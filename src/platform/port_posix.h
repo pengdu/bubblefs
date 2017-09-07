@@ -16,7 +16,6 @@
 
 #include <sys/types.h>
 #include <dirent.h>
-#include <endian.h> // for linux
 #include <stdint.h>
 #include <string.h>
 #include <pthread.h>
@@ -24,6 +23,7 @@
 #include <string>
 #include "platform/base.h"
 #include "platform/macros.h"
+#include "platform/cpu_info.h"
 
 // size_t printf formatting named in the manner of C99 standard formatting
 // strings such as PRIu64
@@ -32,10 +32,6 @@
 
 #define __declspec(S)
 
-#ifndef PLATFORM_IS_LITTLE_ENDIAN
-#define PLATFORM_IS_LITTLE_ENDIAN (__BYTE_ORDER == __LITTLE_ENDIAN)
-#endif
-
 namespace bubblefs {
 namespace port {
 
@@ -43,8 +39,6 @@ static const int kMaxInt32 = std::numeric_limits<int32_t>::max();
 static const uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
 static const int64_t kMaxInt64 = std::numeric_limits<int64_t>::max();
 static const size_t kMaxSizet = std::numeric_limits<size_t>::max();  
-  
-static const bool kLittleEndian = PLATFORM_IS_LITTLE_ENDIAN;
 
 class CondVar;
 
@@ -151,7 +145,10 @@ extern void Crash(const std::string& srcfile, int srcline);
 
 extern int GetMaxOpenFiles();
 
-int ExecuteCMD(const char* cmd, char* result); 
+int ExecuteCMD(const char* cmd, char* result);
+
+// Return the hostname of the machine on which this process is running
+std::string Hostname();
 
 } // namespace port
 } // namespace bubblefs

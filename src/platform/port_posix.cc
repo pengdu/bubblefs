@@ -230,5 +230,12 @@ int ExecuteCMD(const char* cmd, char* result) {
   }
 }
 
+std::string Hostname() {
+  char hostname[1024];
+  gethostname(hostname, sizeof hostname);
+  hostname[sizeof hostname - 1] = 0;
+  return std::string(hostname);
+}
+
 }  // namespace port
 }  // namespace bubblefs

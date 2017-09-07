@@ -9,77 +9,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-//  Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
-//  This source code is licensed under both the GPLv2 (found in the
-//  COPYING file in the root directory) and Apache 2.0 License
-//  (found in the LICENSE.Apache file in the root directory).
-//
-// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-// rocksdb/port/port_posix.cc
 // tensorflow/tensorflow/core/platform/posix/port.cc
 
-#include "platform/port.h"
-#include <assert.h>
-#if defined(__i386__) || defined(__x86_64__)
-#include <cpuid.h>
-#endif
 #include <malloc.h>
-#if defined(__linux__) && !defined(__ANDROID__)
-#include <sched.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdexcept>
-#include <thread>
 #include "platform/base.h"
-#include "platform/cpu_info.h"
 #include "platform/logging.h"
+#include "platform/macros.h"
 #include "platform/mem.h"
 #include "platform/platform.h"
-#include "platform/snappy_wrapper.h"
-#include "platform/types.h"
 #if TF_USE_JEMALLOC
 #include "jemalloc/jemalloc.h"
-#endif
-#if TF_USE_SNAPPY
-#include "snappy.h"
 #endif
 
 namespace bubblefs {
 namespace port {
-
-void InitMain(const char* usage, int* argc, char*** argv) {}
-
-std::string Hostname() {
-  char hostname[1024];
-  gethostname(hostname, sizeof hostname);
-  hostname[sizeof hostname - 1] = 0;
-  return std::string(hostname);
-}
-
-int NumSchedulableCPUs() {
-#if defined(__linux__) && !defined(__ANDROID__)
-  cpu_set_t cpuset;
-  if (sched_getaffinity(0, sizeof(cpu_set_t), &cpuset) == 0) {
-    return CPU_COUNT(&cpuset);
-  }
-  perror("sched_getaffinity");
-#endif
-#if (defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__)
-  unsigned int count = std::thread::hardware_concurrency();
-  if (count > 0) return static_cast<int>(count);
-#endif
-  const int kDefaultCores = 4;  // Semi-conservative guess
-  fprintf(stderr, "can't determine number of CPU cores: assuming %d\n",
-          kDefaultCores);
-  return kDefaultCores;
-}
-
+  
 void* AlignedMalloc(size_t size, int minimum_alignment) {
 #if defined(__ANDROID__)
   return memalign(minimum_alignment, size);
@@ -129,13 +79,6 @@ void Free(void* ptr) {
 #endif
 }
 
-void MallocExtension_ReleaseToSystem(std::size_t num_bytes) {
-  // No-op.
-}
-
-std::size_t MallocExtension_GetAllocatedSize(const void* p) { return 0; }
-
-
 double GetMemoryUsage() {
   FILE* fp = fopen("/proc/meminfo", "r");
   CHECK(fp) << "failed to fopen /proc/meminfo";
@@ -175,55 +118,6 @@ double GetMemoryUsage() {
   double usedMem = 1.0 - 1.0 * (freeMem + bufMem + cacheMem) / totalMem;
   return usedMem;
 }
-
-T* AlignedAllocator::allocate(const size_type n) const {
-  if (n == 0) {
-    return nullptr;
-  }
-  if (n > max_size()) {
-    throw std::length_error("AlignAllocator<T>::allocate() - Int Overflow.");
-  }
-  void* r = nullptr;
-  CHECK_EQ(posix_memalign(&r, Alignment * 8, sizeof(T) * n), 0);
-  if (r == nullptr) {
-    throw std::bad_alloc();
-  } else {
-    return static_cast<T*>(r);
-  }
-}
-
-void AdjustFilenameForLogging(std::string* filename) {
-  // Nothing to do
-}
-
-bool Snappy_Compress(const char* input, size_t length, std::string* output) {
-#if TF_USE_SNAPPY
-  output->resize(snappy::MaxCompressedLength(length));
-  size_t outlen;
-  snappy::RawCompress(input, length, &(*output)[0], &outlen);
-  output->resize(outlen);
-  return true;
-#else
-  return false;
-#endif
-}
-
-bool Snappy_GetUncompressedLength(const char* input, size_t length,
-                                  size_t* result) {
-#if TF_USE_SNAPPY
-  return snappy::GetUncompressedLength(input, length, result);
-#else
-  return false;
-#endif
-}
-
-bool Snappy_Uncompress(const char* input, size_t length, char* output) {
-#if TF_USE_SNAPPY
-  return snappy::RawUncompress(input, length, output);
-#else
-  return false;
-#endif
-}
-
-}  // namespace port
-}  // namespace bubblefs
+  
+} // namespace port
+} // namespace bubblefs

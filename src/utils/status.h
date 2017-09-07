@@ -51,7 +51,85 @@ class Status {
   Status(const Status& s);
   void operator=(const Status& s);
 
+  // Return a success status.
   static Status OK() { return Status(); }
+  
+    // Return error status of an appropriate type.
+  static Status NotFound(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::NOT_FOUND, msg, msg2);
+  }
+  // Fast path for not found without malloc;
+  static Status NotFound(error::SubCode msg = error::NONE) { return Status(error::NOT_FOUND, msg); }
+
+  static Status Corruption(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::CORRUPTION, msg, msg2);
+  }
+  static Status Corruption(error::SubCode msg = error::NONE) {
+    return Status(error::CORRUPTION, msg);
+  }
+
+  static Status NotSupported(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::NOT_SUPPORTED, msg, msg2);
+  }
+  static Status NotSupported(error::SubCode msg = error::NONE) {
+    return Status(error::NOT_SUPPORTED, msg);
+  }
+
+  static Status InvalidArgument(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::INVALID_ARGUMENT, msg, msg2);
+  }
+  static Status InvalidArgument(error::SubCode msg = error::NONE) {
+    return Status(error::INVALID_ARGUMENT, msg);
+  }
+
+  static Status IOError(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::IOERROR, msg, msg2);
+  }
+  static Status IOError(error::SubCode msg =  error::NONE) { return Status(error::IOERROR, msg); }
+
+  static Status Incomplete(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::INCOMPLETE, msg, msg2);
+  }
+  static Status Incomplete(error::SubCode msg = error::NONE) {
+    return Status(error::INCOMPLETE, msg);
+  }
+
+  static Status ShutdownInProgress(error::SubCode msg = error::NONE) {
+    return Status(error::SHUTDOWN_IN_PROGRESS, msg);
+  }
+  static Status ShutdownInProgress(const StringPiece& msg,
+                                   const StringPiece& msg2 = StringPiece()) {
+    return Status(error::SHUTDOWN_IN_PROGRESS, msg, msg2);
+  }
+  static Status Aborted(error::SubCode msg = error::NONE) { return Status(error::ABORTED, msg); }
+  static Status Aborted(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::ABORTED, msg, msg2);
+  }
+
+  static Status TimedOut(error::SubCode msg = error::NONE) { return Status(error::TIMEDOUT, msg); }
+  static Status TimedOut(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::TIMEDOUT, msg, msg2);
+  }
+
+  static Status Expired(error::SubCode msg = error::NONE) { return Status(error::EXPIRED, msg); }
+  static Status Expired(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::EXPIRED, msg, msg2);
+  }
+
+  static Status TryAgain(error::SubCode msg = error::NONE) { return Status(error::TRY_AGAIN, msg); }
+  static Status TryAgain(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::TRY_AGAIN, msg, msg2);
+  }
+
+  static Status NoSpace() { return Status(error::IOERROR, error::NOSPACE); }
+  static Status NoSpace(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::IOERROR, error::NOSPACE, msg, msg2);
+  }
+
+  static Status MemoryLimit() { return Status(error::ABORTED, error::MEMORY_LIMIT); }
+  static Status MemoryLimit(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::ABORTED, error::MEMORY_LIMIT, msg, msg2);
+  }
 
   /// Returns true iff the status indicates success.
   bool ok() const { return (state_ == nullptr); }

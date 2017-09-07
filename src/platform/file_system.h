@@ -12,8 +12,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+// Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under both the GPLv2 (found in the
+//  COPYING file in the root directory) and Apache 2.0 License
+//  (found in the LICENSE.Apache file in the root directory).
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+//
 
+// tensorflow/tensorflow/core/platform/file_statistics.h
 // tensorflow/tensorflow/core/platform/file_system.h
+// rocksdb/include/rocksdb/env.h
 
 #ifndef BUBBLEFS_PLATFORM_FILE_SYSTEM_H_
 #define BUBBLEFS_PLATFORM_FILE_SYSTEM_H_
@@ -23,7 +33,6 @@ limitations under the License.
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "platform/file_statistics.h"
 #include "platform/macros.h"
 #include "platform/platform.h"
 #include "platform/protobuf.h"
@@ -41,6 +50,20 @@ namespace bubblefs {
 class RandomAccessFile;
 class ReadOnlyMemoryRegion;
 class WritableFile;
+
+struct FileStatistics {
+  // The length of the file or -1 if finding file length is not supported.
+  int64 length = -1;
+  // The last modified time in nanoseconds.
+  int64 mtime_nsec = 0;
+  // True if the file is a directory, otherwise false.
+  bool is_directory = false;
+
+  FileStatistics() {}
+  FileStatistics(int64 length, int64 mtime_nsec, bool is_directory)
+      : length(length), mtime_nsec(mtime_nsec), is_directory(is_directory) {}
+  ~FileStatistics() {}
+};
 
 /// A generic interface for accessing a file system.  Implementations
 /// of custom filesystem adapters must implement this interface,
@@ -213,6 +236,54 @@ class FileSystem {
   virtual ~FileSystem();
 };
 
+// A file abstraction for reading sequentially through a file
+class SequentialFile {
+ public:
+  SequentialFile() { }
+  virtual ~SequentialFile();
+
+  // Read up to "n" bytes from the file.  "scratch[0..n-1]" may be
+  // written by this routine.  Sets "*result" to the data that was
+  // read (including if fewer than "n" bytes were successfully read).
+  // May set "*result" to point at data in "scratch[0..n-1]", so
+  // "scratch[0..n-1]" must be live when "*result" is used.
+  // If an error was encountered, returns a non-OK status.
+  //
+  // REQUIRES: External synchronization
+  virtual Status Read(size_t n, Slice* result, char* scratch) = 0;
+
+  // Skip "n" bytes from the file. This is guaranteed to be no
+  // slower that reading the same data, but may be faster.
+  //
+  // If end of file is reached, skipping will stop at the end of the
+  // file, and Skip will return OK.
+  //
+  // REQUIRES: External synchronization
+  virtual Status Skip(uint64_t n) = 0;
+
+  // Indicates the upper layers if the current SequentialFile implementation
+  // uses direct IO.
+  virtual bool use_direct_io() const { return false; }
+
+  // Use the returned alignment value to allocate
+  // aligned buffer for Direct I/O
+  virtual size_t GetRequiredBufferAlignment() const { return kDefaultPageSize; }
+
+  // Remove any kind of caching of data from the offset to offset+length
+  // of this file. If the length is 0, then it refers to the end of file.
+  // If the system is not caching the file contents, then this is a noop.
+  virtual Status InvalidateCache(size_t offset, size_t length) {
+    return Status::NotSupported("InvalidateCache not supported.");
+  }
+
+  // Positioned Read for direct I/O
+  // If Direct I/O enabled, offset, n, and scratch should be properly aligned
+  virtual Status PositionedRead(uint64_t offset, size_t n, Slice* result,
+                                char* scratch) {
+    return Status::NotSupported();
+  }
+};
+
 /// A file abstraction for randomly reading the contents of a file.
 class RandomAccessFile {
  public:
@@ -239,6 +310,43 @@ class RandomAccessFile {
 
  private:
   TF_DISALLOW_COPY_AND_ASSIGN(RandomAccessFile);
+};
+
+// A file abstraction for random reading and writing.
+class RandomRWFile {
+ public:
+  RandomRWFile() {}
+  virtual ~RandomRWFile() {}
+
+  // Indicates if the class makes use of direct I/O
+  // If false you must pass aligned buffer to Write()
+  virtual bool use_direct_io() const { return false; }
+
+  // Use the returned alignment value to allocate
+  // aligned buffer for Direct I/O
+  virtual size_t GetRequiredBufferAlignment() const { return kDefaultPageSize; }
+
+  // Write bytes in `data` at  offset `offset`, Returns Status::OK() on success.
+  // Pass aligned buffer when use_direct_io() returns true.
+  virtual Status Write(uint64_t offset, const Slice& data) = 0;
+
+  // Read up to `n` bytes starting from offset `offset` and store them in
+  // result, provided `scratch` size should be at least `n`.
+  // Returns Status::OK() on success.
+  virtual Status Read(uint64_t offset, size_t n, Slice* result,
+                      char* scratch) const = 0;
+
+  virtual Status Flush() = 0;
+
+  virtual Status Sync() = 0;
+
+  virtual Status Fsync() { return Sync(); }
+
+  virtual Status Close() = 0;
+
+  // No copying allowed
+  RandomRWFile(const RandomRWFile&) = delete;
+  RandomRWFile& operator=(const RandomRWFile&) = delete;
 };
 
 /// \brief A file abstraction for sequential writing.

@@ -16,6 +16,7 @@ limitations under the License.
 // tensorflow/tensorflow/core/platform/env.cc
 
 #include <sys/stat.h>
+#include <unistd.h>
 #include <deque>
 #include <utility>
 #include <vector>
@@ -24,12 +25,8 @@ limitations under the License.
 #endif
 #if defined(PLATFORM_WINDOWS)
 #include <windows.h>
-//#include "tensorflow/core/platform/windows/windows_file_system.h"
 #define PATH_MAX MAX_PATH
 #else
-#include <unistd.h>
-#endif
-
 #include "platform/env.h"
 #include "platform/env_time.h"
 #include "platform/port.h"

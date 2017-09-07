@@ -26,6 +26,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 //=================================================================================
+//  Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under both the GPLv2 (found in the
+//  COPYING file in the root directory) and Apache 2.0 License
+//  (found in the LICENSE.Apache file in the root directory).
+//
 /*
  * Tencent is pleased to support the open source community by making Pebble available.
  * Copyright (C) 2016 THL A29 Limited, a Tencent company. All rights reserved.
@@ -56,6 +61,7 @@ limitations under the License. */
 // Pebble/src/common/string_utility.h
 // baidu/common/include/string_util.h
 // mars/mars/comm/strutil.h
+// rocksdb/util/string_util..h
 // tensorflow/tensorflow/core/lib/strings/str_util.h
 
 #ifndef BUBBLEFS_UTILS_STR_UTIL_H_
@@ -74,6 +80,8 @@ limitations under the License. */
 // Basic string utility routines
 namespace bubblefs {
 namespace str_util {
+  
+extern const string kNullptrString;  
   
 template <typename T>
 inline string ToString(T value) {
@@ -124,17 +132,51 @@ void SplitString(const string& str,
                  const string& delim,
                  std::vector<string>* result);
 
-string TrimString(const string& str, const string& trim);
+std::vector<std::string> StringSplit(const string& arg, char delim);
 
-string NumToString(int64_t num);
+// Append a human-readable time in micros.
+int AppendHumanMicros(uint64_t micros, char* output, int len,
+                      bool fixed_format);
 
-string NumToString(int num);
+// Append a human-readable size in bytes
+int AppendHumanBytes(uint64_t bytes, char* output, int len);
 
-string NumToString(uint32_t num);
+// Append a human-readable printout of "num" to *str
+void AppendNumberTo(string* str, uint64_t num);
 
-string NumToString(double num);
+string NumberToString(int64_t num);
 
-string HumanReadableSizeString(int64_t num);
+string NumberToString(int num);
+
+string NumberToString(uint32_t num);
+
+string NumberToString(double num);
+
+// Return a human-readable version of num.
+// for num >= 10.000, prints "xxK"
+// for num >= 10.000.000, prints "xxM"
+// for num >= 10.000.000.000, prints "xxG"
+string NumberToHumanString(int64_t num);
+
+// Return a human-readable version of bytes
+// ex: 1048576 -> 1.00 GB
+string BytesToHumanString(uint64_t bytes);
+
+bool ParseBoolean(const string& type, const string& value);
+
+uint32_t ParseUint32(const string& value);
+
+uint64_t ParseUint64(const string& value);
+
+int ParseInt(const string& value);
+
+double ParseDouble(const string& value);
+
+size_t ParseSizeT(const string& value);
+
+std::vector<int> ParseVectorInt(const string& value);
+
+bool SerializeIntVector(const vector<int>& vec, string* value);
 
 bool StartsWith(const string& str, const string& prefix);
 
@@ -151,6 +193,8 @@ string& Rtrim(string& str); // NOLINT
 string& Trim(string& str); // NOLINT
 
 void Trim(std::vector<string>* str_list);
+
+string TrimString(const string& str, const string& trim);
 
 void string_replace(const std::string &sub_str1,
         const std::string &sub_str2, std::string *str);

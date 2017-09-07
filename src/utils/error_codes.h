@@ -138,6 +138,10 @@ enum Code {
   EXPIRED = 20,
   
   TRY_AGAIN = 21,
+  
+  NOT_SUPPORTED = 22,
+  
+  TIMEDOUT = 23,
 
   // An extra enum entry to prevent people from writing code that
   // fails to compile when a new code is added.

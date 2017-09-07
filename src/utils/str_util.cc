@@ -20,6 +20,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 //=================================================================================
+//  Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under both the GPLv2 (found in the
+//  COPYING file in the root directory) and Apache 2.0 License
+//  (found in the LICENSE.Apache file in the root directory).
 /*
  * Tencent is pleased to support the open source community by making Pebble available.
  * Copyright (C) 2016 THL A29 Limited, a Tencent company. All rights reserved.
@@ -50,14 +54,21 @@ limitations under the License. */
 // Pebble/src/common/string_utility.cpp
 // baidu/common/include/string_util.cc
 // mars/mars/comm/strutil.cc
+// rocksdb/util/string_util.cc
 // tensorflow/tensorflow/core/lib/strings/str_util.cc
 
 #include "utils/str_util.h"
+#include <inttypes.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 #include <algorithm>
+#include <stdexcept>
+#include <sstream>
+#include <utility>
 #include <vector>
 #include "utils/numbers.h"
 #include "utils/stringprintf.h"
@@ -65,6 +76,8 @@ limitations under the License. */
 namespace bubblefs {
 namespace str_util {
 
+const string kNullptrString = "nullptr";  
+  
 static char hex_char[] = "0123456789abcdef";
 
 string DebugString(const string& src) {
@@ -115,48 +128,198 @@ void SplitString(const string& str,
     }
 }
 
-string TrimString(const string& str, const string& trim) {
-    string::size_type pos = str.find_first_not_of(trim);
-    if (pos == string::npos) {
-        return "";
-    }
-    string::size_type pos2 = str.find_last_not_of(trim);
-    if (pos2 != string::npos) {
-        return str.substr(pos, pos2 - pos + 1);
-    }
-    return str.substr(pos);
+
+// for micros < 10ms, print "XX us".
+// for micros < 10sec, print "XX ms".
+// for micros >= 10 sec, print "XX sec".
+// for micros <= 1 hour, print Y:X M:S".
+// for micros > 1 hour, print Z:Y:X H:M:S".
+int AppendHumanMicros(uint64_t micros, char* output, int len,
+                      bool fixed_format) {
+  if (micros < 10000 && !fixed_format) {
+    return snprintf(output, len, "%" PRIu64 " us", micros);
+  } else if (micros < 10000000 && !fixed_format) {
+    return snprintf(output, len, "%.3lf ms",
+                    static_cast<double>(micros) / 1000);
+  } else if (micros < 1000000l * 60 && !fixed_format) {
+    return snprintf(output, len, "%.3lf sec",
+                    static_cast<double>(micros) / 1000000);
+  } else if (micros < 1000000ll * 60 * 60 && !fixed_format) {
+    return snprintf(output, len, "%02" PRIu64 ":%05.3f M:S",
+                    micros / 1000000 / 60,
+                    static_cast<double>(micros % 60000000) / 1000000);
+  } else {
+    return snprintf(output, len, "%02" PRIu64 ":%02" PRIu64 ":%05.3f H:M:S",
+                    micros / 1000000 / 3600, (micros / 1000000 / 60) % 60,
+                    static_cast<double>(micros % 60000000) / 1000000);
+  }
 }
 
-string NumToString(int64_t num) {
+// for sizes >=10TB, print "XXTB"
+// for sizes >=10GB, print "XXGB"
+// etc.
+// append file size summary to output and return the len
+int AppendHumanBytes(uint64_t bytes, char* output, int len) {
+  const uint64_t ull10 = 10;
+  if (bytes >= ull10 << 40) {
+    return snprintf(output, len, "%" PRIu64 "TB", bytes >> 40);
+  } else if (bytes >= ull10 << 30) {
+    return snprintf(output, len, "%" PRIu64 "GB", bytes >> 30);
+  } else if (bytes >= ull10 << 20) {
+    return snprintf(output, len, "%" PRIu64 "MB", bytes >> 20);
+  } else if (bytes >= ull10 << 10) {
+    return snprintf(output, len, "%" PRIu64 "KB", bytes >> 10);
+  } else {
+    return snprintf(output, len, "%" PRIu64 "B", bytes);
+  }
+}
+
+void AppendNumberTo(string* str, uint64_t num) {
+  char buf[30];
+  snprintf(buf, sizeof(buf), "%" PRIu64, num);
+  str->append(buf);
+}
+
+string NumberToString(int64_t num) {
     char buf[32];
     snprintf(buf, sizeof(buf), "%ld", num);
     return string(buf);
 }
 
-string NumToString(int num) {
-    return NumToString(static_cast<int64_t>(num));
+string NumberToString(int num) {
+    return NumberToString(static_cast<int64_t>(num));
 }
 
-string NumToString(uint32_t num) {
-    return NumToString(static_cast<int64_t>(num));
+string NumberToString(uint32_t num) {
+    return NumberToString(static_cast<int64_t>(num));
 }
 
-string NumToString(double num) {
+string NumberToString(double num) {
     char buf[32];
     snprintf(buf, sizeof(buf), "%.3f", num);
     return string(buf);
 }
 
-string HumanReadableSizeString(int64_t num) {
-    static const int max_shift = 6;
-    static const char* const prefix[max_shift + 1] = {"", " K", " M", " G", " T", " P", " E"};
-    int shift = 0;
-    double v = num;
-    while ((num>>=10) > 0 && shift < max_shift) {
-        v /= 1024;
-        shift++;
+
+string NumberToHumanString(int64_t num) {
+  char buf[19];
+  int64_t absnum = num < 0 ? -num : num;
+  if (absnum < 10000) {
+    snprintf(buf, sizeof(buf), "%" PRIi64, num);
+  } else if (absnum < 10000000) {
+    snprintf(buf, sizeof(buf), "%" PRIi64 "K", num / 1000);
+  } else if (absnum < 10000000000LL) {
+    snprintf(buf, sizeof(buf), "%" PRIi64 "M", num / 1000000);
+  } else {
+    snprintf(buf, sizeof(buf), "%" PRIi64 "G", num / 1000000000);
+  }
+  return std::string(buf);
+}
+
+string BytesToHumanString(uint64_t bytes) {
+  const char* size_name[] = {"KB", "MB", "GB", "TB"};
+  double final_size = static_cast<double>(bytes);
+  size_t size_idx;
+
+  // always start with KB
+  final_size /= 1024;
+  size_idx = 0;
+
+  while (size_idx < 3 && final_size >= 1024) {
+    final_size /= 1024;
+    size_idx++;
+  }
+
+  char buf[20];
+  snprintf(buf, sizeof(buf), "%.2f %s", final_size, size_name[size_idx]);
+  return std::string(buf);
+}
+
+bool ParseBoolean(const string& type, const string& value) {
+  if (value == "true" || value == "1") {
+    return true;
+  } else if (value == "false" || value == "0") {
+    return false;
+  }
+  throw std::invalid_argument(type);
+}
+
+uint32_t ParseUint32(const string& value) {
+  uint64_t num = ParseUint64(value);
+  if ((num >> 32LL) == 0) {
+    return static_cast<uint32_t>(num);
+  } else {
+    throw std::out_of_range(value);
+  }
+}
+
+uint64_t ParseUint64(const string& value) {
+  size_t endchar;
+  uint64_t num = std::stoull(value.c_str(), &endchar);
+  if (endchar < value.length()) {
+    char c = value[endchar];
+    if (c == 'k' || c == 'K')
+      num <<= 10LL;
+    else if (c == 'm' || c == 'M')
+      num <<= 20LL;
+    else if (c == 'g' || c == 'G')
+      num <<= 30LL;
+    else if (c == 't' || c == 'T')
+      num <<= 40LL;
+  }
+
+  return num;
+}
+
+int ParseInt(const string& value) {
+  size_t endchar;
+  int num = std::stoi(value.c_str(), &endchar);
+  if (endchar < value.length()) {
+    char c = value[endchar];
+    if (c == 'k' || c == 'K')
+      num <<= 10;
+    else if (c == 'm' || c == 'M')
+      num <<= 20;
+    else if (c == 'g' || c == 'G')
+      num <<= 30;
+  }
+
+  return num;
+}
+
+double ParseDouble(const string& value) {
+  return std::stod(value);
+}
+
+size_t ParseSizeT(const string& value) {
+  return static_cast<size_t>(ParseUint64(value));
+}
+
+std::vector<int> ParseVectorInt(const string& value) {
+  std::vector<int> result;
+  size_t start = 0;
+  while (start < value.size()) {
+    size_t end = value.find(':', start);
+    if (end == string::npos) {
+      result.push_back(ParseInt(value.substr(start)));
+      break;
+    } else {
+      result.push_back(ParseInt(value.substr(start, end - start)));
+      start = end + 1;
     }
-    return NumToString(v) + prefix[shift];
+  }
+  return result;
+}
+
+bool SerializeIntVector(const std::vector<int>& vec, string* value) {
+  *value = "";
+  for (size_t i = 0; i < vec.size(); ++i) {
+    if (i > 0) {
+      *value += ":";
+    }
+    *value += ToString(vec[i]);
+  }
+  return true;
 }
 
 bool StartsWith(const string& str, const string& prefix) {
@@ -241,6 +404,18 @@ void Trim(std::vector<string>* str_list) {
     for (it = str_list->begin(); it != str_list->end(); ++it) {
         *it = Trim(*it);
     }
+}
+
+string TrimString(const string& str, const string& trim) {
+    string::size_type pos = str.find_first_not_of(trim);
+    if (pos == string::npos) {
+        return "";
+    }
+    string::size_type pos2 = str.find_last_not_of(trim);
+    if (pos2 != string::npos) {
+        return str.substr(pos, pos2 - pos + 1);
+    }
+    return str.substr(pos);
 }
 
 void string_replace(const string &sub_str1,

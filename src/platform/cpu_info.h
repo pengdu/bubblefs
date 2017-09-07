@@ -16,6 +16,7 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_CPU_INFO_H_
 #define BUBBLEFS_PLATFORM_CPU_INFO_H_
 
+#include <endian.h> // for linux
 #include <string>
 
 namespace bubblefs {

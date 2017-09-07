@@ -9,8 +9,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+// Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under both the GPLv2 (found in the
+//  COPYING file in the root directory) and Apache 2.0 License
+//  (found in the LICENSE.Apache file in the root directory).
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+//
 
 // tensorflow/tensorflow/core/platform/env.h
+// rocksdb/include/rocksdb/env.h
 
 #ifndef BUBBLEFS_PLATFORM_ENV_H_
 #define BUBBLEFS_PLATFORM_ENV_H_
@@ -35,6 +44,62 @@ namespace bubblefs {
 class Thread;
 struct ThreadOptions;
 
+const size_t kDefaultPageSize = 4 * 1024;
+
+// Options while opening a file to read/write
+struct EnvOptions {
+
+  // Construct with default Options
+  EnvOptions();
+
+  // Construct from Options
+  explicit EnvOptions(const DBOptions& options);
+
+   // If true, then use mmap to read data
+  bool use_mmap_reads = false;
+
+   // If true, then use mmap to write data
+  bool use_mmap_writes = true;
+
+  // If true, then use O_DIRECT for reading data
+  bool use_direct_reads = false;
+
+  // If true, then use O_DIRECT for writing data
+  bool use_direct_writes = false;
+
+  // If false, fallocate() calls are bypassed
+  bool allow_fallocate = true;
+
+  // If true, set the FD_CLOEXEC on open fd.
+  bool set_fd_cloexec = true;
+
+  // Allows OS to incrementally sync files to disk while they are being
+  // written, in the background. Issue one request for every bytes_per_sync
+  // written. 0 turns it off.
+  // Default: 0
+  uint64_t bytes_per_sync = 0;
+
+  // If true, we will preallocate the file with FALLOC_FL_KEEP_SIZE flag, which
+  // means that file size won't change as part of preallocation.
+  // If false, preallocation will also change the file size. This option will
+  // improve the performance in workloads where you sync the data on every
+  // write. By default, we set it to true for MANIFEST writes and false for
+  // WAL writes
+  bool fallocate_with_keep_size = true;
+
+  // See DBOptions doc
+  size_t compaction_readahead_size;
+
+  // See DBOptions doc
+  size_t random_access_max_buffer_size;
+
+  // See DBOptions doc
+  size_t writable_file_max_buffer_size = 1024 * 1024;
+
+  // If not nullptr, write rate limiting is enabled for flush and compaction
+  //RateLimiter* rate_limiter = nullptr;
+};
+
 /// \brief An interface used by the tensorflow implementation to
 /// access operating system functionality like the filesystem etc.
 ///
@@ -45,6 +110,13 @@ struct ThreadOptions;
 /// multiple threads without any external synchronization.
 class Env {
  public:
+  struct FileAttributes {
+    // File name
+    string name;
+    // Size of file in bytes
+    uint64_t size_bytes;
+  };
+   
   Env();
   virtual ~Env() = default;
 
@@ -70,6 +142,17 @@ class Env {
   // \brief Register a file system for a scheme.
   virtual Status RegisterFileSystem(const string& scheme,
                                     FileSystemRegistry::Factory factory);
+  
+  // Create a brand new sequentially-readable file with the specified name.
+  // On success, stores a pointer to the new file in *result and returns OK.
+  // On failure stores nullptr in *result and returns non-OK.  If the file does
+  // not exist, returns a non-OK status.
+  //
+  // The returned file will only be accessed by one thread at a time.
+  virtual Status NewSequentialFile(const string& fname,
+                                   std::unique_ptr<SequentialFile>* result,
+                                   const EnvOptions& options)
+                                   = 0;
 
   /// \brief Creates a brand new random access read-only file with the
   /// specified name.
@@ -84,7 +167,7 @@ class Env {
   /// The ownership of the returned RandomAccessFile is passed to the caller
   /// and the object should be deleted when is not used. The file object
   /// shouldn't live longer than the Env object.
-  Status NewRandomAccessFile(const string& fname,
+  virtual Status NewRandomAccessFile(const string& fname,
                              std::unique_ptr<RandomAccessFile>* result);
 
   /// \brief Creates an object that writes to a new file with the specified
@@ -100,7 +183,7 @@ class Env {
   /// The ownership of the returned WritableFile is passed to the caller
   /// and the object should be deleted when is not used. The file object
   /// shouldn't live longer than the Env object.
-  Status NewWritableFile(const string& fname,
+  virtual Status NewWritableFile(const string& fname,
                          std::unique_ptr<WritableFile>* result);
 
   /// \brief Creates an object that either appends to an existing file, or
@@ -115,7 +198,7 @@ class Env {
   /// The ownership of the returned WritableFile is passed to the caller
   /// and the object should be deleted when is not used. The file object
   /// shouldn't live longer than the Env object.
-  Status NewAppendableFile(const string& fname,
+  virtual Status NewAppendableFile(const string& fname,
                            std::unique_ptr<WritableFile>* result);
 
   /// \brief Creates a readonly region of memory with the file context.
@@ -129,23 +212,68 @@ class Env {
   /// The ownership of the returned ReadOnlyMemoryRegion is passed to the caller
   /// and the object should be deleted when is not used. The memory region
   /// object shouldn't live longer than the Env object.
-  Status NewReadOnlyMemoryRegionFromFile(
+  virtual Status NewReadOnlyMemoryRegionFromFile(
       const string& fname, std::unique_ptr<ReadOnlyMemoryRegion>* result);
+  
+  // Create an object that writes to a new file with the specified
+  // name.  Deletes any existing file with the same name and creates a
+  // new file.  On success, stores a pointer to the new file in
+  // *result and returns OK.  On failure stores nullptr in *result and
+  // returns non-OK.
+  //
+  // The returned file will only be accessed by one thread at a time.
+  virtual Status ReopenWritableFile(const std::string& fname,
+                                    std::unique_ptr<WritableFile>* result,
+                                    const EnvOptions& options) {
+    return Status::NotSupported();
+  }
+  
+  
+  // Reuse an existing file by renaming it and opening it as writable.
+  virtual Status ReuseWritableFile(const std::string& fname,
+                                   const std::string& old_fname,
+                                   std::unique_ptr<WritableFile>* result,
+                                   const EnvOptions& options);
+
+  // Open `fname` for random read and write, if file doesn't exist the file
+  // will be created.  On success, stores a pointer to the new file in
+  // *result and returns OK.  On failure returns non-OK.
+  //
+  // The returned file will only be accessed by one thread at a time.
+  virtual Status NewRandomRWFile(const std::string& fname,
+                                 std::unique_ptr<RandomRWFile>* result,
+                                 const EnvOptions& options) {
+    return Status::NotSupported("RandomRWFile is not implemented in this Env");
+  }
 
   /// Returns OK if the named path exists and NOT_FOUND otherwise.
-  Status FileExists(const string& fname);
+  virtual Status FileExists(const string& fname);
 
   /// Returns true if all the listed files exist, false otherwise.
   /// if status is not null, populate the vector with a detailed status
   /// for each file.
-  bool FilesExist(const std::vector<string>& files,
+  virtual bool FilesExist(const std::vector<string>& files,
                   std::vector<Status>* status);
 
   /// \brief Stores in *result the names of the children of the specified
   /// directory. The names are relative to "dir".
   ///
   /// Original contents of *results are dropped.
-  Status GetChildren(const string& dir, std::vector<string>* result);
+  virtual Status GetChildren(const string& dir, std::vector<string>* result);
+  
+  // Store in *result the attributes of the children of the specified directory.
+  // In case the implementation lists the directory prior to iterating the files
+  // and files are concurrently deleted, the deleted files will be omitted from
+  // result.
+  // The name attributes are relative to "dir".
+  // Original contents of *results are dropped.
+  // Returns OK if "dir" exists and "*result" contains its children.
+  //         NotFound if "dir" does not exist, the calling process does not have
+  //                  permission to access "dir", or if "dir" is invalid.
+  //         IOError if an IO Error was encountered
+  virtual Status GetChildrenFileAttributes(const std::string& dir,
+                                           std::vector<FileAttributes>* result);
+
 
   /// \brief Returns true if the path matches the given pattern. The wildcards
   /// allowed in pattern are described in FileSystem::GetMatchingPaths.
@@ -159,7 +287,7 @@ class Env {
                                   std::vector<string>* results);
 
   /// Deletes the named file.
-  Status DeleteFile(const string& fname);
+  virtual Status DeleteFile(const string& fname);
 
   /// \brief Deletes the specified directory and all subdirectories and files
   /// underneath it. undeleted_files and undeleted_dirs stores the number of
@@ -172,7 +300,7 @@ class Env {
   ///  * PERMISSION_DENIED - dirname or some descendant is not writable
   ///  * UNIMPLEMENTED - Some underlying functions (like Delete) are not
   ///                    implemented
-  Status DeleteRecursively(const string& dirname, int64* undeleted_files,
+  virtual Status DeleteRecursively(const string& dirname, int64* undeleted_files,
                            int64* undeleted_dirs);
 
   /// \brief Creates the specified directory and all the necessary
@@ -180,19 +308,19 @@ class Env {
   ///  * OK - successfully created the directory and sub directories, even if
   ///         they were already created.
   ///  * PERMISSION_DENIED - dirname or some subdirectory is not writable.
-  Status RecursivelyCreateDir(const string& dirname);
+  virtual Status RecursivelyCreateDir(const string& dirname);
 
   /// \brief Creates the specified directory. Typical return codes
   ///  * OK - successfully created the directory.
   ///  * ALREADY_EXISTS - directory already exists.
   ///  * PERMISSION_DENIED - dirname is not writable.
-  Status CreateDir(const string& dirname);
+  virtual Status CreateDir(const string& dirname);
 
   /// Deletes the specified directory.
-  Status DeleteDir(const string& dirname);
+  virtual Status DeleteDir(const string& dirname);
 
   /// Obtains statistics for the given path.
-  Status Stat(const string& fname, FileStatistics* stat);
+  virtual Status Stat(const string& fname, FileStatistics* stat);
 
   /// \brief Returns whether the given path is a directory or not.
   /// Typical return codes (not guaranteed exhaustive):
@@ -201,21 +329,30 @@ class Env {
   ///  * NOT_FOUND - The path entry does not exist.
   ///  * PERMISSION_DENIED - Insufficient permissions.
   ///  * UNIMPLEMENTED - The file factory doesn't support directories.
-  Status IsDirectory(const string& fname);
+  virtual Status IsDirectory(const string& fname);
 
   /// Stores the size of `fname` in `*file_size`.
-  Status GetFileSize(const string& fname, uint64* file_size);
+  virtual Status GetFileSize(const string& fname, uint64* file_size);
+  
+  // Store the last modification time of fname in *file_mtime.
+  virtual Status GetFileModificationTime(const string& fname,
+                                         uint64_t* file_mtime) = 0;
 
   /// \brief Renames file src to target. If target already exists, it will be
   /// replaced.
-  Status RenameFile(const string& src, const string& target);
+  virtual Status RenameFile(const string& src, const string& target);
+  
+  // Hard Link file src to target.
+  virtual Status LinkFile(const std::string& src, const std::string& target) {
+    return Status::NotSupported("LinkFile is not supported for this Env");
+  }
 
   /// \brief Returns the absolute path of the current executable. It resolves
   /// symlinks if there is any.
-  string GetExecutablePath();
+  virtual string GetExecutablePath();
 
   /// Creates a local unique temporary file name. Returns true if success.
-  bool LocalTempFilename(string* filename);
+  virtual bool LocalTempFilename(string* filename);
 
   // TODO(jeff,sanjay): Add back thread/thread-pool support if needed.
   // TODO(jeff,sanjay): if needed, tighten spec so relative to epoch, or
@@ -229,7 +366,108 @@ class Env {
 
   /// Sleeps/delays the thread for the prescribed number of micro-seconds.
   virtual void SleepForMicroseconds(int64 micros) = 0;
+  
+  // Lock the specified file.  Used to prevent concurrent access to
+  // the same db by multiple processes.  On failure, stores nullptr in
+  // *lock and returns non-OK.
+  //
+  // On success, stores a pointer to the object that represents the
+  // acquired lock in *lock and returns OK.  The caller should call
+  // UnlockFile(*lock) to release the lock.  If the process exits,
+  // the lock will be automatically released.
+  //
+  // If somebody else already holds the lock, finishes immediately
+  // with a failure.  I.e., this call does not wait for existing locks
+  // to go away.
+  //
+  // May create the named file if it does not already exist.
+  virtual Status LockFile(const std::string& fname, FileLock** lock) = 0;
 
+  // Release the lock acquired by a previous successful call to LockFile.
+  // REQUIRES: lock was returned by a successful LockFile() call
+  // REQUIRES: lock has not already been unlocked.
+  virtual Status UnlockFile(FileLock* lock) = 0;
+
+  // Priority for scheduling job in thread pool
+  enum Priority { BOTTOM, LOW, HIGH, TOTAL };
+
+  // Priority for requesting bytes in rate limiter scheduler
+  enum IOPriority {
+    IO_LOW = 0,
+    IO_HIGH = 1,
+    IO_TOTAL = 2
+  };
+
+  // Arrange to run "(*function)(arg)" once in a background thread, in
+  // the thread pool specified by pri. By default, jobs go to the 'LOW'
+  // priority thread pool.
+
+  // "function" may run in an unspecified thread.  Multiple functions
+  // added to the same Env may run concurrently in different threads.
+  // I.e., the caller may not assume that background work items are
+  // serialized.
+  // When the UnSchedule function is called, the unschedFunction
+  // registered at the time of Schedule is invoked with arg as a parameter.
+  virtual void Schedule(void (*function)(void* arg), void* arg,
+                        Priority pri = LOW, void* tag = nullptr,
+                        void (*unschedFunction)(void* arg) = 0) = 0;
+
+  // Arrange to remove jobs for given arg from the queue_ if they are not
+  // already scheduled. Caller is expected to have exclusive lock on arg.
+  virtual int UnSchedule(void* arg, Priority pri) { return 0; }
+
+  // Start a new thread, invoking "function(arg)" within the new thread.
+  // When "function(arg)" returns, the thread will be destroyed.
+  virtual void StartThread(void (*function)(void* arg), void* arg) = 0;
+
+  // Wait for all threads started by StartThread to terminate.
+  virtual void WaitForJoin() {}  
+  
+  // Get thread pool queue length for specific thread pool.
+  virtual unsigned int GetThreadPoolQueueLen(Priority pri = LOW) const {
+    return 0;
+  }
+
+  // *path is set to a temporary directory that can be used for testing. It may
+  // or many not have just been created. The directory may or may not differ
+  // between runs of the same process, but subsequent calls will return the
+  // same directory.
+  virtual Status GetTestDirectory(std::string* path) = 0;
+  
+ // Get the current host name.
+  virtual Status GetHostName(char* name, uint64_t len) = 0;
+
+  // Get the number of seconds since the Epoch, 1970-01-01 00:00:00 (UTC).
+  // Only overwrites *unix_time on success.
+  virtual Status GetCurrentTime(int64_t* unix_time) = 0;
+
+  // Get full directory name for this db.
+  virtual Status GetAbsolutePath(const std::string& db_path,
+      std::string* output_path) = 0;
+
+  // The number of background worker threads of a specific thread pool
+  // for this environment. 'LOW' is the default pool.
+  // default number: 1
+  virtual void SetBackgroundThreads(int number, Priority pri = LOW) = 0;
+  virtual int GetBackgroundThreads(Priority pri = LOW) = 0;
+
+  // Enlarge number of background worker threads of a specific thread pool
+  // for this environment if it is smaller than specified. 'LOW' is the default
+  // pool.
+  virtual void IncBackgroundThreadsIfNeeded(int number, Priority pri) = 0;
+
+  // Lower IO priority for threads from the specified pool.
+  virtual void LowerThreadPoolIOPriority(Priority pool = LOW) {}
+
+  // Converts seconds-since-Jan-01-1970 to a printable string
+  virtual std::string TimeToString(uint64_t time) = 0;
+
+  // Generates a unique id that can be used to identify a db
+  virtual std::string GenerateUniqueId();  
+  
+  // Returns the ID of the current thread.
+  virtual uint64_t GetThreadID() const;
+  
   /// \brief Returns a new thread that is running fn() and is identified
   /// (for debugging/performance-analysis) by "name".
   ///
@@ -405,7 +643,7 @@ namespace register_file_system {
 template <typename Factory>
 struct Register {
   Register(Env* env, const string& scheme) {
-    // TODO(b/32704451): Don't just ignore the ::mblobstore::Status object!
+    // TODO(b/32704451): Don't just ignore the ::bubblefs::Status object!
     env->RegisterFileSystem(scheme, []() -> FileSystem* { return new Factory; })
         .IgnoreError();
   }
@@ -424,9 +662,9 @@ struct Register {
 #define REGISTER_FILE_SYSTEM_UNIQ_HELPER(ctr, env, scheme, factory) \
   REGISTER_FILE_SYSTEM_UNIQ(ctr, env, scheme, factory)
 #define REGISTER_FILE_SYSTEM_UNIQ(ctr, env, scheme, factory)   \
-  static ::mblobstore::register_file_system::Register<factory> \
+  static ::bubblefs::register_file_system::Register<factory> \
       register_ff##ctr TF_ATTRIBUTE_UNUSED =                   \
-          ::mblobstore::register_file_system::Register<factory>(env, scheme)
+          ::bubblefs::register_file_system::Register<factory>(env, scheme)
 
 #define REGISTER_FILE_SYSTEM(scheme, factory) \
   REGISTER_FILE_SYSTEM_ENV(Env::Default(), scheme, factory);

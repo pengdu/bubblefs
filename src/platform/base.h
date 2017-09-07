@@ -12,7 +12,7 @@
 #endif
 
 #ifndef TF_USE_SNAPPY
-#define TF_USE_SNAPPY 0
+#define TF_USE_SNAPPY 1
 #endif
 
 #ifndef TF_USE_ADAPTIVE_MUTEX

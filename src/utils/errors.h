@@ -38,15 +38,15 @@ void AppendToMessage(Status* status, Args... args) {
 // For propagating errors when calling a function.
 #define TF_RETURN_IF_ERROR(expr)                         \
   do {                                                   \
-    const ::mblobstore::Status _status = (expr);         \
+    const ::bubblefs::Status _status = (expr);         \
     if (TF_PREDICT_FALSE(!_status.ok())) return _status; \
   } while (0)
 
 #define TF_RETURN_WITH_CONTEXT_IF_ERROR(expr, ...)                  \
   do {                                                              \
-    ::mblobstore::Status _status = (expr);                          \
+    ::bubblefs::Status _status = (expr);                          \
     if (TF_PREDICT_FALSE(!_status.ok())) {                          \
-      ::mblobstore::errors::AppendToMessage(&_status, __VA_ARGS__); \
+      ::bubblefs::errors::AppendToMessage(&_status, __VA_ARGS__); \
       return _status;                                               \
     }                                                               \
   } while (0)
@@ -59,12 +59,12 @@ void AppendToMessage(Status* status, Args... args) {
 
 #define DECLARE_ERROR(FUNC, CONST)                                       \
   template <typename... Args>                                            \
-  ::mblobstore::Status FUNC(Args... args) {                              \
-    return ::mblobstore::Status(::mblobstore::error::CONST,              \
-                                ::mblobstore::strings::StrCat(args...)); \
+  ::bubblefs::Status FUNC(Args... args) {                              \
+    return ::bubblefs::Status(::bubblefs::error::CONST,              \
+                                ::bubblefs::strings::StrCat(args...)); \
   }                                                                      \
-  inline bool Is##FUNC(const ::mblobstore::Status& status) {             \
-    return status.code() == ::mblobstore::error::CONST;                  \
+  inline bool Is##FUNC(const ::bubblefs::Status& status) {             \
+    return status.code() == ::bubblefs::error::CONST;                  \
   }
 
 DECLARE_ERROR(Cancelled, CANCELLED)
@@ -80,9 +80,15 @@ DECLARE_ERROR(Internal, INTERNAL)
 DECLARE_ERROR(Aborted, ABORTED)
 DECLARE_ERROR(DeadlineExceeded, DEADLINE_EXCEEDED)
 DECLARE_ERROR(DataLoss, DATA_LOSS)
+DECLARE_ERROR(Corruption, CORRUPTION)
+DECLARE_ERROR(IOError, IOERROR)
+DECLARE_ERROR(InComplete, INCOMPLETE)
+DECLARE_ERROR(ShutDownInProgress, SHUTDOWN_IN_PROGRESS)
+DECLARE_ERROR(Expired, EXPIRED)
+DECLARE_ERROR(TryAgain, TRY_AGAIN)
+DECLARE_ERROR(NotSupported, NOT_SUPPORTED)
+DECLARE_ERROR(TimedOut, TIMEDOUT)
 DECLARE_ERROR(Unknown, UNKNOWN)
-DECLARE_ERROR(PermissionDenied, PERMISSION_DENIED)
-DECLARE_ERROR(Unauthenticated, UNAUTHENTICATED)
 
 #undef DECLARE_ERROR
 

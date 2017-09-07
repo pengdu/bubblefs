@@ -20,9 +20,9 @@ limitations under the License.
 #include "platform/types.h"
 
 // Import whatever namespace protobuf comes from into the
-// ::mblobstore::protobuf namespace.
+// ::bubblefs::protobuf namespace.
 //
-// Code should use the ::mblobstore::protobuf namespace to
+// Code should use the ::bubblefs::protobuf namespace to
 // refer to all protobuf APIs.
 
 #include "google/protobuf/arena.h"

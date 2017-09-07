@@ -154,10 +154,10 @@ string Status::ToString() const {
     }
     string result(type);
     result += ": ";
-    error::SubCode subcode = error::NONE;
+    error::SubCode subcode = subcode();
     if (subcode != error::NONE) {
       memset(tmp, 0, sizeof(tmp));
-      snprintf(tmp, sizeof(tmp), "Subode(%d)",
+      snprintf(tmp, sizeof(tmp), "Subode(%d), ",
                  static_cast<int>(subcode));
       result.append(tmp);
     }

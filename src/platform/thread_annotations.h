@@ -167,6 +167,7 @@ template <class T>
 inline T& ts_unchecked_read(T& v) NO_THREAD_SAFETY_ANALYSIS {
   return v;
 }
+
 }  // namespace thread_safety_analysis
 }  // namespace bubblefs
 
