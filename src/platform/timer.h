@@ -28,17 +28,21 @@ enum Precision {
 
 static inline long get_micros() {
     struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return static_cast<long>(tv.tv_sec) * 1000000 + tv.tv_usec;
+    gettimeofday(&tv, nullptr);
+    return static_cast<long>(tv.tv_sec) * 1000000 + tv.tv_usec; // us
+}
+
+static inline long get_millis() {
+   return static_cast<int32_t>(get_micros() / 1000); // ms
 }
 
 static inline int32_t now_time() {
-    return static_cast<int32_t>(get_micros() / 1000000);
+    return static_cast<int32_t>(get_micros() / 1000000); // s
 }
 
 static inline int32_t now_time_str(char* buf, int32_t len, Precision p = kUsec) {
     struct timeval tv;
-    gettimeofday(&tv, NULL);
+    gettimeofday(&tv, nullptr);
     const time_t seconds = tv.tv_sec;
     struct tm t;
     localtime_r(&seconds, &t);
@@ -65,9 +69,26 @@ static inline int32_t now_time_str(char* buf, int32_t len, Precision p = kUsec) 
     return ret;
 }
 
+static inline gettimestamp(const std::string &time) {
+    tm tm_;
+    char buf[128] = { 0 };
+    strncpy(buf, time.c_str(), sizeof(buf)-1);
+    buf[sizeof(buf) - 1] = 0;
+    strptime(buf, "%Y-%m-%d %H:%M:%S", &tm_);
+    tm_.tm_isdst = -1;
+    return mktime(&tm_);
+}
+
+static inline gettimediff(const std::string &t1, const std::string &t2) {
+    time_t time1 = gettimestamp(t1);
+    time_t time2 = gettimestamp(t2);
+    time_t time = time1 - time2;
+    return time;
+}
+
 static inline void make_timeout(struct timespec* pts, long millisecond) {
     struct timeval tv;
-    gettimeofday(&tv, 0);
+    gettimeofday(&tv, nullptr);
     pts->tv_sec = millisecond / 1000 + tv.tv_sec;
     pts->tv_nsec = (millisecond % 1000) * 1000 * 1000 + tv.tv_usec * 1000;
 
@@ -77,7 +98,7 @@ static inline void make_timeout(struct timespec* pts, long millisecond) {
 
 class AutoTimer {
 public:
-    AutoTimer(double timeout_ms = -1, const char* msg1 = NULL, const char* msg2 = NULL)
+    AutoTimer(double timeout_ms = -1, const char* msg1 = nullptr, const char* msg2 = nullptr)
       : timeout_(timeout_ms),
         msg1_(msg1),
         msg2_(msg2) {

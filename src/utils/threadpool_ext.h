@@ -19,7 +19,7 @@
 #include "platform/timer.h"
 
 namespace bubblefs {
-namespace threadext {
+namespace baiducomm {
 
 static const int kDebugCheckTime = 5000;
 
@@ -215,7 +215,7 @@ private:
                     }
                     continue;
                 } else if (queue_.empty() && !stop_) {
-                    work_cv_.TimeWait(wait_time, "ThreadProcTimeWait");
+                    work_cv_.TimedLock(wait_time, "ThreadProcTimeWait");
                     continue;
                 }
             }
@@ -278,7 +278,7 @@ private:
     int64_t task_count_;
 };
 
-} // namespace threadext
+} // namespace baiducomm
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_THREAD_POOL_H_

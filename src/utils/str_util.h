@@ -26,6 +26,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 //=================================================================================
+/*
+ * Tencent is pleased to support the open source community by making Pebble available.
+ * Copyright (C) 2016 THL A29 Limited, a Tencent company. All rights reserved.
+ * Licensed under the MIT License (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * http://opensource.org/licenses/MIT
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
 // Tencent is pleased to support the open source community by making Mars available.
 // Copyright (C) 2016 THL A29 Limited, a Tencent company. All rights reserved.
 
@@ -41,6 +53,7 @@ limitations under the License. */
 ////////////////////////////////////////////////////////////////////////////////
 
 // Paddle/paddle/utils/StringUtil.h
+// Pebble/src/common/string_utility.h
 // baidu/common/include/string_util.h
 // mars/mars/comm/strutil.h
 // tensorflow/tensorflow/core/lib/strings/str_util.h
@@ -75,31 +88,58 @@ static inline char ToHex(uint8_t i) {
     return j;
 }
 
-std::string DebugString(const std::string& src);
+string DebugString(const string& src);
 
-void SplitString(const std::string& full,
-                 const std::string& delim,
-                 std::vector<std::string>* result);
+void SplitString(const string& str,
+                 const string& delim,
+                 std::vector<string>* result);
 
-std::string TrimString(const std::string& str, const std::string& trim);
+string TrimString(const string& str, const string& trim);
 
-std::string NumToString(int64_t num);
+string NumToString(int64_t num);
 
-std::string NumToString(int num);
+string NumToString(int num);
 
-std::string NumToString(uint32_t num);
+string NumToString(uint32_t num);
 
-std::string NumToString(double num);
+string NumToString(double num);
 
-std::string HumanReadableSizeString(int64_t num);
+string HumanReadableSizeString(int64_t num);
 
-// test whether a string ends with another string
-bool EndsWith(const std::string& str, const std::string& ext);
+bool StartsWith(const string& str, const string& prefix);
 
-bool StartsWith(const std::string& str, const std::string& prefix);
+bool EndsWith(const string& str, const string& suffix);
 
-std::string Hex2Str(const char* _str, unsigned int _len);
-std::string Str2Hex(const char* _str, unsigned int _len);
+string Hex2Str(const char* _str, unsigned int _len);
+
+string Str2Hex(const char* _str, unsigned int _len);
+
+string& Ltrim(string& str); // NOLINT
+
+string& Rtrim(string& str); // NOLINT
+
+string& Trim(string& str); // NOLINT
+
+void Trim(std::vector<string>* str_list);
+
+void string_replace(const std::string &sub_str1,
+        const std::string &sub_str2, std::string *str);
+
+void UrlEncode(const string& src_str, string* dst_str);
+
+void UrlDecode(const string& src_str, string* dst_str);
+
+void ToUpper(string* str);
+
+void ToLower(string* str);
+
+bool StripSuffix(string* str, const string& suffix);
+
+bool StripPrefix(string* str, const string& prefix);
+
+bool Hex2Bin(const char* hex_str, string* bin_str);
+
+bool Bin2Hex(const char* bin_str, string* hex_str);
 
 // Returns a version of 'src' where unprintable characters have been
 // escaped using C-style escape sequences.

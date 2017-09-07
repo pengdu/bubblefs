@@ -14,7 +14,7 @@
 #include <functional>
 
 namespace bubblefs {
-namespace thread {
+namespace baiducomm {
 
 class Thread {
 public:
@@ -23,17 +23,20 @@ public:
     }
     bool Start(std::function<void ()> thread_proc) {
         user_proc_ = thread_proc;
-        int ret = pthread_create(&tid_, NULL, ProcWrapper, this);
+        int ret = pthread_create(&tid_, nullptr, ProcWrapper, this);
         return (ret == 0);
     }
     typedef void* (Proc)(void*);
     bool Start(Proc proc, void* arg) {
-        int ret = pthread_create(&tid_, NULL, proc, arg);
+        int ret = pthread_create(&tid_, nullptr, proc, arg);
         return (ret == 0);
     }
     bool Join() {
-        int ret = pthread_join(tid_, NULL);
+        int ret = pthread_join(tid_, nullptr);
         return (ret == 0);
+    }
+    void Exit() {
+        pthread_exit(nullptr);
     }
 private:
     Thread(const Thread&);
@@ -47,7 +50,7 @@ private:
     pthread_t tid_;
 };
 
-} // namespace thread
+} // namespace baiducomm
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_THREAD_H_

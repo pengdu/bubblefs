@@ -28,7 +28,7 @@ namespace concurrent {
  * A thread-safe queue that automatically grows but never shrinks.
  * Dequeue a empty queue will block current thread. Enqueue an element
  * will wake up another thread that blocked by dequeue method.
- *
+ * Note: no capacity!
  * For example.
  * @code{.cpp}
  *
@@ -154,6 +154,7 @@ public:
   void Clear() {
      std::lock_guard<std::mutex> guard(queueLock_);
      elements_.clear();
+     numElements_ = 0;
      queueCV_.notify_all();
   }
 
