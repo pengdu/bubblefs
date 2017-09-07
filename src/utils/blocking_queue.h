@@ -11,9 +11,12 @@ limitations under the License. */
 
 // Paddle/paddle/utils/Queue.h
 
+
 #ifndef BUBBLEFS_UTILS_BLOCKING_QUEUE_H_
 #define BUBBLEFS_UTILS_BLOCKING_QUEUE_H_
 
+#include <algorithm>
+#include <chrono>
 #include <condition_variable>
 #include <deque>
 #include <mutex>
@@ -56,6 +59,7 @@ namespace concurrent {
 template <class T>
 class Queue {
 public:
+  typedef T ValueType;
   /**
    * @brief Construct Function. Default capacity of Queue is zero.
    */
@@ -68,7 +72,7 @@ public:
    * @param[in] el The enqueue element.
    * @note This method is thread-safe, and will wake up another blocked thread.
    */
-  void enqueue(const T& el) {
+  void Enqueue(const T& el) {
     std::unique_lock<std::mutex> lock(queueLock_);
     elements_.emplace_back(el);
     numElements_++;
@@ -81,7 +85,7 @@ public:
    * @param[in] el The enqueue element. rvalue reference .
    * @note This method is thread-safe, and will wake up another blocked thread.
    */
-  void enqueue(T&& el) {
+  void Enqueue(T&& el) {
     std::unique_lock<std::mutex> lock(queueLock_);
     elements_.emplace_back(std::move(el));
     numElements_++;
@@ -93,7 +97,7 @@ public:
    * Dequeue from a queue and return a element.
    * @note this method will be blocked until not empty.
    */
-  T dequeue() {
+  T Dequeue() {
     std::unique_lock<std::mutex> lock(queueLock_);
     queueCV_.wait(lock, [this]() { return numElements_ != 0; });
     T el;
@@ -117,19 +121,19 @@ public:
    * @note This method is not thread safe. Obviously this number
    * can change by the time you actually look at it.
    */
-  inline int size() const { return numElements_; }
+  inline int Size() const { return numElements_; }
 
   /**
    * @brief is empty or not.
    * @return true if empty.
    * @note This method is not thread safe.
    */
-  inline bool empty() const { return numElements_ == 0; }
+  inline bool Empty() const { return numElements_ == 0; }
 
   /**
    * @brief wait util queue is empty
    */
-  void waitEmpty() {
+  void WaitEmpty() {
     std::unique_lock<std::mutex> lock(queueLock_);
     queueCV_.wait(lock, [this]() { return numElements_ == 0; });
   }
@@ -139,11 +143,18 @@ public:
    * @param seconds wait time limit.
    * @return true if queue is not empty. false if timeout.
    */
-  bool waitNotEmptyFor(int seconds) {
+  bool WaitNotEmptyFor(int seconds) {
     std::unique_lock<std::mutex> lock(queueLock_);
     return queueCV_.wait_for(lock, std::chrono::seconds(seconds), [this] {
       return numElements_ != 0;
     });
+  }
+  
+  /// @brief clear the queue
+  void Clear() {
+     std::lock_guard<std::mutex> guard(queueLock_);
+     elements_.clear();
+     queueCV_.notify_all();
   }
 
 private:
@@ -185,6 +196,7 @@ private:
 template <typename T>
 class BlockingQueue {
 public:
+  typedef T ValueType;
   /**
    * @brief Construct Function.
    * @param[in] capacity the max numer of elements the queue can have.
@@ -199,11 +211,54 @@ public:
    * @note If it's size() >= capacity before enqueue,
    * this method will block and wait until size() < capacity.
    */
-  void enqueue(const T& x) {
+  void Enqueue(const T& x) {
     std::unique_lock<std::mutex> lock(mutex_);
     notFull_.wait(lock, [&] { return queue_.size() < capacity_; });
     queue_.push_back(x);
     notEmpty_.notify_one();
+  }
+  
+  bool TryEnqueue(const T& x) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (IsFullUnlocked())
+      return false;
+    queue_.push_back(x);
+    notEmpty_.notify_one();
+    return true;
+  }
+  
+  bool TimedEnqueue(const T& x, int timeout_in_ms) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (notFull_.wait_for(lock, std::chrono::milliseconds(timeout_in_ms), [&] { return queue_.size() < capacity_; }))
+      return false;
+    queue_.push_back(x);
+    notEmpty_.notify_one();
+    return true;
+  }
+  
+  void PushFront(const T& x) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    notFull_.wait(lock, [&] { return queue_.size() < capacity_; });
+    queue_.push_front(x);
+    notEmpty_.notify_one();
+  }
+  
+  void TryPushFront(const T& x) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (IsFullUnlocked())
+      return false;
+    queue_.push_front(x);
+    notEmpty_.notify_one();
+    return true;
+  }
+  
+  bool TimedPushFront(const T& x, int timeout_in_ms) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (notFull_.wait_for(lock, std::chrono::milliseconds(timeout_in_ms), [&] { return queue_.size() < capacity_; }))
+      return false;
+    queue_.push_front(x);
+    notEmpty_.notify_one();
+    return true;
   }
 
   /**
@@ -212,23 +267,78 @@ public:
    * @note this method will wake up another thread who was blocked because
    * of the queue is full.
    */
-  T dequeue() {
+  T Dequeue() {
     std::unique_lock<std::mutex> lock(mutex_);
     notEmpty_.wait(lock, [&] { return !queue_.empty(); });
-
     T front(queue_.front());
     queue_.pop_front();
     notFull_.notify_one();
     return front;
   }
-
+  
+  void Dequeue(T *x) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    notEmpty_.wait(lock, [&] { return !queue_.empty(); });
+    *x = queue_.front();
+    queue_.pop_front();
+    notFull_.notify_one();
+  }
+  
+  bool TryDequeue(T *x) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (queue_.empty())
+      return false;
+    *x = queue_.front();
+    queue_.pop_front();
+    notFull_.notify_one();
+    return true;
+  }
+  
+  bool TimedDequeue(T *x, int timeout_in_ms) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (notEmpty_.wait_for(lock, std::chrono::milliseconds(timeout_in_ms), [&] { return !queue_.empty(); }))
+      return false;
+    *x = queue_.front();
+    queue_.pop_front();
+    notFull_.notify_one();
+    return true;
+  }
+  
+  void PopBack(T *x) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    notEmpty_.wait(lock, [&] { return !queue_.empty(); });
+    *x = queue_.back();
+    queue_.pop_back();
+    notFull_.notify_one();
+  }
+  
+  bool TryPopBack(T *x) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (queue_.empty())
+      return false;
+    *x = queue_.back();
+    queue_.pop_back();
+    notFull_.notify_one();
+    return true;
+  }
+  
+  bool TimedPopBack(T *x, int timeout_in_ms) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (notEmpty_.wait_for(lock, std::chrono::milliseconds(timeout_in_ms), [&] { return !queue_.empty(); }))
+      return false;
+    *x = queue_.back();
+    queue_.pop_back();
+    notFull_.notify_one();
+    return true;
+  }
+  
   /**
    * Return size of queue.
    *
    * @note This method is thread safe.
    * The size of the queue won't change until the method return.
    */
-  size_t size() {
+  size_t Size() {
     std::lock_guard<std::mutex> guard(mutex_);
     return queue_.size();
   }
@@ -238,12 +348,24 @@ public:
    * @return true if empty.
    * @note This method is thread safe.
    */
-  size_t empty() {
+  size_t Empty() {
     std::lock_guard<std::mutex> guard(mutex_);
     return queue_.empty();
   }
+  
+  /// @brief clear the queue
+  void Clear() {
+     std::lock_guard<std::mutex> guard(mutex_);
+     queue_.clear();
+     notFull_.notify_all();
+  }
 
 private:
+  bool IsFullUnlocked() const {
+    return queue_.size() >= capacity_;
+  }
+  
+private:  
   std::mutex mutex_;
   std::condition_variable notEmpty_;
   std::condition_variable notFull_;

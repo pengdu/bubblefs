@@ -16,12 +16,18 @@ limitations under the License. */
 #define BUBBLEFS_PLATFORM_PTHREAD_LOCK_H_
 
 #include <sys/time.h>
+#include <semaphore.h>
 #include <pthread.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <atomic>
 #include <condition_variable>
+#include <memory>
 #include <mutex>
+#include "platform/base.h"
 #include "platform/macros.h"
 #include "platform/timer.h"
 
@@ -76,7 +82,7 @@ public:
       else if (0 != ret) abort();
       return 0 == ret;
     }
-    bool TimeLock(long _millisecond) {
+    bool TimedLock(long _millisecond) {
       struct timespec ts;
       timer::make_timeout(&ts, _millisecond);
       int ret =  pthread_mutex_timedlock(&mu_, &ts);
@@ -163,7 +169,7 @@ private:
 class CondVar {
 public:
     explicit CondVar(Mutex* mu) : mu_(mu) {
-        PthreadCall("init condvar", pthread_cond_init(&cond_, NULL));
+        PthreadCall("init condvar", pthread_cond_init(&cond_, nullptr));
     }
     ~CondVar() {
         PthreadCall("destroy condvar", pthread_cond_destroy(&cond_));
@@ -174,11 +180,15 @@ public:
         PthreadCall("condvar wait", pthread_cond_wait(&cond_, &mu_->mu_));
         mu_->AfterLock(msg, msg_threshold);
     }
-    // Time wait in ms, return true iff signalled
-    bool TimeWait(int timeout, const char* msg = nullptr) {
+    // Timed wait in ms, return true iff signalled
+    bool TimedLock(int timeout, const char* msg = nullptr) {
+        if (timeout < 0) {
+          Wait(msg);
+          return 0;
+        }
         timespec ts;
         struct timeval tv;
-        gettimeofday(&tv, NULL);
+        gettimeofday(&tv, nullptr);
         int64_t usec = tv.tv_usec + timeout * 1000LL;
         ts.tv_sec = tv.tv_sec + usec / 1000000;
         ts.tv_nsec = (usec % 1000000) * 1000;
@@ -221,7 +231,7 @@ private:
  */
 class RWLock {
 public:
-  RWLock() { pthread_rwlock_init(&rwlock_, NULL); }
+  RWLock() { pthread_rwlock_init(&rwlock_, nullptr); }
   ~RWLock() { pthread_rwlock_destroy(&rwlock_); }
   RWLock(const RWLock&) = delete;
   RWLock& operator=(const RWLock&) = delete;
@@ -231,14 +241,16 @@ public:
    * @note the method will block the thread, if failed to get the lock.
    */
   // std::mutex interface
-  void lock() { pthread_rwlock_wrlock(&rwlock_); }
+  void Lock() { pthread_rwlock_wrlock(&rwlock_); }
+  void ReadLock() { pthread_rwlock_rdlock(&rwlock_); }
+  void WriteLock() { pthread_rwlock_wrlock(&rwlock_); }
   /**
    * @brief lock on read mode.
    * @note if another thread is writing, it can't get the lock,
    * and will block the thread.
    */
-  void lock_shared() { pthread_rwlock_rdlock(&rwlock_); }
-  void unlock() { pthread_rwlock_unlock(&rwlock_); }
+  void LockShared() { pthread_rwlock_rdlock(&rwlock_); }
+  void Unlock() { pthread_rwlock_unlock(&rwlock_); }
 
 protected:
   pthread_rwlock_t rwlock_;
@@ -253,8 +265,10 @@ public:
   /**
    * @brief Construct Function. Lock on rwlock in read mode.
    */
-  explicit ReadLockGuard(RWLock& rwlock) : rwlock_(&rwlock) {
-    rwlock_->lock_shared();
+  explicit ReadLockGuard(RWLock* rwlock) : rwlock_(rwlock) {
+    if (nullptr != rwlock) {
+      rwlock_->LockShared();      
+    }
   }
 
   /**
@@ -262,55 +276,128 @@ public:
    * @note This method just unlock the read mode rwlock,
    * won't destroy the lock.
    */
-  ~ReadLockGuard() { rwlock_->unlock(); }
+  ~ReadLockGuard() { 
+    if (nullptr != rwlock_) {
+      rwlock_->Unlock();      
+    } 
+  }
 
 protected:
   RWLock* rwlock_;
 };
 
 /**
+ * The WriteLockGuard is a write mode RWLock
+ * using RAII management mechanism.
+ */
+class WriteLockGuard {
+public:
+  /**
+   * @brief Construct Function. Lock on rwlock in read mode.
+   */
+  explicit WriteLockGuard(RWLock* rwlock) : rwlock_(rwlock) {
+    if (nullptr != rwlock) {
+      rwlock_->WriteLock();      
+    }
+  }
+
+  /**
+   * @brief Destruct Function.
+   * @note This method just unlock the read mode rwlock,
+   * won't destroy the lock.
+   */
+  ~WriteLockGuard() { 
+    if (nullptr != rwlock_) {
+      rwlock_->Unlock();      
+    } 
+  }
+
+protected:
+  RWLock* rwlock_;
+};
+
+#ifdef TF_USE_PTHREAD_SPINLOCK
+/**
  * A simple wrapper for spin lock.
  * The lock() method of SpinLock is busy-waiting
  * which means it will keep trying to lock until lock on successfully.
  * The SpinLock disable copy.
  */
-class SpinLockPrivate;
 class SpinLock {
 public:
-  SpinLock();
-  ~SpinLock();
+  inline SpinLock() { pthread_spin_init(&lock_, PTHREAD_PROCESS_PRIVATE); }
+  inline ~SpinLock() { pthread_spin_destroy(&lock_); }
 
-  // std::mutext interface
-  void lock();
-  void unlock();
-  int try_lock();
-  
-  TF_DISALLOW_COPY_AND_ASSIGN(SpinLock);
+  inline void Lock() { pthread_spin_lock(&lock_); }
+  inline void Unlock() { pthread_spin_unlock(&lock_); }
+  inline int TryLock() { return pthread_spin_trylock(&lock_); }
 
-private:
-  SpinLockPrivate* m;
+  pthread_spinlock_t lock_;
+  char padding_[64 - sizeof(pthread_spinlock_t)];
+};
+#else
+#include <stddef.h>
+class SpinLock {
+public:
+  inline void Lock() {
+    while (lock_.test_and_set(std::memory_order_acquire)) {
+    }
+  }
+  inline void Unlock() { lock_.clear(std::memory_order_release); }
+  inline int TryLock() { return lock_.test_and_set(std::memory_order_acquire); }
+
+  std::atomic_flag lock_ = ATOMIC_FLAG_INIT;
+  char padding_[64 - sizeof(lock_)];  // Padding to cache line size
+};
+#endif // TF_USE_PTHREAD_SPINLOCK
+
+/**
+ * The SpinLockGuard is a SpinLock
+ * using RAII management mechanism.
+ */
+class SpinLockGuard {
+public:
+  /**
+   * @brief Construct Function. Lock on spin_lock.
+   */
+  explicit SpinLockGuard(SpinLock* spin_lock) : spin_lock_(spin_lock) {
+    if (nullptr != spin_lock_) {
+      spin_lock_->Lock();      
+    }
+  }
+
+  /**
+   * @brief Destruct Function.
+   * @note This method just unlock the spin_lock,
+   * won't destroy the lock.
+   */
+  ~SpinLockGuard() {
+    if (nullptr != spin_lock_) {
+      spin_lock_->Unlock();      
+    }
+  }
+
+protected:
+  SpinLock* spin_lock_;
 };
 
 /**
  * A simple wapper of semaphore which can only be shared in the same process.
  */
-class SemaphorePrivate;
 class Semaphore {
-public:
-  //! Enable move.
-  Semaphore(Semaphore&& other) : m(std::move(other.m)) {}
-  
-  TF_DISALLOW_COPY_AND_ASSIGN(Semaphore);
-
 public:
   /**
    * @brief Construct Function.
    * @param[in] initValue the initial value of the
    * semaphore, default 0.
    */
-  explicit Semaphore(int initValue = 0);
+  explicit Semaphore(int initValue = 0) {
+    sem_init(&sem, 0, initValue);
+  }
 
-  ~Semaphore();
+  ~Semaphore() {
+    sem_destroy(&sem);
+  }
 
   /**
    * @brief The same as wait(), except if the decrement can not
@@ -320,50 +407,43 @@ public:
    * @return ture if the decrement proceeds before ts,
    * else return false.
    */
-  bool timeWait(struct timespec* ts);
+  bool TimedWait(struct timespec* ts) {
+    return (0 == sem_timedwait(&sem, ts));
+  }
 
   /**
    * @brief decrement the semaphore. If the semaphore's value is 0, then call
    * blocks.
    */
-  void wait();
+  void Wait() { sem_wait(&sem); }
 
   /**
    * @brief increment the semaphore. If the semaphore's value
    * greater than 0, wake up a thread blocked in wait().
    */
-  void post();
+  void Post() { sem_post(&sem); }
 
 private:
-  SemaphorePrivate* m;
+  sem_t sem;
 };
 
 /**
  * A simple wrapper of thread barrier.
  * The ThreadBarrier disable copy.
  */
-class ThreadBarrierPrivate;
 class ThreadBarrier {
 public:
-  /**
-   * @brief Construct Function. Initialize the barrier should
-   * wait for count threads in wait().
-   */
-  explicit ThreadBarrier(int count);
-  ~ThreadBarrier();
+  pthread_barrier_t barrier_;
 
-  /**
-   * @brief .
-   * If there were count - 1 threads waiting before,
-   * then wake up all the count - 1 threads and continue run together.
-   * Else block the thread until waked by other thread .
-   */
-  void wait();
+  inline explicit ThreadBarrier(int count) {
+    pthread_barrier_init(&barrier_, nullptr, count);
+  }
+
+  inline ~ThreadBarrier() { pthread_barrier_destroy(&barrier_); }
+
+  inline void Wait() { pthread_barrier_wait(&barrier_); }
   
   TF_DISALLOW_COPY_AND_ASSIGN(ThreadBarrier);
-
-private:
-  ThreadBarrierPrivate* m;
 };
 
 /**
@@ -376,7 +456,7 @@ public:
    * @param[in] op a thread can do something in op before notify.
    */
   template <class Op>
-  void notify_one(Op op) {
+  void NotifyOne(Op op) {
     std::lock_guard<std::mutex> guard(mutex_);
     op();
     std::condition_variable::notify_one();
@@ -387,7 +467,7 @@ public:
    * @param[in] op a thread can do something in op before notify.
    */
   template <class Op>
-  void notify_all(Op op) {
+  void NotifyAll(Op op) {
     std::lock_guard<std::mutex> guard(mutex_);
     op();
     std::condition_variable::notify_all();
@@ -403,7 +483,7 @@ public:
    * through the dereferenced iterator.
    */
   template <class Predicate>
-  void wait(Predicate pred) {
+  void Wait(Predicate pred) {
     std::unique_lock<std::mutex> lock(mutex_);
     std::condition_variable::wait(lock, pred);
   }

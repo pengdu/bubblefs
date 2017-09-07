@@ -33,6 +33,7 @@ limitations under the License. */
 #include "platform/types.h"
 
 namespace bubblefs {
+
 namespace thread {
     
 struct StlThreadEnvironment {
@@ -155,6 +156,7 @@ class ThreadPool {
 };
 
 }  // namespace thread
+
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_THREADPOOL_H_

@@ -12,7 +12,7 @@
 #include <sstream>
 
 namespace bubblefs {
-namespace logging {
+namespace baiducomm {
   
 enum LogLevel {
     DEBUG = 2,
@@ -45,10 +45,10 @@ private:
     std::ostringstream oss_;
 };
 
-#define BDLOG(level, fmt, args...) ::mblobstore::logging::Log(level, "[%s:%d] " fmt, __FILE__, __LINE__, ##args)
-#define BDLOGS(level) ::mblobstore::logging::LogStream(level)
+#define BDLOG(level, fmt, args...) ::bubblefs::baiducomm::Log(level, "[%s:%d] " fmt, __FILE__, __LINE__, ##args)
+#define BDLOGS(level) ::bubblefs::baiducomm::LogStream(level)
 
-} // namespace logging
+} // namespace baiducomm
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_LOGGING_SIMPLE_H_

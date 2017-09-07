@@ -19,10 +19,6 @@
 #define TF_USE_PTHREAD_SPINLOCK 0
 #endif
 
-#ifndef TF_USE_PTHREAD_BARRIER
-#define TF_USE_PTHREAD_BARRIER 0
-#endif
-
 #ifndef TF_USE_PYTHON
 #define TF_USE_PYTHON 2.7
 #endif
