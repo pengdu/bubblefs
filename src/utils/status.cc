@@ -13,6 +13,7 @@ limitations under the License.
 // tensorflow/tensorflow/core/lib/core/status.cc
 
 #include "utils/status.h"
+#include <assert.h>
 #include <stdio.h>
 
 namespace bubblefs {
@@ -22,6 +23,35 @@ Status::Status(error::Code code, StringPiece msg) {
   state_ = std::unique_ptr<State>(new State);
   state_->code = code;
   state_->msg = msg.ToString();
+  state_->subcode = error::NONE;
+}
+
+Status::Status(error::Code code, error::SubCode subcode) {
+  assert(code != error::OK);
+  state_ = std::unique_ptr<State>(new State);
+  state_->code = code;
+  state_->subcode = subcode;
+}
+
+Status::Status(error::Code code, error::SubCode subcode, StringPiece msg, StringPiece msg2) {
+  assert(code != error::OK);
+  assert(subcode != error::MAX_SUB_CODE);
+  state_ = std::unique_ptr<State>(new State);
+  state_->code = code;
+  state_->subcode = error::NONE;
+  const size_t len1 = msg.size();
+  const size_t len2 = msg2.size();
+  const size_t size = len1 + (len2 ? (2 + len2) : 0);
+  char* const result = new char[size + 1];  // +1 for null terminator
+  memcpy(result, msg.data(), len1);
+  if (len2) {
+    result[len1] = ':';
+    result[len1 + 1] = ' ';
+    memcpy(result + len1 + 2, msg2.data(), len2);
+  }
+  result[size] = '\0';  // null terminator for C style string
+  state_ = result;
+  state_->subcode = error::NONE;
 }
 
 void Status::Update(const Status& new_status) {
@@ -98,6 +128,24 @@ string Status::ToString() const {
       case error::DATA_LOSS:
         type = "Data loss";
         break;
+      case error::CORRUPTION:
+        type = "Corruption";
+        break;
+      case error::IOERROR:
+        type = "IO error";
+        break;
+      case error::INCOMPLETE:
+        type = "Result incomplete";
+        break;  
+      case error::SHUTDOWN_IN_PROGRESS:
+        type = "Shutdown in progress";
+        break;
+      case error::EXPIRED:
+        type = "Operation expired";
+        break;
+      case error::TRY_AGAIN:
+        type = "Operation try again";
+        break;
       default:
         snprintf(tmp, sizeof(tmp), "Unknown code(%d)",
                  static_cast<int>(code()));
@@ -106,6 +154,13 @@ string Status::ToString() const {
     }
     string result(type);
     result += ": ";
+    error::SubCode subcode = error::NONE;
+    if (subcode != error::NONE) {
+      memset(tmp, 0, sizeof(tmp));
+      snprintf(tmp, sizeof(tmp), "Subode(%d)",
+                 static_cast<int>(subcode));
+      result.append(tmp);
+    }
     result += state_->msg;
     return result;
   }

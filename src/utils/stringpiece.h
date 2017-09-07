@@ -9,8 +9,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+// Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under both the GPLv2 (found in the
+//  COPYING file in the root directory) and Apache 2.0 License
+//  (found in the LICENSE.Apache file in the root directory).
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
+//
 
 // tensorflow/tensorflow/core/lib/core/stringpiece.h
+// rocksdb/include/rocksdb/slice.h
 
 // StringPiece is a simple structure containing a pointer into some external
 // storage and a size.  The user of a StringPiece must ensure that the slice
@@ -31,9 +40,12 @@ limitations under the License.
 #include <iosfwd>
 #include <string>
 #include "platform/types.h"
+#include "utils/cleanable.h"
 
 namespace bubblefs {
 
+class StringPieceParts;
+  
 class StringPiece {
  public:
   typedef size_t size_type;
@@ -49,6 +61,10 @@ class StringPiece {
 
   // Create a slice that refers to s[0,strlen(s)-1]
   StringPiece(const char* s) : data_(s), size_(strlen(s)) {}
+  
+  // Create a single slice from SliceParts using buf as storage.
+  // buf must exist as long as the returned Slice exists.
+  StringPiece(const struct StringPieceParts& parts, std::string* buf);
 
   void set(const void* data, size_t len) {
     data_ = reinterpret_cast<const char*>(data);
@@ -118,7 +134,14 @@ class StringPiece {
   };
 
   // Return a string that contains the copy of the referenced data.
-  std::string ToString() const { return std::string(data_, size_); }
+  string ToString(bool hex) const;
+  
+  // Decodes the current slice interpreted as an hexadecimal string into result,
+  // if successful returns true, if this isn't a valid hex string
+  // (e.g not coming from Slice::ToString(true)) DecodeHex returns false.
+  // This slice is expected to have an even number of 0-9A-F characters
+  // also accepts lowercase (a-f)
+  bool DecodeHex(string* result) const;
 
   // Three-way comparison.  Returns value:
   //   <  0 iff "*this" <  "b",
@@ -135,12 +158,26 @@ class StringPiece {
     return ((size_ >= x.size_) &&
             (memcmp(data_ + (size_ - x.size_), x.data_, x.size_) == 0));
   }
+  
+  // Compare two slices and returns the first byte where they differ
+  size_t difference_offset(const StringPiece& b) const;
 
  private:
   const char* data_;
   size_t size_;
 
   // Intentionally copyable
+};
+
+// A set of Slices that are virtually concatenated together.  'parts' points
+// to an array of Slices.  The number of elements in the array is 'num_parts'.
+struct StringPieceParts {
+  StringPieceParts(const StringPiece* _parts, int _num_parts) :
+      parts(_parts), num_parts(_num_parts) {}
+  StringPieceParts() : parts(nullptr), num_parts(0) {}
+
+  const StringPiece* parts;
+  int num_parts;
 };
 
 inline bool operator==(StringPiece x, StringPiece y) {
@@ -171,8 +208,93 @@ inline int StringPiece::compare(StringPiece b) const {
   return r;
 }
 
+// Compare two slices and returns the first byte where they differ
+inline size_t StringPiece::difference_offset(const StringPiece& b) const {
+  size_t off = 0;
+  const size_t len = (size_ < b.size_) ? size_ : b.size_;
+  for (; off < len; off++) {
+    if (data_[off] != b.data_[off]) break;
+  }
+  return off;
+}
+
+/**
+ * A StringPiece that can be pinned with some cleanup tasks, which will be run upon
+ * ::Reset() or object destruction, whichever is invoked first. This can be used
+ * to avoid memcpy by having the PinnsableSlice object referring to the data
+ * that is locked in the memory and release them after the data is consumed.
+ */
+class PinnableSlice : public StringPiece, public Cleanable {
+ public:
+  PinnableSlice() { buf_ = &self_space_; }
+  explicit PinnableSlice(string* buf) { buf_ = buf; }
+
+  inline void PinSlice(const StringPiece& s, CleanupFunction f, void* arg1,
+                       void* arg2) {
+    assert(!pinned_);
+    pinned_ = true;
+    data_ = s.data();
+    size_ = s.size();
+    RegisterCleanup(f, arg1, arg2);
+    assert(pinned_);
+  }
+
+  inline void PinSlice(const StringPiece& s, Cleanable* cleanable) {
+    assert(!pinned_);
+    pinned_ = true;
+    data_ = s.data();
+    size_ = s.size();
+    cleanable->DelegateCleanupsTo(this);
+    assert(pinned_);
+  }
+
+  inline void PinSelf(const StringPiece& slice) {
+    assert(!pinned_);
+    buf_->assign(slice.data(), slice.size());
+    data_ = buf_->data();
+    size_ = buf_->size();
+    assert(!pinned_);
+  }
+
+  inline void PinSelf() {
+    assert(!pinned_);
+    data_ = buf_->data();
+    size_ = buf_->size();
+    assert(!pinned_);
+  }
+
+  void remove_suffix(size_t n) {
+    assert(n <= size());
+    if (pinned_) {
+      size_ -= n;
+    } else {
+      buf_->erase(size() - n, n);
+      PinSelf();
+    }
+  }
+
+  void remove_prefix(size_t n) {
+    assert(0);  // Not implemented
+  }
+
+  void Reset() {
+    Cleanable::Reset();
+    pinned_ = false;
+  }
+
+  inline string* GetSelf() { return buf_; }
+
+  inline bool IsPinned() { return pinned_; }
+
+ private:
+  friend class PinnableSlice4Test;
+  string self_space_;
+  string* buf_;
+  bool pinned_ = false;
+};
+
 // allow StringPiece to be logged
-extern std::ostream& operator<<(std::ostream& o, tensorflow::StringPiece piece);
+extern std::ostream& operator<<(std::ostream& o, StringPiece piece);
 
 }  // namespace bubblefs
 

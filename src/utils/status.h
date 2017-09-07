@@ -41,6 +41,11 @@ class Status {
   /// \brief Create a status with the specified error code and msg as a
   /// human-readable string containing more detailed information.
   Status(error::Code code, StringPiece msg);
+  Status(error::Code code, error::SubCode subcode = error::NONE);
+  Status(error::Code code, error::SubCode subcode, StringPiece msg, StringPiece msg2);
+  
+  Status(Code _code, const StringPiecece& msg, const StringPiece& msg2)
+      : Status(_code, error::NONE, msg, msg2) {}
 
   /// Copy the specified status.
   Status(const Status& s);
@@ -49,7 +54,7 @@ class Status {
   static Status OK() { return Status(); }
 
   /// Returns true iff the status indicates success.
-  bool ok() const { return (state_ == NULL); }
+  bool ok() const { return (state_ == nullptr); }
 
   error::Code code() const {
     return ok() ? error::OK : state_->code;
@@ -57,6 +62,10 @@ class Status {
 
   const string& error_message() const {
     return ok() ? empty_string() : state_->msg;
+  }
+  
+  error::SubCode subcode() const {
+    return ok() ? error::NONE : state_->subcode;
   }
 
   bool operator==(const Status& x) const;
@@ -87,6 +96,7 @@ class Status {
   struct State {
     error::Code code;
     string msg;
+    error::SubCode subcode;
   };
   // OK status has a `NULL` state_.  Otherwise, `state_` points to
   // a `State` structure containing the error code and message(s)
@@ -96,7 +106,7 @@ class Status {
 };
 
 inline Status::Status(const Status& s)
-    : state_((s.state_ == NULL) ? NULL : new State(*s.state_)) {}
+    : state_((s.state_ == nullptr) ? nullptr : new State(*s.state_)) {}
 
 inline void Status::operator=(const Status& s) {
   // The following condition catches both aliasing (when this == &s),
@@ -139,7 +149,7 @@ inline string* TfCheckOpHelper(Status v,
 #define TF_DCHECK_OK(val) TF_CHECK_OK(val)
 #else
 #define TF_DCHECK_OK(val) \
-  while (false && (::mblobstore::Status::OK() == (val))) LOG(FATAL)
+  while (false && (::bubblefs::Status::OK() == (val))) LOG(FATAL)
 #endif
 
 }  // namespace bubblefs

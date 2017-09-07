@@ -1,21 +1,12 @@
 // tensorflow/tensorflow/core/lib/core/error_codes.proto
 
-// The canonical error codes for TensorFlow APIs.
-//
-// Warnings:
-//
-// -   Do not change any numeric assignments.
-// -   Changes to this list should only be made if there is a compelling
-//     need that can't be satisfied in another way.  Such changes
-//     must be approved by at least two OWNERS.
-//
 // Sometimes multiple error codes may apply.  Services should return
 // the most specific error code that applies.  For example, prefer
 // OUT_OF_RANGE over FAILED_PRECONDITION if both codes apply.
 // Similarly prefer NOT_FOUND or ALREADY_EXISTS over FAILED_PRECONDITION.
 
-#ifndef BUBBLEFS_UTILS_ERROR_CODE_H_
-#define BUBBLEFS_UTILS_ERROR_CODE_H_
+#ifndef BUBBLEFS_UTILS_ERROR_CODES_H_
+#define BUBBLEFS_UTILS_ERROR_CODES_H_
 
 namespace bubblefs {
 namespace error {
@@ -135,6 +126,18 @@ enum Code {
 
   // Unrecoverable data loss or corruption.
   DATA_LOSS = 15,
+  
+  CORRUPTION = 16,
+  
+  IOERROR = 17,
+  
+  INCOMPLETE = 18,
+  
+  SHUTDOWN_IN_PROGRESS = 19,
+  
+  EXPIRED = 20,
+  
+  TRY_AGAIN = 21,
 
   // An extra enum entry to prevent people from writing code that
   // fails to compile when a new code is added.
@@ -145,10 +148,23 @@ enum Code {
   //
   // Nobody should rely on the value (currently 20) listed here.  It
   // may change in the future.
-  DO_NOT_USE_RESERVED_FOR_FUTURE_EXPANSION_USE_DEFAULT_IN_SWITCH_INSTEAD_ = 20
+  DO_NOT_USE_RESERVED_FOR_FUTURE_EXPANSION_USE_DEFAULT_IN_SWITCH_INSTEAD_ = 30
 }; // enum Code
+
+enum SubCode {
+  NONE = 0,
+  MUTEX_TIMEOUT = 1,
+  LOCK_TIMEOUT = 2,
+  LOCK_LIMIT = 3,
+  NOSPACE = 4,
+  DEAD_LOCK = 5,
+  STALE_FILE = 6,
+  MEMORY_LIMIT = 7,
+  
+  MAX_SUB_CODE
+}; // enum SubCode
 
 } // namespace error
 } // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_ERROR_CODE_H_
+#endif // BUBBLEFS_UTILS_ERROR_CODES_H_

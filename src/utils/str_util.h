@@ -63,6 +63,7 @@ limitations under the License. */
 
 #include <stdint.h>
 #include <functional>
+#include <sstream>
 #include <string>
 #include <vector>
 #include "platform/types.h"
@@ -74,18 +75,47 @@ limitations under the License. */
 namespace bubblefs {
 namespace str_util {
   
+template <typename T>
+inline string ToString(T value) {
+#if !(defined OS_ANDROID) && !(defined CYGWIN) && !(defined OS_FREEBSD)
+  return std::to_string(value);
+#else
+  // Andorid or cygwin doesn't support all of C++11, std::to_string() being
+  // one of the not supported features.
+  std::ostringstream os;
+  os << value;
+  return os.str();
+#endif
+}
+  
 static inline bool IsVisible(char c) {
     return (c >= 0x20 && c <= 0x7E);
 }
 
-static inline char ToHex(uint8_t i) {
-    char j = 0;
-    if (i < 10) {
-        j = i + '0';
-    } else {
-        j = i - 10 + 'a';
-    }
-    return j;
+// 2 small internal utility functions, for efficient hex conversions
+// and no need for snprintf, toupper etc...
+// Originally from wdt/util/EncryptionUtils.cpp - for ToString(true)/DecodeHex:
+static inline char ToHex(uint8_t v) {
+  if (v <= 9) {
+    return '0' + v;
+  }
+  return 'A' + v - 10;
+}
+
+// most of the code is for validation/error check
+static inline int FromHex(char c) {
+  // toupper:
+  if (c >= 'a' && c <= 'f') {
+    c -= ('a' - 'A');  // aka 0x20
+  }
+  // validation
+  if (c < '0' || (c > '9' && (c < 'A' || c > 'F'))) {
+    return -1;  // invalid not 0-9A-F hex char
+  }
+  if (c <= '9') {
+    return c - '0';
+  }
+  return c - 'A' + 10;
 }
 
 string DebugString(const string& src);

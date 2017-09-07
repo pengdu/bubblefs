@@ -22,6 +22,7 @@ limitations under the License. */
 
 // Paddle/paddle/utils/Logging.h
 // tensorflow/tensorflow/core/platform/default/logging.h
+// rocksdb/util/logging.h
 
 #ifndef BUBBLEFS_PLATFORM_LOGGING_H_ 
 #define BUBBLEFS_PLATFORM_LOGGING_H_
@@ -34,6 +35,11 @@ limitations under the License. */
 // use a light version of glog
 #include "platform/logging_default.h"
 #endif // TF_USE_GLOG
+
+// Helper macros that include information about file name and line number
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define PREPEND_FILE_LINE(FMT) ("[" __FILE__ ":" TOSTRING(__LINE__) "] " FMT)
 
 namespace bubblefs {
   

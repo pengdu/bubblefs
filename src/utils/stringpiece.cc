@@ -16,8 +16,66 @@ limitations under the License.
 #include <algorithm>
 #include <iostream>
 #include "utils/hash.h"
+#include "utils/str_util.h"
 
 namespace bubblefs {
+
+StringPiece::StringPiece(const StringPieceParts& parts, string* buf) {
+  size_t length = 0;
+  for (int i = 0; i < parts.num_parts; ++i) {
+    length += parts.parts[i].size();
+  }
+  buf->reserve(length);
+
+  for (int i = 0; i < parts.num_parts; ++i) {
+    buf->append(parts.parts[i].data(), parts.parts[i].size());
+  }
+  data_ = buf->data();
+  size_ = buf->size();
+}
+
+// Return a string that contains the copy of the referenced data.
+string StringPiece::ToString(bool hex) const {
+  string result;  // RVO/NRVO/move
+  if (hex) {
+    result.reserve(2 * size_);
+    for (size_t i = 0; i < size_; ++i) {
+      unsigned char c = data_[i];
+      result.push_back(str_util::ToHex(c >> 4));
+      result.push_back(str_util::ToHex(c & 0xf));
+    }
+    return result;
+  } else {
+    result.assign(data_, size_);
+    return result;
+  }
+}
+
+bool StringPiece::DecodeHex(string* result) const {
+  string::size_type len = size_;
+  if (len % 2) {
+    // Hex string must be even number of hex digits to get complete bytes back
+    return false;
+  }
+  if (!result) {
+    return false;
+  }
+  result->clear();
+  result->reserve(len / 2);
+
+  for (size_t i = 0; i < len;) {
+    int h1 = str_util::FromHex(data_[i++]);
+    if (h1 < 0) {
+      return false;
+    }
+    int h2 = str_util::FromHex(data_[i++]);
+    if (h2 < 0) {
+      return false;
+    }
+    result->push_back((h1 << 4) | h2);
+  }
+  return true;
+}
 
 size_t StringPiece::Hasher::operator()(StringPiece s) const {
   return Hash64(s.data(), s.size());

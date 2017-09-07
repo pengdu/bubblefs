@@ -16,6 +16,7 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_TYPES_H_
 #define BUBBLEFS_PLATFORM_TYPES_H_
 
+#include <limits>
 #include <string>
 #include "platform/platform.h"
 
@@ -42,8 +43,8 @@ typedef unsigned long long uint64;
 
 namespace bubblefs {
 
-using std::string;  
-  
+using std::string;
+
 static const uint8 kuint8max = ((uint8)0xFF);
 static const uint16 kuint16max = ((uint16)0xFFFF);
 static const uint32 kuint32max = ((uint32)0xFFFFFFFF);

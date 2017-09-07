@@ -15,12 +15,13 @@ limitations under the License.
 #ifndef BUBBLEFS_UTILS_PATH_H_
 #define BUBBLEFS_UTILS_PATH_H_
 
-#include "platform/constants.h"
 #include "utils/status.h"
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
 namespace io {
+  
+static const uint32_t MAX_PATH_LENGTH = 10240;  
   
 namespace internal {
 string JoinPathImpl(std::initializer_list<StringPiece> paths);

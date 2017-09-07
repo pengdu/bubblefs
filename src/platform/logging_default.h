@@ -61,13 +61,13 @@ class LogMessageFatal : public LogMessage {
 };
 
 #define _TF_LOG_INFO \
-  ::mblobstore::internal::LogMessage(__FILE__, __LINE__, mblobstore::INFO)
+  ::bubblefs::internal::LogMessage(__FILE__, __LINE__, bubblefs::INFO)
 #define _TF_LOG_WARNING \
-  ::mblobstore::internal::LogMessage(__FILE__, __LINE__, mblobstore::WARNING)
+  ::bubblefs::internal::LogMessage(__FILE__, __LINE__, bubblefs::WARNING)
 #define _TF_LOG_ERROR \
-  ::mblobstore::internal::LogMessage(__FILE__, __LINE__, mblobstore::ERROR)
+  ::bubblefs::internal::LogMessage(__FILE__, __LINE__, bubblefs::ERROR)
 #define _TF_LOG_FATAL \
-  ::mblobstore::internal::LogMessageFatal(__FILE__, __LINE__)
+  ::bubblefs::internal::LogMessageFatal(__FILE__, __LINE__)
 
 #define _TF_LOG_QFATAL _TF_LOG_FATAL
 
@@ -80,12 +80,12 @@ class LogMessageFatal : public LogMessage {
 // Otherwise, Set TF_CPP_MIN_VLOG_LEVEL environment to update minimum log level
 // of VLOG
 #define VLOG_IS_ON(lvl) \
-  ((lvl) <= ::mblobstore::internal::LogMessage::MinVLogLevel())
+  ((lvl) <= ::bubblefs::internal::LogMessage::MinVLogLevel())
 #endif
 
 #define VLOG(lvl)      \
   if (TF_PREDICT_FALSE(VLOG_IS_ON(lvl))) \
-  ::mblobstore::internal::LogMessage(__FILE__, __LINE__, mblobstore::INFO)
+  ::bubblefs::internal::LogMessage(__FILE__, __LINE__, bubblefs::INFO)
 
 // CHECK dies with a fatal error if condition is not true.  It is *not*
 // controlled by NDEBUG, so the check will be executed regardless of
@@ -197,21 +197,21 @@ string* MakeCheckOpString(const T1& v1, const T2& v2, const char* exprtext) {
     if (TF_PREDICT_TRUE(v1 op v2))                                        \
       return NULL;                                                        \
     else                                                                  \
-      return ::mblobstore::internal::MakeCheckOpString(v1, v2, exprtext); \
+      return ::bubblefs::internal::MakeCheckOpString(v1, v2, exprtext); \
   }                                                                       \
   inline string* name##Impl(int v1, int v2, const char* exprtext) {       \
     return name##Impl<int, int>(v1, v2, exprtext);                        \
   }                                                                       \
   inline string* name##Impl(const size_t v1, const int v2, const char* exprtext) {       \
     if (TF_PREDICT_FALSE(v2 < 0)) {                                       \
-       return ::mblobstore::internal::MakeCheckOpString(v1, v2, exprtext);\
+       return ::bubblefs::internal::MakeCheckOpString(v1, v2, exprtext);\
     }                                                                     \
     const size_t uval = (size_t)((unsigned)v1);                           \
     return name##Impl<size_t, size_t>(uval, v2, exprtext);                \
   }                                                                       \
   inline string* name##Impl(const int v1, const size_t v2, const char* exprtext) {       \
     if (TF_PREDICT_FALSE(v2 >= std::numeric_limits<int>::max())) {      \
-       return ::mblobstore::internal::MakeCheckOpString(v1, v2, exprtext);\
+       return ::bubblefs::internal::MakeCheckOpString(v1, v2, exprtext);\
     }                                                                     \
     const size_t uval = (size_t)((unsigned)v2);                           \
     return name##Impl<size_t, size_t>(v1, uval, exprtext);                \
@@ -233,12 +233,12 @@ TF_DEFINE_CHECK_OP_IMPL(Check_GT, > )
 // In optimized mode, use CheckOpString to hint to compiler that
 // the while condition is unlikely.
 #define CHECK_OP_LOG(name, op, val1, val2)                            \
-  while (::mblobstore::internal::CheckOpString _result =              \
-             ::mblobstore::internal::name##Impl(                      \
-                 ::mblobstore::internal::GetReferenceableValue(val1), \
-                 ::mblobstore::internal::GetReferenceableValue(val2), \
+  while (::bubblefs::internal::CheckOpString _result =              \
+             ::bubblefs::internal::name##Impl(                      \
+                 ::bubblefs::internal::GetReferenceableValue(val1), \
+                 ::bubblefs::internal::GetReferenceableValue(val2), \
                  #val1 " " #op " " #val2))                            \
-  ::mblobstore::internal::LogMessageFatal(__FILE__, __LINE__) << *(_result.str_)
+  ::bubblefs::internal::LogMessageFatal(__FILE__, __LINE__) << *(_result.str_)
 
 #define CHECK_OP(name, op, val1, val2) CHECK_OP_LOG(name, op, val1, val2)
 
@@ -250,8 +250,8 @@ TF_DEFINE_CHECK_OP_IMPL(Check_GT, > )
 #define CHECK_GE(val1, val2) CHECK_OP(Check_GE, >=, val1, val2)
 #define CHECK_GT(val1, val2) CHECK_OP(Check_GT, >, val1, val2)
 #define CHECK_NOTNULL(val)                                 \
-  ::mblobstore::internal::CheckNotNull(__FILE__, __LINE__, \
-                                       "'" #val "' Must be non NULL", (val))
+  ::bubblefs::internal::CheckNotNull(__FILE__, __LINE__, \
+                                     "'" #val "' Must be non NULL", (val))
 
 #ifndef NDEBUG
 // DCHECK_EQ/NE/...

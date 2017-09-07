@@ -124,4 +124,14 @@ limitations under the License.
 
 #define TF_ATTRIBUTE_NO_SANITIZE_MEMORY
 
+#define TF_NOEXCEPT noexcept
+
+#if defined(__GNUC__) && __GNUC__ >= 4
+#define TF_LIKELY(x)   (__builtin_expect((x), 1))
+#define TF_UNLIKELY(x) (__builtin_expect((x), 0))
+#else
+#define TF_LIKELY(x)   (x)
+#define TF_UNLIKELY(x) (x)
+#endif
+
 #endif // BUBBLEFS_PLATFORM_MACROS_H_

@@ -9,10 +9,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+//  Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under both the GPLv2 (found in the
+//  COPYING file in the root directory) and Apache 2.0 License
+//  (found in the LICENSE.Apache file in the root directory).
+//
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
 
+// rocksdb/port/port_posix.cc
 // tensorflow/tensorflow/core/platform/posix/port.cc
 
+#include "platform/port.h"
+#include <assert.h>
+#if defined(__i386__) || defined(__x86_64__)
+#include <cpuid.h>
+#endif
 #include <malloc.h>
+#if defined(__linux__) && !defined(__ANDROID__)
+#include <sched.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,12 +41,8 @@ limitations under the License.
 #include "platform/logging.h"
 #include "platform/mem.h"
 #include "platform/platform.h"
-#include "platform/port.h"
 #include "platform/snappy_wrapper.h"
 #include "platform/types.h"
-#if defined(__linux__) && !defined(__ANDROID__)
-#include <sched.h>
-#endif
 #if TF_USE_JEMALLOC
 #include "jemalloc/jemalloc.h"
 #endif
@@ -39,7 +52,7 @@ limitations under the License.
 
 namespace bubblefs {
 namespace port {
-  
+
 void InitMain(const char* usage, int* argc, char*** argv) {}
 
 std::string Hostname() {

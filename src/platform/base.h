@@ -15,6 +15,10 @@
 #define TF_USE_SNAPPY 0
 #endif
 
+#ifndef TF_USE_ADAPTIVE_MUTEX
+#define TF_USE_ADAPTIVE_MUTEX 0
+#endif
+
 #ifndef TF_USE_PTHREAD_SPINLOCK
 #define TF_USE_PTHREAD_SPINLOCK 0
 #endif
