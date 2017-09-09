@@ -23,9 +23,9 @@ limitations under the License.
 #include "platform/types.h"
 
 #define BENCHMARK(n)                                            \
-  static ::tensorflow::testing::Benchmark* TF_BENCHMARK_CONCAT( \
+  static ::bubblefs::testing::Benchmark* TF_BENCHMARK_CONCAT( \
       __benchmark_, n, __LINE__) TF_ATTRIBUTE_UNUSED =          \
-      (new ::tensorflow::testing::Benchmark(#n, (n)))
+      (new ::bubblefs::testing::Benchmark(#n, (n)))
 #define TF_BENCHMARK_CONCAT(a, b, c) TF_BENCHMARK_CONCAT2(a, b, c)
 #define TF_BENCHMARK_CONCAT2(a, b, c) a##b##c
 

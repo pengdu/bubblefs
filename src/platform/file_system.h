@@ -427,26 +427,6 @@ class RandomAccessFile {
     return Status::OK();
   }
   
-  // Tries to get an unique ID for this file that will be the same each time
-  // the file is opened (and will stay the same while the file is open).
-  // Furthermore, it tries to make this ID at most "max_size" bytes. If such an
-  // ID can be created this function returns the length of the ID and places it
-  // in "id"; otherwise, this function returns 0, in which case "id"
-  // may not have been modified.
-  //
-  // This function guarantees, for IDs from a given environment, two unique ids
-  // cannot be made equal to each other by adding arbitrary bytes to one of
-  // them. That is, no unique ID is the prefix of another.
-  //
-  // This function guarantees that the returned ID will not be interpretable as
-  // a single varint.
-  //
-  // Note: these IDs are only valid for the duration of the process.
-  virtual size_t GetUniqueId(char* id, size_t max_size) const {
-    return 0; // Default implementation to prevent issues with backwards
-              // compatibility.
-  };
-  
   enum AccessPattern { NORMAL, RANDOM, SEQUENTIAL, WILLNEED, DONTNEED };
   
   virtual void Hint(AccessPattern pattern) {}
@@ -476,7 +456,11 @@ class RandomAccessFile {
 /// small fragments at a time to the file.
 class WritableFile {
  public:
-  WritableFile() {}
+  WritableFile()
+    : last_preallocated_block_(0),
+      preallocation_block_size_(0),
+      io_priority_(Env::IO_TOTAL) {
+  }
   virtual ~WritableFile();
 
   /// \brief Append 'data' to the file.
@@ -598,11 +582,6 @@ class WritableFile {
                                       size_t* last_allocated_block) {
     *last_allocated_block = last_preallocated_block_;
     *block_size = preallocation_block_size_;
-  }
-
-  // For documentation, refer to RandomAccessFile::GetUniqueId()
-  virtual size_t GetUniqueId(char* id, size_t max_size) const {
-    return 0; // Default implementation to prevent issues with backwards
   }
 
   // Remove any kind of caching of data from the offset to offset+length
