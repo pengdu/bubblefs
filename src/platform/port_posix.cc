@@ -6,13 +6,28 @@
 // Copyright (c) 2011 The LevelDB Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
+/* Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+==============================================================================*/
 
 // rocksdb/port/port_posix.cc
+// tensorflow/tensorflow/core/platform/posix/net.cc
+// tensorflow/tensorflow/core/platform/posix/port.cc
 
 #include "platform/port_posix.h"
-#include <signal.h>
-#include <sys/time.h>
+#include <netinet/in.h>
 #include <sys/resource.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <assert.h>
 #if defined(__i386__) || defined(__x86_64__)
 #include <cpuid.h>
@@ -25,11 +40,211 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <unordered_set>
+#include "platform/base.h"
 #include "platform/logging.h"
+#include "platform/mem.h"
+#include "platform/snappy_wrapper.h"
+#include "utils/strcat.h"
+#if TF_USE_SNAPPY
+#include "snappy.h"
+#endif
+
+namespace bubblefs {
+namespace internal {
+
+namespace { // namespace anonymous
+bool IsPortAvailable(int* port, bool is_tcp) {
+  const int protocol = is_tcp ? IPPROTO_TCP : 0;
+  const int fd = socket(AF_INET, is_tcp ? SOCK_STREAM : SOCK_DGRAM, protocol);
+
+  struct sockaddr_in addr;
+  socklen_t addr_len = sizeof(addr);
+  int actual_port;
+
+  CHECK_GE(*port, 0);
+  CHECK_LE(*port, 65535);
+  if (fd < 0) {
+    LOG(ERROR) << "socket() failed: " << strerror(errno);
+    return false;
+  }
+
+  // SO_REUSEADDR lets us start up a server immediately after it exists.
+  int one = 1;
+  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) < 0) {
+    LOG(ERROR) << "setsockopt() failed: " << strerror(errno);
+    close(fd);
+    return false;
+  }
+
+  // Try binding to port.
+  addr.sin_family = AF_INET;
+  addr.sin_addr.s_addr = INADDR_ANY;
+  addr.sin_port = htons(static_cast<uint16_t>(*port));
+  if (bind(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
+    LOG(WARNING) << "bind(port=" << *port << ") failed: " << strerror(errno);
+    close(fd);
+    return false;
+  }
+
+  // Get the bound port number.
+  if (getsockname(fd, reinterpret_cast<struct sockaddr*>(&addr), &addr_len) <
+      0) {
+    LOG(WARNING) << "getsockname() failed: " << strerror(errno);
+    close(fd);
+    return false;
+  }
+  CHECK_LE(addr_len, sizeof(addr));
+  actual_port = ntohs(addr.sin_port);
+  CHECK_GT(actual_port, 0);
+  if (*port == 0) {
+    *port = actual_port;
+  } else {
+    CHECK_EQ(*port, actual_port);
+  }
+  close(fd);
+  return true;
+}
+
+const int kNumRandomPortsToPick = 100;
+const int kMaximumTrials = 1000;
+
+}  // namespace anonymous
+
+int PickUnusedPortOrDie() {
+  static std::unordered_set<int> chosen_ports;
+
+  // Type of port to first pick in the next iteration.
+  bool is_tcp = true;
+  int trial = 0;
+  while (true) {
+    int port;
+    trial++;
+    CHECK_LE(trial, kMaximumTrials)
+        << "Failed to pick an unused port for testing.";
+    if (trial == 1) {
+      port = getpid() % (65536 - 30000) + 30000;
+    } else if (trial <= kNumRandomPortsToPick) {
+      port = rand() % (65536 - 30000) + 30000;
+    } else {
+      port = 0;
+    }
+
+    if (chosen_ports.find(port) != chosen_ports.end()) {
+      continue;
+    }
+    if (!IsPortAvailable(&port, is_tcp)) {
+      continue;
+    }
+
+    CHECK_GT(port, 0);
+    if (!IsPortAvailable(&port, !is_tcp)) {
+      is_tcp = !is_tcp;
+      continue;
+    }
+
+    chosen_ports.insert(port);
+    return port;
+  }
+
+  return 0;
+}
+
+}  // namespace internal
+}  // namespace bubblefs
 
 namespace bubblefs {
 namespace port {
 
+void* AlignedMalloc(size_t size, int minimum_alignment) {
+#if defined(__ANDROID__)
+  return memalign(minimum_alignment, size);
+#else  // !defined(__ANDROID__)
+  void* ptr = nullptr;
+  // posix_memalign requires that the requested alignment be at least
+  // sizeof(void*). In this case, fall back on malloc which should return
+  // memory aligned to at least the size of a pointer.
+  const int required_alignment = sizeof(void*);
+  if (minimum_alignment < required_alignment) return Malloc(size);
+#if TF_USE_JEMALLOC
+  int err = jemalloc_posix_memalign(&ptr, minimum_alignment, size);
+#else
+  int err = posix_memalign(&ptr, minimum_alignment, size);
+#endif
+  if (err != 0) {
+    return nullptr;
+  } else {
+    return ptr;
+  }
+#endif
+}
+
+void AlignedFree(void* aligned_memory) { Free(aligned_memory); }
+
+void* Malloc(size_t size) {
+#if TF_USE_JEMALLOC
+  return jemalloc_malloc(size);
+#else
+  return malloc(size);
+#endif
+}
+
+void* Realloc(void* ptr, size_t size) {
+#ifdef TENSORFLOW_USE_JEMALLOC
+  return jemalloc_realloc(ptr, size);
+#else
+  return realloc(ptr, size);
+#endif
+}
+
+void Free(void* ptr) {
+#if TF_USE_JEMALLOC
+  jemalloc_free(ptr);
+#else
+  free(ptr);
+#endif
+}
+
+double GetMemoryUsage() {
+  FILE* fp = fopen("/proc/meminfo", "r");
+  CHECK(fp) << "failed to fopen /proc/meminfo";
+  size_t bufsize = 256 * sizeof(char);
+  char* buf = new (std::nothrow) char[bufsize];
+  CHECK(buf);
+  int totalMem = -1;
+  int freeMem = -1;
+  int bufMem = -1;
+  int cacheMem = -1;
+  while (getline(&buf, &bufsize, fp) >= 0) {
+    if (0 == strncmp(buf, "MemTotal", 8)) {
+      if (1 != sscanf(buf, "%*s%d", &totalMem)) {
+        LOG(FATAL) << "failed to get MemTotal from string: [" << buf << "]";
+      }
+    } else if (0 == strncmp(buf, "MemFree", 7)) {
+      if (1 != sscanf(buf, "%*s%d", &freeMem)) {
+        LOG(FATAL) << "failed to get MemFree from string: [" << buf << "]";
+      }
+    } else if (0 == strncmp(buf, "Buffers", 7)) {
+      if (1 != sscanf(buf, "%*s%d", &bufMem)) {
+        LOG(FATAL) << "failed to get Buffers from string: [" << buf << "]";
+      }
+    } else if (0 == strncmp(buf, "Cached", 6)) {
+      if (1 != sscanf(buf, "%*s%d", &cacheMem)) {
+        LOG(FATAL) << "failed to get Cached from string: [" << buf << "]";
+      }
+    }
+    if (totalMem != -1 && freeMem != -1 && bufMem != -1 && cacheMem != -1) {
+      break;
+    }
+  }
+  CHECK(totalMem != -1 && freeMem != -1 && bufMem != -1 && cacheMem != -1)
+      << "failed to get all information";
+  fclose(fp);
+  delete[] buf;
+  double usedMem = 1.0 - 1.0 * (freeMem + bufMem + cacheMem) / totalMem;
+  return usedMem;
+}
+  
 static int PthreadCall(const char* label, int result) {
   if (result != 0 && result != ETIMEDOUT) {
     fprintf(stderr, "pthread %s: %s\n", label, strerror(result));
@@ -235,6 +450,35 @@ std::string Hostname() {
   gethostname(hostname, sizeof hostname);
   hostname[sizeof hostname - 1] = 0;
   return std::string(hostname);
+}
+
+bool Snappy_Compress(const char* input, size_t length, string* output) {
+#if TF_USE_SNAPPY
+  output->resize(snappy::MaxCompressedLength(length));
+  size_t outlen;
+  snappy::RawCompress(input, length, &(*output)[0], &outlen);
+  output->resize(outlen);
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool Snappy_GetUncompressedLength(const char* input, size_t length,
+                                  size_t* result) {
+#if TF_USE_SNAPPY
+  return snappy::GetUncompressedLength(input, length, result);
+#else
+  return false;
+#endif
+}
+
+bool Snappy_Uncompress(const char* input, size_t length, char* output) {
+#if TF_USE_SNAPPY
+  return snappy::RawUncompress(input, length, output);
+#else
+  return false;
+#endif
 }
 
 }  // namespace port

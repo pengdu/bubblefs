@@ -141,10 +141,16 @@ string Status::ToString() const {
         type = "Shutdown in progress";
         break;
       case error::EXPIRED:
-        type = "Operation expired";
+        type = "Expired";
         break;
       case error::TRY_AGAIN:
         type = "Operation try again";
+        break;
+      case error::NOT_SUPPORTED:
+        type = "Not Supported";
+        break;
+      case error::TIMEDOUT:
+        type = "Timed out";
         break;
       default:
         snprintf(tmp, sizeof(tmp), "Unknown code(%d)",

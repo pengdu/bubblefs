@@ -44,8 +44,6 @@ namespace bubblefs {
 class Thread;
 struct ThreadOptions;
 
-const size_t kDefaultPageSize = 4 * 1024;
-
 // Options while opening a file to read/write
 struct EnvOptions {
 
@@ -53,7 +51,7 @@ struct EnvOptions {
   EnvOptions();
 
   // Construct from Options
-  explicit EnvOptions(const DBOptions& options);
+  //explicit EnvOptions(const DBOptions& options);
 
    // If true, then use mmap to read data
   bool use_mmap_reads = false;
@@ -168,7 +166,7 @@ class Env {
   /// and the object should be deleted when is not used. The file object
   /// shouldn't live longer than the Env object.
   virtual Status NewRandomAccessFile(const string& fname,
-                             std::unique_ptr<RandomAccessFile>* result);
+                                     std::unique_ptr<RandomAccessFile>* result);
 
   /// \brief Creates an object that writes to a new file with the specified
   /// name.
@@ -184,36 +182,7 @@ class Env {
   /// and the object should be deleted when is not used. The file object
   /// shouldn't live longer than the Env object.
   virtual Status NewWritableFile(const string& fname,
-                         std::unique_ptr<WritableFile>* result);
-
-  /// \brief Creates an object that either appends to an existing file, or
-  /// writes to a new file (if the file does not exist to begin with).
-  ///
-  /// On success, stores a pointer to the new file in *result and
-  /// returns OK.  On failure stores NULL in *result and returns
-  /// non-OK.
-  ///
-  /// The returned file will only be accessed by one thread at a time.
-  ///
-  /// The ownership of the returned WritableFile is passed to the caller
-  /// and the object should be deleted when is not used. The file object
-  /// shouldn't live longer than the Env object.
-  virtual Status NewAppendableFile(const string& fname,
-                           std::unique_ptr<WritableFile>* result);
-
-  /// \brief Creates a readonly region of memory with the file context.
-  ///
-  /// On success, it returns a pointer to read-only memory region
-  /// from the content of file fname. The ownership of the region is passed to
-  /// the caller. On failure stores nullptr in *result and returns non-OK.
-  ///
-  /// The returned memory region can be accessed from many threads in parallel.
-  ///
-  /// The ownership of the returned ReadOnlyMemoryRegion is passed to the caller
-  /// and the object should be deleted when is not used. The memory region
-  /// object shouldn't live longer than the Env object.
-  virtual Status NewReadOnlyMemoryRegionFromFile(
-      const string& fname, std::unique_ptr<ReadOnlyMemoryRegion>* result);
+                                 std::unique_ptr<WritableFile>* result);
   
   // Create an object that writes to a new file with the specified
   // name.  Deletes any existing file with the same name and creates a
@@ -228,23 +197,61 @@ class Env {
     return Status::NotSupported();
   }
   
-  
   // Reuse an existing file by renaming it and opening it as writable.
-  virtual Status ReuseWritableFile(const std::string& fname,
-                                   const std::string& old_fname,
+  virtual Status ReuseWritableFile(const string& fname,
+                                   const string& old_fname,
                                    std::unique_ptr<WritableFile>* result,
                                    const EnvOptions& options);
-
+  
   // Open `fname` for random read and write, if file doesn't exist the file
   // will be created.  On success, stores a pointer to the new file in
   // *result and returns OK.  On failure returns non-OK.
   //
   // The returned file will only be accessed by one thread at a time.
-  virtual Status NewRandomRWFile(const std::string& fname,
+  virtual Status NewRandomRWFile(const string& fname,
                                  std::unique_ptr<RandomRWFile>* result,
                                  const EnvOptions& options) {
     return Status::NotSupported("RandomRWFile is not implemented in this Env");
   }
+  
+  // Create an object that represents a directory. Will fail if directory
+  // doesn't exist. If the directory exists, it will open the directory
+  // and create a new Directory object.
+  //
+  // On success, stores a pointer to the new Directory in
+  // *result and returns OK. On failure stores nullptr in *result and
+  // returns non-OK.
+  virtual Status NewDirectory(const string& name,
+                              std::unique_ptr<Directory>* result) = 0;
+
+  /// \brief Creates an object that either appends to an existing file, or
+  /// writes to a new file (if the file does not exist to begin with).
+  ///
+  /// On success, stores a pointer to the new file in *result and
+  /// returns OK.  On failure stores NULL in *result and returns
+  /// non-OK.
+  ///
+  /// The returned file will only be accessed by one thread at a time.
+  ///
+  /// The ownership of the returned WritableFile is passed to the caller
+  /// and the object should be deleted when is not used. The file object
+  /// shouldn't live longer than the Env object.
+  virtual Status NewAppendableFile(const string& fname,
+                                   std::unique_ptr<WritableFile>* result);
+
+  /// \brief Creates a readonly region of memory with the file context.
+  ///
+  /// On success, it returns a pointer to read-only memory region
+  /// from the content of file fname. The ownership of the region is passed to
+  /// the caller. On failure stores nullptr in *result and returns non-OK.
+  ///
+  /// The returned memory region can be accessed from many threads in parallel.
+  ///
+  /// The ownership of the returned ReadOnlyMemoryRegion is passed to the caller
+  /// and the object should be deleted when is not used. The memory region
+  /// object shouldn't live longer than the Env object.
+  virtual Status NewReadOnlyMemoryRegionFromFile(
+      const string& fname, std::unique_ptr<ReadOnlyMemoryRegion>* result);
 
   /// Returns OK if the named path exists and NOT_FOUND otherwise.
   virtual Status FileExists(const string& fname);
@@ -301,7 +308,7 @@ class Env {
   ///  * UNIMPLEMENTED - Some underlying functions (like Delete) are not
   ///                    implemented
   virtual Status DeleteRecursively(const string& dirname, int64* undeleted_files,
-                           int64* undeleted_dirs);
+                                   int64* undeleted_dirs);
 
   /// \brief Creates the specified directory and all the necessary
   /// subdirectories. Typical return codes.
@@ -354,19 +361,6 @@ class Env {
   /// Creates a local unique temporary file name. Returns true if success.
   virtual bool LocalTempFilename(string* filename);
 
-  // TODO(jeff,sanjay): Add back thread/thread-pool support if needed.
-  // TODO(jeff,sanjay): if needed, tighten spec so relative to epoch, or
-  // provide a routine to get the absolute time.
-
-  /// \brief Returns the number of micro-seconds since the Unix epoch.
-  virtual uint64 NowMicros() { return envTime->NowMicros(); };
-
-  /// \brief Returns the number of seconds since the Unix epoch.
-  virtual uint64 NowSeconds() { return envTime->NowSeconds(); }
-
-  /// Sleeps/delays the thread for the prescribed number of micro-seconds.
-  virtual void SleepForMicroseconds(int64 micros) = 0;
-  
   // Lock the specified file.  Used to prevent concurrent access to
   // the same db by multiple processes.  On failure, stores nullptr in
   // *lock and returns non-OK.
@@ -432,7 +426,29 @@ class Env {
   // or many not have just been created. The directory may or may not differ
   // between runs of the same process, but subsequent calls will return the
   // same directory.
-  virtual Status GetTestDirectory(std::string* path) = 0;
+  virtual Status GetTestDirectory(string* path) = 0;
+  
+  // TODO(jeff,sanjay): Add back thread/thread-pool support if needed.
+  // TODO(jeff,sanjay): if needed, tighten spec so relative to epoch, or
+  // provide a routine to get the absolute time.
+
+  /// \brief Returns the number of micro-seconds since the Unix epoch.
+  virtual uint64 NowMicros() { return envTime->NowMicros(); };
+
+  /// \brief Returns the number of seconds since the Unix epoch.
+  virtual uint64 NowSeconds() { return envTime->NowSeconds(); }
+  
+  // Returns the number of nano-seconds since some fixed point in time. Only
+  // useful for computing deltas of time in one run.
+  // Default implementation simply relies on NowMicros.
+  // In platform-specific implementations, NowNanos() should return time points
+  // that are MONOTONIC.
+  virtual uint64_t NowNanos() {
+    return NowMicros() * 1000;
+  }
+
+  /// Sleeps/delays the thread for the prescribed number of micro-seconds.
+  virtual void SleepForMicroseconds(int64 micros) = 0;
   
  // Get the current host name.
   virtual Status GetHostName(char* name, uint64_t len) = 0;
@@ -442,8 +458,8 @@ class Env {
   virtual Status GetCurrentTime(int64_t* unix_time) = 0;
 
   // Get full directory name for this db.
-  virtual Status GetAbsolutePath(const std::string& db_path,
-      std::string* output_path) = 0;
+  virtual Status GetAbsolutePath(const string& db_path,
+      string* output_path) = 0;
 
   // The number of background worker threads of a specific thread pool
   // for this environment. 'LOW' is the default pool.
@@ -460,13 +476,13 @@ class Env {
   virtual void LowerThreadPoolIOPriority(Priority pool = LOW) {}
 
   // Converts seconds-since-Jan-01-1970 to a printable string
-  virtual std::string TimeToString(uint64_t time) = 0;
-
-  // Generates a unique id that can be used to identify a db
-  virtual std::string GenerateUniqueId();  
+  virtual string TimeToString(uint64_t time) = 0;  
   
   // Returns the ID of the current thread.
   virtual uint64_t GetThreadID() const;
+  
+  // Generates a unique id that can be used to identify a db
+  virtual string GenerateUniqueId();
   
   /// \brief Returns a new thread that is running fn() and is identified
   /// (for debugging/performance-analysis) by "name".
@@ -557,11 +573,95 @@ class EnvWrapper : public Env {
   bool MatchPath(const string& path, const string& pattern) override {
     return target_->MatchPath(path, pattern);
   }
+  
+  // Priority for scheduling job in thread pool
+  enum Priority { BOTTOM, LOW, HIGH, TOTAL };
+
+  // Priority for requesting bytes in rate limiter scheduler
+  enum IOPriority {
+    IO_LOW = 0,
+    IO_HIGH = 1,
+    IO_TOTAL = 2
+  };
+
+  // Arrange to run "(*function)(arg)" once in a background thread, in
+  // the thread pool specified by pri. By default, jobs go to the 'LOW'
+  // priority thread pool.
+
+  // "function" may run in an unspecified thread.  Multiple functions
+  // added to the same Env may run concurrently in different threads.
+  // I.e., the caller may not assume that background work items are
+  // serialized.
+  // When the UnSchedule function is called, the unschedFunction
+  // registered at the time of Schedule is invoked with arg as a parameter.
+  virtual void Schedule(void (*function)(void* arg), void* arg,
+                        Priority pri = LOW, void* tag = nullptr,
+                        void (*unschedFunction)(void* arg) = 0) = 0;
+
+  // Arrange to remove jobs for given arg from the queue_ if they are not
+  // already scheduled. Caller is expected to have exclusive lock on arg.
+  virtual int UnSchedule(void* arg, Priority pri) { return 0; }
+
+  // Start a new thread, invoking "function(arg)" within the new thread.
+  // When "function(arg)" returns, the thread will be destroyed.
+  virtual void StartThread(void (*function)(void* arg), void* arg) = 0;
+
+  // Wait for all threads started by StartThread to terminate.
+  virtual void WaitForJoin() {}
+
+  // Get thread pool queue length for specific thread pool.
+  virtual unsigned int GetThreadPoolQueueLen(Priority pri = LOW) const {
+    return 0;
+  }
+
+  // *path is set to a temporary directory that can be used for testing. It may
+  // or many not have just been created. The directory may or may not differ
+  // between runs of the same process, but subsequent calls will return the
+  // same directory.
+  virtual Status GetTestDirectory(string* path) = 0;
 
   uint64 NowMicros() override { return target_->NowMicros(); }
+  uint64_t NowNanos() override { return target_->NowNanos(); }
   void SleepForMicroseconds(int64 micros) override {
     target_->SleepForMicroseconds(micros);
   }
+  Status GetHostName(char* name, uint64_t len) override {
+    return target_->GetHostName(name, len);
+  }
+  Status GetCurrentTime(int64_t* unix_time) override {
+    return target_->GetCurrentTime(unix_time);
+  }
+  Status GetAbsolutePath(const std::string& db_path,
+                         std::string* output_path) override {
+    return target_->GetAbsolutePath(db_path, output_path);
+  }
+  void SetBackgroundThreads(int num, Priority pri) override {
+    return target_->SetBackgroundThreads(num, pri);
+  }
+  int GetBackgroundThreads(Priority pri) override {
+    return target_->GetBackgroundThreads(pri);
+  }
+
+  void IncBackgroundThreadsIfNeeded(int num, Priority pri) override {
+    return target_->IncBackgroundThreadsIfNeeded(num, pri);
+  }
+
+  void LowerThreadPoolIOPriority(Priority pool = LOW) override {
+    target_->LowerThreadPoolIOPriority(pool);
+  }
+
+  std::string TimeToString(uint64_t time) override {
+    return target_->TimeToString(time);
+  }
+
+  uint64_t GetThreadID() const override {
+    return target_->GetThreadID();
+  }
+
+  std::string GenerateUniqueId() override {
+    return target_->GenerateUniqueId();
+  }
+
   Thread* StartThread(const ThreadOptions& thread_options, const string& name,
                       std::function<void()> fn) override {
     return target_->StartThread(thread_options, name, fn);

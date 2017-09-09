@@ -1,4 +1,4 @@
-/* Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+/* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -10,17 +10,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-// tensorflow/tensorflow/core/platform/net.h
+// tensorflow/tensorflow/core/platform/host_info.h
 
-#ifndef BUBBLEFS_PLATFORM_NET_H_
-#define BUBBLEFS_PLATFORM_NET_H_
+#ifndef BUBBLEFS_PLATFORM_PORT_H_
+#define BUBBLEFS_PLATFORM_PORT_H_
 
-namespace bubblefs {
-namespace internal {
+#include "platform/types.h"
+#include "platform/port_posix.h" // for posix
 
-int PickUnusedPortOrDie();
-
-}  // namespace internal
-}  // namespace bubblefs
-
-#endif  // BUBBLEFS_PLATFORM_NET_H_
+#endif  // BUBBLEFS_PLATFORM_PORT_H_
