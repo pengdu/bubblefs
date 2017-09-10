@@ -56,7 +56,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
 namespace bubblefs {
 namespace crypto {
 
@@ -91,6 +90,6 @@ class SHA1
 };
 
 } // namespace crypto
-} // namespace pebble
+} // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_SHA1_H_

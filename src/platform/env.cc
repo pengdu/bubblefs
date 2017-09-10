@@ -21,7 +21,6 @@ limitations under the License.
 #include <utility>
 #include <vector>
 #include "platform/env.h"
-#include "platform/env_time.h"
 #include "platform/port.h"
 #include "platform/protobuf.h"
 #include "utils/errors.h"

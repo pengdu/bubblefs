@@ -66,7 +66,8 @@ class PosixRandomAccessFile : public RandomAccessFile {
               char* scratch) const override;
   
   virtual Status Prefetch(uint64_t offset, size_t n) override;
-
+  
+  //virtual size_t GetUniqueId(char* id, size_t max_size) const override;
   virtual void Hint(AccessPattern pattern) override;
   virtual Status InvalidateCache(size_t offset, size_t length) override;
   virtual bool use_direct_io() const override { return use_direct_io_; }
@@ -82,6 +83,8 @@ class PosixWritableFile : public WritableFile {
   const bool use_direct_io_;
   uint64_t filesize_;
   size_t logical_sector_size_;
+  bool allow_fallocate_;
+  bool fallocate_with_keep_size_;
 
  public:
   PosixWritableFile(const string& fname, int fd,
@@ -92,17 +95,11 @@ class PosixWritableFile : public WritableFile {
   // Need to implement this so the file is truncated correctly
   // with direct I/O
   virtual Status Truncate(uint64_t size) override;
-
-  Status Append(const StringPiece& data) override;
-
-  Status Close() override;
-
-  virtual Status PositionedAppend(const StringPiece& data, uint64_t offset) override;
-  
-  Status Flush() override;
-
-  Status Sync() override;
-  
+  virtual Status Close() override;
+  virtual Status Append(const Slice& data) override;
+  virtual Status PositionedAppend(const Slice& data, uint64_t offset) override;
+  virtual Status Flush() override;
+  virtual Status Sync() override;
   virtual Status Fsync() override;
   virtual bool IsSyncThreadSafe() const override;
   virtual bool use_direct_io() const override { return use_direct_io_; }
@@ -111,6 +108,9 @@ class PosixWritableFile : public WritableFile {
   virtual size_t GetRequiredBufferAlignment() const override {
     return logical_sector_size_;
   }
+  virtual Status Allocate(uint64_t offset, uint64_t len) override;
+  virtual Status RangeSync(uint64_t offset, uint64_t nbytes) override;
+  //virtual size_t GetUniqueId(char* id, size_t max_size) const override;
 };
 
 // mmap() based random-access
@@ -141,6 +141,8 @@ class PosixMmapFile : public WritableFile {
   char* dst_;             // Where to write next  (in range [base_,limit_])
   char* last_sync_;       // Where have we synced up to
   uint64_t file_offset_;  // Offset of base_ in file
+  bool allow_fallocate_;  // If false, fallocate calls are bypassed
+  bool fallocate_with_keep_size_;
 
   // Roundup x to a multiple of y
   static size_t Roundup(size_t x, size_t y) { return ((x + y - 1) / y) * y; }
@@ -164,7 +166,7 @@ class PosixMmapFile : public WritableFile {
   // and it does not need any additional information
   virtual Status Truncate(uint64_t size) override { return Status::OK(); }
   virtual Status Close() override;
-  virtual Status Append(const Slice& data) override;
+  virtual Status Append(const StringPiece& data) override;
   virtual Status Flush() override;
   virtual Status Sync() override;
   virtual Status Fsync() override;

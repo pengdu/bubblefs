@@ -38,8 +38,8 @@ limitations under the License.
 #include "utils/status.h"
 #include "utils/stringpiece.h"
 
-namespace bubblefs {
-
+namespace bubblefs {  
+  
 const size_t kDefaultPageSize = 4 * 1024;   
   
 class Thread;

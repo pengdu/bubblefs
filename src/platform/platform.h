@@ -61,4 +61,13 @@ limitations under the License.
 #define PLATFORM_IS_X86
 #endif
 
+// for linux
+#ifndef OS_LINUX
+#if defined(__linux__)
+#define OS_LINUX 1
+#else
+#define OS_LINUX 0
+#endif // __linux__
+#endif // OS_LINUX
+
 #endif // BUBBLEFS_PLATFORM_PLATFORM_DEFINE_H_

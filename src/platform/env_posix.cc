@@ -21,16 +21,19 @@ limitations under the License.
 // rocksdb/env/env_posix.cc
 // tensorflow/tensorflow/core/platform/posix/posix_file_system.cc
 
+#include "platform/platform.h"
+#ifdef OS_LINUX
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <sys/statfs.h>
+#include <sys/syscall.h>
+#include <sys/vfs.h>
+#endif
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#ifdef OS_LINUX
-#include <linux/fs.h>
-#include <sys/statfs.h>
-#include <sys/syscall.h>
-#endif
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -44,11 +47,11 @@ limitations under the License.
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <limits>
 #include "platform/env.h"
 #include "platform/error.h"
 #include "platform/io_posix.h"
 #include "platform/logging.h"
-#include "platform/platform.h"
 #include "platform/port_posix.h"
 #include "platform/types.h"
 #include "utils/error_codes.h"
@@ -56,9 +59,26 @@ limitations under the License.
 #include "utils/status.h"
 #include "utils/strcat.h"
 
+#if !defined(TMPFS_MAGIC)
+#define TMPFS_MAGIC 0x01021994
+#endif
+#if !defined(XFS_SUPER_MAGIC)
+#define XFS_SUPER_MAGIC 0x58465342
+#endif
+#if !defined(EXT4_SUPER_MAGIC)
+#define EXT4_SUPER_MAGIC 0xEF53
+#endif
+
+// unimplented macros
 #define IOSTATS_TIMER_GUARD(metric)
+#define TEST_SYNC_POINT_CALLBACK(x, y)
 
 namespace bubblefs {
+
+using std::unique_ptr;
+using std::shared_ptr;  
+  
+namespace {  
   
 // list of pathnames that are locked
 static std::set<string> lockedFiles;
@@ -105,7 +125,7 @@ static int LockOrUnlock(const string& fname, int fd, bool lock) {
 class PosixFileLock : public FileLock {
  public:
   int fd_;
-  string filename;
+  std::string filename;
 };
 
 class PosixEnv : public Env {
@@ -119,10 +139,13 @@ class PosixEnv : public Env {
     for (int pool_id = 0; pool_id < Env::Priority::TOTAL; ++pool_id) {
       thread_pools_[pool_id].JoinAllThreads();
     }
-  }
-  
-  string TranslateName(const string& name) const {
-    return io::CleanPath(name);
+    // Delete the thread_status_updater_ only when the current Env is not
+    // Env::Default().  This is to avoid the free-after-use error when
+    // Env::Default() is destructed while some other child threads are
+    // still trying to update thread status.
+    if (this != Env::Default()) {
+      //delete thread_status_updater_;
+    }
   }
 
   void SetFD_CLOEXEC(int fd, const EnvOptions* options) {
@@ -132,7 +155,7 @@ class PosixEnv : public Env {
   }
 
   virtual Status NewSequentialFile(const string& fname,
-                                   std::unique_ptr<SequentialFile>* result,
+                                   unique_ptr<SequentialFile>* result,
                                    const EnvOptions& options) override {
     result->reset();
     int fd = -1;
@@ -150,7 +173,8 @@ class PosixEnv : public Env {
       fd = open(fname.c_str(), flags, 0644);
     } while (fd < 0 && errno == EINTR);
     if (fd < 0) {
-      return IOError(fname, errno);
+      return IOError("While opening a file for sequentially reading", fname,
+                     errno);
     }
 
     SetFD_CLOEXEC(fd, &options);
@@ -159,7 +183,7 @@ class PosixEnv : public Env {
 #ifdef OS_MACOSX
       if (fcntl(fd, F_NOCACHE, 1) == -1) {
         close(fd);
-        return IOError(fname, errno);
+        return IOError("While fcntl NoCache", fname, errno);
       }
 #endif
     } else {
@@ -169,27 +193,16 @@ class PosixEnv : public Env {
       } while (file == nullptr && errno == EINTR);
       if (file == nullptr) {
         close(fd);
-        return IOError(fname, errno);
+        return IOError("While opening file for sequentially read", fname,
+                       errno);
       }
     }
     result->reset(new PosixSequentialFile(fname, file, fd, options));
     return Status::OK();
   }
-  
-  Status NewRandomAccessFile(
-      const string& fname, std::unique_ptr<RandomAccessFile>* result) override {
-    Status s;
-    int fd = open(fname.c_str(), O_RDONLY);
-    if (fd < 0) {
-      s = IOError(fname, errno);
-    } else {
-      result->reset(new PosixRandomAccessFile(fname, fd));
-    }
-    return s;
-  }
 
   virtual Status NewRandomAccessFile(const string& fname,
-                                     std::unique_ptr<RandomAccessFile>* result,
+                                     unique_ptr<RandomAccessFile>* result,
                                      const EnvOptions& options) override {
     result->reset();
     Status s;
@@ -198,7 +211,7 @@ class PosixEnv : public Env {
     if (options.use_direct_reads && !options.use_mmap_reads) {
 #if !defined(OS_MACOSX) && !defined(OS_OPENBSD) && !defined(OS_SOLARIS)
       flags |= O_DIRECT;
-      //TEST_SYNC_POINT_CALLBACK("NewRandomAccessFile:O_DIRECT", &flags);
+      TEST_SYNC_POINT_CALLBACK("NewRandomAccessFile:O_DIRECT", &flags);
 #endif
     }
 
@@ -207,7 +220,7 @@ class PosixEnv : public Env {
       fd = open(fname.c_str(), flags, 0644);
     } while (fd < 0 && errno == EINTR);
     if (fd < 0) {
-      return IOError(fname, errno);
+      return IOError("While open a file for random read", fname, errno);
     }
     SetFD_CLOEXEC(fd, &options);
 
@@ -232,7 +245,7 @@ class PosixEnv : public Env {
 #ifdef OS_MACOSX
         if (fcntl(fd, F_NOCACHE, 1) == -1) {
           close(fd);
-          return IOError(fname, errno);
+          return IOError("while fcntl NoCache", fname, errno);
         }
 #endif
       }
@@ -241,7 +254,7 @@ class PosixEnv : public Env {
     return s;
   }
 
-  virtual Status OpenWritableFile(const std::string& fname,
+  virtual Status OpenWritableFile(const string& fname,
                                   unique_ptr<WritableFile>* result,
                                   const EnvOptions& options,
                                   bool reopen = false) {
@@ -262,7 +275,7 @@ class PosixEnv : public Env {
 #if !defined(OS_MACOSX) && !defined(OS_OPENBSD) && !defined(OS_SOLARIS)
       flags |= O_DIRECT;
 #endif
-      //TEST_SYNC_POINT_CALLBACK("NewWritableFile:O_DIRECT", &flags);
+      TEST_SYNC_POINT_CALLBACK("NewWritableFile:O_DIRECT", &flags);
     } else if (options.use_mmap_writes) {
       // non-direct I/O
       flags |= O_RDWR;
@@ -276,7 +289,7 @@ class PosixEnv : public Env {
     } while (fd < 0 && errno == EINTR);
 
     if (fd < 0) {
-      s = IOError(fname, errno);
+      s = IOError("While open a file for appending", fname, errno);
       return s;
     }
     SetFD_CLOEXEC(fd, &options);
@@ -297,8 +310,17 @@ class PosixEnv : public Env {
 #ifdef OS_MACOSX
       if (fcntl(fd, F_NOCACHE, 1) == -1) {
         close(fd);
-        s = IOError(fname, errno);
+        s = IOError("While fcntl NoCache an opened file for appending", fname,
+                    errno);
         return s;
+      }
+#elif defined(OS_SOLARIS)
+      if (directio(fd, DIRECTIO_ON) == -1) {
+        if (errno != ENOTTY) { // ZFS filesystems don't support DIRECTIO_ON
+          close(fd);
+          s = IOError("While calling directio()", fname, errno);
+          return s;
+        }
       }
 #endif
       result->reset(new PosixWritableFile(fname, fd, options));
@@ -310,27 +332,15 @@ class PosixEnv : public Env {
     }
     return s;
   }
-  
-  virtual Status NewWritableFile(const string& fname,
-                                 std::unique_ptr<WritableFile>* result) override {
-    Status s;
-    FILE* f = fopen(fname.c_str(), "w");
-    if (f == nullptr) {
-      s = IOError(fname, errno);
-    } else {
-      result->reset(new PosixWritableFile(fname, f));
-    }
-    return s;
-  }
 
   virtual Status NewWritableFile(const string& fname,
-                                 std::unique_ptr<WritableFile>* result,
+                                 unique_ptr<WritableFile>* result,
                                  const EnvOptions& options) override {
     return OpenWritableFile(fname, result, options, false);
   }
 
   virtual Status ReopenWritableFile(const string& fname,
-                                    std::unique_ptr<WritableFile>* result,
+                                    unique_ptr<WritableFile>* result,
                                     const EnvOptions& options) override {
     return OpenWritableFile(fname, result, options, true);
   }
@@ -350,7 +360,7 @@ class PosixEnv : public Env {
 #if !defined(OS_MACOSX) && !defined(OS_OPENBSD) && !defined(OS_SOLARIS)
       flags |= O_DIRECT;
 #endif
-      //TEST_SYNC_POINT_CALLBACK("NewWritableFile:O_DIRECT", &flags);
+      TEST_SYNC_POINT_CALLBACK("NewWritableFile:O_DIRECT", &flags);
     } else if (options.use_mmap_writes) {
       // mmap needs O_RDWR mode
       flags |= O_RDWR;
@@ -363,7 +373,7 @@ class PosixEnv : public Env {
       fd = open(old_fname.c_str(), flags, 0644);
     } while (fd < 0 && errno == EINTR);
     if (fd < 0) {
-      s = IOError(fname, errno);
+      s = IOError("while reopen file for write", fname, errno);
       return s;
     }
 
@@ -391,8 +401,17 @@ class PosixEnv : public Env {
 #ifdef OS_MACOSX
       if (fcntl(fd, F_NOCACHE, 1) == -1) {
         close(fd);
-        s = IOError(fname, errno);
+        s = IOError("while fcntl NoCache for reopened file for append", fname,
+                    errno);
         return s;
+      }
+#elif defined(OS_SOLARIS)
+      if (directio(fd, DIRECTIO_ON) == -1) {
+        if (errno != ENOTTY) { // ZFS filesystems don't support DIRECTIO_ON
+          close(fd);
+          s = IOError("while calling directio()", fname, errno);
+          return s;
+        }
       }
 #endif
       result->reset(new PosixWritableFile(fname, fd, options));
@@ -408,7 +427,7 @@ class PosixEnv : public Env {
   }
 
   virtual Status NewRandomRWFile(const string& fname,
-                                 std::unique_ptr<RandomRWFile>* result,
+                                 unique_ptr<RandomRWFile>* result,
                                  const EnvOptions& options) override {
     int fd = -1;
     while (fd < 0) {
@@ -419,7 +438,7 @@ class PosixEnv : public Env {
         if (errno == EINTR) {
           continue;
         }
-        return IOError(fname, errno);
+        return IOError("While open file for random read/write", fname, errno);
       }
     }
 
@@ -427,42 +446,9 @@ class PosixEnv : public Env {
     result->reset(new PosixRandomRWFile(fname, fd, options));
     return Status::OK();
   }
-  
-  virtual Status NewAppendableFile(
-    const string& fname, std::unique_ptr<WritableFile>* result) override {
-    Status s;
-    FILE* f = fopen(fname.c_str(), "a");
-    if (f == nullptr) {
-      s = IOError(fname, errno);
-    } else {
-      result->reset(new PosixWritableFile(fname, f));
-    }
-    return s;
-  }
-
-  virtual Status NewReadOnlyMemoryRegionFromFile(
-    const string& fname, std::unique_ptr<ReadOnlyMemoryRegion>* result) override {
-    Status s = Status::OK();
-    int fd = open(fname.c_str(), O_RDONLY);
-    if (fd < 0) {
-      s = IOError(fname, errno);
-    } else {
-      struct stat st;
-      ::fstat(fd, &st);
-      const void* address =
-          mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-      if (address == MAP_FAILED) {
-        s = IOError(fname, errno);
-      } else {
-        result->reset(new PosixReadOnlyMemoryRegion(address, st.st_size));
-      }
-      close(fd);
-    }
-    return s;
-  }
 
   virtual Status NewDirectory(const string& name,
-                              std::unique_ptr<Directory>* result) override {
+                              unique_ptr<Directory>* result) override {
     result->reset();
     int fd;
     {
@@ -470,7 +456,7 @@ class PosixEnv : public Env {
       fd = open(name.c_str(), 0);
     }
     if (fd < 0) {
-      return IOError(name, errno);
+      return IOError("While open directory", name, errno);
     } else {
       result->reset(new PosixDirectory(fd));
     }
@@ -478,10 +464,24 @@ class PosixEnv : public Env {
   }
 
   virtual Status FileExists(const string& fname) override {
-    if (access(fname.c_str(), F_OK) == 0) {
+    int result = access(fname.c_str(), F_OK);
+
+    if (result == 0) {
       return Status::OK();
     }
-    return errors::NotFound(fname, " not found");
+
+    switch (errno) {
+      case EACCES:
+      case ELOOP:
+      case ENAMETOOLONG:
+      case ENOENT:
+      case ENOTDIR:
+        return Status::NotFound();
+      default:
+        assert(result == EIO || result == ENOMEM);
+        return Status::IOError("Unexpected error(" + ToString(result) +
+                               ") accessing file `" + fname + "' ");
+    }
   }
 
   virtual Status GetChildren(const string& dir,
@@ -489,14 +489,18 @@ class PosixEnv : public Env {
     result->clear();
     DIR* d = opendir(dir.c_str());
     if (d == nullptr) {
-      return IOError(dir, errno);
+      switch (errno) {
+        case EACCES:
+        case ENOENT:
+        case ENOTDIR:
+          return Status::NotFound();
+        default:
+          return IOError("While opendir", dir, errno);
+      }
     }
     struct dirent* entry;
     while ((entry = readdir(d)) != nullptr) {
-      StringPiece basename = entry->d_name;
-      if ((basename != ".") && (basename != "..")) {
-        result->push_back(entry->d_name);
-      }
+      result->push_back(entry->d_name);
     }
     closedir(d);
     return Status::OK();
@@ -505,7 +509,7 @@ class PosixEnv : public Env {
   virtual Status DeleteFile(const string& fname) override {
     Status result;
     if (unlink(fname.c_str()) != 0) {
-      result = IOError(fname, errno);
+      result = IOError("while unlink() file", fname, errno);
     }
     return result;
   };
@@ -513,7 +517,7 @@ class PosixEnv : public Env {
   virtual Status CreateDir(const string& name) override {
     Status result;
     if (mkdir(name.c_str(), 0755) != 0) {
-      result = IOError(name, errno);
+      result = IOError("While mkdir", name, errno);
     }
     return result;
   };
@@ -522,7 +526,7 @@ class PosixEnv : public Env {
     Status result;
     if (mkdir(name.c_str(), 0755) != 0) {
       if (errno != EEXIST) {
-        result = IOError(name, errno);
+        result = IOError("While mkdir if missing", name, errno);
       } else if (!DirExists(name)) { // Check that name is actually a
                                      // directory.
         // Message is taken from mkdir
@@ -535,7 +539,7 @@ class PosixEnv : public Env {
   virtual Status DeleteDir(const string& name) override {
     Status result;
     if (rmdir(name.c_str()) != 0) {
-      result = IOError(name, errno);
+      result = IOError("file rmdir", name, errno);
     }
     return result;
   };
@@ -546,7 +550,7 @@ class PosixEnv : public Env {
     struct stat sbuf;
     if (stat(fname.c_str(), &sbuf) != 0) {
       *size = 0;
-      s = IOError(fname, errno);
+      s = IOError("while stat a file for size", fname, errno);
     } else {
       *size = sbuf.st_size;
     }
@@ -557,47 +561,33 @@ class PosixEnv : public Env {
                                          uint64_t* file_mtime) override {
     struct stat s;
     if (stat(fname.c_str(), &s) !=0) {
-      return IOError(fname, errno);
+      return IOError("while stat a file for modification time", fname, errno);
     }
     *file_mtime = static_cast<uint64_t>(s.st_mtime);
     return Status::OK();
   }
-  
-  virtual Status Stat(const string& fname, FileStatistics* stats) override {
-    Status s;
-    struct stat sbuf;
-    if (stat(fname.c_str(), &sbuf) != 0) {
-      s = IOError(fname, errno);
-    } else {
-      stats->length = sbuf.st_size;
-      stats->mtime_nsec = sbuf.st_mtime * 1e9;
-      stats->is_directory = S_ISDIR(sbuf.st_mode);
-    }
-    return s;
-  }
-  
   virtual Status RenameFile(const string& src,
                             const string& target) override {
     Status result;
     if (rename(src.c_str(), target.c_str()) != 0) {
-      result = IOError(src, errno);
+      result = IOError("While renaming a file to " + target, src, errno);
     }
     return result;
   }
 
-  virtual Status LinkFile(const std::string& src,
-                          const std::string& target) override {
+  virtual Status LinkFile(const string& src,
+                          const string& target) override {
     Status result;
     if (link(src.c_str(), target.c_str()) != 0) {
       if (errno == EXDEV) {
         return Status::NotSupported("No cross FS links allowed");
       }
-      result = IOError(src, errno);
+      result = IOError("while link file to " + target, src, errno);
     }
     return result;
   }
 
-  virtual Status LockFile(const std::string& fname, FileLock** lock) override {
+  virtual Status LockFile(const string& fname, FileLock** lock) override {
     *lock = nullptr;
     Status result;
     int fd;
@@ -606,9 +596,9 @@ class PosixEnv : public Env {
       fd = open(fname.c_str(), O_RDWR | O_CREAT, 0644);
     }
     if (fd < 0) {
-      result = IOError(fname, errno);
+      result = IOError("while open a file for lock", fname, errno);
     } else if (LockOrUnlock(fname, fd, true) == -1) {
-      result = IOError(fname, errno);
+      result = IOError("While lock file", fname, errno);
       close(fd);
     } else {
       SetFD_CLOEXEC(fd, nullptr);
@@ -649,12 +639,18 @@ class PosixEnv : public Env {
       *result = env;
     } else {
       char buf[100];
-      snprintf(buf, sizeof(buf), "/tmp/bubblefs_test-%d", int(geteuid()));
+      snprintf(buf, sizeof(buf), "/tmp/rocksdbtest-%d", int(geteuid()));
       *result = buf;
     }
     // Directory may already exist
     CreateDir(*result);
     return Status::OK();
+  }
+
+  virtual Status GetThreadList(
+      std::vector<ThreadStatus>* thread_list) override {
+    assert(thread_status_updater_);
+    return thread_status_updater_->GetThreadList(thread_list);
   }
 
   static uint64_t gettid(pthread_t tid) {
@@ -683,6 +679,15 @@ class PosixEnv : public Env {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return static_cast<uint64_t>(ts.tv_sec) * 1000000000 + ts.tv_nsec;
+#elif defined(OS_SOLARIS)
+    return gethrtime();
+#elif defined(__MACH__)
+    clock_serv_t cclock;
+    mach_timespec_t ts;
+    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    clock_get_time(cclock, &ts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    return static_cast<uint64_t>(ts.tv_sec) * 1000000000 + ts.tv_nsec;
 #else
     return std::chrono::duration_cast<std::chrono::nanoseconds>(
        std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -697,7 +702,7 @@ class PosixEnv : public Env {
       if (errno == EFAULT || errno == EINVAL)
         return Status::InvalidArgument(strerror(errno));
       else
-        return IOError(name, errno);
+        return IOError("GetHostName", name, errno);
     }
     return Status::OK();
   }
@@ -705,14 +710,14 @@ class PosixEnv : public Env {
   virtual Status GetCurrentTime(int64_t* unix_time) override {
     time_t ret = time(nullptr);
     if (ret == (time_t) -1) {
-      return IOError("", errno);
+      return IOError("GetCurrentTime", "", errno);
     }
     *unix_time = (int64_t) ret;
     return Status::OK();
   }
 
-  virtual Status GetAbsolutePath(const std::string& db_path,
-                                 std::string* output_path) override {
+  virtual Status GetAbsolutePath(const string& db_path,
+                                 string* output_path) override {
     if (db_path.find('/') == 0) {
       *output_path = db_path;
       return Status::OK();
@@ -770,28 +775,6 @@ class PosixEnv : public Env {
              t.tm_min,
              t.tm_sec);
     return dummy;
-  }
-
-  EnvOptions OptimizeForLogWrite(const EnvOptions& env_options,
-                                 const DBOptions& db_options) const override {
-    EnvOptions optimized = env_options;
-    optimized.use_mmap_writes = false;
-    optimized.use_direct_writes = false;
-    optimized.bytes_per_sync = db_options.wal_bytes_per_sync;
-    // TODO(icanadi) it's faster if fallocate_with_keep_size is false, but it
-    // breaks TransactionLogIteratorStallAtLastRecord unit test. Fix the unit
-    // test and make this false
-    optimized.fallocate_with_keep_size = true;
-    return optimized;
-  }
-
-  EnvOptions OptimizeForManifestWrite(
-      const EnvOptions& env_options) const override {
-    EnvOptions optimized = env_options;
-    optimized.use_mmap_writes = false;
-    optimized.use_direct_writes = false;
-    optimized.fallocate_with_keep_size = true;
-    return optimized;
   }
 
  private:

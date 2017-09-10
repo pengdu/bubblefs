@@ -33,6 +33,7 @@ class TF_MUST_USE_RESULT Status;
 
 /// @ingroup core
 /// Denotes success or failure of a call in Tensorflow.
+
 class Status {
  public:
   /// Create a success status.

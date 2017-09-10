@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <functional>
 #include <map>
 #include <mutex>
 #include <vector>
@@ -21,7 +22,7 @@ namespace core {
 template <typename Item>
 class SlidingWindow {
 public:
-    typedef boost::function<void (int32_t, Item)> SlidingCallback;
+    typedef std::function<void (int32_t, Item)> SlidingCallback;
     SlidingWindow(int32_t size, SlidingCallback callback)
       : bitmap_(nullptr), items_(nullptr), item_count_(0),
         callback_(callback), size_(size),
