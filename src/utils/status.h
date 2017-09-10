@@ -44,7 +44,7 @@ class Status {
   Status(error::Code code, error::SubCode subcode = error::NONE);
   Status(error::Code code, error::SubCode subcode, StringPiece msg, StringPiece msg2);
   
-  Status(Code _code, const StringPiecece& msg, const StringPiece& msg2)
+  Status(Code _code, const StringPiece& msg, const StringPiece& msg2)
       : Status(_code, error::NONE, msg, msg2) {}
 
   /// Copy the specified status.

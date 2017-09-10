@@ -25,12 +25,11 @@ limitations under the License.
 #define BUBBLEFS_PLATFORM_ENV_H_
 
 #include <stdint.h>
+#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "platform/env_time.h"
-#include "platform/file_system.h"
 #include "platform/macros.h"
 #include "platform/mutex.h"
 #include "platform/protobuf.h"
@@ -41,8 +40,387 @@ limitations under the License.
 
 namespace bubblefs {
 
+const size_t kDefaultPageSize = 4 * 1024;   
+  
 class Thread;
 struct ThreadOptions;
+
+// Directory object represents collection of files and implements
+// filesystem operations that can be executed on directories.
+class Directory {
+ public:
+  virtual ~Directory() {}
+  // Fsync directory. Can be called concurrently from multiple threads.
+  virtual Status Fsync() = 0;
+};
+
+// Identifies a locked file.
+class FileLock {
+ public:
+  FileLock() { }
+  virtual ~FileLock();
+ private:
+  // No copying allowed
+  FileLock(const FileLock&);
+  void operator=(const FileLock&);
+};
+
+struct FileStatistics {
+  // The length of the file or -1 if finding file length is not supported.
+  int64 length = -1;
+  // The last modified time in nanoseconds.
+  int64 mtime_nsec = 0;
+  // True if the file is a directory, otherwise false.
+  bool is_directory = false;
+
+  FileStatistics() {}
+  FileStatistics(int64 length, int64 mtime_nsec, bool is_directory)
+      : length(length), mtime_nsec(mtime_nsec), is_directory(is_directory) {}
+  ~FileStatistics() {}
+};
+
+// A file abstraction for reading sequentially through a file
+class SequentialFile {
+ public:
+  SequentialFile() { }
+  virtual ~SequentialFile();
+
+  // Read up to "n" bytes from the file.  "scratch[0..n-1]" may be
+  // written by this routine.  Sets "*result" to the data that was
+  // read (including if fewer than "n" bytes were successfully read).
+  // May set "*result" to point at data in "scratch[0..n-1]", so
+  // "scratch[0..n-1]" must be live when "*result" is used.
+  // If an error was encountered, returns a non-OK status.
+  //
+  // REQUIRES: External synchronization
+  virtual Status Read(size_t n, Slice* result, char* scratch) = 0;
+
+  // Skip "n" bytes from the file. This is guaranteed to be no
+  // slower that reading the same data, but may be faster.
+  //
+  // If end of file is reached, skipping will stop at the end of the
+  // file, and Skip will return OK.
+  //
+  // REQUIRES: External synchronization
+  virtual Status Skip(uint64_t n) = 0;
+
+  // Indicates the upper layers if the current SequentialFile implementation
+  // uses direct IO.
+  virtual bool use_direct_io() const { return false; }
+
+  // Use the returned alignment value to allocate
+  // aligned buffer for Direct I/O
+  virtual size_t GetRequiredBufferAlignment() const { return kDefaultPageSize; }
+
+  // Remove any kind of caching of data from the offset to offset+length
+  // of this file. If the length is 0, then it refers to the end of file.
+  // If the system is not caching the file contents, then this is a noop.
+  virtual Status InvalidateCache(size_t offset, size_t length) {
+    return Status::NotSupported("InvalidateCache not supported.");
+  }
+
+  // Positioned Read for direct I/O
+  // If Direct I/O enabled, offset, n, and scratch should be properly aligned
+  virtual Status PositionedRead(uint64_t offset, size_t n, Slice* result,
+                                char* scratch) {
+    return Status::NotSupported();
+  }
+};
+
+/// A file abstraction for randomly reading the contents of a file.
+class RandomAccessFile {
+ public:
+  RandomAccessFile() {}
+  virtual ~RandomAccessFile();
+
+  /// \brief Reads up to `n` bytes from the file starting at `offset`.
+  ///
+  /// `scratch[0..n-1]` may be written by this routine.  Sets `*result`
+  /// to the data that was read (including if fewer than `n` bytes were
+  /// successfully read).  May set `*result` to point at data in
+  /// `scratch[0..n-1]`, so `scratch[0..n-1]` must be live when
+  /// `*result` is used.
+  ///
+  /// On OK returned status: `n` bytes have been stored in `*result`.
+  /// On non-OK returned status: `[0..n]` bytes have been stored in `*result`.
+  ///
+  /// Returns `OUT_OF_RANGE` if fewer than n bytes were stored in `*result`
+  /// because of EOF.
+  ///
+  /// Safe for concurrent use by multiple threads.
+  virtual Status Read(uint64 offset, size_t n, StringPiece* result,
+                      char* scratch) const = 0;
+                      
+  // Readahead the file starting from offset by n bytes for caching.
+  virtual Status Prefetch(uint64_t offset, size_t n) {
+    return Status::OK();
+  }
+  
+  enum AccessPattern { NORMAL, RANDOM, SEQUENTIAL, WILLNEED, DONTNEED };
+  
+  virtual void Hint(AccessPattern pattern) {}
+
+  // Indicates the upper layers if the current RandomAccessFile implementation
+  // uses direct IO.
+  virtual bool use_direct_io() const { return false; }
+
+  // Use the returned alignment value to allocate
+  // aligned buffer for Direct I/O
+  virtual size_t GetRequiredBufferAlignment() const { return kDefaultPageSize; }
+
+  // Remove any kind of caching of data from the offset to offset+length
+  // of this file. If the length is 0, then it refers to the end of file.
+  // If the system is not caching the file contents, then this is a noop.
+  virtual Status InvalidateCache(size_t offset, size_t length) {
+    return Status::NotSupported("InvalidateCache not supported.");
+  }
+
+ private:
+  TF_DISALLOW_COPY_AND_ASSIGN(RandomAccessFile);
+};
+
+/// \brief A file abstraction for sequential writing.
+///
+/// The implementation must provide buffering since callers may append
+/// small fragments at a time to the file.
+class WritableFile {
+ public:
+  WritableFile()
+    : last_preallocated_block_(0),
+      preallocation_block_size_(0),
+      io_priority_(Env::IO_TOTAL) {
+  }
+  virtual ~WritableFile();
+
+  /// \brief Append 'data' to the file.
+  virtual Status Append(const StringPiece& data) = 0;
+  
+  // PositionedAppend data to the specified offset. The new EOF after append
+  // must be larger than the previous EOF. This is to be used when writes are
+  // not backed by OS buffers and hence has to always start from the start of
+  // the sector. The implementation thus needs to also rewrite the last
+  // partial sector.
+  // Note: PositionAppend does not guarantee moving the file offset after the
+  // write. A WritableFile object must support either Append or
+  // PositionedAppend, so the users cannot mix the two.
+  //
+  // PositionedAppend() can only happen on the page/sector boundaries. For that
+  // reason, if the last write was an incomplete sector we still need to rewind
+  // back to the nearest sector/page and rewrite the portion of it with whatever
+  // we need to add. We need to keep where we stop writing.
+  //
+  // PositionedAppend() can only write whole sectors. For that reason we have to
+  // pad with zeros for the last write and trim the file when closing according
+  // to the position we keep in the previous step.
+  //
+  // PositionedAppend() requires aligned buffer to be passed in. The alignment
+  // required is queried via GetRequiredBufferAlignment()
+  virtual Status PositionedAppend(const Slice& /* data */, uint64_t /* offset */) {
+    return Status::NotSupported();
+  }
+  
+  
+  // Truncate is necessary to trim the file to the correct size
+  // before closing. It is not always possible to keep track of the file
+  // size due to whole pages writes. The behavior is undefined if called
+  // with other writes to follow.
+  virtual Status Truncate(uint64_t size) {
+    return Status::OK();
+  }
+
+  /// \brief Close the file.
+  ///
+  /// Flush() and de-allocate resources associated with this file
+  ///
+  /// Typical return codes (not guaranteed to be exhaustive):
+  ///  * OK
+  ///  * Other codes, as returned from Flush()
+  virtual Status Close() = 0;
+
+  /// \brief Flushes the file and optionally syncs contents to filesystem.
+  ///
+  /// This should flush any local buffers whose contents have not been
+  /// delivered to the filesystem.
+  ///
+  /// If the process terminates after a successful flush, the contents
+  /// may still be persisted, since the underlying filesystem may
+  /// eventually flush the contents.  If the OS or machine crashes
+  /// after a successful flush, the contents may or may not be
+  /// persisted, depending on the implementation.
+  virtual Status Flush() = 0;
+
+  /// \brief Syncs contents of file to filesystem.
+  ///
+  /// This waits for confirmation from the filesystem that the contents
+  /// of the file have been persisted to the filesystem; if the OS
+  /// or machine crashes after a successful Sync, the contents should
+  /// be properly saved.
+  virtual Status Sync() = 0;
+  
+  /*
+   * Sync data and/or metadata as well.
+   * By default, sync only data.
+   * Override this method for environments where we need to sync
+   * metadata as well.
+   */
+  virtual Status Fsync() {
+    return Sync();
+  }
+
+  // true if Sync() and Fsync() are safe to call concurrently with Append()
+  // and Flush().
+  virtual bool IsSyncThreadSafe() const {
+    return false;
+  }
+
+  // Indicates the upper layers if the current WritableFile implementation
+  // uses direct IO.
+  virtual bool use_direct_io() const { return false; }
+
+  // Use the returned alignment value to allocate
+  // aligned buffer for Direct I/O
+  virtual size_t GetRequiredBufferAlignment() const { return kDefaultPageSize; }
+  /*
+   * Change the priority in rate limiter if rate limiting is enabled.
+   * If rate limiting is not enabled, this call has no effect.
+   */
+  virtual void SetIOPriority(Env::IOPriority pri) {
+    io_priority_ = pri;
+  }
+
+  virtual Env::IOPriority GetIOPriority() { return io_priority_; }
+
+  /*
+   * Get the size of valid data in the file.
+   */
+  virtual uint64_t GetFileSize() {
+    return 0;
+  }
+
+  /*
+   * Get and set the default pre-allocation block size for writes to
+   * this file.  If non-zero, then Allocate will be used to extend the
+   * underlying storage of a file (generally via fallocate) if the Env
+   * instance supports it.
+   */
+  virtual void SetPreallocationBlockSize(size_t size) {
+    preallocation_block_size_ = size;
+  }
+
+  virtual void GetPreallocationStatus(size_t* block_size,
+                                      size_t* last_allocated_block) {
+    *last_allocated_block = last_preallocated_block_;
+    *block_size = preallocation_block_size_;
+  }
+
+  // Remove any kind of caching of data from the offset to offset+length
+  // of this file. If the length is 0, then it refers to the end of file.
+  // If the system is not caching the file contents, then this is a noop.
+  // This call has no effect on dirty pages in the cache.
+  virtual Status InvalidateCache(size_t offset, size_t length) {
+    return Status::NotSupported("InvalidateCache not supported.");
+  }
+
+  // Sync a file range with disk.
+  // offset is the starting byte of the file range to be synchronized.
+  // nbytes specifies the length of the range to be synchronized.
+  // This asks the OS to initiate flushing the cached data to disk,
+  // without waiting for completion.
+  // Default implementation does nothing.
+  virtual Status RangeSync(uint64_t offset, uint64_t nbytes) { return Status::OK(); }
+
+  // PrepareWrite performs any necessary preparation for a write
+  // before the write actually occurs.  This allows for pre-allocation
+  // of space on devices where it can result in less file
+  // fragmentation and/or less waste from over-zealous filesystem
+  // pre-allocation.
+  virtual void PrepareWrite(size_t offset, size_t len) {
+    if (preallocation_block_size_ == 0) {
+      return;
+    }
+    // If this write would cross one or more preallocation blocks,
+    // determine what the last preallocation block necessary to
+    // cover this write would be and Allocate to that point.
+    const auto block_size = preallocation_block_size_;
+    size_t new_last_preallocated_block =
+      (offset + len + block_size - 1) / block_size;
+    if (new_last_preallocated_block > last_preallocated_block_) {
+      size_t num_spanned_blocks =
+        new_last_preallocated_block - last_preallocated_block_;
+      Allocate(block_size * last_preallocated_block_,
+               block_size * num_spanned_blocks);
+      last_preallocated_block_ = new_last_preallocated_block;
+    }
+  }
+
+  // Pre-allocates space for a file.
+  virtual Status Allocate(uint64_t offset, uint64_t len) {
+    return Status::OK();
+  }
+
+ protected:
+  size_t preallocation_block_size() { return preallocation_block_size_; }
+
+ private:
+  size_t last_preallocated_block_;
+  size_t preallocation_block_size_;
+  TF_DISALLOW_COPY_AND_ASSIGN(WritableFile);
+  
+ protected:
+  Env::IOPriority io_priority_;
+};
+
+// A file abstraction for random reading and writing.
+class RandomRWFile {
+ public:
+  RandomRWFile() {}
+  virtual ~RandomRWFile() {}
+
+  // Indicates if the class makes use of direct I/O
+  // If false you must pass aligned buffer to Write()
+  virtual bool use_direct_io() const { return false; }
+
+  // Use the returned alignment value to allocate
+  // aligned buffer for Direct I/O
+  virtual size_t GetRequiredBufferAlignment() const { return kDefaultPageSize; }
+
+  // Write bytes in `data` at  offset `offset`, Returns Status::OK() on success.
+  // Pass aligned buffer when use_direct_io() returns true.
+  virtual Status Write(uint64_t offset, const StringPiece& data) = 0;
+
+  // Read up to `n` bytes starting from offset `offset` and store them in
+  // result, provided `scratch` size should be at least `n`.
+  // Returns Status::OK() on success.
+  virtual Status Read(uint64_t offset, size_t n, StringPiece* result,
+                      char* scratch) const = 0;
+
+  virtual Status Flush() = 0;
+
+  virtual Status Sync() = 0;
+
+  virtual Status Fsync() { return Sync(); }
+
+  virtual Status Close() = 0;
+
+  // No copying allowed
+  TF_DISALLOW_COPY_AND_ASSIGN(RandomRWFile);
+};
+
+/// \brief A readonly memmapped file abstraction.
+///
+/// The implementation must guarantee that all memory is accessible when the
+/// object exists, independently from the Env that created it.
+class ReadOnlyMemoryRegion {
+ public:
+  ReadOnlyMemoryRegion() {}
+  virtual ~ReadOnlyMemoryRegion() = default;
+
+  /// \brief Returns a pointer to the memory region.
+  virtual const void* data() = 0;
+
+  /// \brief Returns the length of the memory region in bytes.
+  virtual uint64 length() = 0;
+};
 
 // Options while opening a file to read/write
 struct EnvOptions {
@@ -132,14 +510,13 @@ class Env {
   /// for the file system related (non-virtual) functions that follow.
   /// Returned FileSystem object is still owned by the Env object and will
   // (might) be destroyed when the environment is destroyed.
-  virtual Status GetFileSystemForFile(const string& fname, FileSystem** result);
+  //virtual Status GetFileSystemForFile(const string& fname, FileSystem** result);
 
   /// \brief Returns the file system schemes registered for this Env.
-  virtual Status GetRegisteredFileSystemSchemes(std::vector<string>* schemes);
+  //virtual Status GetRegisteredFileSystemSchemes(std::vector<string>* schemes);
 
   // \brief Register a file system for a scheme.
-  virtual Status RegisterFileSystem(const string& scheme,
-                                    FileSystemRegistry::Factory factory);
+  //virtual Status RegisterFileSystem(const string& scheme, FileSystemRegistry::Factory factory);
   
   // Create a brand new sequentially-readable file with the specified name.
   // On success, stores a pointer to the new file in *result and returns OK.
@@ -213,16 +590,6 @@ class Env {
                                  const EnvOptions& options) {
     return Status::NotSupported("RandomRWFile is not implemented in this Env");
   }
-  
-  // Create an object that represents a directory. Will fail if directory
-  // doesn't exist. If the directory exists, it will open the directory
-  // and create a new Directory object.
-  //
-  // On success, stores a pointer to the new Directory in
-  // *result and returns OK. On failure stores nullptr in *result and
-  // returns non-OK.
-  virtual Status NewDirectory(const string& name,
-                              std::unique_ptr<Directory>* result) = 0;
 
   /// \brief Creates an object that either appends to an existing file, or
   /// writes to a new file (if the file does not exist to begin with).
@@ -252,6 +619,16 @@ class Env {
   /// object shouldn't live longer than the Env object.
   virtual Status NewReadOnlyMemoryRegionFromFile(
       const string& fname, std::unique_ptr<ReadOnlyMemoryRegion>* result);
+  
+  // Create an object that represents a directory. Will fail if directory
+  // doesn't exist. If the directory exists, it will open the directory
+  // and create a new Directory object.
+  //
+  // On success, stores a pointer to the new Directory in
+  // *result and returns OK. On failure stores nullptr in *result and
+  // returns non-OK.
+  virtual Status NewDirectory(const string& name,
+                              std::unique_ptr<Directory>* result) = 0;
 
   /// Returns OK if the named path exists and NOT_FOUND otherwise.
   virtual Status FileExists(const string& fname);
@@ -322,6 +699,10 @@ class Env {
   ///  * ALREADY_EXISTS - directory already exists.
   ///  * PERMISSION_DENIED - dirname is not writable.
   virtual Status CreateDir(const string& dirname);
+  
+  // Creates directory if missing. Return Ok if it exists, or successful in
+  // Creating.
+  virtual Status CreateDirIfMissing(const std::string& dirname) = 0;
 
   /// Deletes the specified directory.
   virtual Status DeleteDir(const string& dirname);
@@ -433,10 +814,10 @@ class Env {
   // provide a routine to get the absolute time.
 
   /// \brief Returns the number of micro-seconds since the Unix epoch.
-  virtual uint64 NowMicros() { return envTime->NowMicros(); };
+  virtual uint64 NowMicros();
 
   /// \brief Returns the number of seconds since the Unix epoch.
-  virtual uint64 NowSeconds() { return envTime->NowSeconds(); }
+  virtual uint64 NowSeconds() { return NowMicros() / 1000000L; }
   
   // Returns the number of nano-seconds since some fixed point in time. Only
   // useful for computing deltas of time in one run.
@@ -540,7 +921,6 @@ class Env {
 
   std::unique_ptr<FileSystemRegistry> file_system_registry_;
   TF_DISALLOW_COPY_AND_ASSIGN(Env);
-  EnvTime* envTime = EnvTime::Default();
 };
 
 /// \brief An implementation of Env that forwards all calls to another Env.
@@ -556,6 +936,7 @@ class EnvWrapper : public Env {
   /// Returns the target to which this Env forwards all calls
   Env* target() const { return target_; }
 
+  /*
   Status GetFileSystemForFile(const string& fname,
                               FileSystem** result) override {
     return target_->GetFileSystemForFile(fname, result);
@@ -573,6 +954,7 @@ class EnvWrapper : public Env {
   bool MatchPath(const string& path, const string& pattern) override {
     return target_->MatchPath(path, pattern);
   }
+  */
   
   // Priority for scheduling job in thread pool
   enum Priority { BOTTOM, LOW, HIGH, TOTAL };
@@ -736,37 +1118,6 @@ Status WriteTextProto(Env* env, const string& fname,
 Status ReadTextProto(Env* env, const string& fname,
                      protobuf::Message* proto);
 
-// START_SKIP_DOXYGEN
-
-namespace register_file_system {
-
-template <typename Factory>
-struct Register {
-  Register(Env* env, const string& scheme) {
-    // TODO(b/32704451): Don't just ignore the ::bubblefs::Status object!
-    env->RegisterFileSystem(scheme, []() -> FileSystem* { return new Factory; })
-        .IgnoreError();
-  }
-};
-
-}  // namespace register_file_system
-
-// END_SKIP_DOXYGEN
-
 }  // namespace bubblefs
-
-// Register a FileSystem implementation for a scheme. Files with names that have
-// "scheme://" prefixes are routed to use this implementation.
-#define REGISTER_FILE_SYSTEM_ENV(env, scheme, factory) \
-  REGISTER_FILE_SYSTEM_UNIQ_HELPER(__COUNTER__, env, scheme, factory)
-#define REGISTER_FILE_SYSTEM_UNIQ_HELPER(ctr, env, scheme, factory) \
-  REGISTER_FILE_SYSTEM_UNIQ(ctr, env, scheme, factory)
-#define REGISTER_FILE_SYSTEM_UNIQ(ctr, env, scheme, factory)   \
-  static ::bubblefs::register_file_system::Register<factory> \
-      register_ff##ctr TF_ATTRIBUTE_UNUSED =                   \
-          ::bubblefs::register_file_system::Register<factory>(env, scheme)
-
-#define REGISTER_FILE_SYSTEM(scheme, factory) \
-  REGISTER_FILE_SYSTEM_ENV(Env::Default(), scheme, factory);
 
 #endif  // BUBBLEFS_PLATFORM_ENV_H_

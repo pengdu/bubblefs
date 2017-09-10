@@ -20,13 +20,6 @@ limitations under the License.
 #include <deque>
 #include <utility>
 #include <vector>
-#if defined(__APPLE__)
-#include <mach-o/dyld.h>
-#endif
-#if defined(PLATFORM_WINDOWS)
-#include <windows.h>
-#define PATH_MAX MAX_PATH
-#else
 #include "platform/env.h"
 #include "platform/env_time.h"
 #include "platform/port.h"
@@ -39,6 +32,7 @@ limitations under the License.
 
 namespace bubblefs {
 
+/*
 class FileSystemRegistryImpl : public FileSystemRegistry {
  public:
   Status Register(const string& scheme, Factory factory) override;
@@ -102,6 +96,7 @@ Status Env::RegisterFileSystem(const string& scheme,
                                FileSystemRegistry::Factory factory) {
   return file_system_registry_->Register(scheme, std::move(factory));
 }
+*/
 
 Status Env::NewRandomAccessFile(const string& fname,
                                 std::unique_ptr<RandomAccessFile>* result) {
@@ -311,6 +306,37 @@ bool Env::LocalTempFilename(string* filename) {
     }
   }
   return false;
+}
+
+Status Env::GetTestDirectory(string* result) {
+  const char* env = getenv("TEST_TMPDIR");
+  if (env && env[0] != '\0') {
+    *result = env;
+  } else {
+    char buf[100];
+    snprintf(buf, sizeof(buf), "/tmp/bubblefs-%d", int(geteuid()));
+    *result = buf;
+  }
+  // Directory may already exist
+  FileSystem* fs;
+  TF_RETURN_IF_ERROR(GetFileSystemForFile(result, &fs));
+  fs->CreateDir(*result);
+  return Status::OK();
+}
+
+static uint64_t gettid(pthread_t tid) {
+  uint64_t thread_id = 0;
+  memcpy(&thread_id, &tid, std::min(sizeof(thread_id), sizeof(tid)));
+  return thread_id;
+}
+
+static uint64_t gettid() {
+  pthread_t tid = pthread_self();
+  return gettid(tid);
+}
+
+uint64_t Env::GetThreadID() const override {
+  return gettid(pthread_self());
 }
 
 Thread::~Thread() {}
