@@ -35,10 +35,15 @@
 #include "platform/error.h"
 #include "platform/logging.h"
 #include "platform/port_posix.h"
+#include "utils/coding.h"
 #include "utils/error_codes.h"
 #include "utils/status.h"
 #include "utils/strcat.h"
 #include "utils/str_util.h"
+
+// unimplented macros
+#define IOSTATS_TIMER_GUARD(metric)
+#define TEST_SYNC_POINT_CALLBACK(x, y)
 
 // For non linux platform, the following macros are used only as place
 // holder.
@@ -49,9 +54,6 @@
 #define POSIX_FADV_WILLNEED 3   /* [MC1] will need these pages */
 #define POSIX_FADV_DONTNEED 4   /* [MC1] dont need these pages */
 #endif
-
-// unimplemented macros
-#define IOSTATS_TIMER_GUARD(metric)
 
 namespace bubblefs {
 
@@ -260,7 +262,7 @@ Status PosixSequentialFile::InvalidateCache(size_t offset, size_t length) {
  */
 #if defined(OS_LINUX)
 size_t PosixHelper::GetUniqueIdFromFile(int fd, char* id, size_t max_size) {
-  if (max_size < kMaxVarint64Length * 3) {
+  if (max_size < core::kMaxVarint64Bytes * 3) {
     return 0;
   }
 
@@ -290,7 +292,7 @@ size_t PosixHelper::GetUniqueIdFromFile(int fd, char* id, size_t max_size) {
 
 #if defined(OS_MACOSX) || defined(OS_AIX)
 size_t PosixHelper::GetUniqueIdFromFile(int fd, char* id, size_t max_size) {
-  if (max_size < kMaxVarint64Length * 3) {
+  if (max_size < core::kMaxVarint64Bytes * 3) {
     return 0;
   }
 

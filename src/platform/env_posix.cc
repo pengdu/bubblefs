@@ -28,7 +28,7 @@ limitations under the License.
 #include <sys/statfs.h>
 #include <sys/syscall.h>
 #include <sys/vfs.h>
-#endif
+#endif // OS_LINUX
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>

@@ -22,6 +22,11 @@ class PosixFileLock : public FileLock {
   string filename;
 };
 
+class PosixHelper {
+ public:
+  static size_t GetUniqueIdFromFile(int fd, char* id, size_t max_size);
+};
+
 class PosixSequentialFile : public SequentialFile {
  private:
   string filename_;

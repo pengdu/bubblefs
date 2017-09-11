@@ -46,6 +46,7 @@ namespace bubblefs {
 
 class StringPieceParts;
   
+// also known as Slice
 class StringPiece {
  public:
   typedef size_t size_type;
@@ -64,7 +65,7 @@ class StringPiece {
   
   // Create a single slice from SliceParts using buf as storage.
   // buf must exist as long as the returned Slice exists.
-  StringPiece(const struct StringPieceParts& parts, std::string* buf);
+  StringPiece(const struct StringPieceParts& parts, string* buf);
 
   void set(const void* data, size_t len) {
     data_ = reinterpret_cast<const char*>(data);
