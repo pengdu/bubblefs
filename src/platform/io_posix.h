@@ -95,6 +95,8 @@ class PosixWritableFile : public WritableFile {
   bool fallocate_with_keep_size_;
 
  public:
+  PosixWritableFile(const string& fname, int fd)
+      : filename_(fname), fd_(fd) {}
   PosixWritableFile(const string& fname, int fd,
                     const EnvOptions& options);
 
@@ -104,8 +106,8 @@ class PosixWritableFile : public WritableFile {
   // with direct I/O
   virtual Status Truncate(uint64_t size) override;
   virtual Status Close() override;
-  virtual Status Append(const Slice& data) override;
-  virtual Status PositionedAppend(const Slice& data, uint64_t offset) override;
+  virtual Status Append(const StringPiece& data) override;
+  virtual Status PositionedAppend(const StringPiece& data, uint64_t offset) override;
   virtual Status Flush() override;
   virtual Status Sync() override;
   virtual Status Fsync() override;
@@ -118,7 +120,15 @@ class PosixWritableFile : public WritableFile {
   }
   virtual Status Allocate(uint64_t offset, uint64_t len) override;
   virtual Status RangeSync(uint64_t offset, uint64_t nbytes) override;
-  //virtual size_t GetUniqueId(char* id, size_t max_size) const override;
+#ifdef OS_LINUX
+  virtual Status Allocate(uint64_t offset, uint64_t len) override;
+#endif
+#ifdef OS_LINUX
+  virtual Status RangeSync(uint64_t offset, uint64_t nbytes) override;
+#endif
+#ifdef OS_LINUX
+  virtual size_t GetUniqueId(char* id, size_t max_size) const override;
+#endif
 };
 
 // mmap() based random-access
@@ -180,6 +190,9 @@ class PosixMmapFile : public WritableFile {
   virtual Status Fsync() override;
   virtual uint64_t GetFileSize() override;
   virtual Status InvalidateCache(size_t offset, size_t length) override;
+#ifdef OS_LINUX
+  virtual Status Allocate(uint64_t offset, uint64_t len) override;
+#endif
 };
 
 class PosixRandomRWFile : public RandomRWFile {
@@ -188,9 +201,9 @@ class PosixRandomRWFile : public RandomRWFile {
                              const EnvOptions& options);
   virtual ~PosixRandomRWFile();
 
-  virtual Status Write(uint64_t offset, const Slice& data) override;
+  virtual Status Write(uint64_t offset, const StringPiece& data) override;
 
-  virtual Status Read(uint64_t offset, size_t n, Slice* result,
+  virtual Status Read(uint64_t offset, size_t n, StringPiece* result,
                       char* scratch) const override;
 
   virtual Status Flush() override;

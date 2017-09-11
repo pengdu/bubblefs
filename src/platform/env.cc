@@ -12,8 +12,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+//  Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under both the GPLv2 (found in the
+//  COPYING file in the root directory) and Apache 2.0 License
+//  (found in the LICENSE.Apache file in the root directory).
+//
+// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 // tensorflow/tensorflow/core/platform/env.cc
+// tensorflow/tensorflow/core/platform/file_system.cc
+// rocksdb/env/env.cc
 
 #include <sys/stat.h>
 #include <unistd.h>
@@ -25,12 +35,35 @@ limitations under the License.
 #include "platform/protobuf.h"
 #include "utils/errors.h"
 #include "utils/map_util.h"
+#include "utils/path.h"
 #include "utils/stl_util.h"
 #include "utils/path.h"
 #include "utils/stringprintf.h"
 
 namespace bubblefs {
 
+namespace {
+
+constexpr int kNumThreads = 8;
+
+// Run a function in parallel using a ThreadPool, but skip the ThreadPool
+// on the iOS platform due to its problems with more than a few threads.
+void ForEach(int first, int last, const std::function<void(int)>& f) {
+#if TARGET_OS_IPHONE
+  for (int i = first; i < last; i++) {
+    f(i);
+  }
+#else
+  int num_threads = std::min(kNumThreads, last - first);
+  thread::ThreadPool threads(Env::Default(), "ForEach", num_threads);
+  for (int i = first; i < last; i++) {
+    threads.Schedule([f, i] { f(i); });
+  }
+#endif
+}
+
+}  // anonymous namespace  
+  
 /*
 class FileSystemRegistryImpl : public FileSystemRegistry {
  public:
@@ -97,158 +130,239 @@ Status Env::RegisterFileSystem(const string& scheme,
 }
 */
 
-Status Env::NewRandomAccessFile(const string& fname,
-                                std::unique_ptr<RandomAccessFile>* result) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(fname, &fs));
-  return fs->NewRandomAccessFile(fname, result);
+string Env::TranslateName(const string& name) const {
+  return io::CleanPath(name);
 }
 
-Status Env::NewReadOnlyMemoryRegionFromFile(
-    const string& fname, std::unique_ptr<ReadOnlyMemoryRegion>* result) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(fname, &fs));
-  return fs->NewReadOnlyMemoryRegionFromFile(fname, result);
+Status Env::ReuseWritableFile(const string& fname,
+                              const string& old_fname,
+                              std::unique_ptr<WritableFile>* result,
+                              const EnvOptions& options) {
+  Status s = RenameFile(old_fname, fname);
+  if (!s.ok()) {
+    return s;
+  }
+  return NewWritableFile(fname, result, options);
 }
 
-Status Env::NewWritableFile(const string& fname,
-                            std::unique_ptr<WritableFile>* result) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(fname, &fs));
-  return fs->NewWritableFile(fname, result);
-}
-
-Status Env::NewAppendableFile(const string& fname,
-                              std::unique_ptr<WritableFile>* result) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(fname, &fs));
-  return fs->NewAppendableFile(fname, result);
-}
-
-Status Env::FileExists(const string& fname) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(fname, &fs));
-  return fs->FileExists(fname);
+Status Env::GetChildrenFileAttributes(const string& dir,
+                                      std::vector<FileAttributes>* result) {
+  assert(result != nullptr);
+  std::vector<string> child_fnames;
+  Status s = GetChildren(dir, &child_fnames);
+  if (!s.ok()) {
+    return s;
+  }
+  result->resize(child_fnames.size());
+  size_t result_size = 0;
+  for (size_t i = 0; i < child_fnames.size(); ++i) {
+    const string path = dir + "/" + child_fnames[i];
+    if (!(s = GetFileSize(path, &(*result)[result_size].size_bytes)).ok()) {
+      if (FileExists(path).IsNotFound()) {
+        // The file may have been deleted since we listed the directory
+        continue;
+      }
+      return s;
+    }
+    (*result)[result_size].name = std::move(child_fnames[i]);
+    result_size++;
+  }
+  result->resize(result_size);
+  return Status::OK();
 }
 
 bool Env::FilesExist(const std::vector<string>& files,
                      std::vector<Status>* status) {
-  std::unordered_map<string, std::vector<string>> files_per_fs;
-  for (const auto& file : files) {
-    StringPiece scheme, host, path;
-    io::ParseURI(file, &scheme, &host, &path);
-    files_per_fs[scheme.ToString()].push_back(file);
-  }
-
-  std::unordered_map<string, Status> per_file_status;
   bool result = true;
-  for (auto itr : files_per_fs) {
-    FileSystem* file_system = file_system_registry_->Lookup(itr.first);
-    bool fs_result;
-    std::vector<Status> local_status;
-    std::vector<Status>* fs_status = status ? &local_status : nullptr;
-    if (!file_system) {
-      fs_result = false;
-      if (fs_status) {
-        Status s = errors::Unimplemented("File system scheme ", itr.first,
-                                         " not implemented");
-        local_status.resize(itr.second.size(), s);
-      }
-    } else {
-      fs_result = file_system->FilesExist(itr.second, fs_status);
-    }
-    if (fs_status) {
-      result &= fs_result;
-      for (int i = 0; i < itr.second.size(); ++i) {
-        per_file_status[itr.second[i]] = fs_status->at(i);
-      }
-    } else if (!fs_result) {
-      // Return early
+  for (const auto& file : files) {
+    Status s = FileExists(file);
+    result &= s.ok();
+    if (status != nullptr) {
+      status->push_back(s);
+    } else if (!result) {
+      // Return early since there is no need to check other files.
       return false;
     }
   }
-
-  if (status) {
-    for (const auto& file : files) {
-      status->push_back(per_file_status[file]);
-    }
-  }
-
   return result;
-}
-
-Status Env::GetChildren(const string& dir, std::vector<string>* result) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(dir, &fs));
-  return fs->GetChildren(dir, result);
 }
 
 Status Env::GetMatchingPaths(const string& pattern,
                              std::vector<string>* results) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(pattern, &fs));
-  return fs->GetMatchingPaths(pattern, results);
+  results->clear();
+  // Find the fixed prefix by looking for the first wildcard.
+  string fixed_prefix = pattern.substr(0, pattern.find_first_of("*?[\\"));
+  string eval_pattern = pattern;
+  std::vector<string> all_files;
+  string dir = io::Dirname(fixed_prefix).ToString();
+  // If dir is empty then we need to fix up fixed_prefix and eval_pattern to
+  // include . as the top level directory.
+  if (dir.empty()) {
+    dir = ".";
+    fixed_prefix = io::JoinPath(dir, fixed_prefix);
+    eval_pattern = io::JoinPath(dir, pattern);
+  }
+
+  // Setup a BFS to explore everything under dir.
+  std::deque<string> dir_q;
+  dir_q.push_back(dir);
+  Status ret;  // Status to return.
+  // children_dir_status holds is_dir status for children. It can have three
+  // possible values: OK for true; FAILED_PRECONDITION for false; CANCELLED
+  // if we don't calculate IsDirectory (we might do that because there isn't
+  // any point in exploring that child path).
+  std::vector<Status> children_dir_status;
+  while (!dir_q.empty()) {
+    string current_dir = dir_q.front();
+    dir_q.pop_front();
+    std::vector<string> children;
+    Status s = GetChildren(current_dir, &children);
+    ret.Update(s);
+    if (children.empty()) continue;
+    // This IsDirectory call can be expensive for some FS. Parallelizing it.
+    children_dir_status.resize(children.size());
+    ForEach(0, children.size(), [this, &current_dir, &children, &fixed_prefix,
+                                 &children_dir_status](int i) {
+      const string child_path = io::JoinPath(current_dir, children[i]);
+      // In case the child_path doesn't start with the fixed_prefix then
+      // we don't need to explore this path.
+      if (!StringPiece(child_path).starts_with(fixed_prefix)) {
+        children_dir_status[i] =
+            Status(error::CANCELLED, "Operation not needed");
+      } else {
+        children_dir_status[i] = IsDirectory(child_path);
+      }
+    });
+    for (int i = 0; i < children.size(); ++i) {
+      const string child_path = io::JoinPath(current_dir, children[i]);
+      // If the IsDirectory call was cancelled we bail.
+      if (children_dir_status[i].code() == error::CANCELLED) {
+        continue;
+      }
+      // If the child is a directory add it to the queue.
+      if (children_dir_status[i].ok()) {
+        dir_q.push_back(child_path);
+      }
+      all_files.push_back(child_path);
+    }
+  }
+
+  // Match all obtained files to the input pattern.
+  for (const auto& f : all_files) {
+    if (Env::Default()->MatchPath(f, eval_pattern)) {
+      results->push_back(f);
+    }
+  }
+  return ret;
 }
 
-Status Env::DeleteFile(const string& fname) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(fname, &fs));
-  return fs->DeleteFile(fname);
+Status Env::DeleteRecursively(const string& dirname,
+                              int64* undeleted_files,
+                              int64* undeleted_dirs) {
+  CHECK_NOTNULL(undeleted_files);
+  CHECK_NOTNULL(undeleted_dirs);
+
+  *undeleted_files = 0;
+  *undeleted_dirs = 0;
+  // Make sure that dirname exists;
+  Status exists_status = FileExists(dirname);
+  if (!exists_status.ok()) {
+    (*undeleted_dirs)++;
+    return exists_status;
+  }
+  std::deque<string> dir_q;      // Queue for the BFS
+  std::vector<string> dir_list;  // List of all dirs discovered
+  dir_q.push_back(dirname);
+  Status ret;  // Status to be returned.
+  // Do a BFS on the directory to discover all the sub-directories. Remove all
+  // children that are files along the way. Then cleanup and remove the
+  // directories in reverse order.;
+  while (!dir_q.empty()) {
+    string dir = dir_q.front();
+    dir_q.pop_front();
+    dir_list.push_back(dir);
+    std::vector<string> children;
+    // GetChildren might fail if we don't have appropriate permissions.
+    Status s = GetChildren(dir, &children);
+    ret.Update(s);
+    if (!s.ok()) {
+      (*undeleted_dirs)++;
+      continue;
+    }
+    for (const string& child : children) {
+      const string child_path = io::JoinPath(dir, child);
+      // If the child is a directory add it to the queue, otherwise delete it.
+      if (IsDirectory(child_path).ok()) {
+        dir_q.push_back(child_path);
+      } else {
+        // Delete file might fail because of permissions issues or might be
+        // unimplemented.
+        Status del_status = DeleteFile(child_path);
+        ret.Update(del_status);
+        if (!del_status.ok()) {
+          (*undeleted_files)++;
+        }
+      }
+    }
+  }
+  // Now reverse the list of directories and delete them. The BFS ensures that
+  // we can delete the directories in this order.
+  std::reverse(dir_list.begin(), dir_list.end());
+  for (const string& dir : dir_list) {
+    // Delete dir might fail because of permissions issues or might be
+    // unimplemented.
+    Status s = DeleteDir(dir);
+    ret.Update(s);
+    if (!s.ok()) {
+      (*undeleted_dirs)++;
+    }
+  }
+  return ret;
 }
 
 Status Env::RecursivelyCreateDir(const string& dirname) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(dirname, &fs));
-  return fs->RecursivelyCreateDir(dirname);
-}
-
-Status Env::CreateDir(const string& dirname) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(dirname, &fs));
-  return fs->CreateDir(dirname);
-}
-
-Status Env::DeleteDir(const string& dirname) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(dirname, &fs));
-  return fs->DeleteDir(dirname);
-}
-
-Status Env::Stat(const string& fname, FileStatistics* stat) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(fname, &fs));
-  return fs->Stat(fname, stat);
-}
-
-Status Env::IsDirectory(const string& fname) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(fname, &fs));
-  return fs->IsDirectory(fname);
-}
-
-Status Env::DeleteRecursively(const string& dirname, int64* undeleted_files,
-                              int64* undeleted_dirs) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(dirname, &fs));
-  return fs->DeleteRecursively(dirname, undeleted_files, undeleted_dirs);
-}
-
-Status Env::GetFileSize(const string& fname, uint64* file_size) {
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(fname, &fs));
-  return fs->GetFileSize(fname, file_size);
-}
-
-Status Env::RenameFile(const string& src, const string& target) {
-  FileSystem* src_fs;
-  FileSystem* target_fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(src, &src_fs));
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(target, &target_fs));
-  if (src_fs != target_fs) {
-    return errors::Unimplemented("Renaming ", src, " to ", target,
-                                 " not implemented");
+  StringPiece scheme, host, remaining_dir;
+  io::ParseURI(dirname, &scheme, &host, &remaining_dir);
+  std::vector<StringPiece> sub_dirs;
+  while (!remaining_dir.empty()) {
+    Status status = FileExists(io::CreateURI(scheme, host, remaining_dir));
+    if (status.ok()) {
+      break;
+    }
+    if (status.code() != error::Code::NOT_FOUND) {
+      return status;
+    }
+    // Basename returns "" for / ending dirs.
+    if (!remaining_dir.ends_with("/")) {
+      sub_dirs.push_back(io::Basename(remaining_dir));
+    }
+    remaining_dir = io::Dirname(remaining_dir);
   }
-  return src_fs->RenameFile(src, target);
+
+  // sub_dirs contains all the dirs to be created but in reverse order.
+  std::reverse(sub_dirs.begin(), sub_dirs.end());
+
+  // Now create the directories.
+  string built_path = remaining_dir.ToString();
+  for (const StringPiece sub_dir : sub_dirs) {
+    built_path = io::JoinPath(built_path, sub_dir);
+    Status status = CreateDir(io::CreateURI(scheme, host, built_path));
+    if (!status.ok() && status.code() != error::ALREADY_EXISTS) {
+      return status;
+    }
+  }
+  return Status::OK();
+}
+
+Status Env::IsDirectory(const string& name) {
+  // Check if path exists.
+  TF_RETURN_IF_ERROR(FileExists(name));
+  FileStatistics stat;
+  TF_RETURN_IF_ERROR(Stat(name, &stat));
+  if (stat.is_directory) {
+    return Status::OK();
+  }
+  return Status(error::FAILED_PRECONDITION, "Not a directory");
 }
 
 string Env::GetExecutablePath() {
@@ -305,22 +419,6 @@ bool Env::LocalTempFilename(string* filename) {
     }
   }
   return false;
-}
-
-Status Env::GetTestDirectory(string* result) {
-  const char* env = getenv("TEST_TMPDIR");
-  if (env && env[0] != '\0') {
-    *result = env;
-  } else {
-    char buf[100];
-    snprintf(buf, sizeof(buf), "/tmp/bubblefs-%d", int(geteuid()));
-    *result = buf;
-  }
-  // Directory may already exist
-  FileSystem* fs;
-  TF_RETURN_IF_ERROR(GetFileSystemForFile(result, &fs));
-  fs->CreateDir(*result);
-  return Status::OK();
 }
 
 static uint64_t gettid(pthread_t tid) {

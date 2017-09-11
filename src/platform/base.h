@@ -27,4 +27,8 @@
 #define TF_USE_PYTHON 2.7
 #endif
 
+#ifndef TF_SUPPORT_THREAD_LOCAL
+#define TF_SUPPORT_THREAD_LOCAL
+#endif
+
 #endif // #ifndef BUBBLEFS_PLATFORM_BASE_H_

@@ -13,9 +13,22 @@ limitations under the License.
 // tensorflow/tensorflow/core/lib/random/random.cc
 
 #include "utils/random.h"
-#include <random>
+#include <stdint.h>
+#include <string.h>
+#include <functional>
+#include <thread>
+#include <type_traits>
+#include <utility>
+#include "platform/base.h"
+#include "platform/macros.h"
 #include "platform/mutex.h"
 #include "platform/types.h"
+
+#ifdef TF_SUPPORT_THREAD_LOCAL
+#define STORAGE_DECL static __thread
+#else
+#define STORAGE_DECL static
+#endif
 
 namespace bubblefs {
 namespace random {
@@ -41,6 +54,19 @@ uint64 New64DefaultSeed() {
   static mutex mu;
   mutex_lock l(mu);
   return rng();
+}
+
+Random* Random::GetTLSInstance() {
+  STORAGE_DECL Random* tls_instance;
+  STORAGE_DECL std::aligned_storage<sizeof(Random)>::type tls_instance_bytes;
+
+  auto rv = tls_instance;
+  if (TF_UNLIKELY(rv == nullptr)) {
+    size_t seed = std::hash<std::thread::id>()(std::this_thread::get_id());
+    rv = new (&tls_instance_bytes) Random((uint32_t)seed);
+    tls_instance = rv;
+  }
+  return rv;
 }
 
 }  // namespace random

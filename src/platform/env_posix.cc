@@ -37,6 +37,7 @@ limitations under the License.
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <fnmatch.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
@@ -56,6 +57,7 @@ limitations under the License.
 #include "platform/types.h"
 #include "utils/error_codes.h"
 #include "utils/path.h"
+#include "utils/random.h"
 #include "utils/status.h"
 #include "utils/strcat.h"
 
@@ -200,6 +202,18 @@ class PosixEnv : public Env {
     result->reset(new PosixSequentialFile(fname, file, fd, options));
     return Status::OK();
   }
+  
+  virtual Status NewRandomAccessFile(
+      const string& fname, std::unique_ptr<RandomAccessFile>* result) override {
+    Status s;
+    int fd = open(fname.c_str(), O_RDONLY);
+    if (fd < 0) {
+      s = IOError(fname, errno);
+    } else {
+      result->reset(new PosixRandomAccessFile(fname, fd));
+    }
+    return s;
+  }
 
   virtual Status NewRandomAccessFile(const string& fname,
                                      unique_ptr<RandomAccessFile>* result,
@@ -250,6 +264,18 @@ class PosixEnv : public Env {
 #endif
       }
       result->reset(new PosixRandomAccessFile(fname, fd, options));
+    }
+    return s;
+  }
+  
+  virtual Status NewWritableFile(const string& fname,
+                                 std::unique_ptr<WritableFile>* result) override {
+    Status s;
+    FILE* f = fopen(fname.c_str(), "w");
+    if (f == nullptr) {
+      s = IOError(fname, errno);
+    } else {
+      result->reset(new PosixWritableFile(fname, f));
     }
     return s;
   }
@@ -446,6 +472,39 @@ class PosixEnv : public Env {
     result->reset(new PosixRandomRWFile(fname, fd, options));
     return Status::OK();
   }
+  
+  virtual Status NewAppendableFile(
+    const string& fname, std::unique_ptr<WritableFile>* result) override {
+    Status s;
+    FILE* f = fopen(fname.c_str(), "a");
+    if (f == nullptr) {
+      s = IOError(fname, errno);
+    } else {
+      result->reset(new PosixWritableFile(fname, f));
+    }
+    return s;
+  }
+  
+  virtual Status NewReadOnlyMemoryRegionFromFile(
+    const string& fname, std::unique_ptr<ReadOnlyMemoryRegion>* result) override {
+    Status s = Status::OK();
+    int fd = open(fname.c_str(), O_RDONLY);
+    if (fd < 0) {
+      s = IOError(fname, errno);
+    } else {
+      struct stat st;
+      ::fstat(fd, &st);
+      const void* address =
+          mmap(nullptr, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+      if (address == MAP_FAILED) {
+        s = IOError(fname, errno);
+      } else {
+        result->reset(new PosixReadOnlyMemoryRegion(address, st.st_size));
+      }
+      close(fd);
+    }
+    return s;
+  }
 
   virtual Status NewDirectory(const string& name,
                               unique_ptr<Directory>* result) override {
@@ -464,24 +523,10 @@ class PosixEnv : public Env {
   }
 
   virtual Status FileExists(const string& fname) override {
-    int result = access(fname.c_str(), F_OK);
-
-    if (result == 0) {
-      return Status::OK();
+    if (access(fname.c_str(), F_OK) == 0) {
+    return Status::OK();
     }
-
-    switch (errno) {
-      case EACCES:
-      case ELOOP:
-      case ENAMETOOLONG:
-      case ENOENT:
-      case ENOTDIR:
-        return Status::NotFound();
-      default:
-        assert(result == EIO || result == ENOMEM);
-        return Status::IOError("Unexpected error(" + ToString(result) +
-                               ") accessing file `" + fname + "' ");
-    }
+    return errors::NotFound(fname, " not found");
   }
 
   virtual Status GetChildren(const string& dir,
@@ -500,10 +545,17 @@ class PosixEnv : public Env {
     }
     struct dirent* entry;
     while ((entry = readdir(d)) != nullptr) {
-      result->push_back(entry->d_name);
+      StringPiece basename = entry->d_name;
+      if ((basename != ".") && (basename != "..")) {
+        result->push_back(entry->d_name);
+      }
     }
     closedir(d);
     return Status::OK();
+  }
+  
+  bool MatchPath(const string& path, const string& pattern) override {
+    return fnmatch(pattern.c_str(), path.c_str(), FNM_PATHNAME) == 0;
   }
 
   virtual Status DeleteFile(const string& fname) override {
@@ -543,6 +595,19 @@ class PosixEnv : public Env {
     }
     return result;
   };
+  
+  virtual Status Stat(const string& fname, FileStatistics* stats) override {
+    Status s;
+    struct stat sbuf;
+    if (stat(fname.c_str(), &sbuf) != 0) {
+      s = IOError(fname, errno);
+    } else {
+      stats->length = sbuf.st_size;
+      stats->mtime_nsec = sbuf.st_mtime * 1e9;
+      stats->is_directory = S_ISDIR(sbuf.st_mode);
+    }
+    return s;
+  }
 
   virtual Status GetFileSize(const string& fname,
                              uint64_t* size) override {
@@ -556,7 +621,7 @@ class PosixEnv : public Env {
     }
     return s;
   }
-
+  
   virtual Status GetFileModificationTime(const string& fname,
                                          uint64_t* file_mtime) override {
     struct stat s;
@@ -566,6 +631,7 @@ class PosixEnv : public Env {
     *file_mtime = static_cast<uint64_t>(s.st_mtime);
     return Status::OK();
   }
+  
   virtual Status RenameFile(const string& src,
                             const string& target) override {
     Status result;
@@ -620,6 +686,41 @@ class PosixEnv : public Env {
     delete my_lock;
     return result;
   }
+  
+  virtual void GetLocalTempDirectories(std::vector<string>* list) override {
+    list->clear();
+    // Directories, in order of preference. If we find a dir that
+    // exists, we stop adding other less-preferred dirs
+    const char* candidates[] = {
+        // Non-null only during unittest/regtest
+        getenv("TEST_TMPDIR"),
+
+        // Explicitly-supplied temp dirs
+        getenv("TMPDIR"),
+        getenv("TMP"),
+
+        // If all else fails
+        "/tmp",
+    };
+
+    for (const char* d : candidates) {
+      if (!d || d[0] == '\0') continue;  // Empty env var
+
+      // Make sure we don't surprise anyone who's expecting a '/'
+      string dstr = d;
+      if (dstr[dstr.size() - 1] != '/') {
+        dstr += "/";
+      }
+
+      struct stat statbuf;
+      if (!stat(d, &statbuf) && S_ISDIR(statbuf.st_mode) &&
+          !access(dstr.c_str(), 0)) {
+        // We found a dir that exists and is accessible - we're done.
+        list->push_back(dstr);
+        return;
+      }
+    }
+  }
 
   virtual void Schedule(void (*function)(void* arg1), void* arg,
                         Priority pri = LOW, void* tag = nullptr,
@@ -639,18 +740,12 @@ class PosixEnv : public Env {
       *result = env;
     } else {
       char buf[100];
-      snprintf(buf, sizeof(buf), "/tmp/rocksdbtest-%d", int(geteuid()));
+      snprintf(buf, sizeof(buf), "/tmp/bubblefs-%d", int(geteuid()));
       *result = buf;
     }
     // Directory may already exist
     CreateDir(*result);
     return Status::OK();
-  }
-
-  virtual Status GetThreadList(
-      std::vector<ThreadStatus>* thread_list) override {
-    assert(thread_status_updater_);
-    return thread_status_updater_->GetThreadList(thread_list);
   }
 
   static uint64_t gettid(pthread_t tid) {
@@ -757,11 +852,11 @@ class PosixEnv : public Env {
 #endif
   }
 
-  virtual std::string TimeToString(uint64_t secondsSince1970) override {
+  virtual string TimeToString(uint64_t secondsSince1970) override {
     const time_t seconds = (time_t)secondsSince1970;
     struct tm t;
     int maxsize = 64;
-    std::string dummy;
+    string dummy;
     dummy.reserve(maxsize);
     dummy.resize(maxsize);
     char* p = &dummy[0];
@@ -782,7 +877,7 @@ class PosixEnv : public Env {
   bool forceMmapOff_;  // do we override Env options?
 
   // Returns true iff the named directory exists and is a directory.
-  virtual bool DirExists(const std::string& dname) {
+  virtual bool DirExists(const string& dname) {
     struct stat statbuf;
     if (stat(dname.c_str(), &statbuf) == 0) {
       return S_ISDIR(statbuf.st_mode);
@@ -790,8 +885,8 @@ class PosixEnv : public Env {
     return false; // stat() failed return false
   }
 
-  bool SupportsFastAllocate(const std::string& path) {
-#ifdef ROCKSDB_FALLOCATE_PRESENT
+  bool SupportsFastAllocate(const string& path) {
+#ifdef OS_LINUX
     struct statfs s;
     if (statfs(path.c_str(), &s)){
       return false;
@@ -818,6 +913,7 @@ class PosixEnv : public Env {
   std::vector<pthread_t> threads_to_join_;
 };
 
+// PosixEnv impl
 PosixEnv::PosixEnv()
     : checkedDiskForMmap_(false),
       forceMmapOff_(false),
@@ -830,7 +926,7 @@ PosixEnv::PosixEnv()
     // This allows later initializing the thread-local-env of each thread.
     thread_pools_[pool_id].SetHostEnv(this);
   }
-  thread_status_updater_ = CreateThreadStatusUpdater();
+  //thread_status_updater_ = CreateThreadStatusUpdater();
 }
 
 void PosixEnv::Schedule(void (*function)(void* arg1), void* arg, Priority pri,
@@ -893,7 +989,7 @@ std::string Env::GenerateUniqueId() {
     }
   }
   // Could not read uuid_file - generate uuid using "nanos-random"
-  Random64 r(time(nullptr));
+  random::Random64 r(time(nullptr));
   uint64_t random_uuid_portion =
     r.Uniform(std::numeric_limits<uint64_t>::max());
   uint64_t nanos_uuid_portion = NowNanos();
