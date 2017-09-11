@@ -525,56 +525,6 @@ class Env {
   
   // Returns the ID of the current thread.
   virtual uint64_t GetThreadID() const;
-  
-  /// \brief Returns a new thread that is running fn() and is identified
-  /// (for debugging/performance-analysis) by "name".
-  ///
-  /// Caller takes ownership of the result and must delete it eventually
-  /// (the deletion will block until fn() stops running).
-  virtual Thread* StartThread(const ThreadOptions& thread_options,
-                              const string& name,
-                              std::function<void()> fn) TF_MUST_USE_RESULT = 0;
-
-  // \brief Schedules the given closure on a thread-pool.
-  //
-  // NOTE(mrry): This closure may block.
-  virtual void SchedClosure(std::function<void()> closure) = 0;
-
-  // \brief Schedules the given closure on a thread-pool after the given number
-  // of microseconds.
-  //
-  // NOTE(mrry): This closure must not block.
-  virtual void SchedClosureAfter(int64 micros,
-                                 std::function<void()> closure) = 0;
-
-  // \brief Load a dynamic library.
-  //
-  // Pass "library_filename" to a platform-specific mechanism for dynamically
-  // loading a library.  The rules for determining the exact location of the
-  // library are platform-specific and are not documented here.
-  //
-  // On success, returns a handle to the library in "*handle" and returns
-  // OK from the function.
-  // Otherwise returns nullptr in "*handle" and an error status from the
-  // function.
-  virtual Status LoadLibrary(const char* library_filename, void** handle) = 0;
-
-  // \brief Get a pointer to a symbol from a dynamic library.
-  //
-  // "handle" should be a pointer returned from a previous call to LoadLibrary.
-  // On success, store a pointer to the located symbol in "*symbol" and return
-  // OK from the function. Otherwise, returns nullptr in "*symbol" and an error
-  // status from the function.
-  virtual Status GetSymbolFromLibrary(void* handle, const char* symbol_name,
-                                      void** symbol) = 0;
-
-  // \brief build the name of dynamic library.
-  //
-  // "name" should be name of the library.
-  // "version" should be the version of the library or NULL
-  // returns the name that LoadLibrary() can use
-  virtual string FormatLibraryFileName(const string& name,
-      const string& version) = 0;
 
  private:
   std::unique_ptr<FileSystemRegistry> file_system_registry_;
@@ -594,37 +544,37 @@ class EnvWrapper : public Env {
   Env* target() const { return target_; }
 
   // The following text is boilerplate that forwards all methods to target()
-  Status NewSequentialFile(const string& f, unique_ptr<SequentialFile>* r,
+  Status NewSequentialFile(const string& f, std::unique_ptr<SequentialFile>* r,
                            const EnvOptions& options) override {
     return target_->NewSequentialFile(f, r, options);
   }
   Status NewRandomAccessFile(const string& f,
-                             unique_ptr<RandomAccessFile>* r,
+                             std::unique_ptr<RandomAccessFile>* r,
                              const EnvOptions& options) override {
     return target_->NewRandomAccessFile(f, r, options);
   }
-  Status NewWritableFile(const string& f, unique_ptr<WritableFile>* r,
+  Status NewWritableFile(const string& f, std::unique_ptr<WritableFile>* r,
                          const EnvOptions& options) override {
     return target_->NewWritableFile(f, r, options);
   }
   Status ReopenWritableFile(const string& fname,
-                            unique_ptr<WritableFile>* result,
+                            std::unique_ptr<WritableFile>* result,
                             const EnvOptions& options) override {
     return target_->ReopenWritableFile(fname, result, options);
   }
   Status ReuseWritableFile(const string& fname,
                            const string& old_fname,
-                           unique_ptr<WritableFile>* r,
+                           std::unique_ptr<WritableFile>* r,
                            const EnvOptions& options) override {
     return target_->ReuseWritableFile(fname, old_fname, r, options);
   }
   Status NewRandomRWFile(const string& fname,
-                         unique_ptr<RandomRWFile>* result,
+                         std::unique_ptr<RandomRWFile>* result,
                          const EnvOptions& options) override {
     return target_->NewRandomRWFile(fname, result, options);
   }
   Status NewDirectory(const string& name,
-                      unique_ptr<Directory>* result) override {
+                      std::unique_ptr<Directory>* result) override {
     return target_->NewDirectory(name, result);
   }
   Status FileExists(const string& f) override {
