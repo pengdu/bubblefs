@@ -525,6 +525,56 @@ class Env {
   
   // Returns the ID of the current thread.
   virtual uint64_t GetThreadID() const;
+  
+  /// \brief Returns a new thread that is running fn() and is identified
+  /// (for debugging/performance-analysis) by "name".
+  ///
+  /// Caller takes ownership of the result and must delete it eventually
+  /// (the deletion will block until fn() stops running).
+  virtual Thread* StartThread(const ThreadOptions& thread_options,
+                              const string& name,
+                              std::function<void()> fn) TF_MUST_USE_RESULT = 0;
+                              
+  // \brief Schedules the given closure on a thread-pool.
+  //
+  // NOTE(mrry): This closure may block.
+  virtual void SchedClosure(std::function<void()> closure) = 0;
+  
+  // \brief Schedules the given closure on a thread-pool after the given number
+  // of microseconds.
+  //
+  // NOTE(mrry): This closure must not block.
+  virtual void SchedClosureAfter(int64 micros,
+                                 std::function<void()> closure) = 0;
+                                 
+  // \brief Load a dynamic library.
+  //
+  // Pass "library_filename" to a platform-specific mechanism for dynamically
+  // loading a library.  The rules for determining the exact location of the
+  // library are platform-specific and are not documented here.
+  //
+  // On success, returns a handle to the library in "*handle" and returns
+  // OK from the function.
+  // Otherwise returns nullptr in "*handle" and an error status from the
+  // function.
+  virtual Status LoadLibrary(const char* library_filename, void** handle) = 0;
+
+  // \brief Get a pointer to a symbol from a dynamic library.
+  //
+  // "handle" should be a pointer returned from a previous call to LoadLibrary.
+  // On success, store a pointer to the located symbol in "*symbol" and return
+  // OK from the function. Otherwise, returns nullptr in "*symbol" and an error
+  // status from the function.
+  virtual Status GetSymbolFromLibrary(void* handle, const char* symbol_name,
+                                      void** symbol) = 0;
+
+  // \brief build the name of dynamic library.
+  //
+  // "name" should be name of the library.
+  // "version" should be the version of the library or NULL
+  // returns the name that LoadLibrary() can use
+  virtual string FormatLibraryFileName(const string& name,
+      const string& version) = 0;
 
  private:
   std::unique_ptr<FileSystemRegistry> file_system_registry_;
@@ -581,7 +631,7 @@ class EnvWrapper : public Env {
     return target_->FileExists(f);
   }
   Status GetChildren(const string& dir,
-                     std::vector<std::string>* r) override {
+                     std::vector<string>* r) override {
     return target_->GetChildren(dir, r);
   }
   Status GetChildrenFileAttributes(
@@ -639,7 +689,7 @@ class EnvWrapper : public Env {
   unsigned int GetThreadPoolQueueLen(Priority pri = LOW) const override {
     return target_->GetThreadPoolQueueLen(pri);
   }
-  Status GetTestDirectory(std::string* path) override {
+  Status GetTestDirectory(string* path) override {
     return target_->GetTestDirectory(path);
   }
 
@@ -655,8 +705,8 @@ class EnvWrapper : public Env {
   Status GetCurrentTime(int64_t* unix_time) override {
     return target_->GetCurrentTime(unix_time);
   }
-  Status GetAbsolutePath(const std::string& db_path,
-                         std::string* output_path) override {
+  Status GetAbsolutePath(const string& db_path,
+                         string* output_path) override {
     return target_->GetAbsolutePath(db_path, output_path);
   }
   void SetBackgroundThreads(int num, Priority pri) override {
@@ -674,7 +724,7 @@ class EnvWrapper : public Env {
     target_->LowerThreadPoolIOPriority(pool);
   }
 
-  std::string TimeToString(uint64_t time) override {
+  string TimeToString(uint64_t time) override {
     return target_->TimeToString(time);
   }
 
@@ -682,7 +732,7 @@ class EnvWrapper : public Env {
     return target_->GetThreadID();
   }
 
-  std::string GenerateUniqueId() override {
+  string GenerateUniqueId() override {
     return target_->GenerateUniqueId();
   }
 
@@ -696,7 +746,7 @@ class Thread {
   Thread() {}
 
   /// Blocks until the thread of control stops running.
-  virtual ~Thread();
+  virtual ~Thread() {};
 
  private:
   TF_DISALLOW_COPY_AND_ASSIGN(Thread);

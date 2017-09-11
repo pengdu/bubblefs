@@ -49,14 +49,18 @@ limitations under the License.
 #include <atomic>
 #include <chrono>
 #include <limits>
+#include <thread>
+#include <vector>
 #include "platform/env.h"
 #include "platform/error.h"
 #include "platform/io_posix.h"
+#include "platform/load_library.h"
 #include "platform/logging.h"
 #include "platform/port_posix.h"
 #include "platform/types.h"
 #include "utils/error_codes.h"
 #include "utils/path.h"
+#include "utils/threadpool_impl.h"
 #include "utils/random.h"
 #include "utils/status.h"
 #include "utils/strcat.h"
@@ -734,7 +738,7 @@ class PosixEnv : public Env {
 
   virtual unsigned int GetThreadPoolQueueLen(Priority pri = LOW) const override;
 
-  virtual Status GetTestDirectory(std::string* result) override {
+  virtual Status GetTestDirectory(string* result) override {
     const char* env = getenv("TEST_TMPDIR");
     if (env && env[0] != '\0') {
       *result = env;
@@ -789,7 +793,26 @@ class PosixEnv : public Env {
 #endif
   }
 
-  virtual void SleepForMicroseconds(int micros) override { usleep(micros); }
+  virtual void SleepForMicroseconds(int64 micros) override {
+    while (micros > 0) {
+      timespec sleep_time;
+      sleep_time.tv_sec = 0;
+      sleep_time.tv_nsec = 0;
+
+      if (micros >= 1e6) {
+        sleep_time.tv_sec =
+            std::min<int64>(micros / 1e6, std::numeric_limits<time_t>::max());
+        micros -= static_cast<int64>(sleep_time.tv_sec) * 1e6;
+      }
+      if (micros < 1e6) {
+        sleep_time.tv_nsec = 1000 * micros;
+        micros = 0;
+      }
+      while (nanosleep(&sleep_time, &sleep_time) != 0 && errno == EINTR) {
+        // Ignore signals and wait for the full interval to elapse.
+      }
+    }
+  }
 
   virtual Status GetHostName(char* name, uint64_t len) override {
     int ret = gethostname(name, static_cast<size_t>(len));
@@ -911,7 +934,7 @@ class PosixEnv : public Env {
   std::vector<ThreadPoolImpl> thread_pools_;
   pthread_mutex_t mu_;
   std::vector<pthread_t> threads_to_join_;
-};
+}; // PosixEnv
 
 // PosixEnv impl
 PosixEnv::PosixEnv()
@@ -975,32 +998,56 @@ void PosixEnv::WaitForJoin() {
   threads_to_join_.clear();
 }
 
-}  // namespace
+class StdThread : public Thread {
+ public:
+  // name and thread_options are both ignored.
+  StdThread(const ThreadOptions& thread_options, const string& name,
+            std::function<void()> fn)
+      : thread_(fn) {}
+  ~StdThread() override { thread_.join(); }
 
-std::string Env::GenerateUniqueId() {
-  std::string uuid_file = "/proc/sys/kernel/random/uuid";
+ private:
+  std::thread thread_;
+};
 
-  Status s = FileExists(uuid_file);
-  if (s.ok()) {
-    std::string uuid;
-    s = ReadFileToString(this, uuid_file, &uuid);
-    if (s.ok()) {
-      return uuid;
-    }
-  }
-  // Could not read uuid_file - generate uuid using "nanos-random"
-  random::Random64 r(time(nullptr));
-  uint64_t random_uuid_portion =
-    r.Uniform(std::numeric_limits<uint64_t>::max());
-  uint64_t nanos_uuid_portion = NowNanos();
-  char uuid2[200];
-  snprintf(uuid2,
-           200,
-           "%lx-%lx",
-           (unsigned long)nanos_uuid_portion,
-           (unsigned long)random_uuid_portion);
-  return uuid2;
+Thread* PosixEnv::StartThread(const ThreadOptions& thread_options, const string& name,
+                    std::function<void()> fn) override {
+  return new StdThread(thread_options, name, fn);
 }
+
+void PosixEnv::SchedClosure(std::function<void()> closure) override {
+  // TODO(b/27290852): Spawning a new thread here is wasteful, but
+  // needed to deal with the fact that many `closure` functions are
+  // blocking in the current codebase.
+  std::thread closure_thread(closure);
+  closure_thread.detach();
+}
+
+void PosixEnv::SchedClosureAfter(int64 micros, std::function<void()> closure) override {
+  // TODO(b/27290852): Consuming a thread here is wasteful, but this
+  // code is (currently) only used in the case where a step fails
+  // (AbortStep). This could be replaced by a timer thread
+  SchedClosure([this, micros, closure]() {
+    SleepForMicroseconds(micros);
+    closure();
+  });
+}
+
+Status LoadLibrary(const char* library_filename, void** handle) override {
+  return internal::LoadLibrary(library_filename, handle);
+}
+
+Status GetSymbolFromLibrary(void* handle, const char* symbol_name,
+                            void** symbol) override {
+  return internal::GetSymbolFromLibrary(handle, symbol_name, symbol);
+}
+
+string FormatLibraryFileName(const string& name,
+                             const string& version) override {
+  return internal::FormatLibraryFileName(name, version);
+}
+
+}  // namespace
 
 //
 // Default Posix Env

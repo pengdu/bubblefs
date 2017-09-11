@@ -25,6 +25,7 @@ limitations under the License.
 
 #include <functional>
 #include <memory>
+#include <thread>
 #include "platform/env.h"
 #include "platform/macros.h"
 #include "platform/types.h"

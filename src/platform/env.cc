@@ -421,22 +421,6 @@ bool Env::LocalTempFilename(string* filename) {
   return false;
 }
 
-static uint64_t gettid(pthread_t tid) {
-  uint64_t thread_id = 0;
-  memcpy(&thread_id, &tid, std::min(sizeof(thread_id), sizeof(tid)));
-  return thread_id;
-}
-
-static uint64_t gettid() {
-  pthread_t tid = pthread_self();
-  return gettid(tid);
-}
-
-uint64_t Env::GetThreadID() const override {
-  return gettid(pthread_self());
-}
-
-Thread::~Thread() {}
 
 EnvWrapper::~EnvWrapper() {}
 
