@@ -282,9 +282,9 @@ size_t PosixHelper::GetUniqueIdFromFile(int fd, char* id, size_t max_size) {
   uint64_t uversion = (uint64_t)version;
 
   char* rid = id;
-  rid = EncodeVarint64(rid, buf.st_dev);
-  rid = EncodeVarint64(rid, buf.st_ino);
-  rid = EncodeVarint64(rid, uversion);
+  rid = core::EncodeVarint64(rid, buf.st_dev);
+  rid = core::EncodeVarint64(rid, buf.st_ino);
+  rid = core::EncodeVarint64(rid, uversion);
   assert(rid >= id);
   return static_cast<size_t>(rid - id);
 }
@@ -303,19 +303,20 @@ size_t PosixHelper::GetUniqueIdFromFile(int fd, char* id, size_t max_size) {
   }
 
   char* rid = id;
-  rid = EncodeVarint64(rid, buf.st_dev);
-  rid = EncodeVarint64(rid, buf.st_ino);
-  rid = EncodeVarint64(rid, buf.st_gen);
+  rid = core::EncodeVarint64(rid, buf.st_dev);
+  rid = core::EncodeVarint64(rid, buf.st_ino);
+  rid = core::EncodeVarint64(rid, buf.st_gen);
   assert(rid >= id);
   return static_cast<size_t>(rid - id);
 }
 #endif
+
 /*
  * PosixRandomAccessFile
  *
  * pread() based random-access
  */
-PosixRandomAccessFile::PosixRandomAccessFile(const std::string& fname, int fd,
+PosixRandomAccessFile::PosixRandomAccessFile(const string& fname, int fd,
                                              const EnvOptions& options)
     : filename_(fname),
       fd_(fd),
@@ -445,7 +446,7 @@ Status PosixRandomAccessFile::InvalidateCache(size_t offset, size_t length) {
  */
 // base[0,length-1] contains the mmapped contents of the file.
 PosixMmapReadableFile::PosixMmapReadableFile(const int fd,
-                                             const std::string& fname,
+                                             const string& fname,
                                              void* base, size_t length,
                                              const EnvOptions& options)
     : fd_(fd), filename_(fname), mmapped_region_(base), length_(length) {
@@ -501,7 +502,7 @@ Status PosixMmapReadableFile::InvalidateCache(size_t offset, size_t length) {
  * knows enough to skip zero suffixes.
  */
 Status PosixMmapFile::UnmapCurrentRegion() {
-  TEST_KILL_RANDOM("PosixMmapFile::UnmapCurrentRegion:0", rocksdb_kill_odds);
+  //TEST_KILL_RANDOM("PosixMmapFile::UnmapCurrentRegion:0", rocksdb_kill_odds);
   if (base_ != nullptr) {
     int munmap_status = munmap(base_, limit_ - base_);
     if (munmap_status != 0) {
@@ -522,9 +523,9 @@ Status PosixMmapFile::UnmapCurrentRegion() {
 }
 
 Status PosixMmapFile::MapNewRegion() {
-#ifdef ROCKSDB_FALLOCATE_PRESENT
+#ifdef OS_LINUX
   assert(base_ == nullptr);
-  TEST_KILL_RANDOM("PosixMmapFile::UnmapCurrentRegion:0", rocksdb_kill_odds);
+  //TEST_KILL_RANDOM("PosixMmapFile::UnmapCurrentRegion:0", rocksdb_kill_odds);
   // we can't fallocate with FALLOC_FL_KEEP_SIZE here
   if (allow_fallocate_) {
     IOSTATS_TIMER_GUARD(allocate_nanos);
@@ -539,13 +540,13 @@ Status PosixMmapFile::MapNewRegion() {
     }
   }
 
-  TEST_KILL_RANDOM("PosixMmapFile::Append:1", rocksdb_kill_odds);
+  //TEST_KILL_RANDOM("PosixMmapFile::Append:1", rocksdb_kill_odds);
   void* ptr = mmap(nullptr, map_size_, PROT_READ | PROT_WRITE, MAP_SHARED, fd_,
                    file_offset_);
   if (ptr == MAP_FAILED) {
     return Status::IOError("MMap failed on " + filename_);
   }
-  TEST_KILL_RANDOM("PosixMmapFile::Append:2", rocksdb_kill_odds);
+  //TEST_KILL_RANDOM("PosixMmapFile::Append:2", rocksdb_kill_odds);
 
   base_ = reinterpret_cast<char*>(ptr);
   limit_ = base_ + map_size_;
@@ -566,14 +567,14 @@ Status PosixMmapFile::Msync() {
   size_t p1 = TruncateToPageBoundary(last_sync_ - base_);
   size_t p2 = TruncateToPageBoundary(dst_ - base_ - 1);
   last_sync_ = dst_;
-  TEST_KILL_RANDOM("PosixMmapFile::Msync:0", rocksdb_kill_odds);
+  //TEST_KILL_RANDOM("PosixMmapFile::Msync:0", rocksdb_kill_odds);
   if (msync(base_ + p1, p2 - p1 + page_size_, MS_SYNC) < 0) {
     return IOError("While msync", filename_, errno);
   }
   return Status::OK();
 }
 
-PosixMmapFile::PosixMmapFile(const std::string& fname, int fd, size_t page_size,
+PosixMmapFile::PosixMmapFile(const string& fname, int fd, size_t page_size,
                              const EnvOptions& options)
     : filename_(fname),
       fd_(fd),
@@ -584,7 +585,7 @@ PosixMmapFile::PosixMmapFile(const std::string& fname, int fd, size_t page_size,
       dst_(nullptr),
       last_sync_(nullptr),
       file_offset_(0) {
-#ifdef ROCKSDB_FALLOCATE_PRESENT
+#ifdef OS_LINUX
   allow_fallocate_ = options.allow_fallocate;
   fallocate_with_keep_size_ = options.fallocate_with_keep_size;
 #endif
@@ -615,7 +616,7 @@ Status PosixMmapFile::Append(const StringPiece& data) {
       if (!s.ok()) {
         return s;
       }
-      TEST_KILL_RANDOM("PosixMmapFile::Append:0", rocksdb_kill_odds);
+      //TEST_KILL_RANDOM("PosixMmapFile::Append:0", rocksdb_kill_odds);
     }
 
     size_t n = (left <= avail) ? left : avail;
@@ -698,11 +699,11 @@ Status PosixMmapFile::InvalidateCache(size_t offset, size_t length) {
 #endif
 }
 
-#ifdef ROCKSDB_FALLOCATE_PRESENT
+#ifdef OS_LINUX
 Status PosixMmapFile::Allocate(uint64_t offset, uint64_t len) {
   assert(offset <= std::numeric_limits<off_t>::max());
   assert(len <= std::numeric_limits<off_t>::max());
-  TEST_KILL_RANDOM("PosixMmapFile::Allocate:0", rocksdb_kill_odds);
+  //TEST_KILL_RANDOM("PosixMmapFile::Allocate:0", rocksdb_kill_odds);
   int alloc_status = 0;
   if (allow_fallocate_) {
     alloc_status = fallocate(
@@ -724,14 +725,14 @@ Status PosixMmapFile::Allocate(uint64_t offset, uint64_t len) {
  *
  * Use posix write to write data to a file.
  */
-PosixWritableFile::PosixWritableFile(const std::string& fname, int fd,
+PosixWritableFile::PosixWritableFile(const string& fname, int fd,
                                      const EnvOptions& options)
     : filename_(fname),
       use_direct_io_(options.use_direct_writes),
       fd_(fd),
       filesize_(0),
       logical_sector_size_(GetLogicalBufferSize(fd_)) {
-#ifdef ROCKSDB_FALLOCATE_PRESENT
+#ifdef OS_LINUX
   allow_fallocate_ = options.allow_fallocate;
   fallocate_with_keep_size_ = options.fallocate_with_keep_size;
 #endif
@@ -816,7 +817,7 @@ Status PosixWritableFile::Close() {
     // but it will be nice to log these errors.
     int dummy __attribute__((unused));
     dummy = ftruncate(fd_, filesize_);
-#if defined(ROCKSDB_FALLOCATE_PRESENT) && !defined(TRAVIS)
+#if defined(OS_LINUX) && !defined(TRAVIS)
     // in some file systems, ftruncate only trims trailing space if the
     // new file size is smaller than the current size. Calling fallocate
     // with FALLOC_FL_PUNCH_HOLE flag to explicitly release these unused
@@ -894,10 +895,11 @@ Status PosixWritableFile::InvalidateCache(size_t offset, size_t length) {
 #endif
 }
 
+#ifdef OS_LINUX
 Status PosixWritableFile::Allocate(uint64_t offset, uint64_t len) {
   assert(offset <= std::numeric_limits<off_t>::max());
   assert(len <= std::numeric_limits<off_t>::max());
-  TEST_KILL_RANDOM("PosixWritableFile::Allocate:0", rocksdb_kill_odds);
+  //TEST_KILL_RANDOM("PosixWritableFile::Allocate:0", rocksdb_kill_odds);
   IOSTATS_TIMER_GUARD(allocate_nanos);
   int alloc_status = 0;
   if (allow_fallocate_) {
@@ -913,7 +915,9 @@ Status PosixWritableFile::Allocate(uint64_t offset, uint64_t len) {
         filename_, errno);
   }
 }
+#endif
 
+#ifdef OS_LINUX
 Status PosixWritableFile::RangeSync(uint64_t offset, uint64_t nbytes) {
   assert(offset <= std::numeric_limits<off_t>::max());
   assert(nbytes <= std::numeric_limits<off_t>::max());
@@ -926,6 +930,7 @@ Status PosixWritableFile::RangeSync(uint64_t offset, uint64_t nbytes) {
                    filename_, errno);
   }
 }
+#endif
 
 #ifdef OS_LINUX
 size_t PosixWritableFile::GetUniqueId(char* id, size_t max_size) const {
@@ -937,7 +942,7 @@ size_t PosixWritableFile::GetUniqueId(char* id, size_t max_size) const {
  * PosixRandomRWFile
  */
 
-PosixRandomRWFile::PosixRandomRWFile(const std::string& fname, int fd,
+PosixRandomRWFile::PosixRandomRWFile(const string& fname, int fd,
                                      const EnvOptions& options)
     : filename_(fname), fd_(fd) {}
 

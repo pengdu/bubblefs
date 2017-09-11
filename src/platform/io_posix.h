@@ -72,6 +72,9 @@ class PosixRandomAccessFile : public RandomAccessFile {
   
   virtual Status Prefetch(uint64_t offset, size_t n) override;
   
+#if defined(OS_LINUX) || defined(OS_MACOSX) || defined(OS_AIX)
+  virtual size_t GetUniqueId(char* id, size_t max_size) const override;
+#endif
   //virtual size_t GetUniqueId(char* id, size_t max_size) const override;
   virtual void Hint(AccessPattern pattern) override;
   virtual Status InvalidateCache(size_t offset, size_t length) override;
