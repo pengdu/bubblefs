@@ -21,9 +21,18 @@ limitations under the License. */
 #include <map>
 #include <mutex>
 #include <random>
+#include "platform/base.h"
 #include "platform/logging.h"
 
 namespace bubblefs {
+  
+// Try to come up with a portable implementation of thread local variables
+#ifdef TF_SUPPORT_THREAD_LOCAL
+#define TF_THREAD_LOCAL static __thread
+#else
+#define TF_THREAD_LOCAL static thread_local
+#endif
+  
 namespace concurrent {
   
 /**

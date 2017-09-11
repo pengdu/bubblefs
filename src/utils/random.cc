@@ -22,13 +22,8 @@ limitations under the License.
 #include "platform/base.h"
 #include "platform/macros.h"
 #include "platform/mutex.h"
+#include "platform/threadlocal.h"
 #include "platform/types.h"
-
-#ifdef TF_SUPPORT_THREAD_LOCAL
-#define STORAGE_DECL static __thread
-#else
-#define STORAGE_DECL static
-#endif
 
 namespace bubblefs {
 namespace random {
@@ -57,8 +52,8 @@ uint64 New64DefaultSeed() {
 }
 
 Random* Random::GetTLSInstance() {
-  STORAGE_DECL Random* tls_instance;
-  STORAGE_DECL std::aligned_storage<sizeof(Random)>::type tls_instance_bytes;
+  TF_THREAD_LOCAL Random* tls_instance;
+  TF_THREAD_LOCAL std::aligned_storage<sizeof(Random)>::type tls_instance_bytes;
 
   auto rv = tls_instance;
   if (TF_UNLIKELY(rv == nullptr)) {

@@ -536,20 +536,15 @@ Status ReadBinaryProto(Env* env, const string& fname,
 
 Status WriteTextProto(Env* env, const string& fname,
                       const protobuf::Message& proto) {
-#if !defined(TENSORFLOW_LITE_PROTOS)
   string serialized;
   if (!protobuf::TextFormat::PrintToString(proto, &serialized)) {
     return errors::FailedPrecondition("Unable to convert proto to text.");
   }
   return WriteStringToFile(env, fname, serialized);
-#else
-  return errors::Unimplemented("Can't write text protos with protolite.");
-#endif
 }
 
 Status ReadTextProto(Env* env, const string& fname,
                      protobuf::Message* proto) {
-#if !defined(TENSORFLOW_LITE_PROTOS)
   std::unique_ptr<RandomAccessFile> file;
   TF_RETURN_IF_ERROR(env->NewRandomAccessFile(fname, &file));
   std::unique_ptr<FileStream> stream(new FileStream(file.get()));
@@ -559,9 +554,6 @@ Status ReadTextProto(Env* env, const string& fname,
     return errors::DataLoss("Can't parse ", fname, " as text proto");
   }
   return Status::OK();
-#else
-  return errors::Unimplemented("Can't parse text protos with protolite.");
-#endif
 }
 
 }  // namespace bubblefs

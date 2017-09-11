@@ -18,7 +18,9 @@ limitations under the License.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
+// eigen/unsupported/Eigen/CXX11/src/ThreadPool/ThreadEnvironment.h
 // tensorflow/tensorflow/core/lib/core/threadpool.h
+// rocksdb/include/rocksdb/threadpool.h
 
 #ifndef BUBBLEFS_UTILS_THREADPOOL_H_
 #define BUBBLEFS_UTILS_THREADPOOL_H_
@@ -32,30 +34,7 @@ limitations under the License.
 
 namespace bubblefs {
 
-namespace thread {
-    
-struct StlThreadEnvironment {
-  struct Task {
-    std::function<void()> f;
-  };
-
-  // EnvThread constructor must start the thread,
-  // destructor must join the thread.
-  class EnvThread {
-   public:
-    EnvThread(std::function<void()> f) : thr_(std::move(f)) {}
-    ~EnvThread() { thr_.join(); }
-    // This function is called when the threadpool is cancelled.
-    void OnCancel() { }
-
-   private:
-    std::thread thr_;
-  };
-
-  EnvThread* CreateThread(std::function<void()> f) { return new EnvThread(std::move(f)); }
-  Task CreateTask(std::function<void()> f) { return Task{std::move(f)}; }
-  void ExecuteTask(const Task& t) { t.f(); }
-};  
+namespace thread { 
   
 // This defines an interface that ThreadPoolDevice can take to use
 // custom thread pools underneath.
@@ -106,38 +85,6 @@ class ThreadPool {
 
   // Schedules fn() for execution in the pool of threads.
   void Schedule(std::function<void()> fn);
-
-  // ParallelFor shards the "total" units of work assuming each unit of work
-  // having roughly "cost_per_unit" cost, in cycles. Each unit of work is
-  // indexed 0, 1, ..., total - 1. Each shard contains 1 or more units of work
-  // and the total cost of each shard is roughly the same.
-  //
-  // "cost_per_unit" is an estimate of the number of CPU cycles (or nanoseconds
-  // if not CPU-bound) to complete a unit of work. Overestimating creates too
-  // many shards and CPU time will be dominated by per-shard overhead, such as
-  // Context creation. Underestimating may not fully make use of the specified
-  // parallelism.
-  void ParallelFor(int64 total, int64 cost_per_unit,
-                   std::function<void(int64, int64)> fn);
-
-  // Shards the "total" units of work. For more details, see "ParallelFor".
-  //
-  // The function is passed a thread_id between 0 and NumThreads() *inclusive*.
-  // This is because some work can happen on the caller thread while the threads
-  // in the pool are also being used.
-  //
-  // The caller can allocate NumThreads() + 1 separate buffers for each thread.
-  // Each thread can safely write to the buffer given by its id without
-  // synchronization. However, the worker fn may be called multiple times
-  // sequentially with the same id.
-  //
-  // At most NumThreads() unique ids will actually be used, and only a few may
-  // be used for small workloads. If each buffer is expensive, the buffers
-  // should be stored in an array initially filled with null, and a buffer
-  // should be allocated by fn the first time that the id is used.
-  void ParallelForWithWorkerId(
-      int64 total, int64 cost_per_unit,
-      const std::function<void(int64, int64, int)>& fn);
 
   // Returns the number of threads in the pool.
   int NumThreads() const;

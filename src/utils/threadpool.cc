@@ -26,11 +26,35 @@ limitations under the License.
 #include <mutex>
 #include <vector>
 #include "platform/logging.h"
+#include "platform/threadlocal.h"
 #include "platform/types.h"
 #include "utils/threadpool.h"
 
 namespace bubblefs {
 namespace thread {
+  
+struct StlThreadEnvironment {
+  struct Task {
+    std::function<void()> f;
+  };
+
+  // EnvThread constructor must start the thread,
+  // destructor must join the thread.
+  class EnvThread {
+   public:
+    EnvThread(std::function<void()> f) : thr_(std::move(f)) {}
+    ~EnvThread() { thr_.join(); }
+    // This function is called when the threadpool is cancelled.
+    void OnCancel() {}
+
+   private:
+    std::thread thr_;
+  };
+
+  EnvThread* CreateThread(std::function<void()> f) { return new EnvThread(std::move(f)); }
+  Task CreateTask(std::function<void()> f) { return Task{std::move(f)}; }
+  void ExecuteTask(const Task& t) { t.f(); }
+}; 
 
 // The implementation of the ThreadPool type ensures that the Schedule method
 // runs the functions it is provided in FIFO order when the scheduling is done
@@ -86,6 +110,12 @@ class SimpleThreadPoolTempl : public ThreadPoolInterface {
       w->ready = true;
       w->task = std::move(t);
       w->cv.notify_one();
+    }
+  }
+  
+  void Cancel() {
+    for (size_t i = 0; i < threads_.size(); i++) {
+      threads_[i]->OnCancel();
     }
   }
 
@@ -172,7 +202,7 @@ typedef SimpleThreadPoolTempl<StlThreadEnvironment> SimpleThreadPool;
 struct ThreadPool::Impl : SimpleThreadPool {
   Impl(Env* env, const ThreadOptions& thread_options, const string& name,
        int num_threads, bool low_latency_hint)
-      : ::mblobstore::thread::SimpleThreadPool(num_threads) {}
+      : SimpleThreadPool(num_threads) { }
 };
 
 ThreadPool::ThreadPool(Env* env, const string& name, int num_threads)
@@ -195,17 +225,6 @@ ThreadPool::~ThreadPool() {}
 void ThreadPool::Schedule(std::function<void()> fn) {
   CHECK(fn != nullptr);
   impl_->Schedule(std::move(fn));
-}
-
-void ThreadPool::ParallelFor(int64 total, int64 cost_per_unit,
-                             std::function<void(int64, int64)> fn) {
-  static_assert(false, "Unimplmented ParallelFor");                               
-}
-
-void ThreadPool::ParallelForWithWorkerId(
-    int64 total, int64 cost_per_unit,
-    const std::function<void(int64, int64, int)>& fn) {
- static_assert(false, "Unimplmented ParallelForWithWorkerId");       
 }
 
 int ThreadPool::NumThreads() const { return impl_->NumThreads(); }
