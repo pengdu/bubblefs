@@ -8,7 +8,7 @@
 
 // baidu/common/src/cache.cc
 
-#include "utils/cache.h"
+#include "utils/cache_simple.h"
 #include <assert.h>
 #include <malloc.h>
 #include <stdio.h>
@@ -17,7 +17,7 @@
 #include "utils/hash.h"
 
 namespace bubblefs {
-namespace core {
+namespace baiducomm {
 
 Cache::~Cache() {
 }
@@ -328,5 +328,5 @@ Cache* NewLRUCache(size_t capacity) {
     return new ShardedLRUCache(capacity);
 }  
   
-} // namespace core
+} // namespace baiducomm
 } // namespace bubblefs

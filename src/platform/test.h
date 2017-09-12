@@ -17,11 +17,11 @@ limitations under the License.
 
 #include <memory>
 #include <vector>
-
 #include "platform/macros.h"
 #include "platform/platform.h"
 #include "platform/subprocess.h"
 #include "platform/types.h"
+
 // As of September 2016, we continue to attempt to avoid the use of gmock aka
 // googlemock included in the test framework
 // (https://github.com/google/googletest) to discourage over-eager use of mocks

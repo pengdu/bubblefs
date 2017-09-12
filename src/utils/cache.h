@@ -1,7 +1,18 @@
-// Copyright (c) 2015, Baidu.com, Inc. All Rights Reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
+/* Copyright (c) 2016 PaddlePaddle Authors. All Rights Reserve.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. */
+// Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
+//  This source code is licensed under both the GPLv2 (found in the
+//  COPYING file in the root directory) and Apache 2.0 License
+//  (found in the LICENSE.Apache file in the root directory).
+//
 // Copyright (c) 2011 The LevelDB Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
@@ -19,28 +30,20 @@
 // they want something more sophisticated (like scan-resistance, a
 // custom eviction policy, variable cache sizing, etc.)
 
-/* Copyright (c) 2016 PaddlePaddle Authors. All Rights Reserve.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License. */
-
 // Paddle/paddle/utils/Util.h
-// baidu/common/include/cache.h
+// rocksdb/include/rocksdb/cache.h
 
 #ifndef BUBBLEFS_UTILS_CACHE_H_
 #define BUBBLEFS_UTILS_CACHE_H_
 
 #include <assert.h>
+#include <stdint.h>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include "platform/macros.h"
+#include "utils/status.h"
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
@@ -90,73 +93,168 @@ private:
 
 class Cache;
 
-// Create a new cache with a fixed size capacity.  This implementation
-// of Cache uses a least-recently-used eviction policy.
-extern Cache* NewLRUCache(size_t capacity);
+// Create a new cache with a fixed size capacity. The cache is sharded
+// to 2^num_shard_bits shards, by hash of the key. The total capacity
+// is divided and evenly assigned to each shard. If strict_capacity_limit
+// is set, insert to the cache will fail when cache is full. User can also
+// set percentage of the cache reserves for high priority entries via
+// high_pri_pool_pct.
+// num_shard_bits = -1 means it is automatically determined: every shard
+// will be at least 512KB and number of shard bits will not exceed 6.
+extern std::shared_ptr<Cache> NewLRUCache(size_t capacity,
+                                          int num_shard_bits = -1,
+                                          bool strict_capacity_limit = false,
+                                          double high_pri_pool_ratio = 0.0);
+
+// Similar to NewLRUCache, but create a cache based on CLOCK algorithm with
+// better concurrent performance in some cases. See util/clock_cache.cc for
+// more detail.
+//
+// Return nullptr if it is not supported.
+//extern std::shared_ptr<Cache> NewClockCache(size_t capacity,
+//                                            int num_shard_bits = -1,
+//                                            bool strict_capacity_limit = false);
 
 class Cache {
-public:
-    Cache() { }
+ public:
+  // Depending on implementation, cache entries with high priority could be less
+  // likely to get evicted than low priority entries.
+  enum class Priority { HIGH, LOW };
 
-    // Destroys all existing entries by calling the "deleter"
-    // function that was passed to the constructor.
-    virtual ~Cache();
+  Cache() {}
 
-    // Opaque handle to an entry stored in the cache.
-    struct Handle { };
+  // Destroys all existing entries by calling the "deleter"
+  // function that was passed via the Insert() function.
+  //
+  // @See Insert
+  virtual ~Cache() {}
 
-    // Insert a mapping from key->value into the cache and assign it
-    // the specified charge against the total cache capacity.
-    //
-    // Returns a handle that corresponds to the mapping.  The caller
-    // must call this->Release(handle) when the returned mapping is no
-    // longer needed.
-    //
-    // When the inserted entry is no longer needed, the key and
-    // value will be passed to "deleter".
-    virtual Handle* Insert(const StringPiece& key, void* value, size_t charge,
-                           void (*deleter)(const StringPiece& key, void* value)) = 0;
+  // Opaque handle to an entry stored in the cache.
+  struct Handle {};
 
-    // If the cache has no mapping for "key", returns NULL.
-    //
-    // Else return a handle that corresponds to the mapping.  The caller
-    // must call this->Release(handle) when the returned mapping is no
-    // longer needed.
-    virtual Handle* Lookup(const StringPiece& key) = 0;
+  // The type of the Cache
+  virtual const char* Name() const = 0;
 
-    // Release a mapping returned by a previous Lookup().
-    // REQUIRES: handle must not have been released yet.
-    // REQUIRES: handle must have been returned by a method on *this.
-    virtual void Release(Handle* handle) = 0;
+  // Insert a mapping from key->value into the cache and assign it
+  // the specified charge against the total cache capacity.
+  // If strict_capacity_limit is true and cache reaches its full capacity,
+  // return Status::Incomplete.
+  //
+  // If handle is not nullptr, returns a handle that corresponds to the
+  // mapping. The caller must call this->Release(handle) when the returned
+  // mapping is no longer needed. In case of error caller is responsible to
+  // cleanup the value (i.e. calling "deleter").
+  //
+  // If handle is nullptr, it is as if Release is called immediately after
+  // insert. In case of error value will be cleanup.
+  //
+  // When the inserted entry is no longer needed, the key and
+  // value will be passed to "deleter".
+  virtual Status Insert(const StringPiece& key, void* value, size_t charge,
+                        void (*deleter)(const StringPiece& key, void* value),
+                        Handle** handle = nullptr,
+                        Priority priority = Priority::LOW) = 0;
 
-    // Return the value encapsulated in a handle returned by a
-    // successful Lookup().
-    // REQUIRES: handle must not have been released yet.
-    // REQUIRES: handle must have been returned by a method on *this.
-    virtual void* Value(Handle* handle) = 0;
+  // If the cache has no mapping for "key", returns nullptr.
+  //
+  // Else return a handle that corresponds to the mapping.  The caller
+  // must call this->Release(handle) when the returned mapping is no
+  // longer needed.
+  // If stats is not nullptr, relative tickers could be used inside the
+  // function.
+  virtual Handle* Lookup(const StringPiece& key) = 0;
 
-    // If the cache contains entry for key, erase it.  Note that the
-    // underlying entry will be kept around until all existing handles
-    // to it have been released.
-    virtual void Erase(const StringPiece& key) = 0;
+  // Increments the reference count for the handle if it refers to an entry in
+  // the cache. Returns true if refcount was incremented; otherwise, returns
+  // false.
+  // REQUIRES: handle must have been returned by a method on *this.
+  virtual bool Ref(Handle* handle) = 0;
 
-    // Return a new numeric id.  May be used by multiple clients who are
-    // sharing the same cache to partition the key space.  Typically the
-    // client will allocate a new id at startup and prepend the id to
-    // its cache keys.
-    virtual uint64_t NewId() = 0;
+  /**
+   * Release a mapping returned by a previous Lookup(). A released entry might
+   * still  remain in cache in case it is later looked up by others. If
+   * force_erase is set then it also erase it from the cache if there is no
+   * other reference to  it. Erasing it should call the deleter function that
+   * was provided when the
+   * entry was inserted.
+   *
+   * Returns true if the entry was also erased.
+   */
+  // REQUIRES: handle must not have been released yet.
+  // REQUIRES: handle must have been returned by a method on *this.
+  virtual bool Release(Handle* handle, bool force_erase = false) = 0;
 
-private:
-    void LRU_Remove(Handle* e);
-    void LRU_Append(Handle* e);
-    void Unref(Handle* e);
+  // Return the value encapsulated in a handle returned by a
+  // successful Lookup().
+  // REQUIRES: handle must not have been released yet.
+  // REQUIRES: handle must have been returned by a method on *this.
+  virtual void* Value(Handle* handle) = 0;
 
-    struct Rep;
-    Rep* rep_;
+  // If the cache contains entry for key, erase it.  Note that the
+  // underlying entry will be kept around until all existing handles
+  // to it have been released.
+  virtual void Erase(const StringPiece& key) = 0;
+  // Return a new numeric id.  May be used by multiple clients who are
+  // sharding the same cache to partition the key space.  Typically the
+  // client will allocate a new id at startup and prepend the id to
+  // its cache keys.
+  virtual uint64_t NewId() = 0;
 
-    // No copying allowed
-    Cache(const Cache&);
-    void operator=(const Cache&);
+  // sets the maximum configured capacity of the cache. When the new
+  // capacity is less than the old capacity and the existing usage is
+  // greater than new capacity, the implementation will do its best job to
+  // purge the released entries from the cache in order to lower the usage
+  virtual void SetCapacity(size_t capacity) = 0;
+
+  // Set whether to return error on insertion when cache reaches its full
+  // capacity.
+  virtual void SetStrictCapacityLimit(bool strict_capacity_limit) = 0;
+
+  // Get the flag whether to return error on insertion when cache reaches its
+  // full capacity.
+  virtual bool HasStrictCapacityLimit() const = 0;
+
+  // returns the maximum configured capacity of the cache
+  virtual size_t GetCapacity() const = 0;
+
+  // returns the memory size for the entries residing in the cache.
+  virtual size_t GetUsage() const = 0;
+
+  // returns the memory size for a specific entry in the cache.
+  virtual size_t GetUsage(Handle* handle) const = 0;
+
+  // returns the memory size for the entries in use by the system
+  virtual size_t GetPinnedUsage() const = 0;
+
+  // Call this on shutdown if you want to speed it up. Cache will disown
+  // any underlying data and will not free it on delete. This call will leak
+  // memory - call this only if you're shutting down the process.
+  // Any attempts of using cache after this call will fail terribly.
+  // Always delete the DB object before calling this method!
+  virtual void DisownData(){
+      // default implementation is noop
+  };
+
+  // Apply callback to all entries in the cache
+  // If thread_safe is true, it will also lock the accesses. Otherwise, it will
+  // access the cache without the lock held
+  virtual void ApplyToAllCacheEntries(void (*callback)(void*, size_t),
+                                      bool thread_safe) = 0;
+
+  // Remove all entries.
+  // Prerequisite: no entry is referenced.
+  virtual void EraseUnRefEntries() = 0;
+
+  virtual std::string GetPrintableOptions() const { return ""; }
+
+  // Mark the last inserted object as being a raw data block. This will be used
+  // in tests. The default implementation does nothing.
+  virtual void TEST_mark_as_data_block(const StringPiece& key, size_t charge) {}
+
+ private:
+  // No copying allowed
+  Cache(const Cache&);
+  Cache& operator=(const Cache&);
 };
 
 } // namespace core

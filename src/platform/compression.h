@@ -12,14 +12,22 @@ limitations under the License.
 
 // tensorflow/tensorflow/core/platform/snappy.h
 
-#ifndef BUBBLEFS_PLATFORM_SNAPPY_WRAPPER_H_
-#define BUBBLEFS_PLATFORM_SNAPPY_WRAPPER_H_
+#ifndef BUBBLEFS_PLATFORM_COMPRESSION_H_
+#define BUBBLEFS_PLATFORM_COMPRESSION_H_
 
+#include "platform/base.h"
 #include "platform/types.h"
 
 namespace bubblefs {
 namespace port {
 
+inline bool Snappy_Supported() {
+#ifdef TF_USE_SNAPPY
+  return true;
+#endif
+  return false;
+}
+  
 // Snappy compression/decompression support
 bool Snappy_Compress(const char* input, size_t length, string* output);
 
@@ -30,4 +38,4 @@ bool Snappy_Uncompress(const char* input, size_t length, char* output);
 }  // namespace port
 }  // namespace bubblefs
 
-#endif  // BUBBLEFS_PLATFORM_SNAPPY_WRAPPER_H_
+#endif  // BUBBLEFS_PLATFORM_COMPRESSION_H_

@@ -17,6 +17,7 @@ limitations under the License.
 
 #include "platform/platform.h"
 #include "platform/types.h"
+
 #ifdef PLATFORM_POSIX
 #include "platform/port_posix.h" // for posix
 #endif
