@@ -192,7 +192,7 @@ class SimpleThreadPoolTempl : public ThreadPoolInterface {
   bool exiting_ = false;
 
   PerThread* GetPerThread() const {
-    TF_THREAD_LOCAL PerThread per_thread;
+    TF_STATIC_THREAD_LOCAL PerThread per_thread;
     return &per_thread;
   }
 };

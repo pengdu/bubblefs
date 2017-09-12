@@ -52,8 +52,8 @@ uint64 New64DefaultSeed() {
 }
 
 Random* Random::GetTLSInstance() {
-  TF_THREAD_LOCAL Random* tls_instance;
-  TF_THREAD_LOCAL std::aligned_storage<sizeof(Random)>::type tls_instance_bytes;
+  TF_STATIC_THREAD_LOCAL Random* tls_instance;
+  TF_STATIC_THREAD_LOCAL std::aligned_storage<sizeof(Random)>::type tls_instance_bytes;
 
   auto rv = tls_instance;
   if (TF_UNLIKELY(rv == nullptr)) {

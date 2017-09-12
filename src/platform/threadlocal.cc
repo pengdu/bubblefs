@@ -22,6 +22,7 @@ limitations under the License. */
 
 #include "platform/threadlocal.h"
 #include <sys/syscall.h>
+#include <vector>
 #include "platform/mutexlock.h"
 #include "platform/port.h"
 #include "gflags/gflags.h"
@@ -31,6 +32,7 @@ DEFINE_bool(thread_local_rand_use_global_seed,
             "Whether to use global seed in thread local rand.");
 
 namespace bubblefs {
+  
 namespace concurrent {
   
 unsigned int ThreadLocalRand::defaultSeed_ = 1;
@@ -66,6 +68,8 @@ std::default_random_engine& ThreadLocalRandomEngine::get() {
   }
   return *engine;
 }
+
+}  // namespace concurrent
 
 struct Entry {
   Entry() : ptr(nullptr) {}
@@ -189,20 +193,15 @@ private:
   // The private mutex.  Developers should always use Mutex() instead of
   // using this variable directly.
   port::Mutex mutex_;
-#ifdef TF_SUPPORT_THREAD_LOCAL
   // Thread local storage
-  static __thread ThreadData* tls_;
-#endif
+  TF_STATIC_THREAD_LOCAL ThreadData* tls_;
 
   // Used to make thread exit trigger possible if !defined(OS_MACOSX).
   // Otherwise, used to retrieve thread data.
   pthread_key_t pthread_key_;
 };
 
-
-#ifdef TF_SUPPORT_THREAD_LOCAL
-__thread ThreadData* ThreadLocalPtr::StaticMeta::tls_ = nullptr;
-#endif
+TF_THREAD_LOCAL ThreadData* ThreadLocalPtr::StaticMeta::tls_ = nullptr;
 
 // Windows doesn't support a per-thread destructor with its
 // TLS primitives.  So, we build it manually by inserting a
@@ -286,7 +285,7 @@ BOOL WINAPI DllMain(HINSTANCE h, DWORD dwReason, PVOID pv) {
     wintlscleanup::WinOnThreadExit(h, dwReason, pv);
   return TRUE;
 }
-#endif
+#endif // _MSC_VER
 }  // extern "C"
 
 #endif  // OS_WIN
@@ -596,5 +595,4 @@ void ThreadLocalPtr::Fold(FoldFunc func, void* res) {
   Instance()->Fold(id_, func, res);
 }
 
-}  // namespace concurrent
 }  // namespace bubblefs

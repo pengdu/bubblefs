@@ -44,9 +44,11 @@ namespace bubblefs {
   
 // Try to come up with a portable implementation of thread local variables
 #ifdef TF_SUPPORT_THREAD_LOCAL
-#define TF_THREAD_LOCAL static __thread
+#define TF_STATIC_THREAD_LOCAL static __thread
+#define TF_THREAD_LOCAL __thread
 #else
-#define TF_THREAD_LOCAL static thread_local
+#define TF_STATIC_THREAD_LOCAL static thread_local
+#define TF_THREAD_LOCAL thread_local
 #endif
   
 namespace concurrent {
@@ -251,6 +253,8 @@ protected:
   static ThreadLocal<std::default_random_engine> engine_;
 };
 
+}  // namespace concurrent
+
 // Cleanup function that will be called for a stored thread local
 // pointer (if not NULL) when one of the following happens:
 // (1) a thread terminates
@@ -318,8 +322,6 @@ private:
 
   const uint32_t id_;
 };
-
-}  // namespace concurrent
 
 }  // namespace bubblefs
 
