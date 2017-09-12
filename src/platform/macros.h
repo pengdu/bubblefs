@@ -1,3 +1,22 @@
+// Modifications copyright (C) 2017, Baidu.com, Inc.
+// Copyright 2017 The Apache Software Foundation
+
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -71,12 +90,32 @@ limitations under the License.
 // instance, a CHECK failure), and use that information in static analysis.
 // Giving it this information can help it optimize for the common case in
 // the absence of better information (ie. -fprofile-arcs).
-#if defined(COMPILER_GCC3)
+#if defined(__GNUC__) && __GNUC__ >= 4
 #define TF_PREDICT_FALSE(x) (__builtin_expect(x, 0))
 #define TF_PREDICT_TRUE(x) (__builtin_expect(!!(x), 1))
+#define TF_LIKELY(x)   (__builtin_expect((x), 1))
+#define TF_UNLIKELY(x) (__builtin_expect((x), 0))
+#define TF_ALIGN_AS(n) alignas(n)
+#define TF_PREFETCH(addr, rw, locality) __builtin_prefetch(addr, rw, locality)
+#define TF_SYNC_SYNCHRONIZE __sync_synchronize();
+#define TF_SYNC_ADD_AND_FETCH(x, y) __sync_add_and_fetch(x, y);
+#define TF_SYNC_FETCH_AND_ADD(x, y) __sync_fetch_and_add(x, y);
+#define TF_SYNC_BOOL_COMPARE_AND_SWAP(x, y, z) __sync_bool_compare_and_swap(x, y, x);
+#define TF_SYNC_VAL_COMPARE_AND_SWAP(x, y, z) __sync_val_compare_and_swap(x, y, z);
+#define TF_SYNC_LOCK_TEST_AND_SET(x, y, z) __sync_lock_test_and_set(x, y);
 #else
 #define TF_PREDICT_FALSE(x) (x)
 #define TF_PREDICT_TRUE(x) (x)
+#define TF_LIKELY(x)   (x)
+#define TF_UNLIKELY(x) (x)
+#define TF_ALIGN_AS(n)
+#define TF_PREFETCH(addr, rw, locality)
+#define TF_SYNC_SYNCHRONIZE
+#define TF_SYNC_ADD_AND_FETCH(x, y)
+#define TF_SYNC_FETCH_AND_ADD(x, y)
+#define TF_SYNC_BOOL_COMPARE_AND_SWAP(x, y, z)
+#define TF_SYNC_VAL_COMPARE_AND_SWAP(x, y, z)
+#define TF_SYNC_LOCK_TEST_AND_SET(x, y, z)
 #endif
 
 // A macro to disallow the copy constructor and operator= functions
@@ -125,13 +164,5 @@ limitations under the License.
 #define TF_ATTRIBUTE_NO_SANITIZE_MEMORY
 
 #define TF_NOEXCEPT noexcept
-
-#if defined(__GNUC__) && __GNUC__ >= 4
-#define TF_LIKELY(x)   (__builtin_expect((x), 1))
-#define TF_UNLIKELY(x) (__builtin_expect((x), 0))
-#else
-#define TF_LIKELY(x)   (x)
-#define TF_UNLIKELY(x) (x)
-#endif
 
 #endif // BUBBLEFS_PLATFORM_MACROS_H_

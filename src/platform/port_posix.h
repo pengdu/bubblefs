@@ -62,6 +62,7 @@ static const size_t kMaxSizet = std::numeric_limits<size_t>::max();
 
 class CondVar;
 
+// A Mutex represents an exclusive lock.
 class Mutex {
  public:
 // We want to give users opportunity to default all the mutexes to adaptive if
@@ -80,14 +81,21 @@ class Mutex {
   ~Mutex();
 
   void Lock();
+  bool TryLock();
+  bool TimedLock(long _millisecond);
   void Unlock();
+  bool IsLocked();
   // this will assert if the mutex is not locked
   // it does NOT verify that mutex is held by a calling thread
   void AssertHeld();
 
  private:
+  void AfterLock();
+  void BeforeUnlock();
+   
   friend class CondVar;
   pthread_mutex_t mu_;
+  pthread_t owner_;
 #ifndef NDEBUG
   bool locked_;
 #endif
@@ -156,10 +164,6 @@ extern void InitOnce(OnceType* once, void (*initializer)());
 extern void *cacheline_aligned_alloc(size_t size);
 
 extern void cacheline_aligned_free(void *memblock);
-
-#define TF_ALIGN_AS(n) alignas(n)
-
-#define TF_PREFETCH(addr, rw, locality) __builtin_prefetch(addr, rw, locality)
 
 extern void Crash(const std::string& srcfile, int srcline);
 

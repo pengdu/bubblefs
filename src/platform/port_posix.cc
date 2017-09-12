@@ -44,12 +44,14 @@ limitations under the License.
 #include "platform/base.h"
 #include "platform/logging.h"
 #include "platform/mem.h"
+#include "platform/timer.h"
 #include "utils/strcat.h"
 
 namespace bubblefs {
 namespace internal {
 
 namespace { // namespace anonymous
+  
 bool IsPortAvailable(int* port, bool is_tcp) {
   const int protocol = is_tcp ? IPPROTO_TCP : 0;
   const int fd = socket(AF_INET, is_tcp ? SOCK_STREAM : SOCK_DGRAM, protocol);
@@ -249,7 +251,7 @@ static int PthreadCall(const char* label, int result) {
   return result;
 }
 
-Mutex::Mutex(bool adaptive) {
+Mutex::Mutex(bool adaptive) : owner_(0) {
 #ifdef TF_USE_ADAPTIVE_MUTEX
   if (!adaptive) {
     PthreadCall("init mutex", pthread_mutex_init(&mu_, nullptr));
@@ -264,7 +266,11 @@ Mutex::Mutex(bool adaptive) {
                 pthread_mutexattr_destroy(&mutex_attr));
   }
 #else
-  PthreadCall("init mutex", pthread_mutex_init(&mu_, nullptr));
+  pthread_mutexattr_t attr;
+  PthreadCall("init mutexattr", pthread_mutexattr_init(&attr));
+  PthreadCall("set mutexattr", pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK));
+  PthreadCall("init mutex", pthread_mutex_init(&mu_, &attr));
+  PthreadCall("destroy mutexattr", pthread_mutexattr_destroy(&attr));
 #endif // TF_USE_ADAPTIVE_MUTEX
 }
 
@@ -275,19 +281,64 @@ void Mutex::Lock() {
 #ifndef NDEBUG
   locked_ = true;
 #endif
+  AfterLock();
+}
+
+bool Mutex::TryLock() {
+  int ret = pthread_mutex_trylock(&mu_);
+  if (EBUSY == ret) return false;
+  if (EINVAL == ret) abort();
+  else if (EAGAIN == ret) abort();
+  else if (EDEADLK == ret) abort();
+  else if (0 != ret) abort();
+  AfterLock();
+  return 0 == ret;
+}
+
+bool Mutex::TimedLock(long _millisecond) {
+  struct timespec ts;
+  timer::make_timeout(&ts, _millisecond);
+  int ret =  pthread_mutex_timedlock(&mu_, &ts);
+  switch (ret) {
+    case 0: AfterLock(); return true;
+    case ETIMEDOUT: return false;
+    case EAGAIN: abort();
+    case EDEADLK: abort();
+    case EINVAL: abort();
+    default: abort();
+  }
+  return false;
 }
 
 void Mutex::Unlock() {
+  BeforeUnlock();
 #ifndef NDEBUG
   locked_ = false;
 #endif
   PthreadCall("unlock", pthread_mutex_unlock(&mu_));
 }
 
+bool Mutex::IsLocked() {
+    int ret = pthread_mutex_trylock(&mu_);
+    if (0 == ret) Unlock();
+    return 0 != ret;
+}
+
 void Mutex::AssertHeld() {
 #ifndef NDEBUG
   assert(locked_);
 #endif
+  if (0 == pthread_equal(owner_, pthread_self())) {
+    abort();
+  }
+}
+
+void Mutex::AfterLock() {
+  owner_ = pthread_self();
+}
+
+void Mutex::BeforeUnlock() {
+  owner_ = 0;
 }
 
 CondVar::CondVar(Mutex* mu)

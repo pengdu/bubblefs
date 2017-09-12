@@ -195,14 +195,14 @@ private:
  * }
  */
 template <typename T>
-class BlockingQueue {
+class BlockingFifoQueue {
 public:
   typedef T ValueType;
   /**
    * @brief Construct Function.
    * @param[in] capacity the max numer of elements the queue can have.
    */
-  explicit BlockingQueue(size_t capacity) : capacity_(capacity) {}
+  explicit BlockingFifoQueue(size_t capacity) : capacity_(capacity) {}
 
   /**
    * @brief enqueue an element into Queue.

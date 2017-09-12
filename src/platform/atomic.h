@@ -1,3 +1,22 @@
+// Modifications copyright (C) 2017, Baidu.com, Inc.
+// Copyright 2017 The Apache Software Foundation
+
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 // Copyright (c) 2014, Baidu.com, Inc. All Rights Reserved
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -5,9 +24,13 @@
 // Author: yanshiguang02@baidu.com
 
 // baidu/common/include/atomic.h
+// // palo/be/src/common/atomic.h
 
-#ifndef  BUBBLEFS_PLATFORM_ATOMIC_H_
-#define  BUBBLEFS_PLATFORM_ATOMIC_H_
+#ifndef BUBBLEFS_PLATFORM_ATOMIC_H_
+#define BUBBLEFS_PLATFORM_ATOMIC_H_
+
+#include <algorithm>
+#include "platform/macros.h"
 
 namespace bubblefs {
 namespace atomics {
@@ -167,6 +190,30 @@ static inline long atomic_comp_swap64(volatile void *mem, long long xchg, long l
     );
     return cmp;
 }
+
+class AtomicUtil {
+public:
+    // Issues instruction to have the CPU wait, this is less busy (bus traffic
+    // etc) than just spinning.
+    // For example:
+    //  while (1);
+    // should be:
+    //  while (1) CpuWait();
+    static TF_ATTRIBUTE_ALWAYS_INLINE void cpu_wait() {
+        asm volatile("pause\n": : :"memory");
+    }
+
+    /// Provides "barrier" semantics (see below) without a memory access.
+    static TF_ATTRIBUTE_ALWAYS_INLINE void memory_barrier() {
+        TF_SYNC_SYNCHRONIZE
+    }
+
+    /// Provides a compiler barrier. The compiler is not allowed to reorder memory
+    /// accesses across this (but the CPU can).  This generates no instructions.
+    static TF_ATTRIBUTE_ALWAYS_INLINE void compiler_barrier() {
+        __asm__ __volatile__("" : : : "memory");
+    }
+};
 
 } // namespace atomics
 } // namespace bubblefs
