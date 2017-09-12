@@ -37,8 +37,8 @@ limitations under the License.
 #include "utils/map_util.h"
 #include "utils/path.h"
 #include "utils/stl_util.h"
-#include "utils/path.h"
 #include "utils/stringprintf.h"
+#include "utils/threadpool.h"
 
 namespace bubblefs {
 

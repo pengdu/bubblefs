@@ -11,6 +11,7 @@ limitations under the License.
 ==============================================================================*/
 
 // tensorflow/tensorflow/core/lib/core/arena.cc
+// rocksdb/util/arena.cc
 
 // This approach to arenas overcomes many of the limitations described
 // in the "Specialized allocators" section of
@@ -36,6 +37,28 @@ namespace core {
 // Arena::~Arena()
 //    Destroying the arena automatically calls Reset()
 // ----------------------------------------------------------------------
+  
+// MSVC complains that it is already defined since it is static in the header.
+#ifndef _MSC_VER
+const size_t Arena::kInlineSize;
+#endif
+
+const size_t Arena::kMinBlockSize = 4096;
+const size_t Arena::kMaxBlockSize = 2u << 30;
+static const int kAlignUnit = sizeof(void*);
+
+size_t OptimizeBlockSize(size_t block_size) {
+  // Make sure block_size is in optimal range
+  block_size = std::max(Arena::kMinBlockSize, block_size);
+  block_size = std::min(Arena::kMaxBlockSize, block_size);
+
+  // make sure block_size is the multiple of kAlignUnit
+  if (block_size % kAlignUnit != 0) {
+    block_size = (1 + block_size / kAlignUnit) * kAlignUnit;
+  }
+
+  return block_size;
+}
 
 Arena::Arena(const size_t block_size)
     : remaining_(0),

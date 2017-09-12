@@ -65,27 +65,18 @@ if [ ! -f "${FLAG_DIR}/jemalloc_5_0_1" ] \
 fi
 
 # gflags
-if [ ! -f "${FLAG_DIR}/gflags_2_1_1" ] \
-    || [ ! -f "${DEPS_PREFIX}/lib/libgflags.a" ] \
-    || [ ! -d "${DEPS_PREFIX}/include/gflags" ]; then
+if [ ! -f "${FLAG_DIR}/gflags_2_1_1" ]; then
     cd ${DEPS_SOURCE}
-    if [ -d "${DEPS_SOURCE}/gflags" ] \
-    	|| [ -d "${DEPS_BUILD}/gflags" ]; then
+    if [ -d "${DEPS_SOURCE}/gflags" ] ; then
     	rm -rf ${DEPS_SOURCE}/gflags
-    	sudo rm -rf ${DEPS_BUILD}/gflags
     fi
     unzip ${DEPS_PACKAGE}/gflags-2.2.1.zip -d .
     mv gflags-2.2.1 gflags
     cd gflags
-    cmake -DCMAKE_INSTALL_PREFIX=${DEPS_BUILD}/gflags -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC
+    cmake -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC
     make -j4
     make test
     sudo make install
-    cd ${DEPS_BUILD}/gflags
-    sudo chmod 777 lib/libgflags.a
-    sudo chmod -R 777 include
-    cp -a lib/libgflags.a ${DEPS_PREFIX}/lib
-    cp -a include/gflags ${DEPS_PREFIX}/include
     touch "${FLAG_DIR}/gflags_2_1_1"
 fi
 

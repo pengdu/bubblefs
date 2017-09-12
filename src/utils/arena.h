@@ -26,22 +26,38 @@ limitations under the License.
 namespace bubblefs {
 namespace core {
 
+class Allocator {
+ public:
+  virtual ~Allocator() {}
+
+  virtual char* Alloc(const size_t size) = 0;
+  virtual char* AllocAligned(const size_t size, const size_t alignment) = 0;
+
+  virtual size_t BlockSize() const = 0;
+};  
+  
 // This class is "thread-compatible": different threads can access the
 // arena at the same time without locking, as long as they use only
 // const methods.
-class Arena {
+class Arena : public Allocator {
  public:
   // Allocates a thread-compatible arena with the specified block size.
   explicit Arena(const size_t block_size);
-  ~Arena();
+  virtual ~Arena();
+  
+  static const size_t kInlineSize = 2048;
+  static const size_t kMinBlockSize;
+  static const size_t kMaxBlockSize;
 
-  char* Alloc(const size_t size) {
+  virtual char* Alloc(const size_t size) override {
     return reinterpret_cast<char*>(GetMemory(size, 1));
   }
 
-  char* AllocAligned(const size_t size, const size_t alignment) {
+  virtual char* AllocAligned(const size_t size, const size_t alignment) override {
     return reinterpret_cast<char*>(GetMemory(size, alignment));
   }
+  
+  virtual size_t BlockSize() const override { return block_size_; }
 
   void Reset();
 

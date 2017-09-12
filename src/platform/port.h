@@ -15,7 +15,10 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_PORT_H_
 #define BUBBLEFS_PLATFORM_PORT_H_
 
+#include "platform/platform.h"
 #include "platform/types.h"
+#ifdef PLATFORM_POSIX
 #include "platform/port_posix.h" // for posix
+#endif
 
 #endif  // BUBBLEFS_PLATFORM_PORT_H_
