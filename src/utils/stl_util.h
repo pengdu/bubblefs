@@ -168,26 +168,6 @@ inline std::ostream& operator<<(std::ostream& out, const std::multimap<A,B,Comp,
 namespace bubblefs {
 namespace gtl {
   
-// comparators for stl containers
-// for std::unordered_map:
-//   std::unordered_map<const char*, long, hash<const char*>, eqstr> vals;
-struct eqstr
-{
-  bool operator()(const char* s1, const char* s2) const
-  {
-    return strcmp(s1, s2) == 0;
-  }
-};
-
-// for set, map
-struct ltstr
-{
-  bool operator()(const char* s1, const char* s2) const
-  {
-    return strcmp(s1, s2) < 0;
-  }
-};  
-  
 /**
  * find the value given a key k from container c.
  * If the key can be found, the value is stored in *value

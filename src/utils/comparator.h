@@ -11,11 +11,32 @@
 #ifndef BUBBLEFS_UTILS_COMPARATOR_H_
 #define BUBBLEFS_UTILS_COMPARATOR_H_
 
+#include <string.h>
 #include <string>
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
 
+// comparators for stl containers
+// for std::unordered_map:
+//   std::unordered_map<const char*, long, hash<const char*>, eqstr> vals;
+struct eqstr
+{
+  bool operator()(const char* s1, const char* s2) const
+  {
+    return strcmp(s1, s2) == 0;
+  }
+};
+
+// for set, map
+struct ltstr
+{
+  bool operator()(const char* s1, const char* s2) const
+  {
+    return strcmp(s1, s2) < 0;
+  }
+};
+  
 // A Comparator object provides a total order across slices that are
 // used as keys in an sstable or a database.  A Comparator implementation
 // must be thread-safe since rocksdb may invoke its methods concurrently
