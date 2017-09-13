@@ -18,13 +18,11 @@ limitations under the License.
 #include <sched.h>
 #endif
 #include <stdio.h>
+#include <mutex>
 #include <thread>
 #include "platform/logging.h"
 #include "platform/platform.h"
 #include "platform/types.h"
-#if defined(PLATFORM_IS_X86)
-#include <mutex>  // NOLINT
-#endif
 
 // SIMD extension querying is only available on x86.
 #ifdef PLATFORM_IS_X86
@@ -47,8 +45,8 @@ limitations under the License.
       "xchg %%rdi, %%rbx\n"                \
       : "=a"(a), "=D"(b), "=c"(c), "=d"(d) \
       : "a"(a_inp), "2"(c_inp))
-#endif
-#endif
+#endif // PLATFORM_WINDOWS
+#endif // PLATFORM_IS_X86
 
 namespace bubblefs {
 namespace port {
@@ -87,7 +85,7 @@ int GetXCR0EAX() {
   asm("XGETBV" : "=a"(eax), "=d"(edx) : "c"(0));
   return eax;
 }
-#endif
+#endif // PLATFORM_WINDOWS
 
 // Structure for basic CPUID info
 class CPUIDInfo {
@@ -368,6 +366,10 @@ int CPUModelNum() {
 #endif
 }
 
+double NominalCPUFrequency() {
+  // TODO(yuefengz): implement it for this platform.
+  return 1.0;
+}
 
 namespace { // namespace anonymous
 

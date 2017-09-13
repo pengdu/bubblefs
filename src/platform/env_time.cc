@@ -10,23 +10,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-// tensorflow/tensorflow/core/platform/load_library.h
-
-#ifndef BUBBLEFS_PLATFORM_LOAD_LIBRARY_H_
-#define BUBBLEFS_PLATFORM_LOAD_LIBRARY_H_
-
-#include "platform/types.h"
-#include "utils/status.h"
+#include <sys/time.h>
+#include <time.h>
+#include "platform/platform.h"
+#include "platform/env_time.h"
 
 namespace bubblefs {
-namespace internal {
 
-Status LoadLibrary(const char* library_filename, void** handle);
-Status GetSymbolFromLibrary(void* handle, const char* symbol_name,
-                            void** symbol);
-string FormatLibraryFileName(const string& name, const string& version);
+namespace {
 
-}  // namespace internal
+class PosixEnvTime : public EnvTime {
+ public:
+  PosixEnvTime() {}
+
+  uint64 NowMicros() override {
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    return static_cast<uint64>(tv.tv_sec) * 1000000 + tv.tv_usec;
+  }
+};
+
+}  // namespace
+
+#if defined(PLATFORM_POSIX) || defined(__ANDROID__)
+EnvTime* EnvTime::Default() {
+  static EnvTime* default_env_time = new PosixEnvTime;
+  return default_env_time;
+}
+#endif
+
 }  // namespace bubblefs
-
-#endif  // BUBBLEFS_PLATFORM_LOAD_LIBRARY_H_

@@ -100,6 +100,9 @@ int CPUFamily();
 // Returns CPU model number.
 int CPUModelNum();
 
+// Returns nominal core processor cycles per second of each processor.
+double NominalCPUFrequency();
+
 // Called by the framework when we expect heavy CPU computation and we want to
 // be sure that the code has been compiled to run optimally on the current
 // hardware. The first time it's called it will run lightweight checks of

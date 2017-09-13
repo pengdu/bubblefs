@@ -55,7 +55,7 @@ class Status {
   // Return a success status.
   static Status OK() { return Status(); }
   
-    // Return error status of an appropriate type.
+  // Return error status of an appropriate type.
   static Status NotFound(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::NOT_FOUND, msg, msg2);
   }
@@ -141,7 +141,7 @@ class Status {
   /// Returns true iff the status indicates success.
   bool ok() const { return (state_ == nullptr); }
   
-   // Returns true iff the status indicates a NotFound error.
+  // Returns true iff the status indicates a NotFound error.
   bool IsNotFound() const { return code() == error::NOT_FOUND; }
 
   // Returns true iff the status indicates a Corruption error.

@@ -165,4 +165,9 @@ limitations under the License.
 
 #define TF_NOEXCEPT noexcept
 
+// Helper macros that include information about file name and line number
+#define TF_STRINGIFY(x) #x
+#define TF_TOSTRING(x) STRINGIFY(x)
+#define TF_PREPEND_FILE_LINE(FMT) ("[" __FILE__ ":" TOSTRING(__LINE__) "] " FMT)
+
 #endif // BUBBLEFS_PLATFORM_MACROS_H_
