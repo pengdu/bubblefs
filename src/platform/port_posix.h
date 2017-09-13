@@ -118,9 +118,9 @@ class CondVar {
  public:
   explicit CondVar(Mutex* mu);
   ~CondVar();
-  void Wait();
+  void Wait(const char* msg = nullptr);
   // Timed condition wait.  Returns true if timeout occurred.
-  bool TimedWait(uint64_t abs_time_us);
+  bool TimedWait(uint64_t abs_time_us, const char* msg = nullptr);
   // Time wait in timeout ms, return true if signalled
   bool TimeoutWait(uint64_t timeout, const char* msg = nullptr);
   void Signal();

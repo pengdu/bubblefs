@@ -43,7 +43,6 @@ limitations under the License.
 #include <unordered_set>
 #include "platform/base.h"
 #include "platform/logging.h"
-#include "platform/mem.h"
 #include "platform/timer.h"
 #include "utils/strcat.h"
 
@@ -152,95 +151,6 @@ int PickUnusedPortOrDie() {
 }  // namespace internal
 
 namespace port {
-
-void* AlignedMalloc(size_t size, int minimum_alignment) {
-#if defined(__ANDROID__)
-  return memalign(minimum_alignment, size);
-#else  // !defined(__ANDROID__)
-  void* ptr = nullptr;
-  // posix_memalign requires that the requested alignment be at least
-  // sizeof(void*). In this case, fall back on malloc which should return
-  // memory aligned to at least the size of a pointer.
-  const int required_alignment = sizeof(void*);
-  if (minimum_alignment < required_alignment) return Malloc(size);
-#if TF_USE_JEMALLOC
-  int err = jemalloc_posix_memalign(&ptr, minimum_alignment, size);
-#else
-  int err = posix_memalign(&ptr, minimum_alignment, size);
-#endif
-  if (err != 0) {
-    return nullptr;
-  } else {
-    return ptr;
-  }
-#endif
-}
-
-void AlignedFree(void* aligned_memory) { Free(aligned_memory); }
-
-void* Malloc(size_t size) {
-#if TF_USE_JEMALLOC
-  return jemalloc_malloc(size);
-#else
-  return malloc(size);
-#endif
-}
-
-void* Realloc(void* ptr, size_t size) {
-#ifdef TENSORFLOW_USE_JEMALLOC
-  return jemalloc_realloc(ptr, size);
-#else
-  return realloc(ptr, size);
-#endif
-}
-
-void Free(void* ptr) {
-#if TF_USE_JEMALLOC
-  jemalloc_free(ptr);
-#else
-  free(ptr);
-#endif
-}
-
-double GetMemoryUsage() {
-  FILE* fp = fopen("/proc/meminfo", "r");
-  CHECK(fp) << "failed to fopen /proc/meminfo";
-  size_t bufsize = 256 * sizeof(char);
-  char* buf = new (std::nothrow) char[bufsize];
-  CHECK(buf);
-  int totalMem = -1;
-  int freeMem = -1;
-  int bufMem = -1;
-  int cacheMem = -1;
-  while (getline(&buf, &bufsize, fp) >= 0) {
-    if (0 == strncmp(buf, "MemTotal", 8)) {
-      if (1 != sscanf(buf, "%*s%d", &totalMem)) {
-        LOG(FATAL) << "failed to get MemTotal from string: [" << buf << "]";
-      }
-    } else if (0 == strncmp(buf, "MemFree", 7)) {
-      if (1 != sscanf(buf, "%*s%d", &freeMem)) {
-        LOG(FATAL) << "failed to get MemFree from string: [" << buf << "]";
-      }
-    } else if (0 == strncmp(buf, "Buffers", 7)) {
-      if (1 != sscanf(buf, "%*s%d", &bufMem)) {
-        LOG(FATAL) << "failed to get Buffers from string: [" << buf << "]";
-      }
-    } else if (0 == strncmp(buf, "Cached", 6)) {
-      if (1 != sscanf(buf, "%*s%d", &cacheMem)) {
-        LOG(FATAL) << "failed to get Cached from string: [" << buf << "]";
-      }
-    }
-    if (totalMem != -1 && freeMem != -1 && bufMem != -1 && cacheMem != -1) {
-      break;
-    }
-  }
-  CHECK(totalMem != -1 && freeMem != -1 && bufMem != -1 && cacheMem != -1)
-      << "failed to get all information";
-  fclose(fp);
-  delete[] buf;
-  double usedMem = 1.0 - 1.0 * (freeMem + bufMem + cacheMem) / totalMem;
-  return usedMem;
-}
   
 static int PthreadCall(const char* label, int result) {
   if (result != 0 && result != ETIMEDOUT) {
@@ -346,13 +256,13 @@ CondVar::CondVar(Mutex* mu)
 
 CondVar::~CondVar() { PthreadCall("destroy cv", pthread_cond_destroy(&cv_)); }
 
-void CondVar::Wait() {
+void CondVar::Wait(const char* msg) {
   mu_->BeforeUnlock();
   PthreadCall("cv wait", pthread_cond_wait(&cv_, &mu_->mu_));
   mu_->AfterLock();
 }
 
-bool CondVar::TimedWait(uint64_t abs_time_us) {
+bool CondVar::TimedWait(uint64_t abs_time_us, const char* msg = nullptr) {
   struct timespec ts;
   ts.tv_sec = static_cast<time_t>(abs_time_us / 1000000);
   ts.tv_nsec = static_cast<suseconds_t>((abs_time_us % 1000000) * 1000);

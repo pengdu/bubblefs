@@ -17,7 +17,6 @@
 #include <sstream>
 #include <vector>
 #include "platform/mutexlock.h"
-#include "platform/timer.h"
 
 namespace bubblefs {
 namespace baiducomm {
@@ -183,6 +182,11 @@ private:
         reinterpret_cast<ThreadPool*>(arg)->ThreadProc();
         return nullptr;
     }
+    int64_t get_micros() {
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        return static_cast<int64_t>(ts.tv_sec) * 1000000 + static_cast<int64_t>(ts.tv_nsec) / 1000;
+    }
     void ThreadProc() {
         while (true) {
             Task task;
@@ -195,7 +199,7 @@ private:
             }
             // Timer task
             if (!time_queue_.empty()) {
-                int64_t now_time = timer::get_micros();
+                int64_t now_time = get_micros();
                 BGItem bg_item = time_queue_.top();
                 int64_t wait_time = (bg_item.exe_time - now_time) / 1000; // in ms
                 if (wait_time <= 0) {
@@ -209,7 +213,7 @@ private:
                         running_task_id_ = bg_item.id;
                         mutex_.Unlock();
                         task();
-                        task_cost_sum_ += timer::get_micros() - now_time;
+                        task_cost_sum_ += get_micros() - now_time;
                         task_count_++;
                         mutex_.Lock("ThreadProcRelock");
                         running_task_id_ = 0;

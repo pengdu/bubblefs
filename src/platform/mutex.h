@@ -24,8 +24,6 @@ limitations under the License.
 #include "platform/types.h"
 
 namespace bubblefs {
-  
-enum ConditionResult { kCond_Timeout, kCond_MaybeNotified };
 
 #undef mutex_lock
 
@@ -60,27 +58,6 @@ class SCOPED_LOCKABLE mutex_lock : public std::unique_lock<std::mutex> {
 // Catch bug where variable name is omitted, e.g. mutex_lock (mu);
 #define mutex_lock(x) static_assert(0, "mutex_lock_decl_missing_var_name");
 
-using std::condition_variable;
-
-inline ConditionResult WaitForMilliseconds(mutex_lock* mu,
-                                           condition_variable* cv, int64 ms) {
-  std::cv_status s = cv->wait_for(*mu, std::chrono::milliseconds(ms));
-  return (s == std::cv_status::timeout) ? kCond_Timeout : kCond_MaybeNotified;
-}
-
-// The mutex library included above defines:
-//   class mutex;
-//   class mutex_lock;
-//   class condition_variable;
-// It also defines the following:
-
-// Like "cv->wait(*mu)", except that it only waits for up to "ms" milliseconds.
-//
-// Returns kCond_Timeout if the timeout expired without this
-// thread noticing a signal on the condition variable.  Otherwise may
-// return either kCond_Timeout or kCond_MaybeNotified
-ConditionResult WaitForMilliseconds(mutex_lock* mu, condition_variable* cv,
-                                    int64 ms);
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_MUTEX_H_

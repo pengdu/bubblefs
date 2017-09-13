@@ -46,5 +46,6 @@ void InstallFailureWriter(void (*callback)(const char*, int)) {
 #endif
 }
 
-}  // namespace logging  
+}  // namespace logging
+
 }  // namespace bubblefs

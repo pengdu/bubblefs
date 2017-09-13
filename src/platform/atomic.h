@@ -24,18 +24,23 @@
 // Author: yanshiguang02@baidu.com
 
 // baidu/common/include/atomic.h
+// baidu/ins/src/common/asm_atomic.h
 // palo/be/src/common/atomic.h
 
 #ifndef BUBBLEFS_PLATFORM_ATOMIC_H_
 #define BUBBLEFS_PLATFORM_ATOMIC_H_
 
+#include <stdint.h>
 #include <algorithm>
 #include "platform/macros.h"
+
+#if !defined(__i386__) && !defined(__x86_64__)
+#error    "Arch not supprot asm atomic!"
+#endif
 
 namespace bubblefs {
 namespace atomics {
 
-  
 /**
  * Note: use gcc.
  * asm (statement : out : in : dirty clobbered regs or memory).
@@ -206,6 +211,87 @@ static inline long atomic_comp_swap64(volatile void *mem, long long xchg, long l
     );
     return cmp;
 }
+
+/*
+template <typename T>
+inline void asm_atomic_inc(volatile T* n)
+{
+    asm volatile ("lock; incl %0;":"+m"(*n)::"cc");
+}
+template <typename T>
+inline void asm_atomic_dec(volatile T* n)
+{
+    asm volatile ("lock; decl %0;":"+m"(*n)::"cc");
+}
+template <typename T>
+inline T asm_atomic_add_ret_old(volatile T* n, T v)
+{
+    asm volatile ("lock; xaddl %1, %0;":"+m"(*n),"+r"(v)::"cc");
+    return v;
+}
+template <typename T>
+inline T asm_atomic_inc_ret_old(volatile T* n)
+{
+    T r = 1;
+    asm volatile ("lock; xaddl %1, %0;":"+m"(*n), "+r"(r)::"cc");
+    return r;
+}
+template <typename T>
+inline T asm_atomic_dec_ret_old(volatile T* n)
+{
+    T r = (T)-1;
+    asm volatile ("lock; xaddl %1, %0;":"+m"(*n), "+r"(r)::"cc");
+    return r;
+}
+template <typename T>
+inline T asm_atomic_add_ret_old64(volatile T* n, T v)
+{
+    asm volatile ("lock; xaddq %1, %0;":"+m"(*n),"+r"(v)::"cc");
+    return v;
+}
+template <typename T>
+inline T asm_atomic_inc_ret_old64(volatile T* n)
+{
+    T r = 1;
+    asm volatile ("lock; xaddq %1, %0;":"+m"(*n), "+r"(r)::"cc");
+    return r;
+}
+template <typename T>
+inline T asm_atomic_dec_ret_old64(volatile T* n)
+{
+    T r = (T)-1;
+    asm volatile ("lock; xaddq %1, %0;":"+m"(*n), "+r"(r)::"cc");
+    return r;
+}
+template <typename T>
+inline void asm_atomic_add(volatile T* n, T v)
+{
+    asm volatile ("lock; addl %1, %0;":"+m"(*n):"r"(v):"cc");
+}
+template <typename T>
+inline void asm_atomic_sub(volatile T* n, T v)
+{
+    asm volatile ("lock; subl %1, %0;":"+m"(*n):"r"(v):"cc");
+}
+template <typename T, typename C, typename D>
+inline T asm_atomic_cmpxchg(volatile T* n, C cmp, D dest)
+{
+    asm volatile ("lock; cmpxchgl %1, %0":"+m"(*n), "+r"(dest), "+a"(cmp)::"cc");
+    return cmp;
+}
+// return old value
+template <typename T>
+inline T asm_atomic_swap(volatile T* lockword, T value)
+{
+    asm volatile ("lock; xchg %0, %1;" : "+r"(value), "+m"(*lockword));
+    return value;
+}
+template <typename T, typename E, typename C>
+inline T asm_atomic_comp_swap(volatile T* lockword, E exchange, C comperand)
+{
+    return asm_atomic_cmpxchg(lockword, comperand, exchange);
+}
+*/
 
 class AtomicUtil {
 public:
