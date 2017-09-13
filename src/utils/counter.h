@@ -13,7 +13,8 @@
 #include "platform/timer.h"
 
 namespace bubblefs {
-
+namespace metric {
+  
 class Counter {
     volatile int64_t val_;
 public:
@@ -41,6 +42,7 @@ public:
     }
 };
 
+} // namespace metric
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_COUNTER_H_

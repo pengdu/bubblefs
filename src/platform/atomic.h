@@ -24,7 +24,7 @@
 // Author: yanshiguang02@baidu.com
 
 // baidu/common/include/atomic.h
-// // palo/be/src/common/atomic.h
+// palo/be/src/common/atomic.h
 
 #ifndef BUBBLEFS_PLATFORM_ATOMIC_H_
 #define BUBBLEFS_PLATFORM_ATOMIC_H_
@@ -35,11 +35,28 @@
 namespace bubblefs {
 namespace atomics {
 
+  
 /**
- * @brief 原子加,返回原值
- *
- * @param [in/out] mem 原子变量
- * @param [in] add              : 加数
+ * Note: use gcc.
+ * asm (statement : out : in : dirty clobbered regs or memory).
+ * if asm conflicts, use __asm__ instead.
+ * a,b,c,d,S,D means eax,ebx,ecx,edx,esi,edi.
+ * r means any register, m means memory, i means imediate, g means any, %%reg refs register
+ * $, $0x means constants.
+ * %0 means output ... %n-1 means input operand, "=" specifies output operand.
+ * 
+**/ 
+  
+#if defined(__GNUC__)
+/**
+ * @brief atomic add
+ * lock xadd guarantees atomic ops and memory fence for muliti processors;
+ * xadd exchanges the first operand (destination operand) with the second operand (source operand), 
+ * then loads the sum of the two values into the destination operand. 
+ * The destination operand can be a register or a memory location; 
+ * the source operand is a register.
+ * @param [in/out] mem  atomic operand
+ * @param [in] add              : add operand
  * @return  inline int
  * @author yanshiguang02
  * @date 2012/09/09 13:55:38
@@ -66,7 +83,7 @@ static inline long atomic_add64(volatile long* mem, long add)
 }
 
 /**
- * @brief 原子自增
+ * @brief atomic increment
  *
  * @param [in/out] mem   : volatile int*
  * @return  inline void
@@ -91,7 +108,7 @@ static inline void atomic_inc64(volatile long *mem)
 }
 
 /**
- * @brief 原子自减
+ * @brief atomic decrement
  *
  * @param [in/out] mem   : volatile int*
  * @return  inline void
@@ -172,7 +189,7 @@ static inline int atomic_comp_swap(volatile void *mem, int xchg, int cmp)
 }
 
 /**
- * @brief 64位 if set
+ * @brief 64bit if set
  *
  * @param [in/out] mem   : volatile void*
  * @param [in/out] xchg   : long long
@@ -214,6 +231,8 @@ public:
         __asm__ __volatile__("" : : : "memory");
     }
 };
+
+#endif // defined(__GNUC__)
 
 } // namespace atomics
 } // namespace bubblefs

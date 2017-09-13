@@ -10,11 +10,11 @@
 #define BUBBLEFS_PLATFORM_TIMER_H
 
 #include <sys/time.h>
-#include <time.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <unistd.h>
+#include <string.h>
 #include <time.h>
+#include <unistd.h>
 #include <string>
 
 namespace bubblefs {
@@ -152,6 +152,5 @@ private:
 
 } // namespace timer
 } // namespace bubblefs
-
 
 #endif // BUBBLEFS_PLATFORM_TIMER_H
