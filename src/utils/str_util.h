@@ -132,7 +132,11 @@ void SplitString(const string& str,
                  const string& delim,
                  std::vector<string>* result);
 
-std::vector<std::string> StringSplit(const string& arg, char delim);
+std::vector<string> StringSplit(const string& arg, char delim);
+
+static bool SplitPath(const string& path,
+                      std::vector<string>* element,
+                      bool* isdir = nullptr);
 
 // Append a human-readable time in micros.
 int AppendHumanMicros(uint64_t micros, char* output, int len,

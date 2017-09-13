@@ -128,6 +128,38 @@ void SplitString(const string& str,
     }
 }
 
+std::vector<string> StringSplit(const string& arg, char delim) {
+  std::vector<string> splits;
+  stringstream ss(arg);
+  string item;
+  while (std::getline(ss, item, delim)) {
+    splits.push_back(item);
+  }
+  return splits;
+}
+
+static const uint32_t MAX_PATH_LENGTH = 10240;
+static bool SplitPath(const string& path,
+                      std::vector<string>* element,
+                      bool* isdir) {
+    if (path.empty() || path[0] != '/' || path.size() > MAX_PATH_LENGTH) {
+        return false;
+    }
+    element->clear();
+    size_t last_pos = 0;
+    for (size_t i = 1; i <= path.size(); i++) {
+        if (i == path.size() || path[i] == '/') {
+            if (last_pos + 1 < i) {
+                element->push_back(path.substr(last_pos + 1, i - last_pos - 1));
+            }
+            last_pos = i;
+        }
+    }
+    if (isdir) {
+        *isdir = (path[path.size() - 1] == '/');
+    }
+    return true;
+}
 
 // for micros < 10ms, print "XX us".
 // for micros < 10sec, print "XX ms".

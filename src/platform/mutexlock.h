@@ -12,7 +12,6 @@
 #ifndef BUBBLEFS_PLATFORM_MUTEXLOCK_H_
 #define BUBBLEFS_PLATFORM_MUTEXLOCK_H_
 
-#include "platform/base.h"
 #include <assert.h>
 #include <semaphore.h>
 #include <stddef.h>
@@ -21,7 +20,9 @@
 #include <memory>
 #include <mutex>
 #include <thread>
-#include "platform/port_posix.h"
+#include "platform/base.h"
+#include "platform/macros.h"
+#include "platform/port.h"
 
 namespace bubblefs {
 
@@ -37,16 +38,14 @@ namespace bubblefs {
 
 class MutexLock {
  public:
-  explicit MutexLock(port::Mutex *mu) : mu_(mu) {
+  explicit MutexLock(port::Mutex *mu, const char* msg = nullptr, int64_t msg_threshold = 5000) : mu_(mu) {
     this->mu_->Lock();
   }
   ~MutexLock() { this->mu_->Unlock(); }
 
  private:
   port::Mutex *const mu_;
-  // No copying allowed
-  MutexLock(const MutexLock&);
-  void operator=(const MutexLock&);
+  TF_DISALLOW_COPY_AND_ASSIGN(MutexLock);
 };
 
 //
@@ -63,9 +62,7 @@ class ReadLock {
 
  private:
   port::RWMutex *const mu_;
-  // No copying allowed
-  ReadLock(const ReadLock&);
-  void operator=(const ReadLock&);
+  TF_DISALLOW_COPY_AND_ASSIGN(ReadLock);
 };
 
 //
@@ -78,9 +75,7 @@ class ReadUnlock {
 
  private:
   port::RWMutex *const mu_;
-  // No copying allowed
-  ReadUnlock(const ReadUnlock &) = delete;
-  ReadUnlock &operator=(const ReadUnlock &) = delete;
+  TF_DISALLOW_COPY_AND_ASSIGN(ReadUnlock);
 };
 
 //
@@ -97,9 +92,7 @@ class WriteLock {
 
  private:
   port::RWMutex *const mu_;
-  // No copying allowed
-  WriteLock(const WriteLock&);
-  void operator=(const WriteLock&);
+  TF_DISALLOW_COPY_AND_ASSIGN(WriteLock);
 };
 
 #ifdef TF_USE_PTHREAD_SPINLOCK

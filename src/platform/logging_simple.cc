@@ -4,7 +4,7 @@
 //
 // Author: yanshiguang02@baidu.com
 
-// baidu/common/logging.h in c++11
+// baidu/common/src/logging.cc in c++11
 
 #include "platform/logging_simple.h"
 #include <sys/time.h>
@@ -23,12 +23,13 @@
 #include <unistd.h>
 #include <algorithm>
 #include <condition_variable>
-#include <mutex>
 #include <queue>
 #include <set>
 #include <string>
-#include <thread>
+#include <vector>
+#include "platform/mutexlock.h"
 #include "platform/timer.h"
+#include "utils/thread.h"
 
 namespace bubblefs {
 namespace baiducomm {
@@ -38,7 +39,7 @@ int64_t g_log_size = 0;
 int32_t g_log_count = 0;
 FILE* g_log_file = stdout;
 std::string g_log_file_name;
-FILE* g_warning_file = NULL;
+FILE* g_warning_file = nullptr;
 int64_t g_total_size_limit = 0;
 
 std::set<std::string> g_log_set;
@@ -47,7 +48,7 @@ int64_t current_total_size = 0;
 bool GetNewLog(bool append) {
     char buf[30];
     struct timeval tv;
-    gettimeofday(&tv, NULL);
+    gettimeofday(&tv, nullptr);
     const time_t seconds = tv.tv_sec;
     struct tm t;
     localtime_r(&seconds, &t);
@@ -69,7 +70,7 @@ bool GetNewLog(bool append) {
     }
     const char* mode = append ? "ab" : "wb";
     FILE* fp = fopen(full_path.c_str(), mode);
-    if (fp == NULL) {
+    if (fp == nullptr) {
         return false;
     }
     if (g_log_file != stdout) {
@@ -104,27 +105,27 @@ void SetLogLevel(int level) {
 class AsyncLogger {
 public:
     AsyncLogger()
-      : stopped_(false), size_(0) {
+      : jobs_(&mu_), done_(&mu_), stopped_(false), size_(0) {
         buffer_queue_ = new std::queue<std::pair<int, std::string*> >;
         bg_queue_ = new std::queue<std::pair<int, std::string*> >;
-        thread_ = std::thread(std::bind(&AsyncLogger::AsyncWriter, this));
+        thread_.Start(std::bind(&AsyncLogger::AsyncWriter, this));
     }
     ~AsyncLogger() {
         stopped_ = true;
         {
-            std::unique_lock<std::mutex> lock(mu_);
-            jobs_.notify_one();
+            MutexLock lock(&mu_);
+            jobs_.Signal();
         }
-        thread_.join();
+        thread_.Join();
         delete buffer_queue_;
         delete bg_queue_;
         // close fd
     }
     void WriteLog(int log_level, const char* buffer, int32_t len) {
         std::string* log_str = new std::string(buffer, len);
-        std::unique_lock<std::mutex> lock(mu_);
+        MutexLock lock(&mu_);
         buffer_queue_->push(make_pair(log_level, log_str));
-        jobs_.notify_one();
+        jobs_.Signal();
     }
     void AsyncWriter() {
         int64_t loglen = 0;
@@ -151,35 +152,35 @@ public:
                 }
                 delete str;
             }
-            std::unique_lock<std::mutex> lock(mu_);
+            MutexLock lock(&mu_);
             if (!buffer_queue_->empty()) {
                 std::swap(buffer_queue_, bg_queue_);
                 continue;
             }
             if (loglen) fflush(g_log_file);
             if (wflen) fflush(g_warning_file);
-            done_.notify_all();
+            done_.Broadcast();
             if (stopped_) {
                 break;
             }
-            jobs_.wait(lock);
+            jobs_.Wait();
             loglen = 0;
             wflen = 0;
         }
     }
     void Flush() {
-        std::unique_lock<std::mutex> lock(mu_);
-        buffer_queue_->push(std::make_pair(0, reinterpret_cast<std::string*>(NULL)));
-        jobs_.notify_one();
-        done_.wait(lock);
+        MutexLock lock(&mu_);
+        buffer_queue_->push(std::make_pair(0, reinterpret_cast<std::string*>(nullptr)));
+        jobs_.Signal();
+        done_.Wait();
     }
 private:
-    std::mutex mu_;
-    std::condition_variable jobs_;
-    std::condition_variable done_;
+    port::Mutex mu_;
+    port::CondVar jobs_;
+    port::CondVar done_;
     bool stopped_;
     int64_t size_;
-    std::thread thread_;
+    Thread thread_;
     std::queue<std::pair<int, std::string*> > * buffer_queue_;
     std::queue<std::pair<int, std::string*> > * bg_queue_;
 };
@@ -189,7 +190,7 @@ AsyncLogger g_logger;
 bool SetWarningFile(const char* path, bool append) {
     const char* mode = append ? "ab" : "wb";
     FILE* fp = fopen(path, mode);
-    if (fp == NULL) {
+    if (fp == nullptr) {
         return false;
     }
     if (g_warning_file) {
@@ -208,13 +209,13 @@ bool RecoverHistory(const char* path) {
         dir = log_path.substr(0, idx + 1);
         log = log_path.substr(idx + 1);
     }
-    struct dirent *entry = NULL;
+    struct dirent *entry = nullptr;
     DIR *dir_ptr = opendir(dir.c_str());
-    if (dir_ptr == NULL) {
+    if (dir_ptr == nullptr) {
         return false;
     }
     std::vector<std::string> loglist;
-    while ((entry = readdir(dir_ptr)) != NULL) {
+    while ((entry = readdir(dir_ptr)) != nullptr) {
         if (std::string(entry->d_name).find(log) != std::string::npos) {
             std::string file_name = dir + std::string(entry->d_name);
             struct stat sta;

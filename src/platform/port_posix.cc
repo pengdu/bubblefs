@@ -48,6 +48,7 @@ limitations under the License.
 #include "utils/strcat.h"
 
 namespace bubblefs {
+  
 namespace internal {
 
 namespace { // namespace anonymous
@@ -149,9 +150,7 @@ int PickUnusedPortOrDie() {
 }
 
 }  // namespace internal
-}  // namespace bubblefs
 
-namespace bubblefs {
 namespace port {
 
 void* AlignedMalloc(size_t size, int minimum_alignment) {
@@ -251,48 +250,42 @@ static int PthreadCall(const char* label, int result) {
   return result;
 }
 
-Mutex::Mutex(bool adaptive) : owner_(0) {
-#ifdef TF_USE_ADAPTIVE_MUTEX
-  if (!adaptive) {
-    PthreadCall("init mutex", pthread_mutex_init(&mu_, nullptr));
-  } else {
-    pthread_mutexattr_t mutex_attr;
-    PthreadCall("init mutex attr", pthread_mutexattr_init(&mutex_attr));
-    PthreadCall("set mutex attr",
-                pthread_mutexattr_settype(&mutex_attr,
-                                          PTHREAD_MUTEX_ADAPTIVE_NP));
-    PthreadCall("init mutex", pthread_mutex_init(&mu_, &mutex_attr));
-    PthreadCall("destroy mutex attr",
-                pthread_mutexattr_destroy(&mutex_attr));
-  }
-#else
+Mutex::Mutex() : owner_(0) {
   pthread_mutexattr_t attr;
   PthreadCall("init mutexattr", pthread_mutexattr_init(&attr));
-  PthreadCall("set mutexattr", pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK));
-  PthreadCall("init mutex", pthread_mutex_init(&mu_, &attr));
-  PthreadCall("destroy mutexattr", pthread_mutexattr_destroy(&attr));
-#endif // TF_USE_ADAPTIVE_MUTEX
+  PthreadCall("set mutexattr errorcheck", pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK));
+  PthreadCall("init mutex errorcheck", pthread_mutex_init(&mu_, &attr));
+  PthreadCall("destroy mutexattr errorcheck", pthread_mutexattr_destroy(&attr));
+}
+
+Mutex::Mutex(bool adaptive) : owner_(0) {
+  if (!adaptive) {
+    PthreadCall("init mutex default", pthread_mutex_init(&mu_, nullptr));
+  } else {
+    pthread_mutexattr_t mutex_attr;
+    PthreadCall("init mutexattr", pthread_mutexattr_init(&mutex_attr));
+    PthreadCall("set mutexattr adaptive_np", pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_ADAPTIVE_NP));
+    PthreadCall("init mutex adaptive_np", pthread_mutex_init(&mu_, &mutex_attr));
+    PthreadCall("destroy mutexattr adaptive_np", pthread_mutexattr_destroy(&mutex_attr));
+  }
 }
 
 Mutex::~Mutex() { PthreadCall("destroy mutex", pthread_mutex_destroy(&mu_)); }
 
-void Mutex::Lock() {
-  PthreadCall("lock", pthread_mutex_lock(&mu_));
-#ifndef NDEBUG
-  locked_ = true;
-#endif
-  AfterLock();
+void Mutex::Lock(const char* msg, int64_t msg_threshold) {
+  PthreadCall("mutex lock", pthread_mutex_lock(&mu_));
+  AfterLock(msg);
 }
 
 bool Mutex::TryLock() {
   int ret = pthread_mutex_trylock(&mu_);
+  if (0 == ret) { AfterLock(); return true; }
   if (EBUSY == ret) return false;
   if (EINVAL == ret) abort();
   else if (EAGAIN == ret) abort();
   else if (EDEADLK == ret) abort();
   else if (0 != ret) abort();
-  AfterLock();
-  return 0 == ret;
+  return false;
 }
 
 bool Mutex::TimedLock(long _millisecond) {
@@ -312,10 +305,7 @@ bool Mutex::TimedLock(long _millisecond) {
 
 void Mutex::Unlock() {
   BeforeUnlock();
-#ifndef NDEBUG
-  locked_ = false;
-#endif
-  PthreadCall("unlock", pthread_mutex_unlock(&mu_));
+  PthreadCall("mutex unlock", pthread_mutex_unlock(&mu_));
 }
 
 bool Mutex::IsLocked() {
@@ -329,15 +319,23 @@ void Mutex::AssertHeld() {
   assert(locked_);
 #endif
   if (0 == pthread_equal(owner_, pthread_self())) {
+    fprintf(stderr, "mutex is held by two calling threads %lu:%lu\n",
+            (unsigned long)owner_, (unsigned long)pthread_self());
     abort();
   }
 }
 
-void Mutex::AfterLock() {
+void Mutex::AfterLock(const char* msg, int64_t msg_threshold) {
+#ifndef NDEBUG
+  locked_ = true;
+#endif
   owner_ = pthread_self();
 }
 
-void Mutex::BeforeUnlock() {
+void Mutex::BeforeUnlock(const char* msg) {
+#ifndef NDEBUG
+  locked_ = false;
+#endif
   owner_ = 0;
 }
 
@@ -349,13 +347,9 @@ CondVar::CondVar(Mutex* mu)
 CondVar::~CondVar() { PthreadCall("destroy cv", pthread_cond_destroy(&cv_)); }
 
 void CondVar::Wait() {
-#ifndef NDEBUG
-  mu_->locked_ = false;
-#endif
-  PthreadCall("wait", pthread_cond_wait(&cv_, &mu_->mu_));
-#ifndef NDEBUG
-  mu_->locked_ = true;
-#endif
+  mu_->BeforeUnlock();
+  PthreadCall("cv wait", pthread_cond_wait(&cv_, &mu_->mu_));
+  mu_->AfterLock();
 }
 
 bool CondVar::TimedWait(uint64_t abs_time_us) {
@@ -363,32 +357,35 @@ bool CondVar::TimedWait(uint64_t abs_time_us) {
   ts.tv_sec = static_cast<time_t>(abs_time_us / 1000000);
   ts.tv_nsec = static_cast<suseconds_t>((abs_time_us % 1000000) * 1000);
 
-#ifndef NDEBUG
-  mu_->locked_ = false;
-#endif
+  mu_->BeforeUnlock();
   int err = pthread_cond_timedwait(&cv_, &mu_->mu_, &ts);
-#ifndef NDEBUG
-  mu_->locked_ = true;
-#endif
+  mu_->AfterLock();
   if (err == ETIMEDOUT) {
     return true;
   }
   if (err != 0) {
-    PthreadCall("timedwait", err);
+    PthreadCall("cv timedwait", err);
   }
   return false;
 }
 
+bool CondVar::TimeoutWait(uint64_t timeout, const char* msg) {
+  struct timeval tv;
+  gettimeofday(&tv, nullptr);
+  uint64_t abs_time_us = tv.tv_usec + timeout * 1000LL + tv.tv_sec * 1000000LL;
+  return TimedWait(abs_time_us);
+}
+
 void CondVar::Signal() {
-  PthreadCall("signal", pthread_cond_signal(&cv_));
+  PthreadCall("cv signal", pthread_cond_signal(&cv_));
 }
 
 void CondVar::SignalAll() {
-  PthreadCall("broadcast", pthread_cond_broadcast(&cv_));
+  PthreadCall("cv broadcast", pthread_cond_broadcast(&cv_));
 }
 
 void CondVar::Broadcast() {
-  PthreadCall("broadcast", pthread_cond_broadcast(&cv_));
+  PthreadCall("cv broadcast", pthread_cond_broadcast(&cv_));
 }
 
 RWMutex::RWMutex() {
@@ -494,10 +491,13 @@ int ExecuteCMD(const char* cmd, char* result) {
 
 std::string Hostname() {
   char hostname[1024];
-  gethostname(hostname, sizeof hostname);
+  if (0 != gethostname(hostname, sizeof hostname)) {
+    return "";
+  }
   hostname[sizeof hostname - 1] = 0;
   return std::string(hostname);
 }
 
 }  // namespace port
+
 }  // namespace bubblefs

@@ -43,11 +43,10 @@ namespace atomics {
  * a,b,c,d,S,D means eax,ebx,ecx,edx,esi,edi.
  * r means any register, m means memory, i means imediate, g means any, %%reg refs register
  * $, $0x means constants.
- * %0 means output ... %n-1 means input operand, "=" specifies output operand.
+ * %0 means output ... %n-1 means input operand(expression), "=" specifies output operand.
  * 
 **/ 
-  
-#if defined(__GNUC__)
+
 /**
  * @brief atomic add
  * lock xadd guarantees atomic ops and memory fence for muliti processors;
@@ -231,8 +230,6 @@ public:
         __asm__ __volatile__("" : : : "memory");
     }
 };
-
-#endif // defined(__GNUC__)
 
 } // namespace atomics
 } // namespace bubblefs

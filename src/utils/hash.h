@@ -23,7 +23,6 @@ limitations under the License.
 #include "platform/types.h"
 #include "utils/stringpiece.h"
 
-
 namespace bubblefs {
 
 extern uint32 Hash32(const char* data, size_t n, uint32 seed);

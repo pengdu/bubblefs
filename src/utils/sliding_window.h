@@ -15,9 +15,11 @@
 #include <map>
 #include <mutex>
 #include <vector>
+#include "platform/mutexlock.h"
 
-namespace mblobstore {
-namespace core {
+namespace bubblefs {
+  
+namespace baiducomm {
 
 template <typename Item>
 class SlidingWindow {
@@ -43,7 +45,7 @@ public:
         return base_offset_;
     }
     void GetFragments(std::vector<std::pair<int32_t, Item> >* fragments) {
-        std::lock_guard<std::mutex> lock(&mu_);
+        MutexLock lock(&mu_);
         for (int i = 0; i < size_; i++) {
             if (bitmap_[(ready_ + i) % size_]) {
                 fragments->push_back(std::make_pair(base_offset_+i, items_[(ready_ + i) % size_]));
@@ -68,7 +70,7 @@ public:
         notifying_ = false;
     }
     int32_t UpBound() const {
-        std::lock_guard<std::mutex> lock(&mu_);
+        MutexLock lock(&mu_);
         return base_offset_ + size_ - 1;
     }
     /// Add a new item to slinding window.
@@ -80,7 +82,7 @@ public:
     ///     There is no thread pool, so SlidingCallback would be called by Add.
     ///     Pay attention to a deadlock.
     int Add(int32_t offset, Item item) {
-        std::lock_guard<std::mutex> lock(&mu_, "Slinding Add", 50000);
+        MutexLock lock(&mu_, "Slinding Add", 50000);
         int32_t pos = offset - base_offset_;
         if (pos >= size_) {
             return -1;
@@ -101,7 +103,7 @@ public:
         return 0;
     }
     int32_t GetMaxOffset() const {
-        std::lock_guard<std::mutex> lock(&mu_);
+        MutexLock lock(&mu_);
         return max_offset_;
     }
 private:
@@ -114,10 +116,11 @@ private:
     int32_t max_offset_;
     int32_t ready_;
     bool notifying_;
-    mutable std::mutex mu_;
+    mutable port::Mutex mu_;
 };
 
-} // namespace core
+} // namespace baiducomm
+
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SLIDING_WINDOW_H_

@@ -12,10 +12,13 @@
 #include <pthread.h>
 #include <string.h>
 #include <functional>
+#include "platform/macros.h"
 
 namespace bubblefs {
+  
 namespace baiducomm {
 
+// simple thread implement
 class Thread {
 public:
     Thread() {
@@ -39,18 +42,18 @@ public:
         pthread_exit(nullptr);
     }
 private:
-    Thread(const Thread&);
-    void operator=(const Thread&);
     static void* ProcWrapper(void* arg) {
         reinterpret_cast<Thread*>(arg)->user_proc_();
-        return NULL;
+        return nullptr;
     }
+    TF_DISALLOW_COPY_AND_ASSIGN(Thread);
 private:
     std::function<void ()> user_proc_;
     pthread_t tid_;
 };
 
 } // namespace baiducomm
+
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_THREAD_H_

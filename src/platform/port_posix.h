@@ -41,7 +41,6 @@ limitations under the License.
 // strings such as PRIu64
 // in fact, we could use that one
 #define TF_PRIszt "zu"
-
 #define __declspec(S)
 
 namespace bubblefs {
@@ -73,14 +72,11 @@ class Mutex {
 // ROCKSDB_PTHREAD_ADAPTIVE_MUTEX during the compilation. If you use RocksDB
 // build environment then this happens automatically; otherwise it's up to the
 // consumer to define the identifier.
-#ifdef TF_USE_ADAPTIVE_MUTEX
-  explicit Mutex(bool adaptive = true);
-#else
-  explicit Mutex(bool adaptive = false);
-#endif
+  Mutex();
+  Mutex(bool adaptive);
   ~Mutex();
 
-  void Lock();
+  void Lock(const char* msg = nullptr, int64_t msg_threshold = 5000);
   bool TryLock();
   bool TimedLock(long _millisecond);
   void Unlock();
@@ -90,7 +86,7 @@ class Mutex {
   void AssertHeld();
 
  private:
-  void AfterLock();
+  void AfterLock(const char* msg = nullptr, int64_t msg_threshold = 5000);
   void BeforeUnlock();
    
   friend class CondVar;
@@ -115,7 +111,6 @@ class RWMutex {
 
  private:
   pthread_rwlock_t mu_; // the underlying platform mutex
-
   TF_DISALLOW_COPY_AND_ASSIGN(RWMutex);
 };
 
@@ -126,6 +121,8 @@ class CondVar {
   void Wait();
   // Timed condition wait.  Returns true if timeout occurred.
   bool TimedWait(uint64_t abs_time_us);
+  // Time wait in timeout ms, return true if signalled
+  bool TimeoutWait(uint64_t timeout, const char* msg = nullptr);
   void Signal();
   void SignalAll();
   void Broadcast();
@@ -169,10 +166,10 @@ extern void Crash(const std::string& srcfile, int srcline);
 
 extern int GetMaxOpenFiles();
 
-int ExecuteCMD(const char* cmd, char* result);
+extern int ExecuteCMD(const char* cmd, char* result);
 
 // Return the hostname of the machine on which this process is running
-std::string Hostname();
+extern std::string Hostname();
 
 } // namespace port
 } // namespace bubblefs

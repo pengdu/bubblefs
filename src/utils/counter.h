@@ -10,7 +10,6 @@
 #define  BUBBLEFS_UTILS_COUNTER_H_
 
 #include "platform/atomic.h"
-#include "platform/timer.h"
 
 namespace bubblefs {
 namespace metric {

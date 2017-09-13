@@ -26,6 +26,7 @@
 #include <mutex>
 #include <vector>
 #include "platform/logging.h"
+#include "platform/mutexlock.h"
 
 namespace bubblefs {
 namespace core {
@@ -47,13 +48,13 @@ public:
         // TODO: Consider using a lock-free structure.
         SpecificElement<T>* obj = new SpecificElement<T>(t);
         DCHECK(obj != NULL);
-        std::lock_guard<std::mutex> l(_lock);
+        std::lock_guard<SpinMutex> l(_lock);
         _objects.push_back(obj);
         return t;
     }
 
     void clear() {
-        std::lock_guard<std::mutex> l(_lock);
+        std::lock_guard<SpinMutex> l(_lock);
         for (auto i = _objects.rbegin(); i != _objects.rend(); ++i) {
             delete *i;
         }
@@ -77,7 +78,7 @@ private:
 
     typedef std::vector<GenericElement*> ElementVector;
     ElementVector _objects;
-    std::mutex _lock; // use spinLock ?
+    SpinMutex _lock;
 };
 
 } // namespace core

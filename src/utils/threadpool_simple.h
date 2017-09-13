@@ -9,13 +9,14 @@
 #ifndef BUBBLEFS_UTILS_THREAD_POOL_SIMPLE_H_
 #define BUBBLEFS_UTILS_THREAD_POOL_SIMPLE_H_
 
+#include <time.h>
 #include <deque>
 #include <functional>
 #include <map>
 #include <queue>
 #include <sstream>
 #include <vector>
-#include "platform/pthread_lock.h"
+#include "platform/mutexlock.h"
 #include "platform/timer.h"
 
 namespace bubblefs {
@@ -44,14 +45,14 @@ public:
     }
     // Start a thread_num threads pool.
     bool Start() {
-        locks::MutexLock lock(&mutex_);
+        MutexLock lock(&mutex_);
         if (tids_.size()) {
             return false;
         }
         stop_ = false;
         for (int i = 0; i < threads_num_; i++) {
             pthread_t tid;
-            int ret = pthread_create(&tid, NULL, ThreadWrapper, this);
+            int ret = pthread_create(&tid, nullptr, ThreadWrapper, this);
             if (ret) {
                 abort();
             }
@@ -70,12 +71,12 @@ public:
         }
 
         {
-            locks::MutexLock lock(&mutex_);
+            MutexLock lock(&mutex_);
             stop_ = true;
             work_cv_.Broadcast();
         }
         for (uint32_t i = 0; i < tids_.size(); i++) {
-            pthread_join(tids_[i], NULL);
+            pthread_join(tids_[i], nullptr);
         }
         tids_.clear();
         return true;
@@ -86,21 +87,21 @@ public:
 
     // Add a task to the thread pool.
     void AddTask(const Task& task) {
-        locks::MutexLock lock(&mutex_, "AddTask");
+        MutexLock lock(&mutex_, "AddTask");
         if (stop_) return;
         queue_.push_back(BGItem(0, timer::get_micros(), task));
         ++pending_num_;
         work_cv_.Signal();
     }
     void AddPriorityTask(const Task& task) {
-        locks::MutexLock lock(&mutex_);
+        MutexLock lock(&mutex_);
         if (stop_) return;
         queue_.push_front(BGItem(0, timer::get_micros(), task));
         ++pending_num_;
         work_cv_.Signal();
     }
     int64_t DelayTask(int64_t delay, const Task& task) {
-        locks::MutexLock lock(&mutex_);
+        MutexLock lock(&mutex_);
         if (stop_) return 0;
         int64_t now_time = timer::get_micros();
         int64_t exe_time = now_time + delay * 1000;
@@ -112,20 +113,20 @@ public:
     }
     /// Cancel a delayed task
     /// if running, wait if non_block==false; return immediately if non_block==true
-    bool CancelTask(int64_t task_id, bool non_block = false, bool* is_running = NULL) {
+    bool CancelTask(int64_t task_id, bool non_block = false, bool* is_running = nullptr) {
         if (task_id == 0) {
-            if (is_running != NULL) {
+            if (is_running != nullptr) {
                 *is_running = false;
             }
             return false;
         }
         while (1) {
             {
-                locks::MutexLock lock(&mutex_);
+                MutexLock lock(&mutex_);
                 if (running_task_id_ != task_id) {
                     BGMap::iterator it = latest_.find(task_id);
                     if (it == latest_.end()) {
-                        if (is_running != NULL) {
+                        if (is_running != nullptr) {
                             *is_running = false;
                         }
                         return false;
@@ -133,13 +134,13 @@ public:
                     latest_.erase(it);
                     return true;
                 } else if (non_block) {
-                    if (is_running != NULL) {
+                    if (is_running != nullptr) {
                         *is_running = true;
                     }
                     return false;
                 }
             }
-            timespec ts = {0, 100000};
+            struct timespec ts = {0, 100000};
             nanosleep(&ts, &ts);
         }
     }
@@ -157,7 +158,7 @@ public:
         int64_t task_cost_sum;
         int64_t task_count;
         {
-            locks::MutexLock lock(&mutex_);
+            MutexLock lock(&mutex_);
             schedule_cost_sum = schedule_cost_sum_;
             schedule_cost_sum_ = 0;
             schedule_count = schedule_count_;
@@ -180,12 +181,12 @@ private:
 
     static void* ThreadWrapper(void* arg) {
         reinterpret_cast<ThreadPool*>(arg)->ThreadProc();
-        return NULL;
+        return nullptr;
     }
     void ThreadProc() {
         while (true) {
             Task task;
-            locks::MutexLock lock(&mutex_, "ThreadProc");
+            MutexLock lock(&mutex_, "ThreadProc");
             while (time_queue_.empty() && queue_.empty() && !stop_) {
                 work_cv_.Wait("ThreadProcWait");
             }
@@ -215,7 +216,7 @@ private:
                     }
                     continue;
                 } else if (queue_.empty() && !stop_) {
-                    work_cv_.TimedLock(wait_time, "ThreadProcTimeWait");
+                    work_cv_.TimeoutWait(wait_time, "ThreadProcTimeWait");
                     continue;
                 }
             }
@@ -261,8 +262,8 @@ private:
     int32_t threads_num_;
     std::deque<BGItem> queue_;
     volatile int pending_num_;
-    locks::Mutex mutex_;
-    locks::CondVar work_cv_;
+    port::Mutex mutex_;
+    port::CondVar work_cv_;
     bool stop_;
     std::vector<pthread_t> tids_;
 

@@ -577,7 +577,7 @@ class Env {
       const string& version) = 0;
 
  private:
-  std::unique_ptr<FileSystemRegistry> file_system_registry_;
+  //std::unique_ptr<FileSystemRegistry> file_system_registry_;
   TF_DISALLOW_COPY_AND_ASSIGN(Env);
 };
 
