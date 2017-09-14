@@ -81,8 +81,9 @@ limitations under the License. */
 namespace bubblefs {
 namespace str_util {
   
-extern const string kNullptrString;  
-  
+extern const string kNullptrString;
+
+// stringfy
 template <typename T>
 inline string ToString(T value) {
 #if !(defined OS_ANDROID) && !(defined CYGWIN) && !(defined OS_FREEBSD)
@@ -96,14 +97,14 @@ inline string ToString(T value) {
 #endif
 }
   
-static inline bool IsVisible(char c) {
+inline bool IsVisible(char c) {
     return (c >= 0x20 && c <= 0x7E);
 }
 
 // 2 small internal utility functions, for efficient hex conversions
 // and no need for snprintf, toupper etc...
 // Originally from wdt/util/EncryptionUtils.cpp - for ToString(true)/DecodeHex:
-static inline char ToHex(uint8_t v) {
+inline char ToHex(uint8_t v) {
   if (v <= 9) {
     return '0' + v;
   }
@@ -111,7 +112,7 @@ static inline char ToHex(uint8_t v) {
 }
 
 // most of the code is for validation/error check
-static inline int FromHex(char c) {
+inline int FromHex(char c) {
   // toupper:
   if (c >= 'a' && c <= 'f') {
     c -= ('a' - 'A');  // aka 0x20
@@ -124,6 +125,54 @@ static inline int FromHex(char c) {
     return c - '0';
   }
   return c - 'A' + 10;
+}
+
+// ASCII-specific tolower.  The standard library's tolower is locale sensitive,
+// so we don't want to use it here.
+inline char ToLowerASCII(char c) {
+  return (c >= 'A' && c <= 'Z') ? (c + ('a' - 'A')) : c;
+}
+inline uint16_t ToLowerASCII(uint16_t c) {
+  return (c >= 'A' && c <= 'Z') ? (c + ('a' - 'A')) : c;
+}
+
+// ASCII-specific toupper.  The standard library's toupper is locale sensitive,
+// so we don't want to use it here.
+inline char ToUpperASCII(char c) {
+  return (c >= 'a' && c <= 'z') ? (c + ('A' - 'a')) : c;
+}
+inline uint16_t ToUpperASCII(uint16_t c) {
+  return (c >= 'a' && c <= 'z') ? (c + ('A' - 'a')) : c;
+}
+
+// Determines the type of ASCII character, independent of locale (the C
+// library versions will change based on locale).
+template <typename Char>
+inline bool IsAsciiWhitespace(Char c) {
+  return c == ' ' || c == '\r' || c == '\n' || c == '\t';
+}
+template <typename Char>
+inline bool IsAsciiAlpha(Char c) {
+  return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+template <typename Char>
+inline bool IsAsciiUpper(Char c) {
+  return c >= 'A' && c <= 'Z';
+}
+template <typename Char>
+inline bool IsAsciiLower(Char c) {
+  return c >= 'a' && c <= 'z';
+}
+template <typename Char>
+inline bool IsAsciiDigit(Char c) {
+  return c >= '0' && c <= '9';
+}
+
+template <typename Char>
+inline bool IsHexDigit(Char c) {
+  return (c >= '0' && c <= '9') ||
+         (c >= 'A' && c <= 'F') ||
+         (c >= 'a' && c <= 'f');
 }
 
 string DebugString(const string& src);

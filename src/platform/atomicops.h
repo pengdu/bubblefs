@@ -27,8 +27,8 @@
 // baidu/ins/src/common/asm_atomic.h
 // palo/be/src/common/atomic.h
 
-#ifndef BUBBLEFS_PLATFORM_ATOMIC_H_
-#define BUBBLEFS_PLATFORM_ATOMIC_H_
+#ifndef BUBBLEFS_PLATFORM_ATOMICOPS_H_
+#define BUBBLEFS_PLATFORM_ATOMICOPS_H_
 
 #include <stdint.h>
 #include <algorithm>
@@ -39,7 +39,7 @@
 #endif
 
 namespace bubblefs {
-namespace atomics {
+namespace port {
 
 /**
  * Note: use gcc.
@@ -212,7 +212,6 @@ static inline long atomic_comp_swap64(volatile void *mem, long long xchg, long l
     return cmp;
 }
 
-/*
 template <typename T>
 inline void asm_atomic_inc(volatile T* n)
 {
@@ -291,7 +290,6 @@ inline T asm_atomic_comp_swap(volatile T* lockword, E exchange, C comperand)
 {
     return asm_atomic_cmpxchg(lockword, comperand, exchange);
 }
-*/
 
 class AtomicUtil {
 public:
@@ -317,7 +315,7 @@ public:
     }
 };
 
-} // namespace atomics
+} // namespace port
 } // namespace bubblefs
 
-#endif // BUBBLEFS_PLATFORM_ATOMIC_H_
+#endif // BUBBLEFS_PLATFORM_ATOMICOPS_H_

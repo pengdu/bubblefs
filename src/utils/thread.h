@@ -20,7 +20,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace baiducomm {
+namespace bdcommon {
 
 class ThisThread {
 public:
@@ -135,7 +135,7 @@ private:
     pthread_t tid_;
 };
 
-} // namespace baiducomm
+} // namespace bdcommon
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_THREAD_H_

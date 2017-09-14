@@ -35,7 +35,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace baiducomm {
+namespace bdcommon {
   
 class Cache;
 
@@ -108,7 +108,7 @@ private:
     void operator=(const Cache&);
 };
 
-} // namespace baiducomm  
+} // namespace bdcommon  
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_CACHE_SIMPLE_H_

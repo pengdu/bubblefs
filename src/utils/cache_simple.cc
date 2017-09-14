@@ -17,7 +17,7 @@
 #include "utils/hash.h"
 
 namespace bubblefs {
-namespace baiducomm {
+namespace bdcommon {
 
 Cache::~Cache() {
 }
@@ -328,5 +328,5 @@ Cache* NewLRUCache(size_t capacity) {
     return new ShardedLRUCache(capacity);
 }  
   
-} // namespace baiducomm
+} // namespace bdcommon
 } // namespace bubblefs

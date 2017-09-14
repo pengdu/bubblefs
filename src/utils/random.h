@@ -17,15 +17,36 @@ limitations under the License.
 // Copyright (c) 2011 The LevelDB Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
+/*
+ * Ceph - scalable distributed file system
+ *
+ * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
+ *
+ * This is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License version 2.1, as published by the Free Software 
+ * Foundation.  See file COPYING.
+ * 
+ */
+// Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 // tensorflow/tensorflow/core/lib/random/random.h
+// chromium/base/rand_util.h
 // rocksdb/util/random.h
+// ceph/src/include/Distribution.h
 
 #ifndef BUBBLEFS_UTILS_RANDOM_H_
 #define BUBBLEFS_UTILS_RANDOM_H_
 
+#include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <random>
+#include <string>
+#include <vector>
+#include "platform/macros.h"
 #include "platform/types.h"
 
 namespace bubblefs {
@@ -33,11 +54,25 @@ namespace random {
 
 // Return a 64-bit random value.  Different sequences are generated
 // in different processes.
+// Returns a random number in range [0, UINT64_MAX]. Thread-safe.
 uint64 New64();
 
 // Return a 64-bit random value. Uses
 // std::mersenne_twister_engine::default_seed as seed value.
 uint64 New64DefaultSeed();
+
+// Returns a random number between min and max (inclusive). Thread-safe.
+TF_EXPORT int RandInt(int min, int max);
+
+// Returns a random number in range [0, range).  Thread-safe.
+//
+// Note that this can be used as an adapter for std::random_shuffle():
+// Given a pre-populated |std::vector<int> myvector|, shuffle it as
+//   std::random_shuffle(myvector.begin(), myvector.end(), base::RandGenerator);
+TF_EXPORT uint64_t RandGenerator(uint64_t range);
+
+// Returns a random double in range [0, 1). Thread-safe.
+TF_EXPORT double RandDouble();
 
 // A very simple random number generator.  Not especially good at
 // generating truly random bits, but good enough for our needs in this
@@ -130,6 +165,55 @@ class Random64 {
   uint64_t Skewed(int max_log) {
     return Uniform(uint64_t(1) << Uniform(max_log + 1));
   }
+};
+
+class Distribution {
+  std::vector<float> p;
+  std::vector<int> v;
+
+ public:  
+  unsigned GetWidth() {
+    return p.size();
+  }
+
+  void Clear() {
+    p.clear();
+    v.clear();
+  }
+  void Add(int val, float pr) {
+    p.push_back(pr);
+    v.push_back(val);
+  }
+
+  void Random() {
+    float sum = 0.0;
+    for (unsigned i = 0; i < p.size(); i++) {
+      p[i] = (float)(rand() % 10000);
+      sum += p[i];
+    }
+    for (unsigned i = 0; i < p.size(); i++) 
+      p[i] /= sum;
+  }
+
+  int Sample() {
+    float s = (float)(rand() % 10000) / 10000.0;
+    for (unsigned i = 0; i < p.size(); i++) {
+      if (s < p[i]) return v[i];
+      s -= p[i];
+    }
+    abort();
+    return v[p.size() - 1];
+  }
+
+  float Normalize() {
+    float s = 0.0;
+    for (unsigned i = 0; i < p.size(); i++)
+      s += p[i];
+    for (unsigned i=0; i < p.size(); i++)
+      p[i] /= s;
+    return s;
+  }
+
 };
 
 }  // namespace random

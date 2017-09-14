@@ -32,7 +32,7 @@
 #include "utils/thread.h"
 
 namespace bubblefs {
-namespace baiducomm {
+namespace bdcommon {
   
 int g_log_level = INFO;
 int64_t g_log_size = 0;
@@ -394,8 +394,5 @@ LogStream::~LogStream() {
     Log(level_, "%s", oss_.str().c_str());
 }
 
-} // namespace baiducomm
+} // namespace bdcommon
 } // namespace bubblefs
-
-
-

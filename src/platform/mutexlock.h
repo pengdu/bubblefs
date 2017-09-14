@@ -102,7 +102,7 @@ class WriteLock {
  * which means it will keep trying to lock until lock on successfully.
  * The SpinLock disable copy.
  */
-class SpinLock {
+class SpinLock final {
 public:
   inline SpinLock() { pthread_spin_init(&lock_, PTHREAD_PROCESS_PRIVATE); }
   inline ~SpinLock() { pthread_spin_destroy(&lock_); }
@@ -115,7 +115,7 @@ public:
   char padding_[64 - sizeof(pthread_spinlock_t)];
 };
 #else
-class SpinLock {
+class SpinLock final {
 public:
   inline void Lock() {
     while (lock_.test_and_set(std::memory_order_acquire)) {

@@ -279,10 +279,10 @@ bool CondVar::TimedWait(uint64_t abs_time_us, const char* msg = nullptr) {
   return false;
 }
 
-bool CondVar::TimeoutWait(uint64_t timeout, const char* msg) {
+bool CondVar::IntervalWait(uint64_t timeout_interval, const char* msg) {
   struct timeval tv;
   gettimeofday(&tv, nullptr);
-  uint64_t abs_time_us = tv.tv_usec + timeout * 1000LL + tv.tv_sec * 1000000LL;
+  uint64_t abs_time_us = tv.tv_usec + timeout_interval * 1000LL + tv.tv_sec * 1000000LL;
   return TimedWait(abs_time_us);
 }
 

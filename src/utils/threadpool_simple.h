@@ -19,7 +19,7 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace baiducomm {
+namespace bdcommon {
 
 static const int kDebugCheckTime = 5000;
 
@@ -88,21 +88,21 @@ public:
     void AddTask(const Task& task) {
         MutexLock lock(&mutex_, "AddTask");
         if (stop_) return;
-        queue_.push_back(BGItem(0, timer::get_micros(), task));
+        queue_.push_back(BGItem(0, get_micros(), task));
         ++pending_num_;
         work_cv_.Signal();
     }
     void AddPriorityTask(const Task& task) {
         MutexLock lock(&mutex_);
         if (stop_) return;
-        queue_.push_front(BGItem(0, timer::get_micros(), task));
+        queue_.push_front(BGItem(0, get_micros(), task));
         ++pending_num_;
         work_cv_.Signal();
     }
     int64_t DelayTask(int64_t delay, const Task& task) {
         MutexLock lock(&mutex_);
         if (stop_) return 0;
-        int64_t now_time = timer::get_micros();
+        int64_t now_time = get_micros();
         int64_t exe_time = now_time + delay * 1000;
         BGItem bg_item(++last_task_id_, exe_time, task);
         time_queue_.push(bg_item);
@@ -185,7 +185,7 @@ private:
     int64_t get_micros() {
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
-        return static_cast<int64_t>(ts.tv_sec) * 1000000 + static_cast<int64_t>(ts.tv_nsec) / 1000;
+        return static_cast<int64_t>(ts.tv_sec) * 1000000 + static_cast<int64_t>(ts.tv_nsec) / 1000; // us
     }
     void ThreadProc() {
         while (true) {
@@ -220,7 +220,7 @@ private:
                     }
                     continue;
                 } else if (queue_.empty() && !stop_) {
-                    work_cv_.TimeoutWait(wait_time, "ThreadProcTimeWait");
+                    work_cv_.IntervalWait(wait_time, "ThreadProcTimeWait");
                     continue;
                 }
             }
@@ -230,12 +230,12 @@ private:
                 int64_t exe_time = queue_.front().exe_time;
                 queue_.pop_front();
                 --pending_num_;
-                int64_t start_time = timer::get_micros();
+                int64_t start_time = get_micros();
                 schedule_cost_sum_ += start_time - exe_time;
                 schedule_count_++;
                 mutex_.Unlock();
                 task();
-                int64_t finish_time = timer::get_micros();
+                int64_t finish_time = get_micros();
                 task_cost_sum_ += finish_time - start_time;
                 task_count_++;
                 mutex_.Lock("ThreadProcRelock2");
@@ -283,7 +283,7 @@ private:
     int64_t task_count_;
 };
 
-} // namespace baiducomm
+} // namespace bdcommon
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_THREAD_POOL_SIMPLE_H_

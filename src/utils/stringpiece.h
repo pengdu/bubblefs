@@ -77,6 +77,7 @@ class StringPiece {
 
   // Return the length (in bytes) of the referenced data
   size_t size() const { return size_; }
+  size_type length() const { return size_; }
 
   // Return true iff the length of the referenced data is zero
   bool empty() const { return size_ == 0; }

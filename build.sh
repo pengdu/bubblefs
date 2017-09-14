@@ -71,8 +71,8 @@ if [ ! -f "${FLAG_DIR}/cpp-btree_1_0_1" ] \
     if [ -d "${DEPS_PREFIX}/include/cpp-btree" ]; then
         rm -rf ${DEPS_PREFIX}/include/cpp-btree
     fi
-    tar zxvf ${DEPS_PACKAGE}/cpp-btree-1_0_1.tar.gz -C .
-    mv cpp-btree_1_0_1 cpp-btree
+    tar zxvf ${DEPS_PACKAGE}/cpp-btree-1.0.1.tar.gz -C .
+    mv cpp-btree-1.0.1 cpp-btree
     touch "${FLAG_DIR}/cpp-btree_1_0_1"
 fi
 

@@ -15,14 +15,70 @@ limitations under the License. */
 #ifndef BUBBLEFS_UTILS_BLOCKING_QUEUE_H_
 #define BUBBLEFS_UTILS_BLOCKING_QUEUE_H_
 
+#include <assert.h>
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <condition_variable>
 #include <deque>
+#include <list>
 #include <mutex>
+#include <vector>
+#include "platform/mutexlock.h"
 
 namespace bubblefs {
 namespace concurrent {
+  
+template <class T>
+class RingQueue {
+  struct QueueBucket {
+    port::Mutex mutex_;
+    port::CondVar cond_;
+    typename std::list<T> entries;
+
+    QueueBucket() : mutex_(), cond_(&mutex_) {}
+    QueueBucket(const QueueBucket& rhs) : mutex_(), cond_(&mutex_) {
+      entries = rhs.entries;
+    }
+
+    void enqueue(const T& entry) {
+      MutexLock lock(&mutex_);
+      if (entries.empty()) {
+        cond_.Signal();
+      }
+      entries.push_back(entry);
+    }
+
+    void dequeue(T *entry) {
+      MutexLock lock(&mutex_);
+      if (entries.empty()) {
+        cond_.Wait();
+      };
+      assert(!entries.empty());
+      *entry = entries.front();
+      entries.pop_front();
+    };
+  };
+
+  std::vector<QueueBucket> buckets;
+  int num_buckets;
+
+  std::atomic<int64_t> cur_read_bucket = { 0 };
+  std::atomic<int64_t> cur_write_bucket = { 0 };
+
+public:
+  RingQueue(int n) : buckets(n), num_buckets(n) {
+  }
+
+  void enqueue(const T& entry) {
+    buckets[++cur_write_bucket % num_buckets].enqueue(entry);
+  };
+
+  void dequeue(T *entry) {
+    buckets[++cur_read_bucket % num_buckets].dequeue(entry);
+  }
+};
+  
   
 /**
  * A thread-safe queue that automatically grows but never shrinks.
