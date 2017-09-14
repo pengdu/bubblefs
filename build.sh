@@ -64,6 +64,18 @@ if [ ! -f "${FLAG_DIR}/jemalloc_5_0_1" ] \
     touch "${FLAG_DIR}/jemalloc_5_0_1"
 fi
 
+# cpp-btree
+if [ ! -f "${FLAG_DIR}/cpp-btree_1_0_1" ] \
+    || [ ! -d "${DEPS_PREFIX}/include/cpp-btree" ]; then
+    cd ${DEPS_PREFIX}/include
+    if [ -d "${DEPS_PREFIX}/include/cpp-btree" ]; then
+        rm -rf ${DEPS_PREFIX}/include/cpp-btree
+    fi
+    tar zxvf ${DEPS_PACKAGE}/cpp-btree-1_0_1.tar.gz -C .
+    mv cpp-btree_1_0_1 cpp-btree
+    touch "${FLAG_DIR}/cpp-btree_1_0_1"
+fi
+
 # gflags
 if [ ! -f "${FLAG_DIR}/gflags_2_1_1" ]; then
     cd ${DEPS_SOURCE}
