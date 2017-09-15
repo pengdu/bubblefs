@@ -11,7 +11,6 @@ limitations under the License. */
 
 // Paddle/paddle/utils/Queue.h
 
-
 #ifndef BUBBLEFS_UTILS_BLOCKING_QUEUE_H_
 #define BUBBLEFS_UTILS_BLOCKING_QUEUE_H_
 
