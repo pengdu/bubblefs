@@ -22,7 +22,7 @@
 #endif
 
 namespace bubblefs {
-namespace base {
+namespace port {
 
 /**
  * Note: use gcc.
@@ -303,7 +303,7 @@ Atomic64 Release_Load(volatile const Atomic64* ptr);
 #error "Atomic operations are not supported on your platform"
 #endif
 
-} // namespace base
+} // namespace port
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_ATOMICOPS_H_
