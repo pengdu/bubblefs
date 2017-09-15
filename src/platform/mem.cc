@@ -20,8 +20,8 @@ limitations under the License.
 
 // tensorflow/tensorflow/core/platform/posix/port.cc
 
+#include "platform/build_config.h"
 #include "platform/mem.h"
-#include "platform/base.h"
 #ifdef TF_USE_JEMALLOC
 #include "jemalloc/jemalloc.h"
 #endif

@@ -26,6 +26,7 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_PORT_POSIX_H_
 #define BUBBLEFS_PLATFORM_PORT_POSIX_H_
 
+#include "platform/build_config.h"
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdint.h>
@@ -33,7 +34,6 @@ limitations under the License.
 #include <pthread.h>
 #include <limits>
 #include <string>
-#include "platform/base.h"
 #include "platform/macros.h"
 #include "platform/cpu_info.h"
 

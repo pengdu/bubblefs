@@ -21,7 +21,7 @@
 // Note: use gcc
 
 namespace bubblefs {
-namespace port {
+namespace base {
   
 // Returns a value with all bytes in |x| swapped, i.e. reverses the endianness.
 inline uint16_t ByteSwap(uint16_t x) {
@@ -120,7 +120,7 @@ inline uint64_t HostToNet64(uint64_t x) {
 #endif
 }  
   
-} // namespace port  
+} // namespace base  
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_BYTEORDER_H_

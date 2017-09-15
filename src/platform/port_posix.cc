@@ -41,7 +41,6 @@ limitations under the License.
 #include <string.h>
 #include <unistd.h>
 #include <unordered_set>
-#include "platform/base.h"
 #include "platform/logging.h"
 #include "platform/timer.h"
 #include "utils/strcat.h"

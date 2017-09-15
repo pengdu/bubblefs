@@ -1,22 +1,6 @@
-// Modifications copyright (C) 2017, Baidu.com, Inc.
-// Copyright 2017 The Apache Software Foundation
-
-// Licensed to the Apache Software Foundation (ASF) under one
-// or more contributor license agreements.  See the NOTICE file
-// distributed with this work for additional information
-// regarding copyright ownership.  The ASF licenses this file
-// to you under the Apache License, Version 2.0 (the
-// "License"); you may not use this file except in compliance
-// with the License.  You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
+// Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 // Copyright (c) 2014, Baidu.com, Inc. All Rights Reserved
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -24,8 +8,7 @@
 // Author: yanshiguang02@baidu.com
 
 // baidu/common/include/atomic.h
-// baidu/ins/src/common/asm_atomic.h
-// palo/be/src/common/atomic.h
+// chromium/base/atomicops.h
 
 #ifndef BUBBLEFS_PLATFORM_ATOMICOPS_H_
 #define BUBBLEFS_PLATFORM_ATOMICOPS_H_
@@ -39,7 +22,7 @@
 #endif
 
 namespace bubblefs {
-namespace port {
+namespace base {
 
 /**
  * Note: use gcc.
@@ -212,110 +195,115 @@ static inline long atomic_comp_swap64(volatile void *mem, long long xchg, long l
     return cmp;
 }
 
-template <typename T>
-inline void asm_atomic_inc(volatile T* n)
-{
-    asm volatile ("lock; incl %0;":"+m"(*n)::"cc");
-}
-template <typename T>
-inline void asm_atomic_dec(volatile T* n)
-{
-    asm volatile ("lock; decl %0;":"+m"(*n)::"cc");
-}
-template <typename T>
-inline T asm_atomic_add_ret_old(volatile T* n, T v)
-{
-    asm volatile ("lock; xaddl %1, %0;":"+m"(*n),"+r"(v)::"cc");
-    return v;
-}
-template <typename T>
-inline T asm_atomic_inc_ret_old(volatile T* n)
-{
-    T r = 1;
-    asm volatile ("lock; xaddl %1, %0;":"+m"(*n), "+r"(r)::"cc");
-    return r;
-}
-template <typename T>
-inline T asm_atomic_dec_ret_old(volatile T* n)
-{
-    T r = (T)-1;
-    asm volatile ("lock; xaddl %1, %0;":"+m"(*n), "+r"(r)::"cc");
-    return r;
-}
-template <typename T>
-inline T asm_atomic_add_ret_old64(volatile T* n, T v)
-{
-    asm volatile ("lock; xaddq %1, %0;":"+m"(*n),"+r"(v)::"cc");
-    return v;
-}
-template <typename T>
-inline T asm_atomic_inc_ret_old64(volatile T* n)
-{
-    T r = 1;
-    asm volatile ("lock; xaddq %1, %0;":"+m"(*n), "+r"(r)::"cc");
-    return r;
-}
-template <typename T>
-inline T asm_atomic_dec_ret_old64(volatile T* n)
-{
-    T r = (T)-1;
-    asm volatile ("lock; xaddq %1, %0;":"+m"(*n), "+r"(r)::"cc");
-    return r;
-}
-template <typename T>
-inline void asm_atomic_add(volatile T* n, T v)
-{
-    asm volatile ("lock; addl %1, %0;":"+m"(*n):"r"(v):"cc");
-}
-template <typename T>
-inline void asm_atomic_sub(volatile T* n, T v)
-{
-    asm volatile ("lock; subl %1, %0;":"+m"(*n):"r"(v):"cc");
-}
-template <typename T, typename C, typename D>
-inline T asm_atomic_cmpxchg(volatile T* n, C cmp, D dest)
-{
-    asm volatile ("lock; cmpxchgl %1, %0":"+m"(*n), "+r"(dest), "+a"(cmp)::"cc");
-    return cmp;
-}
-// return old value
-template <typename T>
-inline T asm_atomic_swap(volatile T* lockword, T value)
-{
-    asm volatile ("lock; xchg %0, %1;" : "+r"(value), "+m"(*lockword));
-    return value;
-}
-template <typename T, typename E, typename C>
-inline T asm_atomic_comp_swap(volatile T* lockword, E exchange, C comperand)
-{
-    return asm_atomic_cmpxchg(lockword, comperand, exchange);
-}
+#if defined(OS_WIN) && defined(ARCH_CPU_64_BITS)
+// windows.h #defines this (only on x64). This causes problems because the
+// public API also uses MemoryBarrier at the public name for this fence. So, on
+// X64, undef it, and call its documented
+// (http://msdn.microsoft.com/en-us/library/windows/desktop/ms684208.aspx)
+// implementation directly.
+#undef MemoryBarrier
+#endif
 
-class AtomicUtil {
-public:
-    // Issues instruction to have the CPU wait, this is less busy (bus traffic
-    // etc) than just spinning.
-    // For example:
-    //  while (1);
-    // should be:
-    //  while (1) CpuWait();
-    static TF_ATTRIBUTE_ALWAYS_INLINE void cpu_wait() {
-        asm volatile("pause\n": : :"memory");
-    }
+typedef int32_t Atomic32;
+#ifdef ARCH_CPU_64_BITS
+// We need to be able to go between Atomic64 and AtomicWord implicitly.  This
+// means Atomic64 and AtomicWord should be the same type on 64-bit.
+#if defined(__ILP32__) || defined(OS_NACL)
+// NaCl's intptr_t is not actually 64-bits on 64-bit!
+// http://code.google.com/p/nativeclient/issues/detail?id=1162
+typedef int64_t Atomic64;
+#else
+typedef intptr_t Atomic64;
+#endif
+#endif
 
-    /// Provides "barrier" semantics (see below) without a memory access.
-    static TF_ATTRIBUTE_ALWAYS_INLINE void memory_barrier() {
-        TF_SYNC_SYNCHRONIZE
-    }
+// Use AtomicWord for a machine-sized pointer.  It will use the Atomic32 or
+// Atomic64 routines below, depending on your architecture.
+typedef intptr_t AtomicWord;
 
-    /// Provides a compiler barrier. The compiler is not allowed to reorder memory
-    /// accesses across this (but the CPU can).  This generates no instructions.
-    static TF_ATTRIBUTE_ALWAYS_INLINE void compiler_barrier() {
-        __asm__ __volatile__("" : : : "memory");
-    }
-};
+// Atomically execute:
+//      result = *ptr;
+//      if (*ptr == old_value)
+//        *ptr = new_value;
+//      return result;
+//
+// I.e., replace "*ptr" with "new_value" if "*ptr" used to be "old_value".
+// Always return the old value of "*ptr"
+//
+// This routine implies no memory barriers.
+Atomic32 NoBarrier_CompareAndSwap(volatile Atomic32* ptr,
+                                  Atomic32 old_value,
+                                  Atomic32 new_value);
 
-} // namespace port
+// Atomically store new_value into *ptr, returning the previous value held in
+// *ptr.  This routine implies no memory barriers.
+Atomic32 NoBarrier_AtomicExchange(volatile Atomic32* ptr, Atomic32 new_value);
+
+// Atomically increment *ptr by "increment".  Returns the new value of
+// *ptr with the increment applied.  This routine implies no memory barriers.
+Atomic32 NoBarrier_AtomicIncrement(volatile Atomic32* ptr, Atomic32 increment);
+
+Atomic32 Barrier_AtomicIncrement(volatile Atomic32* ptr,
+                                 Atomic32 increment);
+
+// These following lower-level operations are typically useful only to people
+// implementing higher-level synchronization operations like spinlocks,
+// mutexes, and condition-variables.  They combine CompareAndSwap(), a load, or
+// a store with appropriate memory-ordering instructions.  "Acquire" operations
+// ensure that no later memory access can be reordered ahead of the operation.
+// "Release" operations ensure that no previous memory access can be reordered
+// after the operation.  "Barrier" operations have both "Acquire" and "Release"
+// semantics.   A MemoryBarrier() has "Barrier" semantics, but does no memory
+// access.
+Atomic32 Acquire_CompareAndSwap(volatile Atomic32* ptr,
+                                Atomic32 old_value,
+                                Atomic32 new_value);
+Atomic32 Release_CompareAndSwap(volatile Atomic32* ptr,
+                                Atomic32 old_value,
+                                Atomic32 new_value);
+
+void MemoryBarrier();
+void NoBarrier_Store(volatile Atomic32* ptr, Atomic32 value);
+void Acquire_Store(volatile Atomic32* ptr, Atomic32 value);
+void Release_Store(volatile Atomic32* ptr, Atomic32 value);
+
+Atomic32 NoBarrier_Load(volatile const Atomic32* ptr);
+Atomic32 Acquire_Load(volatile const Atomic32* ptr);
+Atomic32 Release_Load(volatile const Atomic32* ptr);
+
+// 64-bit atomic operations (only available on 64-bit processors).
+#ifdef ARCH_CPU_64_BITS
+Atomic64 NoBarrier_CompareAndSwap(volatile Atomic64* ptr,
+                                  Atomic64 old_value,
+                                  Atomic64 new_value);
+Atomic64 NoBarrier_AtomicExchange(volatile Atomic64* ptr, Atomic64 new_value);
+Atomic64 NoBarrier_AtomicIncrement(volatile Atomic64* ptr, Atomic64 increment);
+Atomic64 Barrier_AtomicIncrement(volatile Atomic64* ptr, Atomic64 increment);
+
+Atomic64 Acquire_CompareAndSwap(volatile Atomic64* ptr,
+                                Atomic64 old_value,
+                                Atomic64 new_value);
+Atomic64 Release_CompareAndSwap(volatile Atomic64* ptr,
+                                Atomic64 old_value,
+                                Atomic64 new_value);
+void NoBarrier_Store(volatile Atomic64* ptr, Atomic64 value);
+void Acquire_Store(volatile Atomic64* ptr, Atomic64 value);
+void Release_Store(volatile Atomic64* ptr, Atomic64 value);
+Atomic64 NoBarrier_Load(volatile const Atomic64* ptr);
+Atomic64 Acquire_Load(volatile const Atomic64* ptr);
+Atomic64 Release_Load(volatile const Atomic64* ptr);
+#endif  // ARCH_CPU_64_BITS
+
+// Include our platform specific implementation.
+#if defined(OS_NACL)
+#include "platform/atomicops_internals_gcc.h"
+#elif defined(COMPILER_GCC) && defined(ARCH_CPU_X86_FAMILY)
+#include "platform/atomicops_internals_x86_gcc.h"
+#else
+#error "Atomic operations are not supported on your platform"
+#endif
+
+} // namespace base
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_ATOMICOPS_H_

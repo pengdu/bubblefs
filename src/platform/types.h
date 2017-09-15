@@ -16,6 +16,9 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_TYPES_H_
 #define BUBBLEFS_PLATFORM_TYPES_H_
 
+#include <limits.h>  // So we can set the bounds of our types.
+#include <stddef.h>  // For size_t.
+#include <stdint.h>  // For intptr_t.
 #include <limits>
 #include <string>
 #include "platform/platform.h"

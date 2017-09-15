@@ -15,6 +15,8 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_PLATFORM_DEFINE_H_
 #define BUBBLEFS_PLATFORM_PLATFORM_DEFINE_H_
 
+#include "platform/build_config.h"
+
 // Set one PLATFORM_* macro and set IS_MOBILE_PLATFORM if the platform is for
 // mobile.
 
@@ -60,14 +62,5 @@ limitations under the License.
     defined(_M_X64)
 #define PLATFORM_IS_X86
 #endif
-
-// for linux
-#ifndef OS_LINUX
-#if defined(__linux__)
-#define OS_LINUX 1
-#else
-#define OS_LINUX 0
-#endif // __linux__
-#endif // OS_LINUX
 
 #endif // BUBBLEFS_PLATFORM_PLATFORM_DEFINE_H_

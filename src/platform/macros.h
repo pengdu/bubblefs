@@ -28,12 +28,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+// Copyright 2014 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// This file contains macros and macro-like constructs (e.g., templates) that
+// are commonly used throughout Chromium source. (It may also contain things
+// that are closely related to things that are commonly used that belong in this
+// file.)
 
 // tensorflow/tensorflow/core/platform/macros.h
 // tensorflow/tensorflow/core/platform/default/dynamic_annotations.h
+// chromium/base/compiler_specific.h
+// chromium/base/macros.h
 
 #ifndef BUBBLEFS_PLATFORM_MACROS_H_
 #define BUBBLEFS_PLATFORM_MACROS_H_
+
+#include "platform/build_config.h"
 
 // Compiler detection.
 #if defined(__GNUC__)
@@ -104,7 +116,6 @@ limitations under the License.
 #define TF_PREDICT_TRUE(x) (__builtin_expect(!!(x), 1))
 #define TF_LIKELY(x)   (__builtin_expect((x), 1))
 #define TF_UNLIKELY(x) (__builtin_expect((x), 0))
-#define TF_ALIGN_AS(n) alignas(n)
 #define TF_PREFETCH(addr, rw, locality) __builtin_prefetch(addr, rw, locality)
 #define TF_SYNC_SYNCHRONIZE __sync_synchronize();
 #define TF_SYNC_ADD_AND_FETCH(x, y) __sync_add_and_fetch(x, y);
@@ -117,7 +128,6 @@ limitations under the License.
 #define TF_PREDICT_TRUE(x) (x)
 #define TF_LIKELY(x)   (x)
 #define TF_UNLIKELY(x) (x)
-#define TF_ALIGN_AS(n)
 #define TF_PREFETCH(addr, rw, locality)
 #define TF_SYNC_SYNCHRONIZE
 #define TF_SYNC_ADD_AND_FETCH(x, y)
@@ -126,6 +136,14 @@ limitations under the License.
 #define TF_SYNC_VAL_COMPARE_AND_SWAP(x, y, z)
 #define TF_SYNC_LOCK_TEST_AND_SET(x, y, z)
 #endif
+
+// Put this in the private: declarations for a class to be uncopyable.
+#define TF_DISALLOW_COPY(TypeName) \
+  TypeName(const TypeName&) = delete
+
+// Put this in the private: declarations for a class to be unassignable.
+#define TF_DISALLOW_ASSIGN(TypeName) \
+  void operator=(const TypeName&) = delete
 
 // A macro to disallow the copy constructor and operator= functions
 // This is usually placed in the private: declarations for a class.
@@ -142,26 +160,131 @@ limitations under the License.
 #define TF_DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
   TypeName() = delete;                           \
   TF_DISALLOW_COPY_AND_ASSIGN(TypeName)
+   
+// The arraysize(arr) macro returns the # of elements in an array arr.
+// The expression is a compile-time constant, and therefore can be
+// used in defining new arrays, for example.  If you use arraysize on
+// a pointer by mistake, you will get a compile-time error.
+//
+// One caveat is that arraysize() doesn't accept any array of an
+// anonymous type or a type defined inside a function.  In these rare
+// cases, you have to use the unsafe ARRAYSIZE_UNSAFE() macro below.  This is
+// due to a limitation in C++'s template system.  The limitation might
+// eventually be removed, but it hasn't happened yet.
 
+// This template function declaration is used in defining arraysize.
+// Note that the function doesn't need an implementation, as we only
+// use its type.
+template <typename T, size_t N>
+char (&ArraySizeHelper(T (&array)[N]))[N];
+
+// That gcc wants both of these prototypes seems mysterious. VC, for
+// its part, can't decide which to use (another mystery). Matching of
+// template overloads: the final frontier.
+#ifndef _MSC_VER
+template <typename T, size_t N>
+char (&ArraySizeHelper(const T (&array)[N]))[N];
+#endif
+
+#define arraysize(array) (sizeof(ArraySizeHelper(array)))
+
+// ARRAYSIZE_UNSAFE performs essentially the same calculation as arraysize,
+// but can be used on anonymous types or types defined inside
+// functions.  It's less safe than arraysize as it accepts some
+// (although not all) pointers.  Therefore, you should use arraysize
+// whenever possible.
+//
+// The expression ARRAYSIZE_UNSAFE(a) is a compile-time constant of type
+// size_t.
+//
+// ARRAYSIZE_UNSAFE catches a few type errors.  If you see a compiler error
+//
+//   "warning: division by zero in ..."
+//
+// when using ARRAYSIZE_UNSAFE, you are (wrongfully) giving it a pointer.
+// You should only use ARRAYSIZE_UNSAFE on statically allocated arrays.
+//
+// The following comments are on the implementation details, and can
+// be ignored by the users.
+//
+// ARRAYSIZE_UNSAFE(arr) works by inspecting sizeof(arr) (the # of bytes in
+// the array) and sizeof(*(arr)) (the # of bytes in one array
+// element).  If the former is divisible by the latter, perhaps arr is
+// indeed an array, in which case the division result is the # of
+// elements in the array.  Otherwise, arr cannot possibly be an array,
+// and we generate a compiler error to prevent the code from
+// compiling.
+//
+// Since the size of bool is implementation-defined, we need to cast
+// !(sizeof(a) & sizeof(*(a))) to size_t in order to ensure the final
+// result has type size_t.
+//
+// This macro is not perfect as it wrongfully accepts certain
+// pointers, namely where the pointer size is divisible by the pointee
+// size.  Since all our code has to go through a 32-bit compiler,
+// where a pointer is 4 bytes, this means all pointers to a type whose
+// size is 3 or greater than 4 will be (righteously) rejected.
+
+#define ARRAYSIZE_UNSAFE(a) \
+  ((sizeof(a) / sizeof(*(a))) / \
+   static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
+   
 // The TF_ARRAYSIZE(arr) macro returns the # of elements in an array arr.
 //
 // The expression TF_ARRAYSIZE(a) is a compile-time constant of type
 // size_t.
 #define TF_ARRAYSIZE(a)         \
-  ((sizeof(a) / sizeof(*(a))) / \
-   static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
-   
-// The arraysize(arr) macro returns the # of elements in an array arr.  The
-// expression is a compile-time constant, and therefore can be used in defining
-// new arrays, for example.  If you use arraysize on a pointer by mistake, you
-// will get a compile-time error.  For the technical details, refer to
-// http://blogs.msdn.com/b/the1/archive/2004/05/07/128242.aspx.
+  ARRAYSIZE_UNSAFE(a)
+  
+// Use implicit_cast as a safe version of static_cast or const_cast
+// for upcasting in the type hierarchy (i.e. casting a pointer to Foo
+// to a pointer to SuperclassOfFoo or casting a pointer to Foo to
+// a const pointer to Foo).
+// When you use implicit_cast, the compiler checks that the cast is safe.
+// Such explicit implicit_casts are necessary in surprisingly many
+// situations where C++ demands an exact type match instead of an
+// argument type convertible to a target type.
+//
+// The From type can be inferred, so the preferred syntax for using
+// implicit_cast is the same as for static_cast etc.:
+//
+//   implicit_cast<ToType>(expr)
+//
+// implicit_cast would have been part of the C++ standard library,
+// but the proposal was submitted too late.  It will probably make
+// its way into the language in the future.
+template<typename To, typename From>
+inline To implicit_cast(From const &f) {
+  return f;
+}
 
-// This template function declaration is used in defining arraysize.
-// Note that the function doesn't need an implementation, as we only
-// use its type.
-template <typename T, size_t N> char (&ArraySizeHelper(T (&array)[N]))[N];
-#define arraysize(array) (sizeof(ArraySizeHelper(array)))
+// The COMPILE_ASSERT macro can be used to verify that a compile time
+// expression is true. For example, you could use it to verify the
+// size of a static array:
+//
+//   COMPILE_ASSERT(ARRAYSIZE_UNSAFE(content_type_names) == CONTENT_NUM_TYPES,
+//                  content_type_names_incorrect_size);
+//
+// or to make sure a struct is smaller than a certain size:
+//
+//   COMPILE_ASSERT(sizeof(foo) < 128, foo_too_large);
+//
+// The second argument to the macro is the name of the variable. If
+// the expression is false, most compilers will issue a warning/error
+// containing the name of the variable.
+// Under C++11, just use static_assert.
+
+#undef COMPILE_ASSERT
+#define COMPILE_ASSERT(expr, msg) static_assert(expr, #msg)
+
+// Macro useful for writing cross-platform function pointers.
+#if !defined(CDECL)
+#if defined(OS_WIN)
+#define CDECL __cdecl
+#else  // defined(OS_WIN)
+#define CDECL
+#endif  // defined(OS_WIN)
+#endif  // !defined(CDECL)
 
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 // Define this to 1 if the code is compiled in C++11 mode; leave it
@@ -195,6 +318,18 @@ template <typename T, size_t N> char (&ArraySizeHelper(T (&array)[N]))[N];
 #define TF_ATTRIBUTE_NO_SANITIZE_MEMORY
 
 #define TF_NOEXCEPT noexcept
+
+// Tell the compiler a function is using a printf-style format string.
+// |format_param| is the one-based index of the format string parameter;
+// |dots_param| is the one-based index of the "..." parameter.
+// For v*printf functions (which take a va_list), pass 0 for dots_param.
+// (This is undocumented but matches what the system C headers do.)
+#if defined(COMPILER_GCC)
+#define TF_PRINTF_FORMAT(format_param, dots_param) \
+    __attribute__((format(printf, format_param, dots_param)))
+#else
+#define TF_PRINTF_FORMAT(format_param, dots_param)
+#endif
 
 // Helper macros that include information about file name and line number
 #define TF_STRINGIFY(x) #x
@@ -232,7 +367,7 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 // Use these to declare and define a static local variable (static T;) so that
 // it is leaked so that its destructors are not called at exit. If you need
 // thread-safe initialization, use base/lazy_instance.h instead.
-#define CR_DEFINE_STATIC_LOCAL(type, name, arguments) \
+#define TF_DEFINE_STATIC_LOCAL(type, name, arguments) \
   static type& name = *new type arguments
 
 }  // namespace base
