@@ -164,6 +164,27 @@ string FormatTime(int64 seconds, int32 nanos);
 // offset. For example, "2015-05-20T13:29:35.120-08:00".
 bool ParseTime(const string& value, int64* seconds, int32* nanos);
 
+class TimeUtil {
+public:
+    // 得到当前的毫秒
+    static int64_t GetCurrentMS();
+
+    // 得到当前的微妙
+    static int64_t GetCurrentUS();
+
+    // 得到字符串形式的时间 格式：2015-04-10 10:11:12
+    static std::string GetStringTime();
+
+    // 得到字符串形式的详细时间 格式: 2015-04-10 10:11:12.967151
+    static const char* GetStringTimeDetail();
+
+    // 将字符串格式(2015-04-10 10:11:12)的时间，转为time_t(时间戳)
+    static time_t GetTimeStamp(const std::string &time);
+
+    // 取得两个时间戳字符串t1-t2的时间差，精确到秒,时间格式为2015-04-10 10:11:12
+    static time_t GetTimeDiff(const std::string &t1, const std::string &t2);
+};
+
 enum Precision {
     kDay,
     kMin,
@@ -213,7 +234,7 @@ static inline int32_t now_time_str(char* buf, int32_t len, Precision p = kUsec) 
     return ret;
 }
 
-static inline gettimestamp(const std::string &time) {
+static inline time_t gettimestamp(const std::string &time) {
     tm tm_;
     char buf[128] = { 0 };
     strncpy(buf, time.c_str(), sizeof(buf)-1);
@@ -223,7 +244,7 @@ static inline gettimestamp(const std::string &time) {
     return mktime(&tm_);
 }
 
-static inline gettimediff(const std::string &t1, const std::string &t2) {
+static inline time_t gettimediff(const std::string &t1, const std::string &t2) {
     time_t time1 = gettimestamp(t1);
     time_t time2 = gettimestamp(t2);
     time_t time = time1 - time2;

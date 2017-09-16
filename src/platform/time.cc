@@ -21,8 +21,11 @@
 // Timer functions.
 //
 #include "platform/time.h"
+#include <sys/time.h>
 #include <assert.h>
 #include <limits.h>
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include "utils/stringprintf.h"
 #include "utils/str_util.h"
@@ -417,6 +420,80 @@ bool ParseTime(const string& value, int64* seconds, int32* nanos) {
   }
   // Done with parsing.
   return *data == 0;
+}
+
+int64_t TimeUtil::GetCurrentMS() {
+    int64_t timestamp = GetCurrentUS();
+    return timestamp / 1000;
+}
+
+int64_t TimeUtil::GetCurrentUS() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    int64_t timestamp = tv.tv_sec * 1000000 + tv.tv_usec;
+    return timestamp;
+}
+
+std::string TimeUtil::GetStringTime()
+{
+    time_t now = time(NULL);
+
+    struct tm tm_now;
+    struct tm* p_tm_now;
+
+    p_tm_now = localtime_r(&now, &tm_now);
+
+    char buff[256] = {0};
+    snprintf(buff, sizeof(buff), "%04d-%02d-%02d% 02d:%02d:%02d",
+        1900 + p_tm_now->tm_year,
+        p_tm_now->tm_mon + 1,
+        p_tm_now->tm_mday,
+        p_tm_now->tm_hour,
+        p_tm_now->tm_min,
+        p_tm_now->tm_sec);
+
+    return std::string(buff);
+}
+
+const char* TimeUtil::GetStringTimeDetail() {
+    static char buff[64] = {0};
+    static struct timeval tv_now;
+    static time_t now;
+    static struct tm tm_now;
+    static struct tm* p_tm_now;
+
+    gettimeofday(&tv_now, NULL);
+    now = (time_t)tv_now.tv_sec;
+    p_tm_now = localtime_r(&now, &tm_now);
+
+    snprintf(buff, sizeof(buff), "%04d-%02d-%02d %02d:%02d:%02d.%06d",
+        1900 + p_tm_now->tm_year,
+        p_tm_now->tm_mon + 1,
+        p_tm_now->tm_mday,
+        p_tm_now->tm_hour,
+        p_tm_now->tm_min,
+        p_tm_now->tm_sec,
+        static_cast<int>(tv_now.tv_usec));
+
+    return buff;
+}
+
+time_t TimeUtil::GetTimeStamp(const std::string &time) {
+    tm tm_;
+    char buf[128] = { 0 };
+    strncpy(buf, time.c_str(), sizeof(buf)-1);
+    buf[sizeof(buf) - 1] = 0;
+    strptime(buf, "%Y-%m-%d %H:%M:%S", &tm_);
+    tm_.tm_isdst = -1;
+    return mktime(&tm_);
+}
+
+time_t  TimeUtil::GetTimeDiff(const std::string &t1, const std::string &t2) {
+    time_t time1 = GetTimeStamp(t1);
+    time_t time2 = GetTimeStamp(t2);
+    time_t time = time1 - time2;
+    return time;
 }
 
 }  // namespace timeutil

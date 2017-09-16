@@ -110,6 +110,20 @@ double NominalCPUFrequency();
 // used.
 void InfoAboutUnusedCPUFeatures();
 
+/// @brief 获取当前进程的cpu使用时间
+long long GetCurCpuTime();
+
+/// @brief 获取整个系统的cpu使用时间
+long long GetTotalCpuTime();
+
+/// @brief 计算进程的cpu使用率
+/// @param cur_cpu_time_start 当前进程cpu使用时间段-start
+/// @param cur_cpu_time_stop 当前进程cpu使用时间段-stop
+/// @param total_cpu_time_start 整个系统cpu使用时间段-start
+/// @param total_cpu_time_start 整个系统cpu使用时间段-stop
+float CalculateCurCpuUseage(long long cur_cpu_time_start, long long cur_cpu_time_stop,
+    long long total_cpu_time_start, long long total_cpu_time_stop);
+
 }  // namespace port
 }  // namespace bubblefs
 
