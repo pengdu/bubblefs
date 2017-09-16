@@ -57,6 +57,7 @@ limitations under the License. */
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// protobuf/src/google/protobuf/stubs/strutil.h
 // Paddle/paddle/utils/StringUtil.h
 // Pebble/src/common/string_utility.h
 // baidu/common/include/string_util.h
@@ -82,6 +83,286 @@ namespace bubblefs {
 namespace str_util {
   
 extern const string kNullptrString;
+
+// ----------------------------------------------------------------------
+// ascii_isalnum()
+//    Check if an ASCII character is alphanumeric.  We can't use ctype's
+//    isalnum() because it is affected by locale.  This function is applied
+//    to identifiers in the protocol buffer language, not to natural-language
+//    strings, so locale should not be taken into account.
+// ascii_isdigit()
+//    Like above, but only accepts digits.
+// ascii_isspace()
+//    Check if the character is a space character.
+// ----------------------------------------------------------------------
+
+inline bool ascii_isalnum(char c) {
+  return ('a' <= c && c <= 'z') ||
+         ('A' <= c && c <= 'Z') ||
+         ('0' <= c && c <= '9');
+}
+
+inline bool ascii_isdigit(char c) {
+  return ('0' <= c && c <= '9');
+}
+
+inline bool ascii_isspace(char c) {
+  return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' ||
+      c == '\r';
+}
+
+inline bool ascii_isupper(char c) {
+  return c >= 'A' && c <= 'Z';
+}
+
+inline bool ascii_islower(char c) {
+  return c >= 'a' && c <= 'z';
+}
+
+inline char ascii_toupper(char c) {
+  return ascii_islower(c) ? c - ('a' - 'A') : c;
+}
+
+inline char ascii_tolower(char c) {
+  return ascii_isupper(c) ? c + ('a' - 'A') : c;
+}
+
+inline int hex_digit_to_int(char c) {
+  /* Assume ASCII. */
+  int x = static_cast<unsigned char>(c);
+  if (x > '9') {
+    x += 9;
+  }
+  return x & 0xf;
+}
+
+// ----------------------------------------------------------------------
+// strto32()
+// strtou32()
+// strto64()
+// strtou64()
+//    Architecture-neutral plug compatible replacements for strtol() and
+//    strtoul().  Long's have different lengths on ILP-32 and LP-64
+//    platforms, so using these is safer, from the point of view of
+//    overflow behavior, than using the standard libc functions.
+// ----------------------------------------------------------------------
+TF_EXPORT int32 strto32_adaptor(const char *nptr, char **endptr, int base);
+TF_EXPORT uint32 strtou32_adaptor(const char *nptr, char **endptr, int base);
+
+inline int32 strto32(const char *nptr, char **endptr, int base) {
+  if (sizeof(int32) == sizeof(long))
+    return strtol(nptr, endptr, base);
+  else
+    return strto32_adaptor(nptr, endptr, base);
+}
+
+inline uint32 strtou32(const char *nptr, char **endptr, int base) {
+  if (sizeof(uint32) == sizeof(unsigned long))
+    return strtoul(nptr, endptr, base);
+  else
+    return strtou32_adaptor(nptr, endptr, base);
+}
+
+// For now, long long is 64-bit on all the platforms we care about, so these
+// functions can simply pass the call to strto[u]ll.
+inline int64 strto64(const char *nptr, char **endptr, int base) {
+  COMPILE_ASSERT(sizeof(int64) == sizeof(long long),
+                 sizeof_int64_is_not_sizeof_long_long);
+  return strtoll(nptr, endptr, base);
+}
+
+inline uint64 strtou64(const char *nptr, char **endptr, int base) {
+  COMPILE_ASSERT(sizeof(uint64) == sizeof(unsigned long long),
+                 sizeof_uint64_is_not_sizeof_long_long);
+  return strtoull(nptr, endptr, base);
+}
+
+// ----------------------------------------------------------------------
+// safe_strtob()
+// safe_strto32()
+// safe_strtou32()
+// safe_strto64()
+// safe_strtou64()
+// safe_strtof()
+// safe_strtod()
+// ----------------------------------------------------------------------
+TF_EXPORT bool safe_strtob(StringPiece str, bool* value);
+
+TF_EXPORT bool safe_strto32(const string& str, int32* value);
+TF_EXPORT bool safe_strtou32(const string& str, uint32* value);
+inline bool safe_strto32(const char* str, int32* value) {
+  return safe_strto32(string(str), value);
+}
+inline bool safe_strto32(StringPiece str, int32* value) {
+  return safe_strto32(str.ToString(), value);
+}
+inline bool safe_strtou32(const char* str, uint32* value) {
+  return safe_strtou32(string(str), value);
+}
+inline bool safe_strtou32(StringPiece str, uint32* value) {
+  return safe_strtou32(str.ToString(), value);
+}
+
+TF_EXPORT bool safe_strto64(const string& str, int64* value);
+TF_EXPORT bool safe_strtou64(const string& str, uint64* value);
+inline bool safe_strto64(const char* str, int64* value) {
+  return safe_strto64(string(str), value);
+}
+inline bool safe_strto64(StringPiece str, int64* value) {
+  return safe_strto64(str.ToString(), value);
+}
+inline bool safe_strtou64(const char* str, uint64* value) {
+  return safe_strtou64(string(str), value);
+}
+inline bool safe_strtou64(StringPiece str, uint64* value) {
+  return safe_strtou64(str.ToString(), value);
+}
+
+TF_EXPORT bool safe_strtof(const char* str, float* value);
+TF_EXPORT bool safe_strtod(const char* str, double* value);
+inline bool safe_strtof(const string& str, float* value) {
+  return safe_strtof(str.c_str(), value);
+}
+inline bool safe_strtod(const string& str, double* value) {
+  return safe_strtod(str.c_str(), value);
+}
+inline bool safe_strtof(StringPiece str, float* value) {
+  return safe_strtof(str.ToString(), value);
+}
+inline bool safe_strtod(StringPiece str, double* value) {
+  return safe_strtod(str.ToString(), value);
+}
+
+// ----------------------------------------------------------------------
+// FastIntToBuffer()
+// FastHexToBuffer()
+// FastHex64ToBuffer()
+// FastHex32ToBuffer()
+// FastTimeToBuffer()
+//    These are intended for speed.  FastIntToBuffer() assumes the
+//    integer is non-negative.  FastHexToBuffer() puts output in
+//    hex rather than decimal.  FastTimeToBuffer() puts the output
+//    into RFC822 format.
+//
+//    FastHex64ToBuffer() puts a 64-bit unsigned value in hex-format,
+//    padded to exactly 16 bytes (plus one byte for '\0')
+//
+//    FastHex32ToBuffer() puts a 32-bit unsigned value in hex-format,
+//    padded to exactly 8 bytes (plus one byte for '\0')
+//
+//       All functions take the output buffer as an arg.
+//    They all return a pointer to the beginning of the output,
+//    which may not be the beginning of the input buffer.
+// ----------------------------------------------------------------------
+
+// Suggested buffer size for FastToBuffer functions.  Also works with
+// DoubleToBuffer() and FloatToBuffer().
+static const int kFastToBufferSize = 32;
+
+TF_EXPORT char* FastInt32ToBuffer(int32 i, char* buffer);
+TF_EXPORT char* FastInt64ToBuffer(int64 i, char* buffer);
+char* FastUInt32ToBuffer(uint32 i, char* buffer);  // inline below
+char* FastUInt64ToBuffer(uint64 i, char* buffer);  // inline below
+TF_EXPORT char* FastHexToBuffer(int i, char* buffer);
+TF_EXPORT char* FastHex64ToBuffer(uint64 i, char* buffer);
+TF_EXPORT char* FastHex32ToBuffer(uint32 i, char* buffer);
+
+// at least 22 bytes long
+inline char* FastIntToBuffer(int i, char* buffer) {
+  return (sizeof(i) == 4 ?
+          FastInt32ToBuffer(i, buffer) : FastInt64ToBuffer(i, buffer));
+}
+inline char* FastUIntToBuffer(unsigned int i, char* buffer) {
+  return (sizeof(i) == 4 ?
+          FastUInt32ToBuffer(i, buffer) : FastUInt64ToBuffer(i, buffer));
+}
+inline char* FastLongToBuffer(long i, char* buffer) {
+  return (sizeof(i) == 4 ?
+          FastInt32ToBuffer(i, buffer) : FastInt64ToBuffer(i, buffer));
+}
+inline char* FastULongToBuffer(unsigned long i, char* buffer) {
+  return (sizeof(i) == 4 ?
+          FastUInt32ToBuffer(i, buffer) : FastUInt64ToBuffer(i, buffer));
+}
+
+// ----------------------------------------------------------------------
+// FastInt32ToBufferLeft()
+// FastUInt32ToBufferLeft()
+// FastInt64ToBufferLeft()
+// FastUInt64ToBufferLeft()
+//
+// Like the Fast*ToBuffer() functions above, these are intended for speed.
+// Unlike the Fast*ToBuffer() functions, however, these functions write
+// their output to the beginning of the buffer (hence the name, as the
+// output is left-aligned).  The caller is responsible for ensuring that
+// the buffer has enough space to hold the output.
+//
+// Returns a pointer to the end of the string (i.e. the null character
+// terminating the string).
+// ----------------------------------------------------------------------
+
+TF_EXPORT char* FastInt32ToBufferLeft(int32 i, char* buffer);
+TF_EXPORT char* FastUInt32ToBufferLeft(uint32 i, char* buffer);
+TF_EXPORT char* FastInt64ToBufferLeft(int64 i, char* buffer);
+TF_EXPORT char* FastUInt64ToBufferLeft(uint64 i, char* buffer);
+
+// Just define these in terms of the above.
+inline char* FastUInt32ToBuffer(uint32 i, char* buffer) {
+  FastUInt32ToBufferLeft(i, buffer);
+  return buffer;
+}
+inline char* FastUInt64ToBuffer(uint64 i, char* buffer) {
+  FastUInt64ToBufferLeft(i, buffer);
+  return buffer;
+}
+
+inline string SimpleBtoa(bool value) {
+  return value ? "true" : "false";
+}
+
+// ----------------------------------------------------------------------
+// SimpleItoa()
+//    Description: converts an integer to a string.
+//
+//    Return value: string
+// ----------------------------------------------------------------------
+TF_EXPORT string SimpleItoa(int i);
+TF_EXPORT string SimpleItoa(unsigned int i);
+TF_EXPORT string SimpleItoa(long i);
+TF_EXPORT string SimpleItoa(unsigned long i);
+TF_EXPORT string SimpleItoa(long long i);
+TF_EXPORT string SimpleItoa(unsigned long long i);
+
+// ----------------------------------------------------------------------
+// SimpleDtoa()
+// SimpleFtoa()
+// DoubleToBuffer()
+// FloatToBuffer()
+//    Description: converts a double or float to a string which, if
+//    passed to NoLocaleStrtod(), will produce the exact same original double
+//    (except in case of NaN; all NaNs are considered the same value).
+//    We try to keep the string short but it's not guaranteed to be as
+//    short as possible.
+//
+//    DoubleToBuffer() and FloatToBuffer() write the text to the given
+//    buffer and return it.  The buffer must be at least
+//    kDoubleToBufferSize bytes for doubles and kFloatToBufferSize
+//    bytes for floats.  kFastToBufferSize is also guaranteed to be large
+//    enough to hold either.
+//
+//    Return value: string
+// ----------------------------------------------------------------------
+TF_EXPORT string SimpleDtoa(double value);
+TF_EXPORT string SimpleFtoa(float value);
+
+TF_EXPORT char* DoubleToBuffer(double i, char* buffer);
+TF_EXPORT char* FloatToBuffer(float i, char* buffer);
+
+// In practice, doubles should never need more than 24 bytes and floats
+// should never need more than 14 (including null terminators), but we
+// overestimate to be safe.
+static const int kDoubleToBufferSize = 32;
+static const int kFloatToBufferSize = 24;
 
 // stringfy
 template <typename T>
@@ -175,18 +456,6 @@ inline bool IsHexDigit(Char c) {
          (c >= 'a' && c <= 'f');
 }
 
-string DebugString(const string& src);
-
-void SplitString(const string& str,
-                 const string& delim,
-                 std::vector<string>* result);
-
-std::vector<string> StringSplit(const string& arg, char delim);
-
-static bool SplitPath(const string& path,
-                      std::vector<string>* element,
-                      bool* isdir = nullptr);
-
 // Append a human-readable time in micros.
 int AppendHumanMicros(uint64_t micros, char* output, int len,
                       bool fixed_format);
@@ -231,42 +500,49 @@ std::vector<int> ParseVectorInt(const string& value);
 
 bool SerializeIntVector(const vector<int>& vec, string* value);
 
-bool StartsWith(const string& str, const string& prefix);
+void ToUpper(string* str);
 
-bool EndsWith(const string& str, const string& suffix);
+void ToLower(string* str);
 
 string Hex2Str(const char* _str, unsigned int _len);
 
 string Str2Hex(const char* _str, unsigned int _len);
 
-string& Ltrim(string& str); // NOLINT
+bool Hex2Bin(const char* hex_str, string* bin_str);
 
-string& Rtrim(string& str); // NOLINT
-
-string& Trim(string& str); // NOLINT
-
-void Trim(std::vector<string>* str_list);
-
-string TrimString(const string& str, const string& trim);
-
-void string_replace(const std::string &sub_str1,
-        const std::string &sub_str2, std::string *str);
+bool Bin2Hex(const char* bin_str, string* hex_str);
 
 void UrlEncode(const string& src_str, string* dst_str);
 
 void UrlDecode(const string& src_str, string* dst_str);
 
-void ToUpper(string* str);
+bool StartsWith(const string& str, const string& prefix);
 
-void ToLower(string* str);
+bool EndsWith(const string& str, const string& suffix);
+
+// ----------------------------------------------------------------------
+// HasSuffixString()
+//    Return true if str ends in suffix.
+// ----------------------------------------------------------------------
+inline bool HasSuffixString(const string& str,
+                            const string& suffix) {
+  return str.size() >= suffix.size() &&
+         str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+// ----------------------------------------------------------------------
+// HasPrefixString()
+//    Check if a string begins with a given prefix.
+// ----------------------------------------------------------------------
+inline bool HasPrefixString(const string& str,
+                            const string& prefix) {
+  return str.size() >= prefix.size() &&
+         str.compare(0, prefix.size(), prefix) == 0;
+}
 
 bool StripSuffix(string* str, const string& suffix);
 
 bool StripPrefix(string* str, const string& prefix);
-
-bool Hex2Bin(const char* hex_str, string* bin_str);
-
-bool Bin2Hex(const char* bin_str, string* hex_str);
 
 // Returns a version of 'src' where unprintable characters have been
 // escaped using C-style escape sequences.
@@ -315,6 +591,16 @@ bool ConsumePrefix(StringPiece* s, StringPiece expected);
 // Otherwise, return false.
 bool ConsumeSuffix(StringPiece* s, StringPiece expected);
 
+string& Ltrim(string& str); // NOLINT
+
+string& Rtrim(string& str); // NOLINT
+
+string& Trim(string& str); // NOLINT
+
+void Trim(std::vector<string>* str_list);
+
+string TrimString(const string& str, const string& trim);
+
 // Return lower-cased version of s.
 string Lowercase(StringPiece s);
 
@@ -341,6 +627,9 @@ void TitlecaseString(string* s, StringPiece delimiters);
 string StringReplace(StringPiece s, StringPiece oldsub, StringPiece newsub,
                      bool replace_all);
 
+void string_replace(const std::string &sub_str1,
+                    const std::string &sub_str2, std::string *str);
+
 // Join functionality
 template <typename T>
 string Join(const T& s, const char* sep);
@@ -363,6 +652,18 @@ struct SkipWhitespace {
     return !sp.empty();
   }
 };
+
+string DebugString(const string& src);
+
+void SplitString(const string& str,
+                 const string& delim,
+                 std::vector<string>* result);
+
+std::vector<string> StringSplit(const string& arg, char delim);
+
+static bool SplitPath(const string& path,
+                      std::vector<string>* element,
+                      bool* isdir = nullptr);
 
 // Split strings using any of the supplied delimiters. For example:
 // Split("a,b.c,d", ".,") would return {"a", "b", "c", "d"}.
@@ -415,6 +716,30 @@ string Join(const T& s, const char* sep, Formatter f) {
     f(&result, x);
     first = false;
   }
+  return result;
+}
+
+// ----------------------------------------------------------------------
+// Join()
+//    These methods concatenate a range of components into a C++ string, using
+//    the C-string "delim" as a separator between components.
+// ----------------------------------------------------------------------
+template <typename Iterator>
+void Join(Iterator start, Iterator end,
+          const char* delim, string* result) {
+  for (Iterator it = start; it != end; ++it) {
+    if (it != start) {
+      result->append(delim);
+    }
+    strings::StrAppend(result, *it);
+  }
+}
+
+template <typename Range>
+string Join(const Range& components,
+            const char* delim) {
+  string result;
+  Join(components.begin(), components.end(), delim, &result);
   return result;
 }
 

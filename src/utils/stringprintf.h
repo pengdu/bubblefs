@@ -22,9 +22,10 @@ limitations under the License.
 #ifndef BUBBLEFS_UTILS_STRINGPRINTF_H_
 #define BUBBLEFS_UTILS_STRINGPRINTF_H_
 
+#include "platform/macros.h"
 #include <stdarg.h>
 #include <string>
-#include "platform/macros.h"
+#include <vector>
 #include "platform/types.h"
 
 namespace bubblefs {
@@ -34,6 +35,9 @@ namespace strings {
 extern string Printf(const char* format, ...)
     // Tell the compiler to do printf format string checking.
     TF_PRINTF_ATTRIBUTE(1, 2);
+    
+// Store result into a supplied string and return it
+extern const string& SPrintf(string* dst, const char* format, ...);
 
 // Append result to a supplied string
 extern void Appendf(string* dst, const char* format, ...)
@@ -43,6 +47,15 @@ extern void Appendf(string* dst, const char* format, ...)
 // Lower-level routine that takes a va_list and appends to a specified
 // string.  All other routines are just convenience wrappers around it.
 extern void Appendv(string* dst, const char* format, va_list ap);
+
+
+// The max arguments supported by StringPrintfVector
+extern const int kStringPrintfVectorMaxArgs;
+
+// You can use this version when all your arguments are strings, but
+// you don't know how many arguments you'll have at compile time.
+// StringPrintfVector will LOG(FATAL) if v.size() > kStringPrintfVectorMaxArgs
+extern string PrintfVector(const char* format, const std::vector<string>& v);
 
 }  // namespace strings
 }  // namespace bubblefs

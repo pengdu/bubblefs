@@ -17,12 +17,13 @@ limitations under the License. */
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
-// Paddle/paddle/utils/ThreadLocal.h
 // rocksdb/util/thread_local.h
+// protobuf/src/google/protobuf/stubs/mutex.h
 
 #ifndef BUBBLEFS_PLATFORM_THREADLOCAL_H_
 #define BUBBLEFS_PLATFORM_THREADLOCAL_H_
 
+#include "platform/macros.h"
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <pthread.h>
@@ -35,13 +36,10 @@ limitations under the License. */
 #include <random>
 #include <unordered_map>
 #include <vector>
-#include "platform/base.h"
 #include "platform/logging.h"
 #include "platform/port.h"
 #include "utils/autovector.h"
 
-namespace bubblefs {
-  
 // Try to come up with a portable implementation of thread local variables
 #ifdef TF_SUPPORT_THREAD_LOCAL
 #define TF_STATIC_THREAD_LOCAL static __thread
@@ -50,8 +48,36 @@ namespace bubblefs {
 #define TF_STATIC_THREAD_LOCAL static thread_local
 #define TF_THREAD_LOCAL thread_local
 #endif
+
+namespace bubblefs { 
   
-namespace concurrent {
+namespace internal {
+  
+template<typename T>
+class ThreadLocalStorage {
+ public:
+  ThreadLocalStorage() {
+    pthread_key_create(&key_, &ThreadLocalStorage::Delete);
+  }
+  ~ThreadLocalStorage() {
+    pthread_key_delete(key_);
+  }
+  T* Get() {
+    T* result = static_cast<T*>(pthread_getspecific(key_));
+    if (result == NULL) {
+      result = new T();
+      pthread_setspecific(key_, result);
+    }
+    return result;
+  }
+ private:
+  static void Delete(void* value) {
+    delete static_cast<T*>(value);
+  }
+  pthread_key_t key_;
+
+  TF_DISALLOW_COPY_AND_ASSIGN(ThreadLocalStorage);
+};  
   
 /**
  * Thread local storage for object.
@@ -253,7 +279,7 @@ protected:
   static ThreadLocal<std::default_random_engine> engine_;
 };
 
-}  // namespace concurrent
+}  // namespace internal
 
 // Cleanup function that will be called for a stored thread local
 // pointer (if not NULL) when one of the following happens:

@@ -42,7 +42,7 @@ limitations under the License.
 #include <unistd.h>
 #include <unordered_set>
 #include "platform/logging.h"
-#include "platform/timer.h"
+#include "platform/time.h"
 #include "utils/strcat.h"
 
 namespace bubblefs {
@@ -199,7 +199,7 @@ bool Mutex::TryLock() {
 
 bool Mutex::TimedLock(long _millisecond) {
   struct timespec ts;
-  timer::make_timeout(&ts, _millisecond);
+  timeutil::make_timeout(&ts, _millisecond);
   int ret =  pthread_mutex_timedlock(&mu_, &ts);
   switch (ret) {
     case 0: AfterLock(); return true;

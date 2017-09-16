@@ -27,7 +27,7 @@ TF_EXPORT extern struct AtomicOps_x86CPUFeatureStruct
 #define ATOMICOPS_COMPILER_BARRIER() __asm__ __volatile__("" : : : "memory")
 
 namespace bubblefs {
-namespace port {
+namespace internal {
 
 // 32-bit low-level operations on any platform.
 
@@ -263,7 +263,7 @@ inline Atomic64 Release_CompareAndSwap(volatile Atomic64* ptr,
 
 #endif  // defined(__x86_64__)
 
-} // namespace port
+} // namespace internal
 } // namespace bubblefs
 
 #undef ATOMICOPS_COMPILER_BARRIER

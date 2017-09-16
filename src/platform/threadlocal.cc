@@ -32,8 +32,7 @@ DEFINE_bool(thread_local_rand_use_global_seed,
             "Whether to use global seed in thread local rand.");
 
 namespace bubblefs {
-  
-namespace concurrent {
+namespace internal {
   
 unsigned int ThreadLocalRand::defaultSeed_ = 1;
 ThreadLocal<unsigned int> ThreadLocalRand::seed_;
@@ -69,7 +68,7 @@ std::default_random_engine& ThreadLocalRandomEngine::get() {
   return *engine;
 }
 
-}  // namespace concurrent
+}  // namespace internal
 
 struct Entry {
   Entry() : ptr(nullptr) {}

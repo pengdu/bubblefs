@@ -45,7 +45,7 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_MACROS_H_
 #define BUBBLEFS_PLATFORM_MACROS_H_
 
-#include "platform/build_config.h"
+#include "platform/platform.h"
 
 // Compiler detection.
 #if defined(__GNUC__)
@@ -158,6 +158,10 @@ limitations under the License.
 // that wants to prevent anyone from instantiating it. This is
 // especially useful for classes containing only static methods.
 #define TF_DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
+  TypeName() = delete;                           \
+  TF_DISALLOW_COPY_AND_ASSIGN(TypeName)
+  
+#define TF_DISALLOW_EVIL_CONSTRUCTORS(TypeName) \
   TypeName() = delete;                           \
   TF_DISALLOW_COPY_AND_ASSIGN(TypeName)
    
@@ -335,6 +339,18 @@ inline To implicit_cast(From const &f) {
 #define TF_STRINGIFY(x) #x
 #define TF_TOSTRING(x) STRINGIFY(x)
 #define TF_PREPEND_FILE_LINE(FMT) ("[" __FILE__ ":" TOSTRING(__LINE__) "] " FMT)
+
+#ifdef _MSC_VER
+#define TF_LONGLONG(x) x##I64
+#define TF_ULONGLONG(x) x##UI64
+#define TF_LL_FORMAT "I64"  // As in printf("%I64d", ...)
+#else
+// By long long, we actually mean int64.
+#define TF_LONGLONG(x) x##LL
+#define TF_ULONGLONG(x) x##ULL
+// Used to format real long long integers.
+#define TF_LL_FORMAT "ll"  // As in "%lld". Note that "q" is poor form also.
+#endif
 
 // Used to explicitly mark the return value of a function as unused. If you are
 // really sure you don't want to do anything with the return value of a function

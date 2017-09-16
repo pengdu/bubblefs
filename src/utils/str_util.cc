@@ -47,9 +47,67 @@ limitations under the License. */
 // distributed on an "AS IS" basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
 // either express or implied. See the License for the specific language governing permissions and
 // limitations under the License.
-
+// Protocol Buffers - Google's data interchange format
+// Copyright 2008 Google Inc.  All rights reserved.
+// https://developers.google.com/protocol-buffers/
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// Protocol Buffers - Google's data interchange format
+// Copyright 2008 Google Inc.  All rights reserved.
+// https://developers.google.com/protocol-buffers/
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ////////////////////////////////////////////////////////////////////////////////
 
+// protobuf/src/google/protobuf/stubs/strutil.cc
 // Paddle/paddle/utils/StringUtil.cc
 // Pebble/src/common/string_utility.cpp
 // baidu/common/include/string_util.cc
@@ -59,6 +117,7 @@ limitations under the License. */
 
 #include "utils/str_util.h"
 #include <inttypes.h>
+#include "float.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,85 +139,777 @@ const string kNullptrString = "nullptr";
   
 static char hex_char[] = "0123456789abcdef";
 
-string DebugString(const string& src) {
-    size_t src_len = src.size();
-    string dst;
-    dst.resize(src_len << 2);
+// ----------------------------------------------------------------------
+// strto32_adaptor()
+// strtou32_adaptor()
+//    Implementation of strto[u]l replacements that have identical
+//    overflow and underflow characteristics for both ILP-32 and LP-64
+//    platforms, including errno preservation in error-free calls.
+// ----------------------------------------------------------------------
 
-    size_t j = 0;
-    for (size_t i = 0; i < src_len; i++) {
-        uint8_t c = src[i];
-        if (IsVisible(c)) {
-            dst[j++] = c;
-        } else {
-            dst[j++] = '\\';
-            dst[j++] = 'x';
-            dst[j++] = ToHex(c >> 4);
-            dst[j++] = ToHex(c & 0xF);
-        }
-    }
-    return dst.substr(0, j);
-}
-
-void SplitString(const string& str,
-                 const string& delim,
-                 std::vector<string>* result) {
-    result->clear();
-    if (str.empty()) {
-        return;
-    }
-    if (delim[0] == '\0') {
-        result->push_back(str);
-        return;
-    }
-
-    string::size_type delim_length = delim.length();
-
-    for (string::size_type begin_index = 0; begin_index < str.size();) {
-        string::size_type end_index = str.find(delim, begin_index);
-        if (end_index == string::npos) {
-            result->push_back(str.substr(begin_index));
-            return;
-        }
-        if (end_index > begin_index) {
-            result->push_back(str.substr(begin_index, (end_index - begin_index)));
-        }
-
-        begin_index = end_index + delim_length;
-    }
-}
-
-std::vector<string> StringSplit(const string& arg, char delim) {
-  std::vector<string> splits;
-  stringstream ss(arg);
-  string item;
-  while (std::getline(ss, item, delim)) {
-    splits.push_back(item);
+int32 strto32_adaptor(const char *nptr, char **endptr, int base) {
+  const int saved_errno = errno;
+  errno = 0;
+  const long result = strtol(nptr, endptr, base);
+  if (errno == ERANGE && result == LONG_MIN) {
+    return kint32min;
+  } else if (errno == ERANGE && result == LONG_MAX) {
+    return kint32max;
+  } else if (errno == 0 && result < kint32min) {
+    errno = ERANGE;
+    return kint32min;
+  } else if (errno == 0 && result > kint32max) {
+    errno = ERANGE;
+    return kint32max;
   }
-  return splits;
+  if (errno == 0)
+    errno = saved_errno;
+  return static_cast<int32>(result);
 }
 
-static const uint32_t MAX_PATH_LENGTH = 10240;
-static bool SplitPath(const string& path,
-                      std::vector<string>* element,
-                      bool* isdir) {
-    if (path.empty() || path[0] != '/' || path.size() > MAX_PATH_LENGTH) {
-        return false;
+uint32 strtou32_adaptor(const char *nptr, char **endptr, int base) {
+  const int saved_errno = errno;
+  errno = 0;
+  const unsigned long result = strtoul(nptr, endptr, base);
+  if (errno == ERANGE && result == ULONG_MAX) {
+    return kuint32max;
+  } else if (errno == 0 && result > kuint32max) {
+    errno = ERANGE;
+    return kuint32max;
+  }
+  if (errno == 0)
+    errno = saved_errno;
+  return static_cast<uint32>(result);
+}
+
+inline bool safe_parse_sign(string* text  /*inout*/,
+                            bool* negative_ptr  /*output*/) {
+  const char* start = text->data();
+  const char* end = start + text->size();
+
+  // Consume whitespace.
+  while (start < end && (start[0] == ' ')) {
+    ++start;
+  }
+  while (start < end && (end[-1] == ' ')) {
+    --end;
+  }
+  if (start >= end) {
+    return false;
+  }
+
+  // Consume sign.
+  *negative_ptr = (start[0] == '-');
+  if (*negative_ptr || start[0] == '+') {
+    ++start;
+    if (start >= end) {
+      return false;
     }
-    element->clear();
-    size_t last_pos = 0;
-    for (size_t i = 1; i <= path.size(); i++) {
-        if (i == path.size() || path[i] == '/') {
-            if (last_pos + 1 < i) {
-                element->push_back(path.substr(last_pos + 1, i - last_pos - 1));
-            }
-            last_pos = i;
-        }
+  }
+  *text = text->substr(start - text->data(), end - start);
+  return true;
+}
+
+template<typename IntType>
+bool safe_parse_positive_int(
+    string text, IntType* value_p) {
+  int base = 10;
+  IntType value = 0;
+  const IntType vmax = std::numeric_limits<IntType>::max();
+  assert(vmax > 0);
+  assert(vmax >= base);
+  const IntType vmax_over_base = vmax / base;
+  const char* start = text.data();
+  const char* end = start + text.size();
+  // loop over digits
+  for (; start < end; ++start) {
+    unsigned char c = static_cast<unsigned char>(start[0]);
+    int digit = c - '0';
+    if (digit >= base || digit < 0) {
+      *value_p = value;
+      return false;
     }
-    if (isdir) {
-        *isdir = (path[path.size() - 1] == '/');
+    if (value > vmax_over_base) {
+      *value_p = vmax;
+      return false;
     }
+    value *= base;
+    if (value > vmax - digit) {
+      *value_p = vmax;
+      return false;
+    }
+    value += digit;
+  }
+  *value_p = value;
+  return true;
+}
+
+template<typename IntType>
+bool safe_parse_negative_int(
+    const string& text, IntType* value_p) {
+  int base = 10;
+  IntType value = 0;
+  const IntType vmin = std::numeric_limits<IntType>::min();
+  assert(vmin < 0);
+  assert(vmin <= 0 - base);
+  IntType vmin_over_base = vmin / base;
+  // 2003 c++ standard [expr.mul]
+  // "... the sign of the remainder is implementation-defined."
+  // Although (vmin/base)*base + vmin%base is always vmin.
+  // 2011 c++ standard tightens the spec but we cannot rely on it.
+  if (vmin % base > 0) {
+    vmin_over_base += 1;
+  }
+  const char* start = text.data();
+  const char* end = start + text.size();
+  // loop over digits
+  for (; start < end; ++start) {
+    unsigned char c = static_cast<unsigned char>(start[0]);
+    int digit = c - '0';
+    if (digit >= base || digit < 0) {
+      *value_p = value;
+      return false;
+    }
+    if (value < vmin_over_base) {
+      *value_p = vmin;
+      return false;
+    }
+    value *= base;
+    if (value < vmin + digit) {
+      *value_p = vmin;
+      return false;
+    }
+    value -= digit;
+  }
+  *value_p = value;
+  return true;
+}
+
+template<typename IntType>
+bool safe_int_internal(string text, IntType* value_p) {
+  *value_p = 0;
+  bool negative;
+  if (!safe_parse_sign(&text, &negative)) {
+    return false;
+  }
+  if (!negative) {
+    return safe_parse_positive_int(text, value_p);
+  } else {
+    return safe_parse_negative_int(text, value_p);
+  }
+}
+
+template<typename IntType>
+bool safe_uint_internal(string text, IntType* value_p) {
+  *value_p = 0;
+  bool negative;
+  if (!safe_parse_sign(&text, &negative) || negative) {
+    return false;
+  }
+  return safe_parse_positive_int(text, value_p);
+}
+
+// ----------------------------------------------------------------------
+// FastIntToBuffer()
+// FastInt64ToBuffer()
+// FastHexToBuffer()
+// FastHex64ToBuffer()
+// FastHex32ToBuffer()
+// ----------------------------------------------------------------------
+
+// Offset into buffer where FastInt64ToBuffer places the end of string
+// null character.  Also used by FastInt64ToBufferLeft.
+static const int kFastInt64ToBufferOffset = 21;
+
+char *FastInt64ToBuffer(int64 i, char* buffer) {
+  // We could collapse the positive and negative sections, but that
+  // would be slightly slower for positive numbers...
+  // 22 bytes is enough to store -2**64, -18446744073709551616.
+  char* p = buffer + kFastInt64ToBufferOffset;
+  *p-- = '\0';
+  if (i >= 0) {
+    do {
+      *p-- = '0' + i % 10;
+      i /= 10;
+    } while (i > 0);
+    return p + 1;
+  } else {
+    // On different platforms, % and / have different behaviors for
+    // negative numbers, so we need to jump through hoops to make sure
+    // we don't divide negative numbers.
+    if (i > -10) {
+      i = -i;
+      *p-- = '0' + i;
+      *p = '-';
+      return p;
+    } else {
+      // Make sure we aren't at MIN_INT, in which case we can't say i = -i
+      i = i + 10;
+      i = -i;
+      *p-- = '0' + i % 10;
+      // Undo what we did a moment ago
+      i = i / 10 + 1;
+      do {
+        *p-- = '0' + i % 10;
+        i /= 10;
+      } while (i > 0);
+      *p = '-';
+      return p;
+    }
+  }
+}
+
+// Offset into buffer where FastInt32ToBuffer places the end of string
+// null character.  Also used by FastInt32ToBufferLeft
+static const int kFastInt32ToBufferOffset = 11;
+
+// Yes, this is a duplicate of FastInt64ToBuffer.  But, we need this for the
+// compiler to generate 32 bit arithmetic instructions.  It's much faster, at
+// least with 32 bit binaries.
+char *FastInt32ToBuffer(int32 i, char* buffer) {
+  // We could collapse the positive and negative sections, but that
+  // would be slightly slower for positive numbers...
+  // 12 bytes is enough to store -2**32, -4294967296.
+  char* p = buffer + kFastInt32ToBufferOffset;
+  *p-- = '\0';
+  if (i >= 0) {
+    do {
+      *p-- = '0' + i % 10;
+      i /= 10;
+    } while (i > 0);
+    return p + 1;
+  } else {
+    // On different platforms, % and / have different behaviors for
+    // negative numbers, so we need to jump through hoops to make sure
+    // we don't divide negative numbers.
+    if (i > -10) {
+      i = -i;
+      *p-- = '0' + i;
+      *p = '-';
+      return p;
+    } else {
+      // Make sure we aren't at MIN_INT, in which case we can't say i = -i
+      i = i + 10;
+      i = -i;
+      *p-- = '0' + i % 10;
+      // Undo what we did a moment ago
+      i = i / 10 + 1;
+      do {
+        *p-- = '0' + i % 10;
+        i /= 10;
+      } while (i > 0);
+      *p = '-';
+      return p;
+    }
+  }
+}
+
+char *FastHexToBuffer(int i, char* buffer) {
+  CHECK(i >= 0) << "FastHexToBuffer() wants non-negative integers, not " << i;
+
+  static const char *hexdigits = "0123456789abcdef";
+  char *p = buffer + 21;
+  *p-- = '\0';
+  do {
+    *p-- = hexdigits[i & 15];   // mod by 16
+    i >>= 4;                    // divide by 16
+  } while (i > 0);
+  return p + 1;
+}
+
+char *InternalFastHexToBuffer(uint64 value, char* buffer, int num_byte) {
+  static const char *hexdigits = "0123456789abcdef";
+  buffer[num_byte] = '\0';
+  for (int i = num_byte - 1; i >= 0; i--) {
+#ifdef _M_X64
+    // MSVC x64 platform has a bug optimizing the uint32(value) in the #else
+    // block. Given that the uint32 cast was to improve performance on 32-bit
+    // platforms, we use 64-bit '&' directly.
+    buffer[i] = hexdigits[value & 0xf];
+#else
+    buffer[i] = hexdigits[uint32(value) & 0xf];
+#endif
+    value >>= 4;
+  }
+  return buffer;
+}
+
+char *FastHex64ToBuffer(uint64 value, char* buffer) {
+  return InternalFastHexToBuffer(value, buffer, 16);
+}
+
+char *FastHex32ToBuffer(uint32 value, char* buffer) {
+  return InternalFastHexToBuffer(value, buffer, 8);
+}
+
+// ----------------------------------------------------------------------
+// FastInt32ToBufferLeft()
+// FastUInt32ToBufferLeft()
+// FastInt64ToBufferLeft()
+// FastUInt64ToBufferLeft()
+//
+// Like the Fast*ToBuffer() functions above, these are intended for speed.
+// Unlike the Fast*ToBuffer() functions, however, these functions write
+// their output to the beginning of the buffer (hence the name, as the
+// output is left-aligned).  The caller is responsible for ensuring that
+// the buffer has enough space to hold the output.
+//
+// Returns a pointer to the end of the string (i.e. the null character
+// terminating the string).
+// ----------------------------------------------------------------------
+
+static const char two_ASCII_digits[100][2] = {
+  {'0','0'}, {'0','1'}, {'0','2'}, {'0','3'}, {'0','4'},
+  {'0','5'}, {'0','6'}, {'0','7'}, {'0','8'}, {'0','9'},
+  {'1','0'}, {'1','1'}, {'1','2'}, {'1','3'}, {'1','4'},
+  {'1','5'}, {'1','6'}, {'1','7'}, {'1','8'}, {'1','9'},
+  {'2','0'}, {'2','1'}, {'2','2'}, {'2','3'}, {'2','4'},
+  {'2','5'}, {'2','6'}, {'2','7'}, {'2','8'}, {'2','9'},
+  {'3','0'}, {'3','1'}, {'3','2'}, {'3','3'}, {'3','4'},
+  {'3','5'}, {'3','6'}, {'3','7'}, {'3','8'}, {'3','9'},
+  {'4','0'}, {'4','1'}, {'4','2'}, {'4','3'}, {'4','4'},
+  {'4','5'}, {'4','6'}, {'4','7'}, {'4','8'}, {'4','9'},
+  {'5','0'}, {'5','1'}, {'5','2'}, {'5','3'}, {'5','4'},
+  {'5','5'}, {'5','6'}, {'5','7'}, {'5','8'}, {'5','9'},
+  {'6','0'}, {'6','1'}, {'6','2'}, {'6','3'}, {'6','4'},
+  {'6','5'}, {'6','6'}, {'6','7'}, {'6','8'}, {'6','9'},
+  {'7','0'}, {'7','1'}, {'7','2'}, {'7','3'}, {'7','4'},
+  {'7','5'}, {'7','6'}, {'7','7'}, {'7','8'}, {'7','9'},
+  {'8','0'}, {'8','1'}, {'8','2'}, {'8','3'}, {'8','4'},
+  {'8','5'}, {'8','6'}, {'8','7'}, {'8','8'}, {'8','9'},
+  {'9','0'}, {'9','1'}, {'9','2'}, {'9','3'}, {'9','4'},
+  {'9','5'}, {'9','6'}, {'9','7'}, {'9','8'}, {'9','9'}
+};
+
+char* FastUInt32ToBufferLeft(uint32 u, char* buffer) {
+  int digits;
+  const char *ASCII_digits = nullptr;
+  // The idea of this implementation is to trim the number of divides to as few
+  // as possible by using multiplication and subtraction rather than mod (%),
+  // and by outputting two digits at a time rather than one.
+  // The huge-number case is first, in the hopes that the compiler will output
+  // that case in one branch-free block of code, and only output conditional
+  // branches into it from below.
+  if (u >= 1000000000) {  // >= 1,000,000,000
+    digits = u / 100000000;  // 100,000,000
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+sublt100_000_000:
+    u -= digits * 100000000;  // 100,000,000
+lt100_000_000:
+    digits = u / 1000000;  // 1,000,000
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+sublt1_000_000:
+    u -= digits * 1000000;  // 1,000,000
+lt1_000_000:
+    digits = u / 10000;  // 10,000
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+sublt10_000:
+    u -= digits * 10000;  // 10,000
+lt10_000:
+    digits = u / 100;
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+sublt100:
+    u -= digits * 100;
+lt100:
+    digits = u;
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+done:
+    *buffer = 0;
+    return buffer;
+  }
+
+  if (u < 100) {
+    digits = u;
+    if (u >= 10) goto lt100;
+    *buffer++ = '0' + digits;
+    goto done;
+  }
+  if (u  <  10000) {   // 10,000
+    if (u >= 1000) goto lt10_000;
+    digits = u / 100;
+    *buffer++ = '0' + digits;
+    goto sublt100;
+  }
+  if (u  <  1000000) {   // 1,000,000
+    if (u >= 100000) goto lt1_000_000;
+    digits = u / 10000;  //    10,000
+    *buffer++ = '0' + digits;
+    goto sublt10_000;
+  }
+  if (u  <  100000000) {   // 100,000,000
+    if (u >= 10000000) goto lt100_000_000;
+    digits = u / 1000000;  //   1,000,000
+    *buffer++ = '0' + digits;
+    goto sublt1_000_000;
+  }
+  // we already know that u < 1,000,000,000
+  digits = u / 100000000;   // 100,000,000
+  *buffer++ = '0' + digits;
+  goto sublt100_000_000;
+}
+
+char* FastInt32ToBufferLeft(int32 i, char* buffer) {
+  uint32 u = i;
+  if (i < 0) {
+    *buffer++ = '-';
+    u = -i;
+  }
+  return FastUInt32ToBufferLeft(u, buffer);
+}
+
+char* FastUInt64ToBufferLeft(uint64 u64, char* buffer) {
+  int digits;
+  const char *ASCII_digits = nullptr;
+
+  uint32 u = static_cast<uint32>(u64);
+  if (u == u64) return FastUInt32ToBufferLeft(u, buffer);
+
+  uint64 top_11_digits = u64 / 1000000000;
+  buffer = FastUInt64ToBufferLeft(top_11_digits, buffer);
+  u = u64 - (top_11_digits * 1000000000);
+
+  digits = u / 10000000;  // 10,000,000
+  DCHECK_LT(digits, 100);
+  ASCII_digits = two_ASCII_digits[digits];
+  buffer[0] = ASCII_digits[0];
+  buffer[1] = ASCII_digits[1];
+  buffer += 2;
+  u -= digits * 10000000;  // 10,000,000
+  digits = u / 100000;  // 100,000
+  ASCII_digits = two_ASCII_digits[digits];
+  buffer[0] = ASCII_digits[0];
+  buffer[1] = ASCII_digits[1];
+  buffer += 2;
+  u -= digits * 100000;  // 100,000
+  digits = u / 1000;  // 1,000
+  ASCII_digits = two_ASCII_digits[digits];
+  buffer[0] = ASCII_digits[0];
+  buffer[1] = ASCII_digits[1];
+  buffer += 2;
+  u -= digits * 1000;  // 1,000
+  digits = u / 10;
+  ASCII_digits = two_ASCII_digits[digits];
+  buffer[0] = ASCII_digits[0];
+  buffer[1] = ASCII_digits[1];
+  buffer += 2;
+  u -= digits * 10;
+  digits = u;
+  *buffer++ = '0' + digits;
+  *buffer = 0;
+  return buffer;
+}
+
+char* FastInt64ToBufferLeft(int64 i, char* buffer) {
+  uint64 u = i;
+  if (i < 0) {
+    *buffer++ = '-';
+    u = -i;
+  }
+  return FastUInt64ToBufferLeft(u, buffer);
+}
+
+// ----------------------------------------------------------------------
+// SimpleItoa()
+//    Description: converts an integer to a string.
+//
+//    Return value: string
+// ----------------------------------------------------------------------
+
+string SimpleItoa(int i) {
+  char buffer[kFastToBufferSize];
+  return (sizeof(i) == 4) ?
+    FastInt32ToBuffer(i, buffer) :
+    FastInt64ToBuffer(i, buffer);
+}
+
+string SimpleItoa(unsigned int i) {
+  char buffer[kFastToBufferSize];
+  return string(buffer, (sizeof(i) == 4) ?
+    FastUInt32ToBufferLeft(i, buffer) :
+    FastUInt64ToBufferLeft(i, buffer));
+}
+
+string SimpleItoa(long i) {
+  char buffer[kFastToBufferSize];
+  return (sizeof(i) == 4) ?
+    FastInt32ToBuffer(i, buffer) :
+    FastInt64ToBuffer(i, buffer);
+}
+
+string SimpleItoa(unsigned long i) {
+  char buffer[kFastToBufferSize];
+  return string(buffer, (sizeof(i) == 4) ?
+    FastUInt32ToBufferLeft(i, buffer) :
+    FastUInt64ToBufferLeft(i, buffer));
+}
+
+string SimpleItoa(long long i) {
+  char buffer[kFastToBufferSize];
+  return (sizeof(i) == 4) ?
+    FastInt32ToBuffer(i, buffer) :
+    FastInt64ToBuffer(i, buffer);
+}
+
+string SimpleItoa(unsigned long long i) {
+  char buffer[kFastToBufferSize];
+  return string(buffer, (sizeof(i) == 4) ?
+    FastUInt32ToBufferLeft(i, buffer) :
+    FastUInt64ToBufferLeft(i, buffer));
+}
+
+// ----------------------------------------------------------------------
+// SimpleDtoa()
+// SimpleFtoa()
+// DoubleToBuffer()
+// FloatToBuffer()
+//    We want to print the value without losing precision, but we also do
+//    not want to print more digits than necessary.  This turns out to be
+//    trickier than it sounds.  Numbers like 0.2 cannot be represented
+//    exactly in binary.  If we print 0.2 with a very large precision,
+//    e.g. "%.50g", we get "0.2000000000000000111022302462515654042363167".
+//    On the other hand, if we set the precision too low, we lose
+//    significant digits when printing numbers that actually need them.
+//    It turns out there is no precision value that does the right thing
+//    for all numbers.
+//
+//    Our strategy is to first try printing with a precision that is never
+//    over-precise, then parse the result with strtod() to see if it
+//    matches.  If not, we print again with a precision that will always
+//    give a precise result, but may use more digits than necessary.
+//
+//    An arguably better strategy would be to use the algorithm described
+//    in "How to Print Floating-Point Numbers Accurately" by Steele &
+//    White, e.g. as implemented by David M. Gay's dtoa().  It turns out,
+//    however, that the following implementation is about as fast as
+//    DMG's code.  Furthermore, DMG's code locks mutexes, which means it
+//    will not scale well on multi-core machines.  DMG's code is slightly
+//    more accurate (in that it will never use more digits than
+//    necessary), but this is probably irrelevant for most users.
+//
+//    Rob Pike and Ken Thompson also have an implementation of dtoa() in
+//    third_party/fmt/fltfmt.cc.  Their implementation is similar to this
+//    one in that it makes guesses and then uses strtod() to check them.
+//    Their implementation is faster because they use their own code to
+//    generate the digits in the first place rather than use snprintf(),
+//    thus avoiding format string parsing overhead.  However, this makes
+//    it considerably more complicated than the following implementation,
+//    and it is embedded in a larger library.  If speed turns out to be
+//    an issue, we could re-implement this in terms of their
+//    implementation.
+// ----------------------------------------------------------------------
+
+string SimpleDtoa(double value) {
+  char buffer[kDoubleToBufferSize];
+  return DoubleToBuffer(value, buffer);
+}
+
+string SimpleFtoa(float value) {
+  char buffer[kFloatToBufferSize];
+  return FloatToBuffer(value, buffer);
+}
+
+static inline bool IsValidFloatChar(char c) {
+  return ('0' <= c && c <= '9') ||
+         c == 'e' || c == 'E' ||
+         c == '+' || c == '-';
+}
+
+void DelocalizeRadix(char* buffer) {
+  // Fast check:  if the buffer has a normal decimal point, assume no
+  // translation is needed.
+  if (strchr(buffer, '.') != NULL) return;
+
+  // Find the first unknown character.
+  while (IsValidFloatChar(*buffer)) ++buffer;
+
+  if (*buffer == '\0') {
+    // No radix character found.
+    return;
+  }
+
+  // We are now pointing at the locale-specific radix character.  Replace it
+  // with '.'.
+  *buffer = '.';
+  ++buffer;
+
+  if (!IsValidFloatChar(*buffer) && *buffer != '\0') {
+    // It appears the radix was a multi-byte character.  We need to remove the
+    // extra bytes.
+    char* target = buffer;
+    do { ++buffer; } while (!IsValidFloatChar(*buffer) && *buffer != '\0');
+    memmove(target, buffer, strlen(buffer) + 1);
+  }
+}
+
+char* DoubleToBuffer(double value, char* buffer) {
+  // DBL_DIG is 15 for IEEE-754 doubles, which are used on almost all
+  // platforms these days.  Just in case some system exists where DBL_DIG
+  // is significantly larger -- and risks overflowing our buffer -- we have
+  // this assert.
+  COMPILE_ASSERT(DBL_DIG < 20, DBL_DIG_is_too_big);
+
+  if (value == std::numeric_limits<double>::infinity()) {
+    strcpy(buffer, "inf");
+    return buffer;
+  } else if (value == -std::numeric_limits<double>::infinity()) {
+    strcpy(buffer, "-inf");
+    return buffer;
+  } else if (isnan(value)) {
+    strcpy(buffer, "nan");
+    return buffer;
+  }
+
+  int snprintf_result =
+    snprintf(buffer, kDoubleToBufferSize, "%.*g", DBL_DIG, value);
+
+  // The snprintf should never overflow because the buffer is significantly
+  // larger than the precision we asked for.
+  DCHECK(snprintf_result > 0 && snprintf_result < kDoubleToBufferSize);
+
+  // We need to make parsed_value volatile in order to force the compiler to
+  // write it out to the stack.  Otherwise, it may keep the value in a
+  // register, and if it does that, it may keep it as a long double instead
+  // of a double.  This long double may have extra bits that make it compare
+  // unequal to "value" even though it would be exactly equal if it were
+  // truncated to a double.
+  volatile double parsed_value = strtod(buffer, nullptr);
+  if (parsed_value != value) {
+    int snprintf_result =
+      snprintf(buffer, kDoubleToBufferSize, "%.*g", DBL_DIG+2, value);
+
+    // Should never overflow; see above.
+    DCHECK(snprintf_result > 0 && snprintf_result < kDoubleToBufferSize);
+  }
+
+  DelocalizeRadix(buffer);
+  return buffer;
+}
+
+static int memcasecmp(const char *s1, const char *s2, size_t len) {
+  const unsigned char *us1 = reinterpret_cast<const unsigned char *>(s1);
+  const unsigned char *us2 = reinterpret_cast<const unsigned char *>(s2);
+
+  for ( int i = 0; i < len; i++ ) {
+    const int diff =
+      static_cast<int>(static_cast<unsigned char>(ascii_tolower(us1[i]))) -
+      static_cast<int>(static_cast<unsigned char>(ascii_tolower(us2[i])));
+    if (diff != 0) return diff;
+  }
+  return 0;
+}
+
+inline bool CaseEqual(StringPiece s1, StringPiece s2) {
+  if (s1.size() != s2.size()) return false;
+  return memcasecmp(s1.data(), s2.data(), s1.size()) == 0;
+}
+
+bool safe_strtob(StringPiece str, bool* value) {
+  CHECK(value != nullptr) << "NULL output boolean given.";
+  if (CaseEqual(str, "true") || CaseEqual(str, "t") ||
+      CaseEqual(str, "yes") || CaseEqual(str, "y") ||
+      CaseEqual(str, "1")) {
+    *value = true;
     return true;
+  }
+  if (CaseEqual(str, "false") || CaseEqual(str, "f") ||
+      CaseEqual(str, "no") || CaseEqual(str, "n") ||
+      CaseEqual(str, "0")) {
+    *value = false;
+    return true;
+  }
+  return false;
+}
+
+bool safe_strtof(const char* str, float* value) {
+  char* endptr;
+  errno = 0;  // errno only gets set on errors
+#if defined(_WIN32) || defined (__hpux)  // has no strtof()
+  *value = strtod(str, &endptr);
+#else
+  *value = strtof(str, &endptr);
+#endif
+  return *str != 0 && *endptr == 0 && errno == 0;
+}
+
+bool safe_strtod(const char* str, double* value) {
+  char* endptr;
+  *value = strtod(str, &endptr);
+  if (endptr != str) {
+    while (ascii_isspace(*endptr)) ++endptr;
+  }
+  // Ignore range errors from strtod.  The values it
+  // returns on underflow and overflow are the right
+  // fallback in a robust setting.
+  return *str != '\0' && *endptr == '\0';
+}
+
+bool safe_strto32(const string& str, int32* value) {
+  return safe_int_internal(str, value);
+}
+
+bool safe_strtou32(const string& str, uint32* value) {
+  return safe_uint_internal(str, value);
+}
+
+bool safe_strto64(const string& str, int64* value) {
+  return safe_int_internal(str, value);
+}
+
+bool safe_strtou64(const string& str, uint64* value) {
+  return safe_uint_internal(str, value);
+}
+
+char* FloatToBuffer(float value, char* buffer) {
+  // FLT_DIG is 6 for IEEE-754 floats, which are used on almost all
+  // platforms these days.  Just in case some system exists where FLT_DIG
+  // is significantly larger -- and risks overflowing our buffer -- we have
+  // this assert.
+  COMPILE_ASSERT(FLT_DIG < 10, FLT_DIG_is_too_big);
+
+  if (value == std::numeric_limits<double>::infinity()) {
+    strcpy(buffer, "inf");
+    return buffer;
+  } else if (value == -std::numeric_limits<double>::infinity()) {
+    strcpy(buffer, "-inf");
+    return buffer;
+  } else if (isnan(value)) {
+    strcpy(buffer, "nan");
+    return buffer;
+  }
+
+  int snprintf_result =
+    snprintf(buffer, kFloatToBufferSize, "%.*g", FLT_DIG, value);
+
+  // The snprintf should never overflow because the buffer is significantly
+  // larger than the precision we asked for.
+  DCHECK(snprintf_result > 0 && snprintf_result < kFloatToBufferSize);
+
+  float parsed_value;
+  if (!safe_strtof(buffer, &parsed_value) || parsed_value != value) {
+    int snprintf_result =
+      snprintf(buffer, kFloatToBufferSize, "%.*g", FLT_DIG+2, value);
+
+    // Should never overflow; see above.
+    DCHECK(snprintf_result > 0 && snprintf_result < kFloatToBufferSize);
+  }
+
+  DelocalizeRadix(buffer);
+  return buffer;
 }
 
 // for micros < 10ms, print "XX us".
@@ -354,21 +1105,14 @@ bool SerializeIntVector(const std::vector<int>& vec, string* value) {
   return true;
 }
 
-bool StartsWith(const string& str, const string& prefix) {
-  if (prefix.length() > str.length()) {
-      return false;
-  }
-  if (memcmp(str.c_str(), prefix.c_str(), prefix.length()) == 0) {
-      return true;
-  }
-  return false;
+void ToUpper(string* str)
+{
+    std::transform(str->begin(), str->end(), str->begin(), ::toupper);
 }
 
-bool EndsWith(const string& str, const string& suffix) {
-  if (suffix.length() > str.length()) {
-      return false;
-  }
-  return (str.substr(str.length() - suffix.length()) == suffix);
+void ToLower(string* str)
+{
+    std::transform(str->begin(), str->end(), str->begin(), ::tolower);
 }
 
 string Hex2Str(const char* _str, unsigned int _len) {
@@ -400,7 +1144,7 @@ string Str2Hex(const char* _str, unsigned int _len) {
         memset(tmp,0,sizeof(tmp));
         tmp[0] = ptr[i*2];
         tmp[1] = ptr[i*2+1];
-        char *p = NULL;
+        char *p = nullptr;
         outbuffer[outoffset] = (char)strtol(tmp,&p,16);
         outoffset++;
     }
@@ -409,56 +1153,50 @@ string Str2Hex(const char* _str, unsigned int _len) {
     return ret;
 }
 
-string& Ltrim(string& str) { // NOLINT
-    string::iterator it = std::find_if(str.begin(), str.end(), std::not1(std::ptr_fun(::isspace)));
-    str.erase(str.begin(), it);
-    return str;
+bool Hex2Bin(const char* hex_str, string* bin_str)
+{
+    if (nullptr == hex_str || nullptr == bin_str) {
+        return false;
+    }
+    bin_str->clear();
+    while (*hex_str != '\0') {
+        if (hex_str[1] == '\0') {
+            return false;
+        }
+        uint8_t high = static_cast<uint8_t>(hex_str[0]);
+        uint8_t low = static_cast<uint8_t>(hex_str[1]);
+#define ASCII2DEC(c) \
+    if (c >= '0' && c <= '9') c -= '0'; \
+        else if (c >= 'A' && c <= 'F') c -= ('A' - 10); \
+        else if (c >= 'a' && c <= 'f') c -= ('a' - 10); \
+        else return false
+        ASCII2DEC(high);
+        ASCII2DEC(low);
+        bin_str->append(1, static_cast<char>((high << 4) + low));
+        hex_str += 2;
+    }
+    return true;
 }
 
-string& Rtrim(string& str) { // NOLINT
-    string::reverse_iterator it = std::find_if(str.rbegin(),
-        str.rend(), std::not1(std::ptr_fun(::isspace)));
-
-    str.erase(it.base(), str.end());
-    return str;
-}
-
-string& Trim(string& str) { // NOLINT
-    return Rtrim(Ltrim(str));
-}
-
-void Trim(std::vector<string>* str_list) {
-    if (nullptr == str_list) {
-        return;
+bool Bin2Hex(const char* bin_str, string* hex_str)
+{
+    if (nullptr == bin_str || nullptr == hex_str) {
+        return false;
     }
-
-    std::vector<string>::iterator it;
-    for (it = str_list->begin(); it != str_list->end(); ++it) {
-        *it = Trim(*it);
+    hex_str->clear();
+    while (*bin_str != '\0') {
+        uint8_t high = (static_cast<uint8_t>(*bin_str) >> 4);
+        uint8_t low = (static_cast<uint8_t>(*bin_str) & 0xF);
+#define DEC2ASCII(c) \
+    if (c <= 9) c += '0'; \
+    else c += ('A' - 10)
+        DEC2ASCII(high);
+        DEC2ASCII(low);
+        hex_str->append(1, static_cast<char>(high));
+        hex_str->append(1, static_cast<char>(low));
+        bin_str += 1;
     }
-}
-
-string TrimString(const string& str, const string& trim) {
-    string::size_type pos = str.find_first_not_of(trim);
-    if (pos == string::npos) {
-        return "";
-    }
-    string::size_type pos2 = str.find_last_not_of(trim);
-    if (pos2 != string::npos) {
-        return str.substr(pos, pos2 - pos + 1);
-    }
-    return str.substr(pos);
-}
-
-void string_replace(const string &sub_str1,
-    const string &sub_str2, string *str) {
-    string::size_type pos = 0;
-    string::size_type a = sub_str1.size();
-    string::size_type b = sub_str2.size();
-    while ((pos = str->find(sub_str1, pos)) != string::npos) {
-        str->replace(pos, a, sub_str2);
-        pos += b;
-    }
+    return true;
 }
 
 static const char ENCODECHARS[1024] = {
@@ -585,14 +1323,21 @@ void UrlDecode(const string& src_str, string* dst_str)
     }
 }
 
-void ToUpper(string* str)
-{
-    std::transform(str->begin(), str->end(), str->begin(), ::toupper);
+bool StartsWith(const string& str, const string& prefix) {
+  if (prefix.length() > str.length()) {
+      return false;
+  }
+  if (memcmp(str.c_str(), prefix.c_str(), prefix.length()) == 0) {
+      return true;
+  }
+  return false;
 }
 
-void ToLower(string* str)
-{
-    std::transform(str->begin(), str->end(), str->begin(), ::tolower);
+bool EndsWith(const string& str, const string& suffix) {
+  if (suffix.length() > str.length()) {
+      return false;
+  }
+  return (str.substr(str.length() - suffix.length()) == suffix);
 }
 
 bool StripSuffix(string* str, const string& suffix) {
@@ -615,52 +1360,6 @@ bool StripPrefix(string* str, const string& prefix) {
         }
     }
     return false;
-}
-
-bool Hex2Bin(const char* hex_str, string* bin_str)
-{
-    if (nullptr == hex_str || nullptr == bin_str) {
-        return false;
-    }
-    bin_str->clear();
-    while (*hex_str != '\0') {
-        if (hex_str[1] == '\0') {
-            return false;
-        }
-        uint8_t high = static_cast<uint8_t>(hex_str[0]);
-        uint8_t low = static_cast<uint8_t>(hex_str[1]);
-#define ASCII2DEC(c) \
-    if (c >= '0' && c <= '9') c -= '0'; \
-        else if (c >= 'A' && c <= 'F') c -= ('A' - 10); \
-        else if (c >= 'a' && c <= 'f') c -= ('a' - 10); \
-        else return false
-        ASCII2DEC(high);
-        ASCII2DEC(low);
-        bin_str->append(1, static_cast<char>((high << 4) + low));
-        hex_str += 2;
-    }
-    return true;
-}
-
-bool Bin2Hex(const char* bin_str, string* hex_str)
-{
-    if (nullptr == bin_str || nullptr == hex_str) {
-        return false;
-    }
-    hex_str->clear();
-    while (*bin_str != '\0') {
-        uint8_t high = (static_cast<uint8_t>(*bin_str) >> 4);
-        uint8_t low = (static_cast<uint8_t>(*bin_str) & 0xF);
-#define DEC2ASCII(c) \
-    if (c <= 9) c += '0'; \
-    else c += ('A' - 10)
-        DEC2ASCII(high);
-        DEC2ASCII(low);
-        hex_str->append(1, static_cast<char>(high));
-        hex_str->append(1, static_cast<char>(low));
-        bin_str += 1;
-    }
-    return true;
 }
 
 string CEscape(StringPiece src) {
@@ -868,6 +1567,47 @@ void StripTrailingWhitespace(string* s) {
   s->resize(i);
 }
 
+string& Ltrim(string& str) { // NOLINT
+    string::iterator it = std::find_if(str.begin(), str.end(), std::not1(std::ptr_fun(::isspace)));
+    str.erase(str.begin(), it);
+    return str;
+}
+
+string& Rtrim(string& str) { // NOLINT
+    string::reverse_iterator it = std::find_if(str.rbegin(),
+        str.rend(), std::not1(std::ptr_fun(::isspace)));
+
+    str.erase(it.base(), str.end());
+    return str;
+}
+
+string& Trim(string& str) { // NOLINT
+    return Rtrim(Ltrim(str));
+}
+
+void Trim(std::vector<string>* str_list) {
+    if (nullptr == str_list) {
+        return;
+    }
+
+    std::vector<string>::iterator it;
+    for (it = str_list->begin(); it != str_list->end(); ++it) {
+        *it = Trim(*it);
+    }
+}
+
+string TrimString(const string& str, const string& trim) {
+    string::size_type pos = str.find_first_not_of(trim);
+    if (pos == string::npos) {
+        return "";
+    }
+    string::size_type pos2 = str.find_last_not_of(trim);
+    if (pos2 != string::npos) {
+        return str.substr(pos, pos2 - pos + 1);
+    }
+    return str.substr(pos);
+}
+
 // Return lower-cased version of s.
 string Lowercase(StringPiece s) {
   string result(s.data(), s.size());
@@ -967,6 +1707,17 @@ string StringReplace(StringPiece s, StringPiece oldsub, StringPiece newsub,
   return res;
 }
 
+void string_replace(const string &sub_str1,
+                    const string &sub_str2, string *str) {
+    string::size_type pos = 0;
+    string::size_type a = sub_str1.size();
+    string::size_type b = sub_str2.size();
+    while ((pos = str->find(sub_str1, pos)) != string::npos) {
+        str->replace(pos, a, sub_str2);
+        pos += b;
+    }
+}
+
 size_t RemoveLeadingWhitespace(StringPiece* text) {
   size_t count = 0;
   const char* ptr = text->data();
@@ -1052,6 +1803,87 @@ bool ConsumeNonWhitespace(StringPiece* s, StringPiece* val) {
     val->clear();
     return false;
   }
+}
+
+string DebugString(const string& src) {
+    size_t src_len = src.size();
+    string dst;
+    dst.resize(src_len << 2);
+
+    size_t j = 0;
+    for (size_t i = 0; i < src_len; i++) {
+        uint8_t c = src[i];
+        if (IsVisible(c)) {
+            dst[j++] = c;
+        } else {
+            dst[j++] = '\\';
+            dst[j++] = 'x';
+            dst[j++] = ToHex(c >> 4);
+            dst[j++] = ToHex(c & 0xF);
+        }
+    }
+    return dst.substr(0, j);
+}
+
+void SplitString(const string& str,
+                 const string& delim,
+                 std::vector<string>* result) {
+    result->clear();
+    if (str.empty()) {
+        return;
+    }
+    if (delim[0] == '\0') {
+        result->push_back(str);
+        return;
+    }
+
+    string::size_type delim_length = delim.length();
+
+    for (string::size_type begin_index = 0; begin_index < str.size();) {
+        string::size_type end_index = str.find(delim, begin_index);
+        if (end_index == string::npos) {
+            result->push_back(str.substr(begin_index));
+            return;
+        }
+        if (end_index > begin_index) {
+            result->push_back(str.substr(begin_index, (end_index - begin_index)));
+        }
+
+        begin_index = end_index + delim_length;
+    }
+}
+
+std::vector<string> StringSplit(const string& arg, char delim) {
+  std::vector<string> splits;
+  stringstream ss(arg);
+  string item;
+  while (std::getline(ss, item, delim)) {
+    splits.push_back(item);
+  }
+  return splits;
+}
+
+static const uint32_t MAX_PATH_LENGTH = 10240;
+static bool SplitPath(const string& path,
+                      std::vector<string>* element,
+                      bool* isdir) {
+    if (path.empty() || path[0] != '/' || path.size() > MAX_PATH_LENGTH) {
+        return false;
+    }
+    element->clear();
+    size_t last_pos = 0;
+    for (size_t i = 1; i <= path.size(); i++) {
+        if (i == path.size() || path[i] == '/') {
+            if (last_pos + 1 < i) {
+                element->push_back(path.substr(last_pos + 1, i - last_pos - 1));
+            }
+            last_pos = i;
+        }
+    }
+    if (isdir) {
+        *isdir = (path[path.size() - 1] == '/');
+    }
+    return true;
 }
 
 bool SplitAndParseAsInts(StringPiece text, char delim,

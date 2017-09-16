@@ -26,22 +26,19 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_PORT_POSIX_H_
 #define BUBBLEFS_PLATFORM_PORT_POSIX_H_
 
-#include "platform/build_config.h"
+#include "platform/macros.h"
+#include <assert.h>
 #include <sys/types.h>
+#include <byteswap.h>
 #include <dirent.h>
+#include <inttypes.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
 #include <limits>
 #include <string>
-#include "platform/macros.h"
 #include "platform/cpu_info.h"
-
-// size_t printf formatting named in the manner of C99 standard formatting
-// strings such as PRIu64
-// in fact, we could use that one
-#define TF_PRIszt "zu"
-#define __declspec(S)
 
 namespace bubblefs {
 namespace internal {

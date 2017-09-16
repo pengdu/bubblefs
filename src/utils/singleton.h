@@ -14,7 +14,38 @@
  * limitations under the License.
  */
 
+// Protocol Buffers - Google's data interchange format
+// Copyright 2014 Google Inc.  All rights reserved.
+// https://developers.google.com/protocol-buffers/
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//     * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//     * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//     * Neither the name of Google Inc. nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 // android/platform_system_core/libutils/include/utils/Singleton.h
+// protobuf/src/google/protobuf/stubs/singleton.h
 
 #ifndef BUBBLEFS_UTILS_SINGLETON_H
 #define BUBBLEFS_UTILS_SINGLETON_H
@@ -22,8 +53,40 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include "platform/mutexlock.h"
+#include "utils/once.h"
 
 namespace bubblefs {
+  
+namespace core {
+  
+template<typename T>
+class Singleton {
+ public:
+  static T* get() {
+    core::GoogleOnceInit(&once_, &Singleton<T>::Init);
+    return instance_;
+  }
+  static void ShutDown() {
+    delete instance_;
+    instance_ = nullptr;
+  }
+ private:
+  static void Init() {
+    instance_ = new T();
+  }
+  static GoogleOnceType once_;
+  static T* instance_;
+};
+
+template<typename T>
+GoogleOnceType Singleton<T>::once_;
+
+template<typename T>
+T* Singleton<T>::instance_ = nullptr;
+
+}  // namespace core  
+  
+namespace base {
   
 // Singleton<TYPE> may be used in multiple libraries, only one of which should
 // define the static member variables using BUBBLEFS_SINGLETON_STATIC_INSTANCE.
@@ -72,9 +135,11 @@ private:
 
 #define BUBBLEFS_SINGLETON_STATIC_INSTANCE(TYPE)                 \
     template<> ::bubblefs::port::Mutex  \
-        (::bubblefs::Singleton< TYPE >::sLock)();  \
-    template<> TYPE* ::bubblefs::Singleton< TYPE >::sInstance(0);  /* NOLINT */ \
-    template class ::bubblefs::Singleton< TYPE >;
+        (::bubblefs::base::Singleton< TYPE >::sLock)();  \
+    template<> TYPE* ::bubblefs::base::Singleton< TYPE >::sInstance(0);  /* NOLINT */ \
+    template class ::bubblefs::base::Singleton< TYPE >;
+
+}  // namespace base
   
 } // namespace bubblefs
 

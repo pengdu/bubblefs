@@ -20,6 +20,7 @@ limitations under the License.
 #ifndef BUBBLEFS_UTILS_CODING_H_
 #define BUBBLEFS_UTILS_CODING_H_
 
+#include "platform/macros.h"
 #include <stdint.h>
 #include <strings.h>
 #include "platform/types.h"
@@ -33,6 +34,48 @@ limitations under the License.
 
 namespace bubblefs {
 namespace core {
+  
+#if TF_USE_UNALIGNED
+
+#define TF_UNALIGNED_LOAD16(_p) (*reinterpret_cast<const uint16 *>(_p))
+#define TF_UNALIGNED_LOAD32(_p) (*reinterpret_cast<const uint32 *>(_p))
+#define TF_UNALIGNED_LOAD64(_p) (*reinterpret_cast<const uint64 *>(_p))
+
+#define TF_UNALIGNED_STORE16(_p, _val) (*reinterpret_cast<uint16 *>(_p) = (_val))
+#define TF_UNALIGNED_STORE32(_p, _val) (*reinterpret_cast<uint32 *>(_p) = (_val))
+#define TF_UNALIGNED_STORE64(_p, _val) (*reinterpret_cast<uint64 *>(_p) = (_val))
+
+#else
+inline uint16 TF_UNALIGNED_LOAD16(const void *p) {
+  uint16 t;
+  memcpy(&t, p, sizeof t);
+  return t;
+}
+
+inline uint32 TF_UNALIGNED_LOAD32(const void *p) {
+  uint32 t;
+  memcpy(&t, p, sizeof t);
+  return t;
+}
+
+inline uint64 TF_UNALIGNED_LOAD64(const void *p) {
+  uint64 t;
+  memcpy(&t, p, sizeof t);
+  return t;
+}
+
+inline void TF_UNALIGNED_STORE16(void *p, uint16 v) {
+  memcpy(p, &v, sizeof v);
+}
+
+inline void TF_UNALIGNED_STORE32(void *p, uint32 v) {
+  memcpy(p, &v, sizeof v);
+}
+
+inline void TF_UNALIGNED_STORE64(void *p, uint64 v) {
+  memcpy(p, &v, sizeof v);
+}
+#endif // TF_USE_UNALIGNED  
   
 static inline void EncodeBigEndian(char* buf, uint64_t value) {
     buf[0] = (value >> 56) & 0xff;
