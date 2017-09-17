@@ -20,7 +20,6 @@
 #include <memory>
 #include <mutex>
 #include <thread>
-#include "platform/base.h"
 #include "platform/macros.h"
 #include "platform/port.h"
 
@@ -45,7 +44,7 @@ class MutexLock {
 
  private:
   port::Mutex *const mu_;
-  TF_DISALLOW_COPY_AND_ASSIGN(MutexLock);
+  DISALLOW_COPY_AND_ASSIGN(MutexLock);
 };
 
 //
@@ -62,7 +61,7 @@ class ReadLock {
 
  private:
   port::RWMutex *const mu_;
-  TF_DISALLOW_COPY_AND_ASSIGN(ReadLock);
+  DISALLOW_COPY_AND_ASSIGN(ReadLock);
 };
 
 //
@@ -75,7 +74,7 @@ class ReadUnlock {
 
  private:
   port::RWMutex *const mu_;
-  TF_DISALLOW_COPY_AND_ASSIGN(ReadUnlock);
+  DISALLOW_COPY_AND_ASSIGN(ReadUnlock);
 };
 
 //
@@ -92,7 +91,7 @@ class WriteLock {
 
  private:
   port::RWMutex *const mu_;
-  TF_DISALLOW_COPY_AND_ASSIGN(WriteLock);
+  DISALLOW_COPY_AND_ASSIGN(WriteLock);
 };
 
 #ifdef TF_USE_PTHREAD_SPINLOCK
@@ -256,7 +255,7 @@ public:
 
   inline void Wait() { pthread_barrier_wait(&barrier_); }
   
-  TF_DISALLOW_COPY_AND_ASSIGN(ThreadBarrier);
+  DISALLOW_COPY_AND_ASSIGN(ThreadBarrier);
 };
 
 /**

@@ -13,6 +13,7 @@ limitations under the License.
 // tensorflow/tensorflow/core/platform/default/protobuf.cc
 // tensorflow/tensorflow/core/platform/protobuf_util.cc
 
+#include <limits.h>
 #include "platform/protobuf.h"
 
 namespace bubblefs {

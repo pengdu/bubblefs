@@ -50,7 +50,7 @@ limitations under the License.
 #include "platform/types.h"
 #include "utils/manual_constructor.h"
 
-namespace mblobstore {
+namespace bubblefs {
 namespace gtl {
 
 template <typename T, int N>

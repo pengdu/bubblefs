@@ -28,14 +28,14 @@ static void TestMemory(void* mem, int size) {
   // Do some memory allocation to check that the arena doesn't mess up
   // the internal memory allocator
   char* tmp[100];
-  for (size_t i = 0; i < TF_ARRAYSIZE(tmp); i++) {
+  for (size_t i = 0; i < ARRAYSIZE_UNSAFE(tmp); i++) {
     tmp[i] = new char[i * i + 1];
   }
 
   memset(mem, 0xcc, size);
 
   // Free up the allocated memory;
-  for (size_t i = 0; i < TF_ARRAYSIZE(tmp); i++) {
+  for (size_t i = 0; i < ARRAYSIZE_UNSAFE(tmp); i++) {
     delete[] tmp[i];
   }
 

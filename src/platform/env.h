@@ -533,7 +533,7 @@ class Env {
   /// (the deletion will block until fn() stops running).
   virtual Thread* StartThread(const ThreadOptions& thread_options,
                               const string& name,
-                              std::function<void()> fn) TF_MUST_USE_RESULT = 0;
+                              std::function<void()> fn) WARN_UNUSED_RESULT = 0;
                               
   // \brief Schedules the given closure on a thread-pool.
   //
@@ -578,7 +578,7 @@ class Env {
 
  private:
   //std::unique_ptr<FileSystemRegistry> file_system_registry_;
-  TF_DISALLOW_COPY_AND_ASSIGN(Env);
+  DISALLOW_COPY_AND_ASSIGN(Env);
 };
 
 // An implementation of Env that forwards all calls to another Env.
@@ -606,7 +606,7 @@ class Thread {
   virtual ~Thread() {};
 
  private:
-  TF_DISALLOW_COPY_AND_ASSIGN(Thread);
+  DISALLOW_COPY_AND_ASSIGN(Thread);
 };
 
 /// \brief Options to configure a Thread.
@@ -627,8 +627,7 @@ class FileLock {
   virtual ~FileLock();
  private:
   // No copying allowed
-  FileLock(const FileLock&);
-  void operator=(const FileLock&);
+  DISALLOW_COPY_AND_ASSIGN(FileLock);
 };
 
 // Directory object represents collection of files and implements
@@ -751,7 +750,7 @@ class RandomAccessFile {
   }
 
  private:
-  TF_DISALLOW_COPY_AND_ASSIGN(RandomAccessFile);
+  DISALLOW_COPY_AND_ASSIGN(RandomAccessFile);
 };
 
 /// \brief A file abstraction for sequential writing.
@@ -939,7 +938,7 @@ class WritableFile {
  private:
   size_t last_preallocated_block_;
   size_t preallocation_block_size_;
-  TF_DISALLOW_COPY_AND_ASSIGN(WritableFile);
+  DISALLOW_COPY_AND_ASSIGN(WritableFile);
   
  protected:
   Env::IOPriority io_priority_;
@@ -978,7 +977,7 @@ class RandomRWFile {
   virtual Status Close() = 0;
 
   // No copying allowed
-  TF_DISALLOW_COPY_AND_ASSIGN(RandomRWFile);
+  DISALLOW_COPY_AND_ASSIGN(RandomRWFile);
 };
 
 /// \brief A readonly memmapped file abstraction.

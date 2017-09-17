@@ -138,7 +138,7 @@ class LinkNode {
   LinkNode<T>* previous_;
   LinkNode<T>* next_;
 
-  TF_DISALLOW_COPY_AND_ASSIGN(LinkNode);
+  DISALLOW_COPY_AND_ASSIGN(LinkNode);
 };
 
 template <typename T>
@@ -171,7 +171,7 @@ class LinkedList {
  private:
   LinkNode<T> root_;
 
-  TF_DISALLOW_COPY_AND_ASSIGN(LinkedList);
+  DISALLOW_COPY_AND_ASSIGN(LinkedList);
 };
 
 }  // namespace core

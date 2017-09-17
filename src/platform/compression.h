@@ -15,7 +15,7 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_COMPRESSION_H_
 #define BUBBLEFS_PLATFORM_COMPRESSION_H_
 
-#include "platform/base.h"
+#include "platform/macros.h"
 #include "platform/types.h"
 
 namespace bubblefs {

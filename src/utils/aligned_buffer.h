@@ -50,11 +50,11 @@ public:
       bufstart_(nullptr) {
   }
 
-  AlignedBuffer(AlignedBuffer&& o) TF_NOEXCEPT {
+  AlignedBuffer(AlignedBuffer&& o) NOEXCEPT {
     *this = std::move(o);
   }
 
-  AlignedBuffer& operator=(AlignedBuffer&& o) TF_NOEXCEPT {
+  AlignedBuffer& operator=(AlignedBuffer&& o) NOEXCEPT {
     alignment_ = std::move(o.alignment_);
     buf_ = std::move(o.buf_);
     capacity_ = std::move(o.capacity_);

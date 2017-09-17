@@ -116,7 +116,7 @@ void SecureHashAlgorithm::Final() {
   Process();
 
   for (int t = 0; t < 5; ++t)
-    H[t] = port::ByteSwap(H[t]);
+    H[t] = base::ByteSwap(H[t]);
 }
 
 void SecureHashAlgorithm::Update(const void* data, size_t nbytes) {
@@ -163,7 +163,7 @@ void SecureHashAlgorithm::Process() {
   // W and M are in a union, so no need to memcpy.
   // memcpy(W, M, sizeof(M));
   for (t = 0; t < 16; ++t)
-    W[t] = port::ByteSwap(W[t]);
+    W[t] = base::ByteSwap(W[t]);
 
   // b.
   for (t = 16; t < 80; ++t)

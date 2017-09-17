@@ -87,8 +87,7 @@ class Iterator {
   Cleanup cleanup_;
 
   // No copying allowed
-  Iterator(const Iterator&);
-  void operator=(const Iterator&);
+  DISALLOW_COPY_AND_ASSIGN(Iterator);
 };
 
 // Return an empty iterator (yields nothing).

@@ -16,7 +16,7 @@ limitations under the License. */
 #ifndef BUBBLEFS_UTILS_PYTHON_UTIL_H_
 #define BUBBLEFS_UTILS_PYTHON_UTIL_H_
 
-#include "platform/base.h"
+#include "platform/macros.h"
 
 #if TF_USE_PYTHON == 2.7  // Note:use python2.7!
 

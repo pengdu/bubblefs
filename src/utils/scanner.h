@@ -230,7 +230,7 @@ class Scanner {
   bool error_ = false;
 
   friend class ScannerTest;
-  TF_DISALLOW_COPY_AND_ASSIGN(Scanner);
+  DISALLOW_COPY_AND_ASSIGN(Scanner);
 };
 
 }  // namespace strings

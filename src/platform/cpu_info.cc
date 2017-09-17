@@ -14,10 +14,6 @@ limitations under the License.
 // tensorflow/tensorflow/core/platform/cpu_feature_guard.cc
 
 #include "platform/cpu_info.h"
-#if defined(__linux__) && !defined(__ANDROID__)
-#include <linux/limits.h>
-#include <sched.h>
-#endif
 #include <sys/types.h>
 #include <errno.h>
 #include <stdint.h>
@@ -29,6 +25,11 @@ limitations under the License.
 #include "platform/logging.h"
 #include "platform/platform.h"
 #include "platform/types.h"
+
+#if defined(__linux__) && !defined(__ANDROID__)
+#include <linux/limits.h>
+#include <sched.h>
+#endif
 
 // SIMD extension querying is only available on x86.
 #ifdef PLATFORM_IS_X86
@@ -56,6 +57,7 @@ limitations under the License.
 
 namespace bubblefs {
 namespace port {
+  
 namespace { // namespace anonymous
   
 int NumSchedulableCPUs() {
@@ -370,11 +372,6 @@ int CPUModelNum() {
 #else
   return 0;
 #endif
-}
-
-double NominalCPUFrequency() {
-  // TODO(yuefengz): implement it for this platform.
-  return 1.0;
 }
 
 namespace { // namespace anonymous

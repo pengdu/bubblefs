@@ -56,7 +56,7 @@ class LogMessage : public std::basic_ostringstream<char> {
 // logging this message.
 class LogMessageFatal : public LogMessage {
  public:
-  LogMessageFatal(const char* file, int line) TF_ATTRIBUTE_COLD;
+  LogMessageFatal(const char* file, int line) ATTRIBUTE_COLD;
   TF_ATTRIBUTE_NORETURN ~LogMessageFatal();
 };
 
@@ -144,14 +144,14 @@ struct CheckOpString {
   CheckOpString(string* str) : str_(str) {}
   // No destructor: if str_ is non-NULL, we're about to LOG(FATAL),
   // so there's no point in cleaning up str_.
-  operator bool() const { return TF_PREDICT_FALSE(str_ != NULL); }
+  operator bool() const { return PREDICT_FALSE(str_ != NULL); }
   string* str_;
 };
 
 // Build the error message string. Specify no inlining for code size.
 template <typename T1, typename T2>
 string* MakeCheckOpString(const T1& v1, const T2& v2,
-                          const char* exprtext) TF_ATTRIBUTE_NOINLINE;
+                          const char* exprtext) NOINLINE;
 
 // A helper class for formatting "expr (V1 vs. V2)" in a CHECK_XX
 // statement.  See MakeCheckOpString for sample usage.  Other

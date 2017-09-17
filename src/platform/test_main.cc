@@ -22,10 +22,9 @@ limitations under the License.
 #else
 
 #include <iostream>
-
-#include "utils/stringpiece.h"
 #include "platform/test.h"
 #include "platform/test_benchmark.h"
+#include "utils/stringpiece.h"
 
 namespace bubblefs {
 

@@ -34,7 +34,7 @@ namespace strings {
 // Return a C++ string
 extern string Printf(const char* format, ...)
     // Tell the compiler to do printf format string checking.
-    TF_PRINTF_ATTRIBUTE(1, 2);
+    PRINTF_ATTRIBUTE(1, 2);
     
 // Store result into a supplied string and return it
 extern const string& SPrintf(string* dst, const char* format, ...);
@@ -42,7 +42,7 @@ extern const string& SPrintf(string* dst, const char* format, ...);
 // Append result to a supplied string
 extern void Appendf(string* dst, const char* format, ...)
     // Tell the compiler to do printf format string checking.
-    TF_PRINTF_ATTRIBUTE(2, 3);
+    PRINTF_ATTRIBUTE(2, 3);
 
 // Lower-level routine that takes a va_list and appends to a specified
 // string.  All other routines are just convenience wrappers around it.

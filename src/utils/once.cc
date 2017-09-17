@@ -65,7 +65,7 @@ void SchedYield() {
 }  // namespace
 
 void GoogleOnceInitImpl(GoogleOnceType* once, Closure* closure) {
-  internal::AtomicWord state = internal::Acquire_Load(once);
+  base::AtomicWord state = base::Acquire_Load(once);
   // Fast path. The provided closure was already executed.
   if (state == ONCE_STATE_DONE) {
     return;
@@ -77,20 +77,20 @@ void GoogleOnceInitImpl(GoogleOnceType* once, Closure* closure) {
   //
   // First, try to change the state from UNINITIALIZED to EXECUTING_CLOSURE
   // atomically.
-  state = internal::Acquire_CompareAndSwap(
+  state = base::Acquire_CompareAndSwap(
       once, ONCE_STATE_UNINITIALIZED, ONCE_STATE_EXECUTING_CLOSURE);
   if (state == ONCE_STATE_UNINITIALIZED) {
     // We are the first thread to call this function, so we have to call the
     // closure.
     closure->Run();
-    internal::Release_Store(once, ONCE_STATE_DONE);
+    base::Release_Store(once, ONCE_STATE_DONE);
   } else {
     // Another thread has already started executing the closure. We need to
     // wait until it completes the initialization.
     while (state == ONCE_STATE_EXECUTING_CLOSURE) {
       // Note that futex() could be used here on Linux as an improvement.
       SchedYield();
-      state = internal::Acquire_Load(once);
+      state = base::Acquire_Load(once);
     }
   }
 }

@@ -27,7 +27,7 @@
 #endif
 
 #ifndef TF_USE_JEMALLOC
-#define TF_USE_JEMALLOC 1
+#define TF_USE_JEMALLOC 0
 #endif
 
 #ifndef TF_USE_SNAPPY

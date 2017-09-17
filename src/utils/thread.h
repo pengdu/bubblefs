@@ -129,7 +129,7 @@ private:
         reinterpret_cast<Thread*>(arg)->user_proc_();
         return nullptr;
     }
-    TF_DISALLOW_COPY_AND_ASSIGN(Thread);
+    DISALLOW_COPY_AND_ASSIGN(Thread);
 private:
     std::function<void ()> user_proc_;
     pthread_t tid_;

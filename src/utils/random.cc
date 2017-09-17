@@ -23,7 +23,6 @@ limitations under the License.
 #include <thread>
 #include <type_traits>
 #include <utility>
-#include "platform/base.h"
 #include "platform/logging.h"
 #include "platform/macros.h"
 #include "platform/mutex.h"

@@ -45,6 +45,6 @@ struct murmur_hash {
   }
 };
 
-}  // bubblefs
+}  // namespace bubblefs
 
 #endif // BUBBELFS_UTILS_MURMURHASH_H_

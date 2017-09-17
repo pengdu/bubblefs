@@ -14,10 +14,6 @@ limitations under the License.
 // tensorflow/tensorflow/core/platform/default/logging.cc
 
 #include "platform/logging_default.h"
-#include "platform/macros.h"
-#if defined(PLATFORM_POSIX_ANDROID)
-#include <android/log.h>
-#endif
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -26,6 +22,7 @@ limitations under the License.
 #include <sstream>
 #include <unordered_map>
 #include "platform/env_time.h"
+#include "platform/macros.h"
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
@@ -173,7 +170,7 @@ VmoduleMap* VmoduleRecordsFromEnv() {
 LogMessage::~LogMessage() {
   // Read the min log level once during the first call to logging.
   static int64 min_log_level = MinLogLevelFromEnv();
-  if (TF_PREDICT_TRUE(severity_ >= min_log_level)) GenerateLogMessage();
+  if (PREDICT_TRUE(severity_ >= min_log_level)) GenerateLogMessage();
 }
 
 int64 LogMessage::MinVLogLevel() {

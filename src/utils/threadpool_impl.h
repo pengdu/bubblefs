@@ -25,7 +25,7 @@ class ThreadPoolImpl : public ThreadPool {
   ThreadPoolImpl();
   ~ThreadPoolImpl();
 
-  TF_DISALLOW_COPY_AND_ASSIGN(ThreadPoolImpl)
+  DISALLOW_COPY_AND_ASSIGN(ThreadPoolImpl);
 
   // Implement ThreadPool interfaces
 

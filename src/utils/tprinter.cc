@@ -12,7 +12,7 @@
 #include <sstream>
 
 namespace bubblefs {
-namespace baiducomm {
+namespace bdcommon {
 
 static inline std::string NumToString(int64_t num) {
     char buf[32];
@@ -174,5 +174,5 @@ string TPrinter::RemoveSubString(const string& input, const string& substr) {
     return ret;
 }
 
-} // namespace baiducomm
+} // namespace bdcommon
 } // namespace bubblefs

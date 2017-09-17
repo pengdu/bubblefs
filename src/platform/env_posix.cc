@@ -21,14 +21,6 @@ limitations under the License.
 // rocksdb/env/env_posix.cc
 // tensorflow/tensorflow/core/platform/posix/posix_file_system.cc
 
-#include "platform/platform.h"
-#ifdef OS_LINUX
-#include <linux/fs.h>
-#include <linux/magic.h>
-#include <sys/statfs.h>
-#include <sys/syscall.h>
-#include <sys/vfs.h>
-#endif // OS_LINUX
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -56,6 +48,7 @@ limitations under the License.
 #include "platform/io_posix.h"
 #include "platform/load_library.h"
 #include "platform/logging.h"
+#include "platform/macros.h"
 #include "platform/port_posix.h"
 #include "platform/types.h"
 #include "utils/error_codes.h"
@@ -64,6 +57,14 @@ limitations under the License.
 #include "utils/random.h"
 #include "utils/status.h"
 #include "utils/strcat.h"
+
+#ifdef OS_LINUX
+#include <linux/fs.h>
+#include <linux/magic.h>
+#include <sys/statfs.h>
+#include <sys/syscall.h>
+#include <sys/vfs.h>
+#endif // OS_LINUX
 
 #if !defined(TMPFS_MAGIC)
 #define TMPFS_MAGIC 0x01021994

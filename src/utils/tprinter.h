@@ -14,7 +14,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace baiducomm {
+namespace bdcommon {
 
 using std::string;
 class TPrinter {
@@ -51,7 +51,7 @@ private:
     Table _table;
 };
 
-} // namespace baiducomm
+} // namespace bdcommon
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_TPRINTER_H_

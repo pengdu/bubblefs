@@ -23,7 +23,6 @@ limitations under the License. */
 #ifndef BUBBLEFS_PLATFORM_THREADLOCAL_H_
 #define BUBBLEFS_PLATFORM_THREADLOCAL_H_
 
-#include "platform/macros.h"
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <pthread.h>
@@ -37,16 +36,17 @@ limitations under the License. */
 #include <unordered_map>
 #include <vector>
 #include "platform/logging.h"
+#include "platform/macros.h"
 #include "platform/port.h"
 #include "utils/autovector.h"
 
 // Try to come up with a portable implementation of thread local variables
 #ifdef TF_SUPPORT_THREAD_LOCAL
-#define TF_STATIC_THREAD_LOCAL static __thread
-#define TF_THREAD_LOCAL __thread
+#define STATIC_THREAD_LOCAL static __thread
+#define THREAD_LOCAL __thread
 #else
-#define TF_STATIC_THREAD_LOCAL static thread_local
-#define TF_THREAD_LOCAL thread_local
+#define STATIC_THREAD_LOCAL static thread_local
+#define THREAD_LOCAL thread_local
 #endif
 
 namespace bubblefs { 
@@ -76,7 +76,7 @@ class ThreadLocalStorage {
   }
   pthread_key_t key_;
 
-  TF_DISALLOW_COPY_AND_ASSIGN(ThreadLocalStorage);
+  DISALLOW_COPY_AND_ASSIGN(ThreadLocalStorage);
 };  
   
 /**
@@ -280,74 +280,6 @@ protected:
 };
 
 }  // namespace internal
-
-// Cleanup function that will be called for a stored thread local
-// pointer (if not NULL) when one of the following happens:
-// (1) a thread terminates
-// (2) a ThreadLocalPtr is destroyed
-typedef void (*UnrefHandler)(void* ptr);
-
-// ThreadLocalPtr stores only values of pointer type.  Different from
-// the usual thread-local-storage, ThreadLocalPtr has the ability to
-// distinguish data coming from different threads and different
-// ThreadLocalPtr instances.  For example, if a regular thread_local
-// variable A is declared in DBImpl, two DBImpl objects would share
-// the same A.  However, a ThreadLocalPtr that is defined under the
-// scope of DBImpl can avoid such confliction.  As a result, its memory
-// usage would be O(# of threads * # of ThreadLocalPtr instances).
-class ThreadLocalPtr {
- public:
-  explicit ThreadLocalPtr(UnrefHandler handler = nullptr);
-
-  ~ThreadLocalPtr();
-
-  // Return the current pointer stored in thread local
-  void* Get() const;
-
-  // Set a new pointer value to the thread local storage.
-  void Reset(void* ptr);
-
-  // Atomically swap the supplied ptr and return the previous value
-  void* Swap(void* ptr);
-
-  // Atomically compare the stored value with expected. Set the new
-  // pointer value to thread local only if the comparison is true.
-  // Otherwise, expected returns the stored value.
-  // Return true on success, false on failure
-  bool CompareAndSwap(void* ptr, void*& expected);
-
-  // Reset all thread local data to replacement, and return non-nullptr
-  // data for all existing threads
-  void Scrape(core::autovector<void*>* ptrs, void* const replacement);
-
-  typedef std::function<void(void*, void*)> FoldFunc;
-  // Update res by applying func on each thread-local value. Holds a lock that
-  // prevents unref handler from running during this call, but clients must
-  // still provide external synchronization since the owning thread can
-  // access the values without internal locking, e.g., via Get() and Reset().
-  void Fold(FoldFunc func, void* res);
-
-  // Add here for testing
-  // Return the next available Id without claiming it
-  static uint32_t TEST_PeekId();
-
-  // Initialize the static singletons of the ThreadLocalPtr.
-  //
-  // If this function is not called, then the singletons will be
-  // automatically initialized when they are used.
-  //
-  // Calling this function twice or after the singletons have been
-  // initialized will be no-op.
-  static void InitSingletons();
-
-  class StaticMeta;
-
-private:
-
-  static StaticMeta* Instance();
-
-  const uint32_t id_;
-};
 
 }  // namespace bubblefs
 

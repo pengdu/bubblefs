@@ -69,7 +69,7 @@ namespace core {
 //   string my_str;
 //   NewCallback(&Foo, my_str);  // WON'T WORK:  Can't use referecnes.
 // However, correctly-typed pointers will work just fine.
-class TF_EXPORT Closure {
+class BASE_EXPORT Closure {
  public:
   Closure() {}
   virtual ~Closure();
@@ -77,7 +77,7 @@ class TF_EXPORT Closure {
   virtual void Run() = 0;
 
  private:
-  TF_DISALLOW_EVIL_CONSTRUCTORS(Closure);
+  DISALLOW_EVIL_CONSTRUCTORS(Closure);
 };
 
 template<typename R>
@@ -89,11 +89,11 @@ class ResultCallback {
   virtual R Run() = 0;
 
  private:
-  TF_DISALLOW_EVIL_CONSTRUCTORS(ResultCallback);
+  DISALLOW_EVIL_CONSTRUCTORS(ResultCallback);
 };
 
 template<typename R, typename A1>
-class TF_EXPORT ResultCallback1 {
+class BASE_EXPORT ResultCallback1 {
  public:
   ResultCallback1() {}
   virtual ~ResultCallback1() {}
@@ -101,11 +101,11 @@ class TF_EXPORT ResultCallback1 {
   virtual R Run(A1) = 0;
 
  private:
-  TF_DISALLOW_EVIL_CONSTRUCTORS(ResultCallback1);
+  DISALLOW_EVIL_CONSTRUCTORS(ResultCallback1);
 };
 
 template<typename R, typename A1, typename A2>
-class TF_EXPORT ResultCallback2 {
+class BASE_EXPORT ResultCallback2 {
  public:
   ResultCallback2() {}
   virtual ~ResultCallback2() {}
@@ -113,12 +113,12 @@ class TF_EXPORT ResultCallback2 {
   virtual R Run(A1,A2) = 0;
 
  private:
-  TF_DISALLOW_EVIL_CONSTRUCTORS(ResultCallback2);
+  DISALLOW_EVIL_CONSTRUCTORS(ResultCallback2);
 };
 
 namespace internal {
 
-class TF_EXPORT FunctionClosure0 : public Closure {
+class BASE_EXPORT FunctionClosure0 : public Closure {
  public:
   typedef void (*FunctionType)();
 
@@ -569,7 +569,7 @@ inline ResultCallback2<R, A1, A2>* NewPermanentCallback(
 
 // A function which does nothing.  Useful for creating no-op callbacks, e.g.:
 //   Closure* nothing = NewCallback(&DoNothing);
-void TF_EXPORT DoNothing() {};
+void BASE_EXPORT DoNothing() {};
 
 
 }  // namespace core

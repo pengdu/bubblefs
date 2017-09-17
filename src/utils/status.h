@@ -28,7 +28,7 @@ namespace bubblefs {
 
 #if defined(__clang__)
 // Only clang supports warn_unused_result as a type annotation.
-class TF_MUST_USE_RESULT Status;
+class WARN_UNUSED_RESULT Status;
 #endif
 
 /// @ingroup core

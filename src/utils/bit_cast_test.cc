@@ -62,31 +62,31 @@ void TestIntegral(const T values[], int num_values) {
 TEST(BitCast, Bool) {
   LOG(INFO) << "Test bool";
   static const bool bool_list[] = {false, true};
-  TestMarshall<bool>(bool_list, TF_ARRAYSIZE(bool_list));
+  TestMarshall<bool>(bool_list, ARRAYSIZE_UNSAFE(bool_list));
 }
 
 TEST(BitCast, Int32) {
   static const int32 int_list[] = {0,  1,    100,         2147483647,
                                    -1, -100, -2147483647, -2147483647 - 1};
-  TestMarshall<int32>(int_list, TF_ARRAYSIZE(int_list));
+  TestMarshall<int32>(int_list, ARRAYSIZE_UNSAFE(int_list));
 }
 
 TEST(BitCast, Int64) {
   static const int64 int64_list[] = {0, 1, 1LL << 40, -1, -(1LL << 40)};
-  TestMarshall<int64>(int64_list, TF_ARRAYSIZE(int64_list));
+  TestMarshall<int64>(int64_list, ARRAYSIZE_UNSAFE(int64_list));
 }
 
 TEST(BitCast, Uint64) {
   static const uint64 uint64_list[] = {0, 1, 1LLU << 40, 1LLU << 63};
-  TestMarshall<uint64>(uint64_list, TF_ARRAYSIZE(uint64_list));
+  TestMarshall<uint64>(uint64_list, ARRAYSIZE_UNSAFE(uint64_list));
 }
 
 TEST(BitCast, Float) {
   static const float float_list[] = {0.0,  1.0,   -1.0,  10.0,    -10.0,  1e10,
                                      1e20, 1e-10, 1e-20, 2.71828, 3.14159};
-  TestMarshall<float>(float_list, TF_ARRAYSIZE(float_list));
-  TestIntegral<float, int32>(float_list, TF_ARRAYSIZE(float_list));
-  TestIntegral<float, uint32>(float_list, TF_ARRAYSIZE(float_list));
+  TestMarshall<float>(float_list, ARRAYSIZE_UNSAFE(float_list));
+  TestIntegral<float, int32>(float_list, ARRAYSIZE_UNSAFE(float_list));
+  TestIntegral<float, uint32>(float_list, ARRAYSIZE_UNSAFE(float_list));
 }
 
 TEST(BitCast, Double) {
@@ -102,9 +102,9 @@ TEST(BitCast, Double) {
       1e-100,
       2.718281828459045,
       3.141592653589793238462643383279502884197169399375105820974944};
-  TestMarshall<double>(double_list, TF_ARRAYSIZE(double_list));
-  TestIntegral<double, int64>(double_list, TF_ARRAYSIZE(double_list));
-  TestIntegral<double, uint64>(double_list, TF_ARRAYSIZE(double_list));
+  TestMarshall<double>(double_list, ARRAYSIZE_UNSAFE(double_list));
+  TestIntegral<double, int64>(double_list, ARRAYSIZE_UNSAFE(double_list));
+  TestIntegral<double, uint64>(double_list, ARRAYSIZE_UNSAFE(double_list));
 }
 
 }  // namespace bubblefs

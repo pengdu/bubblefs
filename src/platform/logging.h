@@ -27,7 +27,7 @@ limitations under the License. */
 #ifndef BUBBLEFS_PLATFORM_LOGGING_H_ 
 #define BUBBLEFS_PLATFORM_LOGGING_H_
 
-#include "platform/base.h"
+#include "platform/build_config.h"
 #if TF_USE_GLOG
 #include "glog/logging.h"
 #else

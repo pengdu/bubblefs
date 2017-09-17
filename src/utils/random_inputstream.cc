@@ -13,6 +13,7 @@ limitations under the License.
 // tensorflow/tensorflow/core/lib/io/random_inputstream.cc
 
 #include "utils/random_inputstream.h"
+#include "utils/errors.h"
 #include <memory>
 
 namespace bubblefs {

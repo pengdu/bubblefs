@@ -97,7 +97,7 @@ class ThreadPool {
 
  private:
   std::unique_ptr<Impl> impl_;
-  TF_DISALLOW_COPY_AND_ASSIGN(ThreadPool);
+  DISALLOW_COPY_AND_ASSIGN(ThreadPool);
 };
 
 }  // namespace thread

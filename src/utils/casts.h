@@ -52,10 +52,10 @@ limitations under the License.
 #ifndef BUBBLEFS_UTILS_CASTS_H_
 #define BUBBLEFS_UTILS_CASTS_H_
 
-#include "platform/macros.h"
 #include <assert.h>
 #include <string.h>
 #include <type_traits>
+#include "platform/macros.h"
 
 namespace bubblefs {
 

@@ -61,7 +61,7 @@ class Benchmark {
   void Register();
   void Run(int arg1, int arg2, int* run_count, double* run_seconds);
 };
-#endif
+#endif // PLATFORM_GOOGLE
 
 void RunBenchmarks();
 void SetLabel(const std::string& label);

@@ -353,8 +353,7 @@ class Cache {
 
  private:
   // No copying allowed
-  Cache(const Cache&);
-  Cache& operator=(const Cache&);
+  DISALLOW_COPY_AND_ASSIGN(Cache);
 };
 
 } // namespace core

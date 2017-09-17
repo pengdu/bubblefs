@@ -162,12 +162,12 @@ class AlphaNum {
 // ----------------------------------------------------------------------
 
 // For performance reasons, we have specializations for <= 4 args.
-string StrCat(const AlphaNum &a) TF_MUST_USE_RESULT;
-string StrCat(const AlphaNum &a, const AlphaNum &b) TF_MUST_USE_RESULT;
+string StrCat(const AlphaNum &a) WARN_UNUSED_RESULT;
+string StrCat(const AlphaNum &a, const AlphaNum &b) WARN_UNUSED_RESULT;
 string StrCat(const AlphaNum &a, const AlphaNum &b,
-              const AlphaNum &c) TF_MUST_USE_RESULT;
+              const AlphaNum &c) WARN_UNUSED_RESULT;
 string StrCat(const AlphaNum &a, const AlphaNum &b, const AlphaNum &c,
-              const AlphaNum &d) TF_MUST_USE_RESULT;
+              const AlphaNum &d) WARN_UNUSED_RESULT;
 
 namespace internal {
 

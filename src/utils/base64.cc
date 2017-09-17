@@ -61,7 +61,7 @@ Status DecodeThreeChars(const char* codes, char* result) {
                         (Convert(codes[2]) << 6) | (Convert(codes[3]));
   // Convert() return value has upper 25 bits set if input is invalid.
   // Therefore `packed` has high bits set iff at least one of code is invalid.
-  if (TF_PREDICT_FALSE((packed & 0xFF000000) != 0)) {
+  if (PREDICT_FALSE((packed & 0xFF000000) != 0)) {
     return errors::InvalidArgument("Invalid character found in base64.");
   }
   result[0] = static_cast<char>(packed >> 16);
@@ -114,7 +114,7 @@ Status Base64Decode(StringPiece data, string* decoded) {
   }
 
   const int remain = static_cast<int>(end - b64);
-  if (TF_PREDICT_FALSE(remain == 1)) {
+  if (PREDICT_FALSE(remain == 1)) {
     // We may check this condition early by checking data.size() % 4 == 1.
     return errors::InvalidArgument(
         "Base64 string length cannot be 1 modulo 4.");

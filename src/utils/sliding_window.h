@@ -19,7 +19,7 @@
 
 namespace bubblefs {
   
-namespace baiducomm {
+namespace bdcommon {
 
 template <typename Item>
 class SlidingWindow {
@@ -119,7 +119,7 @@ private:
     mutable port::Mutex mu_;
 };
 
-} // namespace baiducomm
+} // namespace bdcommon
 
 } // namespace bubblefs
 

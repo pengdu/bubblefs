@@ -10,13 +10,6 @@
 // rocksdb/env/env_posix.cc
 
 #include "platform/io_posix.h"
-#include "platform/platform.h"
-#ifdef OS_LINUX
-#include <linux/fs.h>
-#include <sys/statfs.h>
-#include <sys/syscall.h>
-#include <sys/sysmacros.h>
-#endif
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -34,12 +27,20 @@
 #include "platform/env.h"
 #include "platform/error.h"
 #include "platform/logging.h"
+#include "platform/platform.h"
 #include "platform/port_posix.h"
 #include "utils/coding.h"
 #include "utils/error_codes.h"
 #include "utils/status.h"
 #include "utils/strcat.h"
 #include "utils/str_util.h"
+
+#ifdef OS_LINUX
+#include <linux/fs.h>
+#include <sys/statfs.h>
+#include <sys/syscall.h>
+#include <sys/sysmacros.h>
+#endif
 
 // unimplented macros
 #define IOSTATS_TIMER_GUARD(metric)

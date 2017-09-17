@@ -68,7 +68,7 @@ class BlockingCounter {
 
  private:
   mutex mu_;
-  condition_variable cond_var_;
+  std::condition_variable cond_var_;
   std::atomic<int> state_;  // low bit is waiter flag
   bool notified_;
 };

@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 #include "platform/mutexlock.h"
-#include "platform/timer.h"
+#include "platform/time.h"
 #include "utils/thread.h"
 
 namespace bubblefs {
@@ -330,7 +330,7 @@ void Logv(int log_level, const char* format, va_list ap) {
 
         *p++ = cur_level;
         *p++ = ' ';
-        int32_t rlen = timer::now_time_str(p, limit - p);
+        int32_t rlen = timeutil::now_time_str(p, limit - p);
         p += rlen;
         memcpy(p, tid_str, tid_str_len);
         p += tid_str_len;

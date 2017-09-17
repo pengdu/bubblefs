@@ -49,6 +49,7 @@ inline void prefetch(const void* x) {
   __builtin_prefetch(x, 0, hint);
 #else
 // You get no effect.  Feel free to add more sections above.
+static_assert(false, "prefetch unimplemented");
 #endif
 }
 

@@ -22,16 +22,12 @@ limitations under the License.
 // tensorflow/tensorflow/core/platform/posix/net.cc
 // tensorflow/tensorflow/core/platform/posix/port.cc
 
-#include "platform/port_posix.h"
 #include <netinet/in.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <assert.h>
-#if defined(__i386__) || defined(__x86_64__)
-#include <cpuid.h>
-#endif
 #include <errno.h>
 #include <malloc.h>
 #include <sched.h>
@@ -42,8 +38,13 @@ limitations under the License.
 #include <unistd.h>
 #include <unordered_set>
 #include "platform/logging.h"
+#include "platform/port_posix.h"
 #include "platform/time.h"
 #include "utils/strcat.h"
+
+#if defined(__i386__) || defined(__x86_64__)
+#include <cpuid.h>
+#endif
 
 namespace bubblefs {
   

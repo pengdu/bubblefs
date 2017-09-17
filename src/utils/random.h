@@ -62,17 +62,17 @@ uint64 New64();
 uint64 New64DefaultSeed();
 
 // Returns a random number between min and max (inclusive). Thread-safe.
-TF_EXPORT int RandInt(int min, int max);
+BASE_EXPORT int RandInt(int min, int max);
 
 // Returns a random number in range [0, range).  Thread-safe.
 //
 // Note that this can be used as an adapter for std::random_shuffle():
 // Given a pre-populated |std::vector<int> myvector|, shuffle it as
 //   std::random_shuffle(myvector.begin(), myvector.end(), base::RandGenerator);
-TF_EXPORT uint64_t RandGenerator(uint64_t range);
+BASE_EXPORT uint64_t RandGenerator(uint64_t range);
 
 // Returns a random double in range [0, 1). Thread-safe.
-TF_EXPORT double RandDouble();
+BASE_EXPORT double RandDouble();
 
 // A very simple random number generator.  Not especially good at
 // generating truly random bits, but good enough for our needs in this

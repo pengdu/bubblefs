@@ -314,19 +314,4 @@
 # endif
 #endif
 
-// Cacheline related --------------------------------------
-#define CACHELINE_SIZE 64
-
-#ifdef _MSC_VER
-# define CACHELINE_ALIGNMENT __declspec(align(CACHELINE_SIZE))
-#endif /* _MSC_VER */
-
-#ifdef __GNUC__
-# define CACHELINE_ALIGNMENT __attribute__((aligned(CACHELINE_SIZE)))
-#endif /* __GNUC__ */
-
-#ifndef CACHELINE_ALIGNMENT
-# define CACHELINE_ALIGNMENT /*CACHELINE_ALIGNMENT*/
-#endif
-
 #endif  // BUBBLEFS_PLATFORM_COMPILER_SPECIFIC_H_

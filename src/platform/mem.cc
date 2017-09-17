@@ -20,16 +20,17 @@ limitations under the License.
 
 // tensorflow/tensorflow/core/platform/posix/port.cc
 
-#include "platform/build_config.h"
-#include "platform/mem.h"
-#ifdef TF_USE_JEMALLOC
-#include "jemalloc/jemalloc.h"
-#endif
 #include <malloc.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "platform/logging.h"
+#include "platform/macros.h"
+#include "platform/mem.h"
+
+#ifdef TF_USE_JEMALLOC
+#include "jemalloc/jemalloc.h"
+#endif
 
 namespace bubblefs {
 namespace port {

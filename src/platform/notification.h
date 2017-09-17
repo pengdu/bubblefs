@@ -71,7 +71,7 @@ class Notification {
   }
 
   mutex mu_;                    // protects mutations of notified_
-  condition_variable cv_;       // signalled when notified_ becomes non-zero
+  std::condition_variable cv_;       // signalled when notified_ becomes non-zero
   std::atomic<bool> notified_;  // mutations under mu_
 };
 

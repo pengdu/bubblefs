@@ -102,7 +102,7 @@ class Cleanup {
 
 template <int&... ExplicitParameterBarrier,
           typename F, typename DecayF = typename std::decay<F>::type>
-TF_MUST_USE_RESULT Cleanup<DecayF> MakeCleanup(F&& f) {
+WARN_UNUSED_RESULT Cleanup<DecayF> MakeCleanup(F&& f) {
   return Cleanup<DecayF>(std::forward<F>(f));
 }
 

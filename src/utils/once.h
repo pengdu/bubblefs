@@ -117,16 +117,16 @@ enum {
   ONCE_STATE_DONE = 2
 };
 
-typedef internal::AtomicWord GoogleOnceType;
+typedef base::AtomicWord GoogleOnceType;
 
 #define GOOGLE_ONCE_INIT ::bubblefs::core::ONCE_STATE_UNINITIALIZED
 
-TF_EXPORT
+BASE_EXPORT
 void GoogleOnceInitImpl(GoogleOnceType* once, Closure* closure);
 
 inline void GoogleOnceInit(GoogleOnceType* once, void (*init_func)()) {
-  if (internal::Acquire_Load(once) != ONCE_STATE_DONE) {
-    internal::FunctionClosure0 func(init_func, false);
+  if (base::Acquire_Load(once) != ONCE_STATE_DONE) {
+    base::FunctionClosure0 func(init_func, false);
     GoogleOnceInitImpl(once, &func);
   }
 }
@@ -134,8 +134,8 @@ inline void GoogleOnceInit(GoogleOnceType* once, void (*init_func)()) {
 template <typename Arg>
 inline void GoogleOnceInit(GoogleOnceType* once, void (*init_func)(Arg*),
     Arg* arg) {
-  if (internal::Acquire_Load(once) != ONCE_STATE_DONE) {
-    internal::FunctionClosure1<Arg*> func(init_func, false, arg);
+  if (base::Acquire_Load(once) != ONCE_STATE_DONE) {
+    base::FunctionClosure1<Arg*> func(init_func, false, arg);
     GoogleOnceInitImpl(once, &func);
   }
 }

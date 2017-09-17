@@ -15,7 +15,7 @@ limitations under the License.
 #ifndef BUBBLEFS_UTILS_BUFFERED_INPUTSTREAM_H_
 #define BUBBLEFS_UTILS_BUFFERED_INPUTSTREAM_H_
 
-#include "platform/file_system.h"
+#include "platform/env.h"
 #include "utils/inputstream_interface.h"
 
 namespace bubblefs {

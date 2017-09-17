@@ -147,7 +147,7 @@ class SubProcess {
   int parent_pipe_[kNFds] GUARDED_BY(data_mu_);
   int child_pipe_[kNFds] GUARDED_BY(data_mu_);
 
-  TF_DISALLOW_COPY_AND_ASSIGN(SubProcess);
+  DISALLOW_COPY_AND_ASSIGN(SubProcess);
 };
 
 }  // namespace bubblefs
