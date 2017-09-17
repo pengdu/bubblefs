@@ -36,9 +36,6 @@
 
 #if defined(cpuid)        // initialize the struct only on x86
 
-namespace bubblefs {
-namespace internal {
-
 // Set the flags so that code will run correctly and conservatively, so even
 // if we haven't been initialized yet, we're probably single threaded, and our
 // default values should hopefully be pretty safe.
@@ -102,9 +99,6 @@ class AtomicOpsx86Initializer {
 AtomicOpsx86Initializer g_initer;
 
 }  // namespace
-
-}  // namespace internal
-}  // namespace bubblefs
 
 #endif  // if x86
 

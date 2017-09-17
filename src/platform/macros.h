@@ -41,130 +41,64 @@ limitations under the License.
 // tensorflow/tensorflow/core/platform/default/dynamic_annotations.h
 // chromium/base/compiler_specific.h
 // chromium/base/macros.h
+// brpc/src/butil/macros.h
 
 #ifndef BUBBLEFS_PLATFORM_MACROS_H_
 #define BUBBLEFS_PLATFORM_MACROS_H_
 
+#include <stddef.h>  // For size_t.
+#include <string.h>  // For memcpy.
+#include "platform/build_config.h"
+#include "platform/base_export.h"
+#include "platform/compiler_specific.h"
 #include "platform/platform.h"
 
-// Compiler detection.
-#if defined(__GNUC__)
-#define COMPILER_GCC 1
-#elif defined(_MSC_VER)
-#define COMPILER_MSVC 1
-#else
-#error Please add support for your compiler in build/build_config.h
-#endif
+// There must be many copy-paste versions of these macros which are same
+// things, undefine them to avoid conflict.
+#undef DISALLOW_COPY
+#undef DISALLOW_ASSIGN
+#undef DISALLOW_COPY_AND_ASSIGN
+#undef DISALLOW_EVIL_CONSTRUCTORS
+#undef DISALLOW_IMPLICIT_CONSTRUCTORS
 
-// Compiler attributes
-#if (defined(__GNUC__) || defined(__APPLE__)) && !defined(SWIG)
-// Compiler supports GCC-style attributes
-#define TF_ATTRIBUTE_NORETURN __attribute__((noreturn))
-#define TF_ATTRIBUTE_ALWAYS_INLINE __attribute__((always_inline))
-#define TF_ATTRIBUTE_NOINLINE __attribute__((noinline))
-#define TF_ATTRIBUTE_UNUSED __attribute__((unused))
-#define TF_ATTRIBUTE_COLD __attribute__((cold))
-#define TF_ATTRIBUTE_WEAK __attribute__((weak))
-#define TF_PACKED __attribute__((packed))
-#define TF_MUST_USE_RESULT __attribute__((warn_unused_result))
-#define TF_PRINTF_ATTRIBUTE(string_index, first_to_check) \
-  __attribute__((__format__(__printf__, string_index, first_to_check)))
-#define TF_SCANF_ATTRIBUTE(string_index, first_to_check) \
-  __attribute__((__format__(__scanf__, string_index, first_to_check)))
-#elif defined(COMPILER_MSVC)
-// Non-GCC equivalents
-#define TF_ATTRIBUTE_NORETURN __declspec(noreturn)
-#define TF_ATTRIBUTE_ALWAYS_INLINE
-#define TF_ATTRIBUTE_NOINLINE
-#define TF_ATTRIBUTE_UNUSED
-#define TF_ATTRIBUTE_COLD
-#define TF_MUST_USE_RESULT
-#define TF_PACKED
-#define TF_PRINTF_ATTRIBUTE(string_index, first_to_check)
-#define TF_SCANF_ATTRIBUTE(string_index, first_to_check)
+#if !defined(BASE_CXX11_ENABLED)
+#define BASE_DELETE_FUNCTION(decl) decl
 #else
-// Non-GCC equivalents
-#define TF_ATTRIBUTE_NORETURN
-#define TF_ATTRIBUTE_ALWAYS_INLINE
-#define TF_ATTRIBUTE_NOINLINE
-#define TF_ATTRIBUTE_UNUSED
-#define TF_ATTRIBUTE_COLD
-#define TF_ATTRIBUTE_WEAK
-#define TF_MUST_USE_RESULT
-#define TF_PACKED
-#define TF_PRINTF_ATTRIBUTE(string_index, first_to_check)
-#define TF_SCANF_ATTRIBUTE(string_index, first_to_check)
-#endif
-
-// Control visiblity outside .so
-#if defined(COMPILER_MSVC)
-#ifdef TF_COMPILE_LIBRARY
-#define TF_EXPORT __declspec(dllexport)
-#else
-#define TF_EXPORT __declspec(dllimport)
-#endif  // TF_COMPILE_LIBRARY
-#else
-#define TF_EXPORT __attribute__((visibility("default")))
-#endif  // COMPILER_MSVC
-
-// GCC can be told that a certain branch is not likely to be taken (for
-// instance, a CHECK failure), and use that information in static analysis.
-// Giving it this information can help it optimize for the common case in
-// the absence of better information (ie. -fprofile-arcs).
-#if defined(__GNUC__) && __GNUC__ >= 4
-#define TF_PREDICT_FALSE(x) (__builtin_expect(x, 0))
-#define TF_PREDICT_TRUE(x) (__builtin_expect(!!(x), 1))
-#define TF_LIKELY(x)   (__builtin_expect((x), 1))
-#define TF_UNLIKELY(x) (__builtin_expect((x), 0))
-#define TF_PREFETCH(addr, rw, locality) __builtin_prefetch(addr, rw, locality)
-#define TF_SYNC_SYNCHRONIZE __sync_synchronize();
-#define TF_SYNC_ADD_AND_FETCH(x, y) __sync_add_and_fetch(x, y);
-#define TF_SYNC_FETCH_AND_ADD(x, y) __sync_fetch_and_add(x, y);
-#define TF_SYNC_BOOL_COMPARE_AND_SWAP(x, y, z) __sync_bool_compare_and_swap(x, y, x);
-#define TF_SYNC_VAL_COMPARE_AND_SWAP(x, y, z) __sync_val_compare_and_swap(x, y, z);
-#define TF_SYNC_LOCK_TEST_AND_SET(x, y, z) __sync_lock_test_and_set(x, y);
-#else
-#define TF_PREDICT_FALSE(x) (x)
-#define TF_PREDICT_TRUE(x) (x)
-#define TF_LIKELY(x)   (x)
-#define TF_UNLIKELY(x) (x)
-#define TF_PREFETCH(addr, rw, locality)
-#define TF_SYNC_SYNCHRONIZE
-#define TF_SYNC_ADD_AND_FETCH(x, y)
-#define TF_SYNC_FETCH_AND_ADD(x, y)
-#define TF_SYNC_BOOL_COMPARE_AND_SWAP(x, y, z)
-#define TF_SYNC_VAL_COMPARE_AND_SWAP(x, y, z)
-#define TF_SYNC_LOCK_TEST_AND_SET(x, y, z)
+#define BASE_DELETE_FUNCTION(decl) decl = delete
 #endif
 
 // Put this in the private: declarations for a class to be uncopyable.
-#define TF_DISALLOW_COPY(TypeName) \
-  TypeName(const TypeName&) = delete
+#define DISALLOW_COPY(TypeName)                         \
+    BASE_DELETE_FUNCTION(TypeName(const TypeName&))
 
 // Put this in the private: declarations for a class to be unassignable.
-#define TF_DISALLOW_ASSIGN(TypeName) \
-  void operator=(const TypeName&) = delete
+#define DISALLOW_ASSIGN(TypeName)                               \
+    BASE_DELETE_FUNCTION(void operator=(const TypeName&))
 
 // A macro to disallow the copy constructor and operator= functions
-// This is usually placed in the private: declarations for a class.
-#define TF_DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&) = delete;         \
-  void operator=(const TypeName&) = delete
-  
+// This should be used in the private: declarations for a class
+#define DISALLOW_COPY_AND_ASSIGN(TypeName)                      \
+    BASE_DELETE_FUNCTION(TypeName(const TypeName&));            \
+    BASE_DELETE_FUNCTION(void operator=(const TypeName&))
+
+// An older, deprecated, politically incorrect name for the above.
+// NOTE: The usage of this macro was banned from our code base, but some
+// third_party libraries are yet using it.
+// TODO(tfarina): Figure out how to fix the usage of this macro in the
+// third_party libraries and get rid of it.
+#define DISALLOW_EVIL_CONSTRUCTORS(TypeName) DISALLOW_COPY_AND_ASSIGN(TypeName)
+
 // A macro to disallow all the implicit constructors, namely the
 // default constructor, copy constructor and operator= functions.
 //
 // This should be used in the private: declarations for a class
 // that wants to prevent anyone from instantiating it. This is
 // especially useful for classes containing only static methods.
-#define TF_DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
-  TypeName() = delete;                           \
-  TF_DISALLOW_COPY_AND_ASSIGN(TypeName)
-  
-#define TF_DISALLOW_EVIL_CONSTRUCTORS(TypeName) \
-  TypeName() = delete;                           \
-  TF_DISALLOW_COPY_AND_ASSIGN(TypeName)
+#define DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
+    BASE_DELETE_FUNCTION(TypeName());            \
+    DISALLOW_COPY_AND_ASSIGN(TypeName)
    
+#undef arraysize
 // The arraysize(arr) macro returns the # of elements in an array arr.
 // The expression is a compile-time constant, and therefore can be
 // used in defining new arrays, for example.  If you use arraysize on
@@ -178,19 +112,27 @@ limitations under the License.
 
 // This template function declaration is used in defining arraysize.
 // Note that the function doesn't need an implementation, as we only
-// use its type.
+// use its type.    
+namespace base {
 template <typename T, size_t N>
 char (&ArraySizeHelper(T (&array)[N]))[N];
+} // ns base
 
 // That gcc wants both of these prototypes seems mysterious. VC, for
 // its part, can't decide which to use (another mystery). Matching of
 // template overloads: the final frontier.
 #ifndef _MSC_VER
+namespace base {
 template <typename T, size_t N>
 char (&ArraySizeHelper(const T (&array)[N]))[N];
+} // ns base
 #endif
 
-#define arraysize(array) (sizeof(ArraySizeHelper(array)))
+#define arraysize(array) (sizeof(::base::ArraySizeHelper(array)))
+
+// gejun: Following macro was used in other modules.
+#undef ARRAY_SIZE
+#define ARRAY_SIZE(array) arraysize(array)
 
 // ARRAYSIZE_UNSAFE performs essentially the same calculation as arraysize,
 // but can be used on anonymous types or types defined inside
@@ -228,141 +170,77 @@ char (&ArraySizeHelper(const T (&array)[N]))[N];
 // size.  Since all our code has to go through a 32-bit compiler,
 // where a pointer is 4 bytes, this means all pointers to a type whose
 // size is 3 or greater than 4 will be (righteously) rejected.
-
+#undef ARRAYSIZE_UNSAFE
 #define ARRAYSIZE_UNSAFE(a) \
-  ((sizeof(a) / sizeof(*(a))) / \
-   static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
-   
-// The TF_ARRAYSIZE(arr) macro returns the # of elements in an array arr.
-//
-// The expression TF_ARRAYSIZE(a) is a compile-time constant of type
-// size_t.
-#define TF_ARRAYSIZE(a)         \
-  ARRAYSIZE_UNSAFE(a)
+    ((sizeof(a) / sizeof(*(a))) / \
+     static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
+     
+// Concatenate numbers in c/c++ macros.
+#ifndef BASE_CONCAT
+# define BASE_CONCAT(a, b) BASE_CONCAT_HELPER(a, b)
+# define BASE_CONCAT_HELPER(a, b) a##b
+#endif
   
-// Use implicit_cast as a safe version of static_cast or const_cast
-// for upcasting in the type hierarchy (i.e. casting a pointer to Foo
-// to a pointer to SuperclassOfFoo or casting a pointer to Foo to
-// a const pointer to Foo).
-// When you use implicit_cast, the compiler checks that the cast is safe.
-// Such explicit implicit_casts are necessary in surprisingly many
-// situations where C++ demands an exact type match instead of an
-// argument type convertible to a target type.
+#if defined(BASE_CXX11_ENABLED)
+// C++11 supports compile-time assertion directly
+#define BASE_CASSERT(expr, msg) static_assert(expr, #msg)
+#else
+// Assert constant boolean expressions at compile-time
+// Params:
+//   expr     the constant expression to be checked
+//   msg      an error infomation conforming name conventions of C/C++
+//            variables(alphabets/numbers/underscores, no blanks). For
+//            example "cannot_accept_a_number_bigger_than_128" is valid
+//            while "this number is out-of-range" is illegal.
 //
-// The From type can be inferred, so the preferred syntax for using
-// implicit_cast is the same as for static_cast etc.:
+// when an asssertion like "BASE_CASSERT(false, you_should_not_be_here)"
+// breaks, a compilation error is printed:
+//   
+//   foo.cpp:401: error: enumerator value for `you_should_not_be_here___19' not
+//   integer constant
 //
-//   implicit_cast<ToType>(expr)
+// You can call BASE_CASSERT at global scope, inside a class or a function
+// 
+//   BASE_CASSERT(false, you_should_not_be_here);
+//   int main () { ... }
 //
-// implicit_cast would have been part of the C++ standard library,
-// but the proposal was submitted too late.  It will probably make
-// its way into the language in the future.
-template<typename To, typename From>
-inline To implicit_cast(From const &f) {
-  return f;
-}
+//   struct Foo {
+//       BASE_CASSERT(1 == 0, Never_equals);
+//   };
+//
+//   int bar(...)
+//   {
+//       BASE_CASSERT (value < 10, invalid_value);
+//   }
+//
+namespace base {
+template <bool> struct CAssert { static const int x = 1; };
+template <> struct CAssert<false> { static const char * x; };
+} // ns base
 
-// The COMPILE_ASSERT macro can be used to verify that a compile time
-// expression is true. For example, you could use it to verify the
-// size of a static array:
-//
-//   COMPILE_ASSERT(ARRAYSIZE_UNSAFE(content_type_names) == CONTENT_NUM_TYPES,
-//                  content_type_names_incorrect_size);
-//
-// or to make sure a struct is smaller than a certain size:
-//
-//   COMPILE_ASSERT(sizeof(foo) < 128, foo_too_large);
-//
-// The second argument to the macro is the name of the variable. If
-// the expression is false, most compilers will issue a warning/error
-// containing the name of the variable.
-// Under C++11, just use static_assert.
+#define BASE_CASSERT(expr, msg)                                \
+    enum { BASE_CONCAT(BASE_CONCAT(LINE_, __LINE__), __##msg) \
+           = ::base::CAssert<!!(expr)>::x };
 
+#endif  // BASE_CXX11_ENABLED
+
+// The impl. of chrome does not work for offsetof(Object, private_filed)
 #undef COMPILE_ASSERT
-#define COMPILE_ASSERT(expr, msg) static_assert(expr, #msg)
-
-// Macro useful for writing cross-platform function pointers.
-#if !defined(CDECL)
-#if defined(OS_WIN)
-#define CDECL __cdecl
-#else  // defined(OS_WIN)
-#define CDECL
-#endif  // defined(OS_WIN)
-#endif  // !defined(CDECL)
-
-#if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
-// Define this to 1 if the code is compiled in C++11 mode; leave it
-// undefined otherwise.  Do NOT define it to 0 -- that causes
-// '#ifdef LANG_CXX11' to behave differently from '#if LANG_CXX11'.
-#define LANG_CXX11 1
-#endif
-
-#if defined(__clang__) && defined(LANG_CXX11) && defined(__has_warning)
-#if __has_feature(cxx_attributes) && __has_warning("-Wimplicit-fallthrough")
-#define TF_FALLTHROUGH_INTENDED [[clang::fallthrough]]  // NOLINT
-#endif
-#endif
-
-#ifndef TF_FALLTHROUGH_INTENDED
-#define TF_FALLTHROUGH_INTENDED \
-  do {                          \
-  } while (0)
-#endif
-
-// dynamic_annotations.h, Do nothing for this platform.
-
-#define TF_ANNOTATE_MEMORY_IS_INITIALIZED(ptr, bytes) \
-  do {                                                \
-  } while (0)
-
-#define TF_ANNOTATE_BENIGN_RACE(ptr, description) \
-  do {                                            \
-  } while (0)
-
-#define TF_ATTRIBUTE_NO_SANITIZE_MEMORY
-
-#define TF_NOEXCEPT noexcept
-
-// Tell the compiler a function is using a printf-style format string.
-// |format_param| is the one-based index of the format string parameter;
-// |dots_param| is the one-based index of the "..." parameter.
-// For v*printf functions (which take a va_list), pass 0 for dots_param.
-// (This is undocumented but matches what the system C headers do.)
-#if defined(COMPILER_GCC)
-#define TF_PRINTF_FORMAT(format_param, dots_param) \
-    __attribute__((format(printf, format_param, dots_param)))
-#else
-#define TF_PRINTF_FORMAT(format_param, dots_param)
-#endif
-
-// Helper macros that include information about file name and line number
-#define TF_STRINGIFY(x) #x
-#define TF_TOSTRING(x) STRINGIFY(x)
-#define TF_PREPEND_FILE_LINE(FMT) ("[" __FILE__ ":" TOSTRING(__LINE__) "] " FMT)
-
-#ifdef _MSC_VER
-#define TF_LONGLONG(x) x##I64
-#define TF_ULONGLONG(x) x##UI64
-#define TF_LL_FORMAT "I64"  // As in printf("%I64d", ...)
-#else
-// By long long, we actually mean int64.
-#define TF_LONGLONG(x) x##LL
-#define TF_ULONGLONG(x) x##ULL
-// Used to format real long long integers.
-#define TF_LL_FORMAT "ll"  // As in "%lld". Note that "q" is poor form also.
-#endif
+#define COMPILE_ASSERT(expr, msg)  BASE_CASSERT(expr, msg)
 
 // Used to explicitly mark the return value of a function as unused. If you are
 // really sure you don't want to do anything with the return value of a function
 // that has been marked WARN_UNUSED_RESULT, wrap it with this. Example:
 //
-//   std::unique_ptr<MyType> my_var = ...;
+//   scoped_ptr<MyType> my_var = ...;
 //   if (TakeOwnership(my_var.get()) == SUCCESS)
 //     ignore_result(my_var.release());
 //
+namespace base {
 template<typename T>
 inline void ignore_result(const T&) {
 }
+} // namespace base
 
 // The following enum should be used only as a constructor argument to indicate
 // that the variable has static storage class, and that the constructor should
@@ -383,9 +261,174 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 // Use these to declare and define a static local variable (static T;) so that
 // it is leaked so that its destructors are not called at exit. If you need
 // thread-safe initialization, use base/lazy_instance.h instead.
-#define TF_DEFINE_STATIC_LOCAL(type, name, arguments) \
+#undef CR_DEFINE_STATIC_LOCAL
+#define CR_DEFINE_STATIC_LOCAL(type, name, arguments) \
   static type& name = *new type arguments
 
 }  // namespace base
+
+#if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
+// Define this to 1 if the code is compiled in C++11 mode; leave it
+// undefined otherwise.  Do NOT define it to 0 -- that causes
+// '#ifdef LANG_CXX11' to behave differently from '#if LANG_CXX11'.
+#define LANG_CXX11 1
+#endif
+
+#if defined(__clang__) && defined(LANG_CXX11) && defined(__has_warning)
+#if __has_feature(cxx_attributes) && __has_warning("-Wimplicit-fallthrough")
+#define FALLTHROUGH_INTENDED [[clang::fallthrough]]  // NOLINT
+#endif
+#endif
+
+#ifndef FALLTHROUGH_INTENDED
+#define FALLTHROUGH_INTENDED \
+  do {                          \
+  } while (0)
+#endif
+
+// dynamic_annotations.h, Do nothing for this platform.
+
+#define ANNOTATE_MEMORY_IS_INITIALIZED(ptr, bytes) \
+  do {                                                \
+  } while (0)
+
+#define ANNOTATE_BENIGN_RACE(ptr, description) \
+  do {                                            \
+  } while (0)
+
+#ifdef _MSC_VER
+#define LONGLONG(x) x##I64
+#define ULONGLONG(x) x##UI64
+#define LL_FORMAT "I64"  // As in printf("%I64d", ...)
+#else
+// By long long, we actually mean int64.
+#define LONGLONG(x) x##LL
+#define ULONGLONG(x) x##ULL
+// Used to format real long long integers.
+#define LL_FORMAT "ll"  // As in "%lld". Note that "q" is poor form also.
+#endif
+
+// Convert symbol to string
+#ifndef BASE_SYMBOLSTR
+# define BASE_SYMBOLSTR(a) BASE_SYMBOLSTR_HELPER(a)
+# define BASE_SYMBOLSTR_HELPER(a) #a
+#endif
+
+#ifndef BASE_TYPEOF
+# if defined(BASE_CXX11_ENABLED)
+#  define BASE_TYPEOF decltype
+# else
+#  ifdef _MSC_VER
+#   include <boost/typeof/typeof.hpp>
+#   define BASE_TYPEOF BOOST_TYPEOF
+#  else
+#   define BASE_TYPEOF typeof
+#  endif
+# endif // BASE_CXX11_ENABLED
+#endif  // BASE_TYPEOF
+
+// ptr:     the pointer to the member.
+// type:    the type of the container struct this is embedded in.
+// member:  the name of the member within the struct.
+#ifndef container_of
+# define container_of(ptr, type, member) ({                             \
+            const BASE_TYPEOF( ((type *)0)->member ) *__mptr = (ptr);  \
+            (type *)( (char *)__mptr - offsetof(type,member) );})
+#endif
+
+// DEFINE_SMALL_ARRAY(MyType, my_array, size, 64);
+//   my_array is typed `MyType*' and as long as `size'. If `size' is not
+//   greater than 64, the array is allocated on stack.
+//
+// NOTE: NEVER use ARRAY_SIZE(my_array) which is always 1.
+
+#if defined(__cplusplus)
+namespace base {
+namespace internal {
+template <typename T> struct ArrayDeleter {
+    ArrayDeleter() : arr(0) {}
+    ~ArrayDeleter() { delete[] arr; }
+    T* arr;
+};
+} // namespace internal
+} // namespace base
+
+// Many versions of clang does not support variable-length array with non-pod
+// types, have to implement the macro differently.
+#if !defined(__clang__)
+# define DEFINE_SMALL_ARRAY(Tp, name, size, maxsize)                    \
+    Tp* name = 0;                                                       \
+    const unsigned name##_size = (size);                                \
+    const unsigned name##_stack_array_size = (name##_size <= (maxsize) ? name##_size : 0); \
+    Tp name##_stack_array[name##_stack_array_size];                     \
+    ::base::internal::ArrayDeleter<Tp> name##_array_deleter;            \
+    if (name##_stack_array_size) {                                      \
+        name = name##_stack_array;                                      \
+    } else {                                                            \
+        name = new (::std::nothrow) Tp[name##_size];                    \
+        name##_array_deleter.arr = name;                                \
+    }
+#else
+// This implementation works for GCC as well, however it needs extra 16 bytes
+// for ArrayCtorDtor.
+namespace base {
+namespace internal {
+template <typename T> struct ArrayCtorDtor {
+    ArrayCtorDtor(void* arr, unsigned size) : _arr((T*)arr), _size(size) {
+        for (unsigned i = 0; i < size; ++i) { new (_arr + i) T; }
+    }
+    ~ArrayCtorDtor() {
+        for (unsigned i = 0; i < _size; ++i) { _arr[i].~T(); }
+    }
+private:
+    T* _arr;
+    unsigned _size;
+};
+} // namespace internal
+} // namespace base
+
+# define DEFINE_SMALL_ARRAY(Tp, name, size, maxsize)                    \
+    Tp* name = 0;                                                       \
+    const unsigned name##_size = (size);                                \
+    const unsigned name##_stack_array_size = (name##_size <= (maxsize) ? name##_size : 0); \
+    char name##_stack_array[sizeof(Tp) * name##_stack_array_size];      \
+    ::base::internal::ArrayDeleter<char> name##_array_deleter;          \
+    if (name##_stack_array_size) {                                      \
+        name = (Tp*)name##_stack_array;                                 \
+    } else {                                                            \
+        name = (Tp*)new (::std::nothrow) char[sizeof(Tp) * name##_size];\
+        name##_array_deleter.arr = (char*)name;                         \
+    }                                                                   \
+    const ::base::internal::ArrayCtorDtor<Tp> name##_array_ctor_dtor(name, name##_size);
+#endif // !defined(__clang__)
+#endif  // __cplusplus
+
+// Put following code somewhere global to run it before main():
+// 
+//   BASE_GLOBAL_INIT()
+//   {
+//       ... your code ...
+//   }
+//
+// Your can:
+//   * Write any code and access global variables.
+//   * Use ASSERT_*.
+//   * Have multiple BASE_GLOBAL_INIT() in one scope.
+// 
+// Since the code run in global scope, quit with exit() or similar functions.
+#if defined(__cplusplus)
+# define BASE_GLOBAL_INIT                                      \
+namespace {  /*anonymous namespace */                           \
+    struct BASE_CONCAT(BaseGlobalInit, __LINE__) {            \
+        BASE_CONCAT(BaseGlobalInit, __LINE__)() { init(); }   \
+        void init();                                            \
+    } BASE_CONCAT(base_global_init_dummy_, __LINE__);         \
+}  /* anonymous namespace */                                    \
+    void BASE_CONCAT(BaseGlobalInit, __LINE__)::init              
+#else
+# define BASE_GLOBAL_INIT                      \
+    static void __attribute__((constructor))    \
+    BASE_CONCAT(base_global_init_, __LINE__)   
+#endif  // __cplusplus
 
 #endif // BUBBLEFS_PLATFORM_MACROS_H_

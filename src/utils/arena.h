@@ -17,24 +17,15 @@ limitations under the License.
 #ifndef BUBBLEFS_UTILS_ARENA_H_
 #define BUBBLEFS_UTILS_ARENA_H_
 
+#include "platform/macros.h"
 #include <assert.h>
 #include <vector>
 #include "platform/logging.h"
-#include "platform/macros.h"
 #include "platform/types.h"
+#include "utils/allocator.h"
 
 namespace bubblefs {
 namespace core {
-
-class Allocator {
- public:
-  virtual ~Allocator() {}
-
-  virtual char* Alloc(const size_t size) = 0;
-  virtual char* AllocAligned(const size_t size, const size_t alignment) = 0;
-
-  virtual size_t BlockSize() const = 0;
-};  
   
 // This class is "thread-compatible": different threads can access the
 // arena at the same time without locking, as long as they use only
@@ -114,7 +105,7 @@ class Arena : public Allocator {
 
   void FreeBlocks();  // Frees all except first block
 
-  TF_DISALLOW_COPY_AND_ASSIGN(Arena);
+  DISALLOW_COPY_AND_ASSIGN(Arena);
 };
 
 }  // namespace core

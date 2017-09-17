@@ -167,7 +167,7 @@ Arena::AllocatedBlock* Arena::AllocNewBlock(const size_t block_size,
                                             const uint32 alignment) {
   AllocatedBlock* block;
   // Find the next block.
-  if (blocks_alloced_ < TF_ARRAYSIZE(first_blocks_)) {
+  if (blocks_alloced_ < ARRAYSIZE_UNSAFE(first_blocks_)) {
     // Use one of the pre-allocated blocks
     block = &first_blocks_[blocks_alloced_++];
   } else {  // oops, out of space, move to the vector

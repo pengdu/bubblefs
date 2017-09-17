@@ -21,13 +21,13 @@ struct AtomicOps_x86CPUFeatureStruct {
                             // after acquire compare-and-swap.
   bool has_sse2;            // Processor has SSE2.
 };
-TF_EXPORT extern struct AtomicOps_x86CPUFeatureStruct
+BASE_EXPORT extern struct AtomicOps_x86CPUFeatureStruct
     AtomicOps_Internalx86CPUFeatures;
 
 #define ATOMICOPS_COMPILER_BARRIER() __asm__ __volatile__("" : : : "memory")
 
 namespace bubblefs {
-namespace internal {
+namespace base {
 
 // 32-bit low-level operations on any platform.
 
@@ -263,7 +263,7 @@ inline Atomic64 Release_CompareAndSwap(volatile Atomic64* ptr,
 
 #endif  // defined(__x86_64__)
 
-} // namespace internal
+} // namespace base
 } // namespace bubblefs
 
 #undef ATOMICOPS_COMPILER_BARRIER

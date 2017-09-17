@@ -1,14 +1,15 @@
-// Copyright (c) 2012 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
 #ifndef BUBBLEFS_PLATFORM_BUILD_CONFIG_H_
 #define BUBBLEFS_PLATFORM_BUILD_CONFIG_H_
 
 /////////////////////////////////////////////////////
 // custom macros
 
-#ifndef TF_NO_RTTI
-#define TF_NO_RTTI 0
+#ifndef TF_COMPILE_LIBRARY
+#define TF_COMPILE_LIBRARY 0
+#endif
+
+#ifndef TF_USE_NO_RTTI
+#define TF_USE_NO_RTTI 0
 #endif
 
 // x86 and x86-64 can perform unaligned loads/stores directly.
