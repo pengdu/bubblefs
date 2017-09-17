@@ -112,23 +112,27 @@ limitations under the License.
 
 // This template function declaration is used in defining arraysize.
 // Note that the function doesn't need an implementation, as we only
-// use its type.    
+// use its type.
+namespace bubblefs {
 namespace base {
 template <typename T, size_t N>
 char (&ArraySizeHelper(T (&array)[N]))[N];
 } // ns base
+} // ns bubblefs
 
 // That gcc wants both of these prototypes seems mysterious. VC, for
 // its part, can't decide which to use (another mystery). Matching of
 // template overloads: the final frontier.
 #ifndef _MSC_VER
+namespace bubblefs {
 namespace base {
 template <typename T, size_t N>
 char (&ArraySizeHelper(const T (&array)[N]))[N];
 } // ns base
+} // ns bubblefs
 #endif
 
-#define arraysize(array) (sizeof(::base::ArraySizeHelper(array)))
+#define arraysize(array) (sizeof(::bubblefs::base::ArraySizeHelper(array)))
 
 // gejun: Following macro was used in other modules.
 #undef ARRAY_SIZE
@@ -213,14 +217,16 @@ char (&ArraySizeHelper(const T (&array)[N]))[N];
 //       BASE_CASSERT (value < 10, invalid_value);
 //   }
 //
+namespace bubblefs {
 namespace base {
 template <bool> struct CAssert { static const int x = 1; };
 template <> struct CAssert<false> { static const char * x; };
 } // ns base
+} // ns bubblefs
 
 #define BASE_CASSERT(expr, msg)                                \
     enum { BASE_CONCAT(BASE_CONCAT(LINE_, __LINE__), __##msg) \
-           = ::base::CAssert<!!(expr)>::x };
+           = ::bubblefs::base::CAssert<!!(expr)>::x };
 
 #endif  // BASE_CXX11_ENABLED
 
@@ -236,10 +242,12 @@ template <> struct CAssert<false> { static const char * x; };
 //   if (TakeOwnership(my_var.get()) == SUCCESS)
 //     ignore_result(my_var.release());
 //
+namespace bubblefs {
 namespace base {
 template<typename T>
 inline void ignore_result(const T&) {
 }
+} // namespace bubblefs
 } // namespace base
 
 // The following enum should be used only as a constructor argument to indicate
@@ -255,6 +263,7 @@ inline void ignore_result(const T&) {
 //       explicit MyClass(base::LinkerInitialized x) {}
 // and invoked as
 //       static MyClass my_variable_name(base::LINKER_INITIALIZED);
+namespace bubblefs {
 namespace base {
 enum LinkerInitialized { LINKER_INITIALIZED };
 
@@ -266,6 +275,7 @@ enum LinkerInitialized { LINKER_INITIALIZED };
   static type& name = *new type arguments
 
 }  // namespace base
+}  // namespace bubblefs
 
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 // Define this to 1 if the code is compiled in C++11 mode; leave it
@@ -343,6 +353,7 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 // NOTE: NEVER use ARRAY_SIZE(my_array) which is always 1.
 
 #if defined(__cplusplus)
+namespace bubblefs {
 namespace base {
 namespace internal {
 template <typename T> struct ArrayDeleter {
@@ -352,6 +363,7 @@ template <typename T> struct ArrayDeleter {
 };
 } // namespace internal
 } // namespace base
+} // namespace bubblefs
 
 // Many versions of clang does not support variable-length array with non-pod
 // types, have to implement the macro differently.
@@ -361,7 +373,7 @@ template <typename T> struct ArrayDeleter {
     const unsigned name##_size = (size);                                \
     const unsigned name##_stack_array_size = (name##_size <= (maxsize) ? name##_size : 0); \
     Tp name##_stack_array[name##_stack_array_size];                     \
-    ::base::internal::ArrayDeleter<Tp> name##_array_deleter;            \
+    ::bubblefs::base::internal::ArrayDeleter<Tp> name##_array_deleter;            \
     if (name##_stack_array_size) {                                      \
         name = name##_stack_array;                                      \
     } else {                                                            \
@@ -371,6 +383,7 @@ template <typename T> struct ArrayDeleter {
 #else
 // This implementation works for GCC as well, however it needs extra 16 bytes
 // for ArrayCtorDtor.
+namespace bubblefs {
 namespace base {
 namespace internal {
 template <typename T> struct ArrayCtorDtor {
@@ -386,20 +399,21 @@ private:
 };
 } // namespace internal
 } // namespace base
+} // namespace bubblefs
 
 # define DEFINE_SMALL_ARRAY(Tp, name, size, maxsize)                    \
     Tp* name = 0;                                                       \
     const unsigned name##_size = (size);                                \
     const unsigned name##_stack_array_size = (name##_size <= (maxsize) ? name##_size : 0); \
     char name##_stack_array[sizeof(Tp) * name##_stack_array_size];      \
-    ::base::internal::ArrayDeleter<char> name##_array_deleter;          \
+    ::bubblefs::base::internal::ArrayDeleter<char> name##_array_deleter;          \
     if (name##_stack_array_size) {                                      \
         name = (Tp*)name##_stack_array;                                 \
     } else {                                                            \
         name = (Tp*)new (::std::nothrow) char[sizeof(Tp) * name##_size];\
         name##_array_deleter.arr = (char*)name;                         \
     }                                                                   \
-    const ::base::internal::ArrayCtorDtor<Tp> name##_array_ctor_dtor(name, name##_size);
+    const ::bubblefs::base::internal::ArrayCtorDtor<Tp> name##_array_ctor_dtor(name, name##_size);
 #endif // !defined(__clang__)
 #endif  // __cplusplus
 
