@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef BUBBLEFS_UTILS_ARENA_H_
 #define BUBBLEFS_UTILS_ARENA_H_
 
-#include "platform/macros.h"
 #include <assert.h>
 #include <vector>
 #include "platform/logging.h"
+#include "platform/macros.h"
 #include "platform/types.h"
 #include "utils/allocator.h"
 

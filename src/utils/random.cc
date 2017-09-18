@@ -106,11 +106,11 @@ uint64_t RandGenerator(uint64_t range) {
 }
 
 Random* Random::GetTLSInstance() {
-  TF_STATIC_THREAD_LOCAL Random* tls_instance;
-  TF_STATIC_THREAD_LOCAL std::aligned_storage<sizeof(Random)>::type tls_instance_bytes;
+  static __thread Random* tls_instance;
+  static __thread std::aligned_storage<sizeof(Random)>::type tls_instance_bytes;
 
   auto rv = tls_instance;
-  if (TF_UNLIKELY(rv == nullptr)) {
+  if (UNLIKELY(rv == nullptr)) {
     size_t seed = std::hash<std::thread::id>()(std::this_thread::get_id());
     rv = new (&tls_instance_bytes) Random((uint32_t)seed);
     tls_instance = rv;

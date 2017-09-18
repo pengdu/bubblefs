@@ -26,7 +26,7 @@ limitations under the License. */
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace concurrent {
+namespace core {
   
 template <class T>
 class RingQueue {
@@ -429,7 +429,7 @@ private:
   size_t capacity_;
 };
 
-}  // namespace concurrent
+}  // namespace core
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BLOCKING_QUEUE_H_

@@ -210,7 +210,6 @@ string NumberToString(double num) {
     return string(buf);
 }
 
-
 string NumberToHumanString(int64_t num) {
   char buf[19];
   int64_t absnum = num < 0 ? -num : num;
@@ -1111,6 +1110,59 @@ static bool SplitPath(const string& path,
         *isdir = (path[path.size() - 1] == '/');
     }
     return true;
+}
+
+bool SplitStringIntoKeyValue(const std::string& line,
+                             char key_value_delimiter,
+                             std::string* key,
+                             std::string* value) {
+  key->clear();
+  value->clear();
+
+  // Find the delimiter.
+  size_t end_key_pos = line.find_first_of(key_value_delimiter);
+  if (end_key_pos == std::string::npos) {
+    DVLOG(1) << "cannot find delimiter in: " << line;
+    return false;    // no delimiter
+  }
+  key->assign(line, 0, end_key_pos);
+
+  // Find the value string.
+  std::string remains(line, end_key_pos, line.size() - end_key_pos);
+  size_t begin_value_pos = remains.find_first_not_of(key_value_delimiter);
+  if (begin_value_pos == std::string::npos) {
+    DVLOG(1) << "cannot parse value from line: " << line;
+    return false;   // no value
+  }
+  value->assign(remains, begin_value_pos, remains.size() - begin_value_pos);
+  return true;
+}
+
+bool SplitStringIntoKeyValuePairs(const std::string& line,
+                                  char key_value_delimiter,
+                                  char key_value_pair_delimiter,
+                                  StringPairs* key_value_pairs) {
+  key_value_pairs->clear();
+
+  std::vector<std::string> pairs;
+  SplitString(line, key_value_pair_delimiter, &pairs);
+
+  bool success = true;
+  for (size_t i = 0; i < pairs.size(); ++i) {
+    // Don't add empty pairs into the result.
+    if (pairs[i].empty())
+      continue;
+
+    std::string key;
+    std::string value;
+    if (!SplitStringIntoKeyValue(pairs[i], key_value_delimiter, &key, &value)) {
+      // Don't return here, to allow for pairs without associated
+      // value or key; just record that the split failed.
+      success = false;
+    }
+    key_value_pairs->push_back(make_pair(key, value));
+  }
+  return success;
 }
 
 bool SplitAndParseAsInts(StringPiece text, char delim,

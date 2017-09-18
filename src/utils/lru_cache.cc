@@ -529,4 +529,4 @@ std::shared_ptr<Cache> NewLRUCache(size_t capacity, int num_shard_bits,
 }
 
 }  // namespace core
-}  // namespace rocksdb
+}  // namespace bubblefs

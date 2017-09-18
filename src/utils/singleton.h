@@ -53,7 +53,6 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include "platform/mutexlock.h"
-#include "utils/once.h"
 
 namespace bubblefs { 
   

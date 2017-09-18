@@ -77,7 +77,7 @@ struct AlignedMemory {};
 // does not understand ALIGNAS(ALIGNOF(Type)) or ALIGNAS(template_param).
 // Greater than 4096 alignment is not supported by some compilers, so 4096 is
 // the maximum specified here.
-//BASE_DECL_ALIGNED_MEMORY(1024);
+// BASE_DECL_ALIGNED_MEMORY(1024);
 
 #undef BASE_DECL_ALIGNED_MEMORY
 

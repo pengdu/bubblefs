@@ -39,7 +39,7 @@ int64_t g_log_size = 0;
 int32_t g_log_count = 0;
 FILE* g_log_file = stdout;
 std::string g_log_file_name;
-FILE* g_warning_file = nullptr;
+FILE* g_warning_file = NULL;
 int64_t g_total_size_limit = 0;
 
 std::set<std::string> g_log_set;
@@ -48,7 +48,7 @@ int64_t current_total_size = 0;
 bool GetNewLog(bool append) {
     char buf[30];
     struct timeval tv;
-    gettimeofday(&tv, nullptr);
+    gettimeofday(&tv, NULL);
     const time_t seconds = tv.tv_sec;
     struct tm t;
     localtime_r(&seconds, &t);
@@ -70,7 +70,7 @@ bool GetNewLog(bool append) {
     }
     const char* mode = append ? "ab" : "wb";
     FILE* fp = fopen(full_path.c_str(), mode);
-    if (fp == nullptr) {
+    if (fp == NULL) {
         return false;
     }
     if (g_log_file != stdout) {
@@ -170,7 +170,7 @@ public:
     }
     void Flush() {
         MutexLock lock(&mu_);
-        buffer_queue_->push(std::make_pair(0, reinterpret_cast<std::string*>(nullptr)));
+        buffer_queue_->push(std::make_pair(0, reinterpret_cast<std::string*>(NULL)));
         jobs_.Signal();
         done_.Wait();
     }
@@ -190,7 +190,7 @@ AsyncLogger g_logger;
 bool SetWarningFile(const char* path, bool append) {
     const char* mode = append ? "ab" : "wb";
     FILE* fp = fopen(path, mode);
-    if (fp == nullptr) {
+    if (fp == NULL) {
         return false;
     }
     if (g_warning_file) {
@@ -209,13 +209,13 @@ bool RecoverHistory(const char* path) {
         dir = log_path.substr(0, idx + 1);
         log = log_path.substr(idx + 1);
     }
-    struct dirent *entry = nullptr;
+    struct dirent *entry = NULL;
     DIR *dir_ptr = opendir(dir.c_str());
-    if (dir_ptr == nullptr) {
+    if (dir_ptr == NULL) {
         return false;
     }
     std::vector<std::string> loglist;
-    while ((entry = readdir(dir_ptr)) != nullptr) {
+    while ((entry = readdir(dir_ptr)) != NULL) {
         if (std::string(entry->d_name).find(log) != std::string::npos) {
             std::string file_name = dir + std::string(entry->d_name);
             struct stat sta;

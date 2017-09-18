@@ -165,27 +165,6 @@ string FormatTime(int64 seconds, int32 nanos);
 // offset. For example, "2015-05-20T13:29:35.120-08:00".
 bool ParseTime(const string& value, int64* seconds, int32* nanos);
 
-class TimeUtil {
-public:
-    // 得到当前的毫秒
-    static int64_t GetCurrentMS();
-
-    // 得到当前的微妙
-    static int64_t GetCurrentUS();
-
-    // 得到字符串形式的时间 格式：2015-04-10 10:11:12
-    static std::string GetStringTime();
-
-    // 得到字符串形式的详细时间 格式: 2015-04-10 10:11:12.967151
-    static const char* GetStringTimeDetail();
-
-    // 将字符串格式(2015-04-10 10:11:12)的时间，转为time_t(时间戳)
-    static time_t GetTimeStamp(const std::string &time);
-
-    // 取得两个时间戳字符串t1-t2的时间差，精确到秒,时间格式为2015-04-10 10:11:12
-    static time_t GetTimeDiff(const std::string &t1, const std::string &t2);
-};
-
 enum Precision {
     kDay,
     kMin,
@@ -261,60 +240,6 @@ static inline void make_timeout(struct timespec* pts, long millisecond) {
     pts->tv_sec += pts->tv_nsec / (1000 * 1000 * 1000);
     pts->tv_nsec = pts->tv_nsec % (1000 * 1000 * 1000);
 }
-
-class AutoTimer {
-public:
-    AutoTimer(double timeout_ms = -1, const char* msg1 = nullptr, const char* msg2 = nullptr)
-      : timeout_(timeout_ms),
-        msg1_(msg1),
-        msg2_(msg2) {
-        start_ = get_micros();
-    }
-    int64_t TimeUsed() const {
-        return get_micros() - start_;
-    }
-    ~AutoTimer() {
-        if (timeout_ == -1) return;
-        long end = get_micros();
-        if (end - start_ > timeout_ * 1000) {
-            double t = (end - start_) / 1000.0;
-            if (!msg2_) {
-                fprintf(stderr, "[AutoTimer] %s use %.3f ms\n",
-                    msg1_, t);
-            } else {
-                fprintf(stderr, "[AutoTimer] %s %s use %.3f ms\n",
-                    msg1_, msg2_, t);
-            }
-        }
-    }
-private:
-    long start_;
-    double timeout_;
-    const char* msg1_;
-    const char* msg2_;
-};
-
-class TimeChecker {
-public:
-    TimeChecker() {
-        start_ = get_micros();
-    }
-    void Check(int64_t timeout, const std::string& msg) {
-        int64_t now = get_micros();
-        int64_t interval = now - start_;
-        if (timeout == -1 || interval > timeout) {
-            char buf[30];
-            now_time_str(buf, 30);
-            fprintf(stderr, "[TimeChecker] %s %s use %ld us\n", buf, msg.c_str(), interval);
-        }
-        start_ = get_micros();
-    }
-    void Reset() {
-        start_ = get_micros();
-    }
-private:
-    int64_t start_;
-};
 
 // ----------------------
 // timespec manipulations
@@ -551,6 +476,114 @@ inline int64_t gettimeofday_s() {
     return gettimeofday_us() / 1000000L;
 }
 
+// NOTE: Don't call fast_realtime*! they're still experimental.
+inline int64_t fast_realtime_ns() {
+    extern const uint64_t invariant_cpu_freq;
+    extern __thread int64_t tls_cpuwidetime_ns;
+    extern __thread int64_t tls_realtime_ns;
+    
+    if (invariant_cpu_freq) {
+        // 1 Intel x86_64 CPU (multiple cores) supporting constant_tsc and
+        // nonstop_tsc(check flags in /proc/cpuinfo)
+    
+        const uint64_t tsc = detail::clock_cycles();
+        const uint64_t sec = tsc / invariant_cpu_freq;
+        // TODO: should be OK until CPU's frequency exceeds 16GHz.
+        const int64_t diff = (tsc - sec * invariant_cpu_freq) * 1000000000L /
+            invariant_cpu_freq + sec * 1000000000L - tls_cpuwidetime_ns;
+        if (__builtin_expect(diff < 10000000, 1)) {
+            return diff + tls_realtime_ns;
+        }
+        timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        tls_cpuwidetime_ns += diff;
+        tls_realtime_ns = timespec_to_nanoseconds(ts);
+        return tls_realtime_ns;
+    }
+    timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return timespec_to_nanoseconds(ts);
+}
+
+inline int fast_realtime(timespec* ts) {
+    extern const uint64_t invariant_cpu_freq;
+    extern __thread int64_t tls_cpuwidetime_ns;
+    extern __thread int64_t tls_realtime_ns;
+    
+    if (invariant_cpu_freq) {    
+        const uint64_t tsc = detail::clock_cycles();
+        const uint64_t sec = tsc / invariant_cpu_freq;
+        // TODO: should be OK until CPU's frequency exceeds 16GHz.
+        const int64_t diff = (tsc - sec * invariant_cpu_freq) * 1000000000L /
+            invariant_cpu_freq + sec * 1000000000L - tls_cpuwidetime_ns;
+        if (__builtin_expect(diff < 10000000, 1)) {
+            const int64_t now = diff + tls_realtime_ns;
+            ts->tv_sec = now / 1000000000L;
+            ts->tv_nsec = now - ts->tv_sec * 1000000000L;
+            return 0;
+        }
+        const int rc = clock_gettime(CLOCK_REALTIME, ts);
+        tls_cpuwidetime_ns += diff;
+        tls_realtime_ns = timespec_to_nanoseconds(*ts);
+        return rc;
+    }
+    return clock_gettime(CLOCK_REALTIME, ts);
+}
+
+class AutoTimer {
+public:
+    AutoTimer(double timeout_ms = -1, const char* msg1 = nullptr, const char* msg2 = nullptr)
+      : timeout_(timeout_ms),
+        msg1_(msg1),
+        msg2_(msg2) {
+        start_ = get_micros();
+    }
+    int64_t TimeUsed() const {
+        return get_micros() - start_;
+    }
+    ~AutoTimer() {
+        if (timeout_ == -1) return;
+        long end = get_micros();
+        if (end - start_ > timeout_ * 1000) {
+            double t = (end - start_) / 1000.0;
+            if (!msg2_) {
+                fprintf(stderr, "[AutoTimer] %s use %.3f ms\n",
+                    msg1_, t);
+            } else {
+                fprintf(stderr, "[AutoTimer] %s %s use %.3f ms\n",
+                    msg1_, msg2_, t);
+            }
+        }
+    }
+private:
+    long start_;
+    double timeout_;
+    const char* msg1_;
+    const char* msg2_;
+};
+
+class TimeChecker {
+public:
+    TimeChecker() {
+        start_ = get_micros();
+    }
+    void Check(int64_t timeout, const std::string& msg) {
+        int64_t now = get_micros();
+        int64_t interval = now - start_;
+        if (timeout == -1 || interval > timeout) {
+            char buf[30];
+            now_time_str(buf, 30);
+            fprintf(stderr, "[TimeChecker] %s %s use %ld us\n", buf, msg.c_str(), interval);
+        }
+        start_ = get_micros();
+    }
+    void Reset() {
+        start_ = get_micros();
+    }
+private:
+    int64_t start_;
+};
+
 // ----------------------------------------
 // Control frequency of operations.
 // ----------------------------------------
@@ -623,60 +656,6 @@ private:
     int64_t _stop;
     int64_t _start;
 };
-
-// NOTE: Don't call fast_realtime*! they're still experimental.
-inline int64_t fast_realtime_ns() {
-    extern const uint64_t invariant_cpu_freq;
-    extern __thread int64_t tls_cpuwidetime_ns;
-    extern __thread int64_t tls_realtime_ns;
-    
-    if (invariant_cpu_freq) {
-        // 1 Intel x86_64 CPU (multiple cores) supporting constant_tsc and
-        // nonstop_tsc(check flags in /proc/cpuinfo)
-    
-        const uint64_t tsc = detail::clock_cycles();
-        const uint64_t sec = tsc / invariant_cpu_freq;
-        // TODO: should be OK until CPU's frequency exceeds 16GHz.
-        const int64_t diff = (tsc - sec * invariant_cpu_freq) * 1000000000L /
-            invariant_cpu_freq + sec * 1000000000L - tls_cpuwidetime_ns;
-        if (__builtin_expect(diff < 10000000, 1)) {
-            return diff + tls_realtime_ns;
-        }
-        timespec ts;
-        clock_gettime(CLOCK_REALTIME, &ts);
-        tls_cpuwidetime_ns += diff;
-        tls_realtime_ns = timespec_to_nanoseconds(ts);
-        return tls_realtime_ns;
-    }
-    timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    return timespec_to_nanoseconds(ts);
-}
-
-inline int fast_realtime(timespec* ts) {
-    extern const uint64_t invariant_cpu_freq;
-    extern __thread int64_t tls_cpuwidetime_ns;
-    extern __thread int64_t tls_realtime_ns;
-    
-    if (invariant_cpu_freq) {    
-        const uint64_t tsc = detail::clock_cycles();
-        const uint64_t sec = tsc / invariant_cpu_freq;
-        // TODO: should be OK until CPU's frequency exceeds 16GHz.
-        const int64_t diff = (tsc - sec * invariant_cpu_freq) * 1000000000L /
-            invariant_cpu_freq + sec * 1000000000L - tls_cpuwidetime_ns;
-        if (__builtin_expect(diff < 10000000, 1)) {
-            const int64_t now = diff + tls_realtime_ns;
-            ts->tv_sec = now / 1000000000L;
-            ts->tv_nsec = now - ts->tv_sec * 1000000000L;
-            return 0;
-        }
-        const int rc = clock_gettime(CLOCK_REALTIME, ts);
-        tls_cpuwidetime_ns += diff;
-        tls_realtime_ns = timespec_to_nanoseconds(*ts);
-        return rc;
-    }
-    return clock_gettime(CLOCK_REALTIME, ts);
-}
 
 } // namespace timeutil
 } // namespace bubblefs

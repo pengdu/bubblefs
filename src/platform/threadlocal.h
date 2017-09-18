@@ -237,64 +237,6 @@ private:
   std::map<pid_t, T*> threadMap_;
 };
 
-/**
- * @brief Thread-safe C-style random API.
- */
-class ThreadLocalRand {
-public:
-  /**
-   * initSeed just like srand,
-   * called by main thread,
-   * init defaultSeed for all thread
-   */
-  static void initSeed(unsigned int seed) { defaultSeed_ = seed; }
-
-  /**
-   * initThreadSeed called by each thread,
-   * init seed to defaultSeed + *tid*
-   * It should be called after main initSeed and before using rand()
-   * It's optional, getSeed will init seed if it's not initialized.
-   */
-  static void initThreadSeed(int tid) {
-    seed_.set(new unsigned int(defaultSeed_ + tid));
-  }
-
-  /// thread get seed, then can call rand_r many times.
-  /// Caller thread can modify the seed value if it's necessary.
-  ///
-  /// if flag thread_local_rand_use_global_seed set,
-  /// the seed will be set to defaultSeed in thread's first call.
-  static unsigned int* getSeed();
-
-  /// like ::rand
-  static int rand() { return rand_r(getSeed()); }
-
-  /**
-   * Get defaultSeed for all thread.
-   */
-  static int getDefaultSeed() { return defaultSeed_; }
-
-protected:
-  static unsigned int defaultSeed_;
-  static ThreadLocal<unsigned int> seed_;
-};
-
-/**
- * @brief Thread-safe C++ style random engine.
- */
-class ThreadLocalRandomEngine {
-public:
-  /**
-   * get random_engine for each thread.
-   *
-   * Engine's seed will be initialized by ThreadLocalRand.
-   */
-  static std::default_random_engine& get();
-
-protected:
-  static ThreadLocal<std::default_random_engine> engine_;
-};
-
 }  // namespace internal
 
 namespace base {

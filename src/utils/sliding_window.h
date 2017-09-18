@@ -4,7 +4,7 @@
 //
 // Author: yanshiguang02@baidu.com
 
-// baidu/common/include/sliding_window.h in c++11
+// baidu/common/include/sliding_window.h
 
 #ifndef  BUBBLEFS_UTILS_SLIDING_WINDOW_H_
 #define  BUBBLEFS_UTILS_SLIDING_WINDOW_H_
@@ -18,7 +18,6 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-  
 namespace bdcommon {
 
 template <typename Item>
@@ -26,7 +25,7 @@ class SlidingWindow {
 public:
     typedef std::function<void (int32_t, Item)> SlidingCallback;
     SlidingWindow(int32_t size, SlidingCallback callback)
-      : bitmap_(nullptr), items_(nullptr), item_count_(0),
+      : bitmap_(NULL), items_(NULL), item_count_(0),
         callback_(callback), size_(size),
         base_offset_(0), max_offset_(-1), ready_(0), notifying_(false) {
         bitmap_ = new char[size];
@@ -116,11 +115,10 @@ private:
     int32_t max_offset_;
     int32_t ready_;
     bool notifying_;
-    mutable port::Mutex mu_;
+    mutable Mutex mu_;
 };
 
 } // namespace bdcommon
-
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SLIDING_WINDOW_H_

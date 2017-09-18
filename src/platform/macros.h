@@ -96,8 +96,8 @@ namespace bubblefs {
 namespace base {
 template <typename T, size_t N>
 char (&ArraySizeHelper(T (&array)[N]))[N];
-} // ns base
-} // ns bubblefs
+} // namespace base
+} // namespace bubblefs
 
 // That gcc wants both of these prototypes seems mysterious. VC, for
 // its part, can't decide which to use (another mystery). Matching of
@@ -107,8 +107,8 @@ namespace bubblefs {
 namespace base {
 template <typename T, size_t N>
 char (&ArraySizeHelper(const T (&array)[N]))[N];
-} // ns base
-} // ns bubblefs
+} // namespace base
+} // namespace bubblefs
 #endif
 
 #define arraysize(array) (sizeof(::bubblefs::base::ArraySizeHelper(array)))

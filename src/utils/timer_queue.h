@@ -52,6 +52,8 @@ namespace core {
   
 class TimerQueue {
  public:
+  using Clock = std::chrono::steady_clock;
+  
   TimerQueue() : m_th(&TimerQueue::run, this) {}
 
   ~TimerQueue() {
@@ -137,7 +139,6 @@ class TimerQueue {
   }
 
  private:
-  using Clock = std::chrono::steady_clock;
   TimerQueue(const TimerQueue&) = delete;
   TimerQueue& operator=(const TimerQueue&) = delete;
 

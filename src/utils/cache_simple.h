@@ -104,8 +104,7 @@ private:
     Rep* rep_;
 
     // No copying allowed
-    Cache(const Cache&);
-    void operator=(const Cache&);
+    DISALLOW_COPY_AND_ASSIGN(Cache);
 };
 
 } // namespace bdcommon  

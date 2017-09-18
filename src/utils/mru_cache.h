@@ -201,7 +201,7 @@ class MRUCacheBase {
 
   size_type max_size_;
 
-  TF_DISALLOW_COPY_AND_ASSIGN(MRUCacheBase);
+  DISALLOW_COPY_AND_ASSIGN(MRUCacheBase);
 };
 
 // MRUCache --------------------------------------------------------------------
@@ -220,7 +220,7 @@ class MRUCache : public MRUCacheBase<KeyType, PayloadType, std::less<KeyType>> {
   virtual ~MRUCache() {}
 
  private:
-  TF_DISALLOW_COPY_AND_ASSIGN(MRUCache);
+  DISALLOW_COPY_AND_ASSIGN(MRUCache);
 };
 
 // HashingMRUCache ------------------------------------------------------------
@@ -247,7 +247,7 @@ class HashingMRUCache
   virtual ~HashingMRUCache() {}
 
  private:
-  TF_DISALLOW_COPY_AND_ASSIGN(HashingMRUCache);
+  DISALLOW_COPY_AND_ASSIGN(HashingMRUCache);
 };
 
 }  // namespace core

@@ -41,14 +41,11 @@ limitations under the License.
 #include "platform/cpu_info.h"
 
 namespace bubblefs {
+  
 namespace internal {
-
 int PickUnusedPortOrDie();
-
 }  // namespace internal
-}  // namespace bubblefs
 
-namespace bubblefs {
 namespace port {
 
 static const int kMaxInt32 = std::numeric_limits<int32_t>::max();
@@ -92,7 +89,7 @@ class Mutex {
 #ifndef NDEBUG
   bool locked_;
 #endif
-  TF_DISALLOW_COPY_AND_ASSIGN(Mutex);
+  DISALLOW_COPY_AND_ASSIGN(Mutex);
 };
 
 class RWMutex {
@@ -108,7 +105,7 @@ class RWMutex {
 
  private:
   pthread_rwlock_t mu_; // the underlying platform mutex
-  TF_DISALLOW_COPY_AND_ASSIGN(RWMutex);
+  DISALLOW_COPY_AND_ASSIGN(RWMutex);
 };
 
 class CondVar {

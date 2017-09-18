@@ -28,7 +28,7 @@ limitations under the License.
 
 namespace bubblefs {
 
-typedef mblobstore::gtl::InlinedVector<int, 8> IntVec;
+typedef bubblefs::gtl::InlinedVector<int, 8> IntVec;
 
 // A type that counts number of live occurrences of the type
 static int64 instances = 0;
@@ -49,7 +49,7 @@ class Instance {
   }
 };
 
-typedef mblobstore::gtl::InlinedVector<Instance, 8> InstanceVec;
+typedef bubblefs::gtl::InlinedVector<Instance, 8> InstanceVec;
 
 // A simple reference counted class to make sure that the proper elements are
 // destroyed in the erase(begin, end) test.
@@ -102,7 +102,7 @@ class RefCounted {
   int* count_;
 };
 
-typedef mblobstore::gtl::InlinedVector<RefCounted, 8> RefCountedVec;
+typedef bubblefs::gtl::InlinedVector<RefCounted, 8> RefCountedVec;
 
 // A class with a vtable pointer
 class Dynamic {
@@ -114,7 +114,7 @@ class Dynamic {
   }
 };
 
-typedef mblobstore::gtl::InlinedVector<Dynamic, 8> DynamicVec;
+typedef bubblefs::gtl::InlinedVector<Dynamic, 8> DynamicVec;
 
 // Append 0..len-1 to *v
 static void Fill(IntVec* v, int len, int offset = 0) {
@@ -252,15 +252,15 @@ struct MoveOnly {
   MoveOnly& operator=(MoveOnly&&) = default;
 };
 TEST(InlinedVectorTest, NoDefaultCtor) {
-  mblobstore::gtl::InlinedVector<NoDefaultCtor, 1> v(10, NoDefaultCtor(2));
+  bubblefs::gtl::InlinedVector<NoDefaultCtor, 1> v(10, NoDefaultCtor(2));
   (void)v;
 }
 TEST(InlinedVectorTest, NoCopy) {
-  mblobstore::gtl::InlinedVector<NoCopy, 1> v(10);
+  bubblefs::gtl::InlinedVector<NoCopy, 1> v(10);
   (void)v;
 }
 TEST(InlinedVectorTest, NoAssign) {
-  mblobstore::gtl::InlinedVector<NoAssign, 1> v(10);
+  bubblefs::gtl::InlinedVector<NoAssign, 1> v(10);
   (void)v;
 }
 TEST(InlinedVectorTest, MoveOnly) {
@@ -383,7 +383,7 @@ TEST(IntVec, CopyConstructorAndAssignment) {
 
 TEST(OverheadTest, Storage) {
   // Check for size overhead.
-  using mblobstore::gtl::InlinedVector;
+  using bubblefs::gtl::InlinedVector;
   EXPECT_EQ(2 * sizeof(int*), sizeof(InlinedVector<int*, 1>));
   EXPECT_EQ(4 * sizeof(int*), sizeof(InlinedVector<int*, 2>));
   EXPECT_EQ(4 * sizeof(int*), sizeof(InlinedVector<int*, 3>));
@@ -442,7 +442,7 @@ static std::vector<typename T::value_type> Vec(const T& src) {
 
 TEST(IntVec, SelfRefPushBack) {
   std::vector<string> std_v;
-  mblobstore::gtl::InlinedVector<string, 4> v;
+  bubblefs::gtl::InlinedVector<string, 4> v;
   const string s = "A quite long string to ensure heap.";
   std_v.push_back(s);
   v.push_back(s);
@@ -646,8 +646,8 @@ TEST(InstanceVec, CountConstructorsDestructorsOnAssignment) {
 TEST(RangedConstructor, SimpleType) {
   std::vector<int> source_v = {4, 5, 6, 7};
   // First try to fit in inline backing
-  mblobstore::gtl::InlinedVector<int, 4> v(source_v.begin(), source_v.end());
-  mblobstore::gtl::InlinedVector<int, 4> empty4;
+  bubblefs::gtl::InlinedVector<int, 4> v(source_v.begin(), source_v.end());
+  bubblefs::gtl::InlinedVector<int, 4> empty4;
   EXPECT_EQ(4, v.size());
   EXPECT_EQ(empty4.capacity(), v.capacity());  // Must still be inline
   EXPECT_EQ(4, v[0]);
@@ -656,9 +656,9 @@ TEST(RangedConstructor, SimpleType) {
   EXPECT_EQ(7, v[3]);
 
   // Now, force a re-allocate
-  mblobstore::gtl::InlinedVector<int, 2> realloc_v(source_v.begin(),
+  bubblefs::gtl::InlinedVector<int, 2> realloc_v(source_v.begin(),
                                                    source_v.end());
-  mblobstore::gtl::InlinedVector<int, 2> empty2;
+  bubblefs::gtl::InlinedVector<int, 2> empty2;
   EXPECT_EQ(4, realloc_v.size());
   EXPECT_LT(empty2.capacity(), realloc_v.capacity());
   EXPECT_EQ(4, realloc_v[0]);
@@ -673,9 +673,9 @@ TEST(RangedConstructor, ComplexType) {
   std::list<Instance> source_v = {Instance(0)};
 
   // First try to fit in inline backing
-  mblobstore::gtl::InlinedVector<Instance, 1> v(source_v.begin(),
+  bubblefs::gtl::InlinedVector<Instance, 1> v(source_v.begin(),
                                                 source_v.end());
-  mblobstore::gtl::InlinedVector<Instance, 1> empty1;
+  bubblefs::gtl::InlinedVector<Instance, 1> empty1;
   EXPECT_EQ(1, v.size());
   EXPECT_EQ(empty1.capacity(), v.capacity());  // Must still be inline
   EXPECT_EQ(0, v[0].value_);
@@ -683,7 +683,7 @@ TEST(RangedConstructor, ComplexType) {
   std::list<Instance> source_v2 = {Instance(0), Instance(1), Instance(2),
                                    Instance(3)};
   // Now, force a re-allocate
-  mblobstore::gtl::InlinedVector<Instance, 1> realloc_v(source_v2.begin(),
+  bubblefs::gtl::InlinedVector<Instance, 1> realloc_v(source_v2.begin(),
                                                         source_v2.end());
   EXPECT_EQ(4, realloc_v.size());
   EXPECT_LT(empty1.capacity(), realloc_v.capacity());
@@ -698,13 +698,13 @@ TEST(RangedConstructor, ElementsAreConstructed) {
 
   // Force expansion and re-allocation of v.  Ensures that when the vector is
   // expanded that new elements are constructed.
-  mblobstore::gtl::InlinedVector<string, 1> v(source_v.begin(), source_v.end());
+  bubblefs::gtl::InlinedVector<string, 1> v(source_v.begin(), source_v.end());
   EXPECT_EQ("cat", v[0]);
   EXPECT_EQ("dog", v[1]);
 }
 
 TEST(InitializerListConstructor, SimpleTypeWithInlineBacking) {
-  auto vec = mblobstore::gtl::InlinedVector<int, 3>{4, 5, 6};
+  auto vec = bubblefs::gtl::InlinedVector<int, 3>{4, 5, 6};
   EXPECT_EQ(3, vec.size());
   EXPECT_EQ(3, vec.capacity());
   EXPECT_EQ(4, vec[0]);
@@ -713,7 +713,7 @@ TEST(InitializerListConstructor, SimpleTypeWithInlineBacking) {
 }
 
 TEST(InitializerListConstructor, SimpleTypeWithReallocationRequired) {
-  auto vec = mblobstore::gtl::InlinedVector<int, 2>{4, 5, 6};
+  auto vec = bubblefs::gtl::InlinedVector<int, 2>{4, 5, 6};
   EXPECT_EQ(3, vec.size());
   EXPECT_LE(3, vec.capacity());
   EXPECT_EQ(4, vec[0]);
@@ -723,16 +723,16 @@ TEST(InitializerListConstructor, SimpleTypeWithReallocationRequired) {
 
 TEST(InitializerListConstructor, DisparateTypesInList) {
   EXPECT_EQ((std::vector<int>{-7, 8}),
-            Vec(mblobstore::gtl::InlinedVector<int, 2>{-7, 8ULL}));
+            Vec(bubblefs::gtl::InlinedVector<int, 2>{-7, 8ULL}));
 
   EXPECT_EQ(
       (std::vector<string>{"foo", "bar"}),
-      Vec(mblobstore::gtl::InlinedVector<string, 2>{"foo", string("bar")}));
+      Vec(bubblefs::gtl::InlinedVector<string, 2>{"foo", string("bar")}));
 }
 
 TEST(InitializerListConstructor, ComplexTypeWithInlineBacking) {
-  mblobstore::gtl::InlinedVector<Instance, 1> empty;
-  auto vec = mblobstore::gtl::InlinedVector<Instance, 1>{Instance(0)};
+  bubblefs::gtl::InlinedVector<Instance, 1> empty;
+  auto vec = bubblefs::gtl::InlinedVector<Instance, 1>{Instance(0)};
   EXPECT_EQ(1, vec.size());
   EXPECT_EQ(empty.capacity(), vec.capacity());
   EXPECT_EQ(0, vec[0].value_);
@@ -740,7 +740,7 @@ TEST(InitializerListConstructor, ComplexTypeWithInlineBacking) {
 
 TEST(InitializerListConstructor, ComplexTypeWithReallocationRequired) {
   auto vec =
-      mblobstore::gtl::InlinedVector<Instance, 1>{Instance(0), Instance(1)};
+      bubblefs::gtl::InlinedVector<Instance, 1>{Instance(0), Instance(1)};
   EXPECT_EQ(2, vec.size());
   EXPECT_LE(2, vec.capacity());
   EXPECT_EQ(0, vec[0].value_);
@@ -834,7 +834,7 @@ struct Buffer {  // some arbitrary structure for benchmarking.
 }  // anonymous namespace
 
 static void BM_InlinedVectorTenAssignments(int iters, int len) {
-  typedef mblobstore::gtl::InlinedVector<Buffer, 2> BufferVec;
+  typedef bubblefs::gtl::InlinedVector<Buffer, 2> BufferVec;
 
   BufferVec src;
   src.resize(len);
@@ -855,7 +855,7 @@ BENCHMARK(BM_InlinedVectorTenAssignments)
 
 static void BM_CreateFromInitializerList(int iters) {
   for (; iters > 0; iters--) {
-    mblobstore::gtl::InlinedVector<int, 4> x{1, 2, 3};
+    bubblefs::gtl::InlinedVector<int, 4> x{1, 2, 3};
     (void)x[0];
   }
 }
@@ -885,7 +885,7 @@ struct LargeSwappable {
 }  // namespace
 
 static void BM_LargeSwappableElements(int iters, int len) {
-  typedef mblobstore::gtl::InlinedVector<LargeSwappable, 32> Vec;
+  typedef bubblefs::gtl::InlinedVector<LargeSwappable, 32> Vec;
   Vec a(len);
   Vec b;
   while (--iters >= 0) {

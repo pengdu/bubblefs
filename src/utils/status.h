@@ -85,6 +85,13 @@ class Status {
   static Status NotSupported(error::SubCode msg = error::NONE) {
     return Status(error::NOT_SUPPORTED, msg);
   }
+  
+  static Status Incomplete(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::INCOMPLETE, msg, msg2);
+  }
+  static Status Incomplete(SubCode msg = error::NONE) {
+    return Status(error::INCOMPLETE, msg);
+  }
 
   /// Returns true iff the status indicates success.
   bool ok() const { return (state_ == nullptr); }

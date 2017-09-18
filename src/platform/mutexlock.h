@@ -13,7 +13,7 @@
 #define BUBBLEFS_PLATFORM_MUTEXLOCK_H_
 
 #include <assert.h>
-#include <semaphore.h>
+#include <pthread.h>
 #include <stddef.h>
 #include <atomic>
 #include <condition_variable>
@@ -194,52 +194,6 @@ class SpinMutex {
 };
 
 /**
- * A simple wapper of semaphore which can only be shared in the same process.
- */
-class Semaphore {
-public:
-  /**
-   * @brief Construct Function.
-   * @param[in] initValue the initial value of the
-   * semaphore, default 0.
-   */
-  explicit Semaphore(int initValue = 0) {
-    sem_init(&sem, 0, initValue);
-  }
-
-  ~Semaphore() {
-    sem_destroy(&sem);
-  }
-
-  /**
-   * @brief The same as wait(), except if the decrement can not
-   * be performed until ts return false install of blocking.
-   * @param[in] ts an absolute timeout in seconds and nanoseconds
-   * since the Epoch 1970-01-01 00:00:00 +0000(UTC).
-   * @return ture if the decrement proceeds before ts,
-   * else return false.
-   */
-  bool TimedWait(struct timespec* ts) {
-    return (0 == sem_timedwait(&sem, ts));
-  }
-
-  /**
-   * @brief decrement the semaphore. If the semaphore's value is 0, then call
-   * blocks.
-   */
-  void Wait() { sem_wait(&sem); }
-
-  /**
-   * @brief increment the semaphore. If the semaphore's value
-   * greater than 0, wake up a thread blocked in wait().
-   */
-  void Post() { sem_post(&sem); }
-
-private:
-  sem_t sem;
-};
-
-/**
  * A simple wrapper of thread barrier.
  * The ThreadBarrier disable copy.
  */
@@ -256,57 +210,6 @@ public:
   inline void Wait() { pthread_barrier_wait(&barrier_); }
   
   DISALLOW_COPY_AND_ASSIGN(ThreadBarrier);
-};
-
-/**
- * A wrapper for condition variable with mutex.
- */
-class LockedCondition : public std::condition_variable {
-public:
-  /**
-   * @brief execute op and notify one thread which was blocked.
-   * @param[in] op a thread can do something in op before notify.
-   */
-  template <class Op>
-  void NotifyOne(Op op) {
-    std::lock_guard<std::mutex> guard(mutex_);
-    op();
-    std::condition_variable::notify_one();
-  }
-
-  /**
-   * @brief execute op and notify all the threads which were blocked.
-   * @param[in] op a thread can do something in op before notify.
-   */
-  template <class Op>
-  void NotifyAll(Op op) {
-    std::lock_guard<std::mutex> guard(mutex_);
-    op();
-    std::condition_variable::notify_all();
-  }
-
-  /**
-   * @brief wait until pred return ture.
-   * @tparam Predicate c++ concepts, describes a function object
-   * that takes a single iterator argument
-   * that is dereferenced and used to
-   * return a value testable as a bool.
-   * @note pred shall not apply any non-constant function
-   * through the dereferenced iterator.
-   */
-  template <class Predicate>
-  void Wait(Predicate pred) {
-    std::unique_lock<std::mutex> lock(mutex_);
-    std::condition_variable::wait(lock, pred);
-  }
-
-  /**
-   * @brief get mutex.
-   */
-  std::mutex* mutex() { return &mutex_; }
-
-protected:
-  std::mutex mutex_;
 };
 
 }  // namespace bubblefs

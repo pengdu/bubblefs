@@ -52,44 +52,6 @@ DEFINE_bool(thread_local_rand_use_global_seed,
             "Whether to use global seed in thread local rand.");
 
 namespace bubblefs {
-  
-namespace internal {
-  
-unsigned int ThreadLocalRand::defaultSeed_ = 1;
-ThreadLocal<unsigned int> ThreadLocalRand::seed_;
-
-unsigned int* ThreadLocalRand::getSeed() {
-  unsigned int* p = seed_.get(false /*createLocal*/);
-  if (!p) {  // init seed
-    if (FLAGS_thread_local_rand_use_global_seed) {
-      p = new unsigned int(defaultSeed_);
-    } else if (getpid() == gettid()) {  // main thread
-      // deterministic, but differs from global srand()
-      p = new unsigned int(defaultSeed_ - 1);
-    } else {
-      p = new unsigned int(defaultSeed_ + gettid());
-      VLOG(3) << "thread use undeterministic rand seed:" << *p;
-    }
-    seed_.set(p);
-  }
-  return p;
-}
-
-ThreadLocal<std::default_random_engine> ThreadLocalRandomEngine::engine_;
-std::default_random_engine& ThreadLocalRandomEngine::get() {
-  auto engine = engine_.get(false);
-  if (!engine) {
-    engine = new std::default_random_engine;
-    int defaultSeed = ThreadLocalRand::getDefaultSeed();
-    engine->seed(FLAGS_thread_local_rand_use_global_seed
-                     ? defaultSeed
-                     : defaultSeed + getTID());
-    engine_.set(engine);
-  }
-  return *engine;
-}
-
-}  // namespace internal
 
 namespace base {
   

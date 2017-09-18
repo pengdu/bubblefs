@@ -44,8 +44,8 @@
 
 // protobuf/src/google/protobuf/stubs/fastmem.h
 
-#ifndef BUBBLEFS_PLATFORM_FASTMEM_H_
-#define BUBBLEFS_PLATFORM_FASTMEM_H_
+#ifndef BUBBLEFS_UTILS_FASTMEM_H_
+#define BUBBLEFS_UTILS_FASTMEM_H_
 
 #include <stddef.h>
 #include <stdio.h>
@@ -53,7 +53,7 @@
 #include <utils/coding.h>
 
 namespace bubblefs {
-namespace internal {
+namespace strings {
 
 // Return true if the n bytes at a equal the n bytes at b.
 // The regions are allowed to overlap.
@@ -146,7 +146,7 @@ inline void memcpy_inlined(char *dst, const char *src, size_t size) {
   }
 }
 
-}  // namespace internal
+}  // namespace strings
 }  // namespace bubblefs
 
-#endif  // BUBBLEFS_PLATFORM_FASTMEM_H_
+#endif  // BUBBLEFS_UTILS_FASTMEM_H_

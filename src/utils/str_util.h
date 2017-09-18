@@ -437,6 +437,16 @@ static bool SplitPath(const string& path,
                       std::vector<string>* element,
                       bool* isdir = nullptr);
 
+// Splits |line| into key value pairs according to the given delimiters and
+// removes whitespace leading each key and trailing each value. Returns true
+// only if each pair has a non-empty key and value. |key_value_pairs| will
+// include ("","") pairs for entries without |key_value_delimiter|.
+typedef std::vector<std::pair<std::string, std::string> > StringPairs;
+BASE_EXPORT bool SplitStringIntoKeyValuePairs(const std::string& line,
+                                              char key_value_delimiter,
+                                              char key_value_pair_delimiter,
+                                              StringPairs* key_value_pairs);
+
 // Split strings using any of the supplied delimiters. For example:
 // Split("a,b.c,d", ".,") would return {"a", "b", "c", "d"}.
 std::vector<string> Split(StringPiece text, StringPiece delims);

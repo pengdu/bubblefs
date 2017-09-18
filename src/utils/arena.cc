@@ -31,18 +31,11 @@ limitations under the License.
 
 namespace bubblefs {
 namespace core {
-
-// ----------------------------------------------------------------------
-// Arena::Arena()
-// Arena::~Arena()
-//    Destroying the arena automatically calls Reset()
-// ----------------------------------------------------------------------
   
 // MSVC complains that it is already defined since it is static in the header.
 #ifndef _MSC_VER
 const size_t Arena::kInlineSize;
 #endif
-
 const size_t Arena::kMinBlockSize = 4096;
 const size_t Arena::kMaxBlockSize = 2u << 30;
 static const int kAlignUnit = sizeof(void*);
@@ -59,6 +52,12 @@ size_t OptimizeBlockSize(size_t block_size) {
 
   return block_size;
 }
+
+// ----------------------------------------------------------------------
+// Arena::Arena()
+// Arena::~Arena()
+//    Destroying the arena automatically calls Reset()
+// ----------------------------------------------------------------------
 
 Arena::Arena(const size_t block_size)
     : remaining_(0),

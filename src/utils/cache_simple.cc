@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mutex>
+#include "platform/mutexlock.h"
 #include "utils/hash.h"
 
 namespace bubblefs {
@@ -58,7 +59,7 @@ struct LRUHandle {
 // 4.4.3's builtin hashtable.
 class HandleTable {
 public:
-    HandleTable() : length_(0), elems_(0), list_(nullptr) { Resize(); }
+    HandleTable() : length_(0), elems_(0), list_(NULL) { Resize(); }
     ~HandleTable() { delete[] list_; }
 
     LRUHandle* Lookup(const StringPiece& key, uint32_t hash) {
@@ -68,9 +69,9 @@ public:
     LRUHandle* Insert(LRUHandle* h) {
         LRUHandle** ptr = FindPointer(h->key(), h->hash);
         LRUHandle* old = *ptr;
-        h->next_hash = (old == nullptr ? nullptr : old->next_hash);
+        h->next_hash = (old == NULL ? NULL : old->next_hash);
         *ptr = h;
-        if (old == nullptr) {
+        if (old == NULL) {
             ++elems_;
             if (elems_ > length_) {
                 // Since each cache entry is fairly large, we aim for a small
@@ -84,7 +85,7 @@ public:
     LRUHandle* Remove(const StringPiece& key, uint32_t hash) {
         LRUHandle** ptr = FindPointer(key, hash);
         LRUHandle* result = *ptr;
-        if (result != nullptr) {
+        if (result != NULL) {
             *ptr = result->next_hash;
             --elems_;
         }
@@ -103,7 +104,7 @@ private:
     // pointer to the trailing slot in the corresponding linked list.
     LRUHandle** FindPointer(const StringPiece& key, uint32_t hash) {
         LRUHandle** ptr = &list_[hash & (length_ - 1)];
-        while (*ptr != nullptr &&
+        while (*ptr != NULL &&
                 ((*ptr)->hash != hash || key != (*ptr)->key())) {
             ptr = &(*ptr)->next_hash;
         }
@@ -120,7 +121,7 @@ private:
         uint32_t count = 0;
         for (uint32_t i = 0; i < length_; i++) {
             LRUHandle* h = list_[i];
-            while (h != nullptr) {
+            while (h != NULL) {
                 LRUHandle* next = h->next_hash;
                 uint32_t hash = h->hash;
                 LRUHandle** ptr = &new_list[hash & (new_length - 1)];
@@ -163,7 +164,7 @@ private:
     size_t capacity_;
 
     // mutex_ protects the following state.
-    std::mutex mutex_;
+    port::Mutex mutex_;
     size_t usage_;
 
     // Dummy head of LRU list.
@@ -213,7 +214,7 @@ void LRUCache::LRU_Append(LRUHandle* e) {
 }
 
 Cache::Handle* LRUCache::Lookup(const StringPiece& key, uint32_t hash) {
-    std::lock_guard<std::mutex> l(&mutex_);
+    MutexLock l(&mutex_);
     LRUHandle* e = table_.Lookup(key, hash);
     if (e != NULL) {
         e->refs++;
@@ -224,14 +225,14 @@ Cache::Handle* LRUCache::Lookup(const StringPiece& key, uint32_t hash) {
 }
 
 void LRUCache::Release(Cache::Handle* handle) {
-    std::lock_guard<std::mutex> l(&mutex_);
+    MutexLock l(&mutex_);
     Unref(reinterpret_cast<LRUHandle*>(handle));
 }
 
 Cache::Handle* LRUCache::Insert(
         const StringPiece& key, uint32_t hash, void* value, size_t charge,
         void (*deleter)(const StringPiece& key, void* value)) {
-    std::lock_guard<std::mutex> l(&mutex_);
+    MutexLock l(&mutex_);
 
     LRUHandle* e = reinterpret_cast<LRUHandle*>(
             malloc(sizeof(LRUHandle)-1 + key.size()));
@@ -262,7 +263,7 @@ Cache::Handle* LRUCache::Insert(
 }
 
 void LRUCache::Erase(const StringPiece& key, uint32_t hash) {
-    std::lock_guard<std::mutex> l(&mutex_);
+    MutexLock l(&mutex_);
     LRUHandle* e = table_.Remove(key, hash);
     if (e != NULL) {
         LRU_Remove(e);
@@ -276,7 +277,7 @@ static const int kNumShards = 1 << kNumShardBits;
 class ShardedLRUCache : public Cache {
 private:
     LRUCache shard_[kNumShards];
-    std::mutex id_mutex_;
+    port::Mutex id_mutex_;
     uint64_t last_id_;
 
     static inline uint32_t HashSlice(const StringPiece& s) {
@@ -317,7 +318,7 @@ public:
         return reinterpret_cast<LRUHandle*>(handle)->value;
     }
     virtual uint64_t NewId() {
-        std::lock_guard<std::mutex> l(&id_mutex_);
+        MutexLock l(&id_mutex_);
         return ++(last_id_);
     }
 };
@@ -326,7 +327,7 @@ public:
 
 Cache* NewLRUCache(size_t capacity) {
     return new ShardedLRUCache(capacity);
-}  
+}
   
 } // namespace bdcommon
 } // namespace bubblefs
