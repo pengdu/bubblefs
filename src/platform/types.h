@@ -21,12 +21,11 @@ limitations under the License.
 #include <stdint.h>  // For intptr_t.
 #include <limits>
 #include <string>
-#include "platform/platform.h"
+#include "platform/macros.h"
 
 // Include appropriate platform-dependent implementations
 #if defined(PLATFORM_POSIX) || defined(PLATFORM_POSIX_ANDROID) || \
     defined(PLATFORM_GOOGLE_ANDROID) || defined(PLATFORM_WINDOWS)
-
 namespace bubblefs {
 /*
 typedef signed char int8;

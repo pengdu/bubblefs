@@ -27,6 +27,7 @@ limitations under the License.
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include <sys/utsname.h>
 #include <assert.h>
 #include <errno.h>
 #include <malloc.h>
@@ -344,21 +345,6 @@ void Crash(const std::string& srcfile, int srcline) {
   kill(getpid(), SIGTERM);
 }
 
-int GetMaxOpenFiles() {
-#if defined(RLIMIT_NOFILE)
-  struct rlimit no_files_limit;
-  if (getrlimit(RLIMIT_NOFILE, &no_files_limit) != 0) {
-    return -1;
-  }
-  // protect against overflow
-  if (no_files_limit.rlim_cur >= std::numeric_limits<int>::max()) {
-    return std::numeric_limits<int>::max();
-  }
-  return static_cast<int>(no_files_limit.rlim_cur);
-#endif
-  return -1;
-}
-
 void *cacheline_aligned_alloc(size_t size) {
 #if __GNUC__ < 5 && defined(__SANITIZE_ADDRESS__)
   return malloc(size);
@@ -397,6 +383,130 @@ int ExecuteCMD(const char* cmd, char* result) {
     LOG(FATAL) << "ExecuteCMD popen failed";
     return -1;
   }
+}
+
+int GetMaxOpenFiles() {
+#if defined(RLIMIT_NOFILE)
+  struct rlimit no_files_limit;
+  if (getrlimit(RLIMIT_NOFILE, &no_files_limit) != 0) {
+    return -1;
+  }
+  // protect against overflow
+  if (no_files_limit.rlim_cur >= std::numeric_limits<int>::max()) {
+    return std::numeric_limits<int>::max();
+  }
+  return static_cast<int>(no_files_limit.rlim_cur);
+#endif
+  return -1;
+}
+
+double GetMemoryUsage() {
+  FILE* fp = fopen("/proc/meminfo", "r");
+  CHECK(fp) << "failed to fopen /proc/meminfo";
+  size_t bufsize = 256 * sizeof(char);
+  char* buf = new (std::nothrow) char[bufsize];
+  CHECK(buf);
+  int totalMem = -1;
+  int freeMem = -1;
+  int bufMem = -1;
+  int cacheMem = -1;
+  while (getline(&buf, &bufsize, fp) >= 0) {
+    if (0 == strncmp(buf, "MemTotal", 8)) {
+      if (1 != sscanf(buf, "%*s%d", &totalMem)) {
+        LOG(FATAL) << "failed to get MemTotal from string: [" << buf << "]";
+      }
+    } else if (0 == strncmp(buf, "MemFree", 7)) {
+      if (1 != sscanf(buf, "%*s%d", &freeMem)) {
+        LOG(FATAL) << "failed to get MemFree from string: [" << buf << "]";
+      }
+    } else if (0 == strncmp(buf, "Buffers", 7)) {
+      if (1 != sscanf(buf, "%*s%d", &bufMem)) {
+        LOG(FATAL) << "failed to get Buffers from string: [" << buf << "]";
+      }
+    } else if (0 == strncmp(buf, "Cached", 6)) {
+      if (1 != sscanf(buf, "%*s%d", &cacheMem)) {
+        LOG(FATAL) << "failed to get Cached from string: [" << buf << "]";
+      }
+    }
+    if (totalMem != -1 && freeMem != -1 && bufMem != -1 && cacheMem != -1) {
+      break;
+    }
+  }
+  CHECK(totalMem != -1 && freeMem != -1 && bufMem != -1 && cacheMem != -1)
+      << "failed to get all information";
+  fclose(fp);
+  delete[] buf;
+  double usedMem = 1.0 - 1.0 * (freeMem + bufMem + cacheMem) / totalMem;
+  return usedMem;
+}
+
+int64_t AmountOfMemory(int pages_name) {
+  long pages = sysconf(pages_name);
+  long page_size = sysconf(_SC_PAGESIZE);
+  if (pages == -1 || page_size == -1) {
+    DCHECK(false);
+    return 0;
+  }
+  return static_cast<int64_t>(pages) * page_size;
+}
+
+int64_t AmountOfPhysicalMemory() {
+  return AmountOfMemory(_SC_PHYS_PAGES);
+}
+
+int64_t AmountOfVirtualMemory() {
+  struct rlimit limit;
+  int result = getrlimit(RLIMIT_DATA, &limit);
+  if (result != 0) {
+    DCHECK(false);
+    return 0;
+  }
+  return limit.rlim_cur == RLIM_INFINITY ? 0 : limit.rlim_cur;
+}
+
+int NumberOfProcessors() {
+  // It seems that sysconf returns the number of "logical" processors on both
+  // Mac and Linux.  So we get the number of "online logical" processors.
+  long res = sysconf(_SC_NPROCESSORS_ONLN);
+  if (res == -1) {
+    DCHECK(false);
+    return 1;
+  }
+
+  return static_cast<int>(res);
+}
+
+std::string OperatingSystemName() {
+  struct utsname info;
+  if (uname(&info) < 0) {
+    DCHECK(false);
+    return std::string();
+  }
+  return std::string(info.sysname);
+}
+
+std::string OperatingSystemVersion() {
+  struct utsname info;
+  if (uname(&info) < 0) {
+    DCHECK(false);
+    return std::string();
+  }
+  return std::string(info.release);
+}
+
+std::string OperatingSystemArchitecture() {
+  struct utsname info;
+  if (uname(&info) < 0) {
+    DCHECK(false);
+    return std::string();
+  }
+  std::string arch(info.machine);
+  if (arch == "i386" || arch == "i486" || arch == "i586" || arch == "i686") {
+    arch = "x86";
+  } else if (arch == "amd64") {
+    arch = "x86_64";
+  }
+  return arch;
 }
 
 std::string Hostname() {

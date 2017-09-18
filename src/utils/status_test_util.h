@@ -20,9 +20,9 @@ limitations under the License.
 
 // Macros for testing the results of functions that return tensorflow::Status.
 #define TF_EXPECT_OK(statement) \
-  EXPECT_EQ(::tensorflow::Status::OK(), (statement))
+  EXPECT_EQ(::bubblefs::Status::OK(), (statement))
 #define TF_ASSERT_OK(statement) \
-  ASSERT_EQ(::tensorflow::Status::OK(), (statement))
+  ASSERT_EQ(::bubblefs::Status::OK(), (statement))
 
 // There are no EXPECT_NOT_OK/ASSERT_NOT_OK macros since they would not
 // provide much value (when they fail, they would just print the OK status

@@ -12,7 +12,7 @@
 #define BUBBLEFS_PLATFORM_ATOMICOPS_INTERNALS_GCC_H_
 
 namespace bubblefs {
-namespace internal {
+namespace base {
 
 inline Atomic32 NoBarrier_CompareAndSwap(volatile Atomic32* ptr,
                                          Atomic32 old_value,
@@ -101,7 +101,7 @@ inline Atomic32 Release_Load(volatile const Atomic32* ptr) {
   return *ptr;
 }
 
-}  // namespace internal
+}  // namespace base
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_ATOMICOPS_INTERNALS_GCC_H_

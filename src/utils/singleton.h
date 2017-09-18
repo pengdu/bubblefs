@@ -55,36 +55,7 @@
 #include "platform/mutexlock.h"
 #include "utils/once.h"
 
-namespace bubblefs {
-  
-namespace core {
-  
-template<typename T>
-class Singleton {
- public:
-  static T* get() {
-    core::GoogleOnceInit(&once_, &Singleton<T>::Init);
-    return instance_;
-  }
-  static void ShutDown() {
-    delete instance_;
-    instance_ = nullptr;
-  }
- private:
-  static void Init() {
-    instance_ = new T();
-  }
-  static GoogleOnceType once_;
-  static T* instance_;
-};
-
-template<typename T>
-GoogleOnceType Singleton<T>::once_;
-
-template<typename T>
-T* Singleton<T>::instance_ = nullptr;
-
-}  // namespace core  
+namespace bubblefs { 
   
 namespace base {
   

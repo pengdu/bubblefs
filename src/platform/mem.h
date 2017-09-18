@@ -98,11 +98,6 @@ void* Malloc(size_t size);
 void* Realloc(void* ptr, size_t size);
 void Free(void* ptr);
 
-/**
- * Return value: memory usage ratio (from 0-1)
- */
-double GetMemoryUsage();
-
 }  // namespace port
 }  // namespace bubblefs
 

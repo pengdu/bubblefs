@@ -84,45 +84,5 @@ void Free(void* ptr) {
 #endif
 }
 
-double GetMemoryUsage() {
-  FILE* fp = fopen("/proc/meminfo", "r");
-  CHECK(fp) << "failed to fopen /proc/meminfo";
-  size_t bufsize = 256 * sizeof(char);
-  char* buf = new (std::nothrow) char[bufsize];
-  CHECK(buf);
-  int totalMem = -1;
-  int freeMem = -1;
-  int bufMem = -1;
-  int cacheMem = -1;
-  while (getline(&buf, &bufsize, fp) >= 0) {
-    if (0 == strncmp(buf, "MemTotal", 8)) {
-      if (1 != sscanf(buf, "%*s%d", &totalMem)) {
-        LOG(FATAL) << "failed to get MemTotal from string: [" << buf << "]";
-      }
-    } else if (0 == strncmp(buf, "MemFree", 7)) {
-      if (1 != sscanf(buf, "%*s%d", &freeMem)) {
-        LOG(FATAL) << "failed to get MemFree from string: [" << buf << "]";
-      }
-    } else if (0 == strncmp(buf, "Buffers", 7)) {
-      if (1 != sscanf(buf, "%*s%d", &bufMem)) {
-        LOG(FATAL) << "failed to get Buffers from string: [" << buf << "]";
-      }
-    } else if (0 == strncmp(buf, "Cached", 6)) {
-      if (1 != sscanf(buf, "%*s%d", &cacheMem)) {
-        LOG(FATAL) << "failed to get Cached from string: [" << buf << "]";
-      }
-    }
-    if (totalMem != -1 && freeMem != -1 && bufMem != -1 && cacheMem != -1) {
-      break;
-    }
-  }
-  CHECK(totalMem != -1 && freeMem != -1 && bufMem != -1 && cacheMem != -1)
-      << "failed to get all information";
-  fclose(fp);
-  delete[] buf;
-  double usedMem = 1.0 - 1.0 * (freeMem + bufMem + cacheMem) / totalMem;
-  return usedMem;
-}
-
 }  // namespace port
 }  // namespace bubblefs

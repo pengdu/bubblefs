@@ -10,10 +10,6 @@
 // rocksdb/util/threadpool_imp.cc
 
 #include "utils/threadpool_impl.h"
-#include "platform/macros.h"
-#ifdef OS_LINUX
-#include <sys/syscall.h>
-#endif
 #include <stdlib.h>
 #include "platform/port.h"
 #include <algorithm>
@@ -22,6 +18,11 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include "platform/macros.h"
+
+#ifdef OS_LINUX
+#include <sys/syscall.h>
+#endif
 
 namespace bubblefs {
 

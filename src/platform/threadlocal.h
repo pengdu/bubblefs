@@ -1,30 +1,29 @@
-/* Copyright (c) 2016 PaddlePaddle Authors. All Rights Reserve.
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License. */
-//  Copyright (c) 2011-present, Facebook, Inc.  All rights reserved.
-//  This source code is licensed under both the GPLv2 (found in the
-//  COPYING file in the root directory) and Apache 2.0 License
-//  (found in the LICENSE.Apache file in the root directory).
-//
-// Copyright (c) 2011 The LevelDB Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file. See the AUTHORS file for names of contributors.
+// Copyright (c) 2014 Baidu, Inc.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     http://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-// rocksdb/util/thread_local.h
+// Author: Ge,Jun (gejun@baidu.com)
+// Date: Tue Sep 16 12:39:12 CST 2014
+
 // protobuf/src/google/protobuf/stubs/mutex.h
+// brpc/src/butil/thread_local.h
 
 #ifndef BUBBLEFS_PLATFORM_THREADLOCAL_H_
 #define BUBBLEFS_PLATFORM_THREADLOCAL_H_
 
 #include <sys/syscall.h>
 #include <sys/types.h>
+#include <stddef.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <atomic>
@@ -32,6 +31,7 @@ limitations under the License. */
 #include <memory>
 #include <map>
 #include <mutex>
+#include <new>
 #include <random>
 #include <unordered_map>
 #include <vector>
@@ -41,6 +41,22 @@ limitations under the License. */
 #include "utils/autovector.h"
 
 // Try to come up with a portable implementation of thread local variables
+// Provide thread_local keyword (for primitive types) before C++11
+// DEPRECATED: define this keyword before C++11 might make the variable ABI
+// incompatible between C++11 and C++03
+#if !defined(thread_local) &&                                           \
+    (__cplusplus < 201103L ||                                           \
+     (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) < 40800)
+// GCC supports thread_local keyword of C++11 since 4.8.0
+#ifdef _MSC_VER
+// WARNING: don't use this macro in C++03
+#define thread_local __declspec(thread)
+#else
+// WARNING: don't use this macro in C++03
+#define thread_local __thread
+#endif  // _MSC_VER
+#endif  // thread_local
+
 #ifdef TF_SUPPORT_THREAD_LOCAL
 #define STATIC_THREAD_LOCAL static __thread
 #define THREAD_LOCAL __thread
@@ -280,6 +296,62 @@ protected:
 };
 
 }  // namespace internal
+
+namespace base {
+
+// Get a thread-local object typed T. The object will be default-constructed
+// at the first call to this function, and will be deleted when thread
+// exits.
+template <typename T> inline T* get_thread_local();
+
+// |fn| or |fn(arg)| will be called at caller's exit. If caller is not a 
+// thread, fn will be called at program termination. Calling sequence is LIFO:
+// last registered function will be called first. Duplication of functions 
+// are not checked. This function is often used for releasing thread-local
+// resources declared with __thread (or thread_local defined in 
+// butil/thread_local.h) which is much faster than pthread_getspecific or
+// boost::thread_specific_ptr.
+// Returns 0 on success, -1 otherwise and errno is set.
+int thread_atexit(void (*fn)());
+int thread_atexit(void (*fn)(void*), void* arg);
+
+// Remove registered function, matched functions will not be called.
+void thread_atexit_cancel(void (*fn)());
+void thread_atexit_cancel(void (*fn)(void*), void* arg);
+
+// Delete the typed-T object whose address is `arg'. This is a common function
+// to thread_atexit.
+template <typename T> void delete_object(void* arg) {
+    delete static_cast<T*>(arg);
+}
+
+namespace detail {
+
+template <typename T>
+class ThreadLocalHelper {
+public:
+    inline static T* get() {
+        if (__builtin_expect(value != nullptr, 1)) {
+            return value;
+        }
+        value = new (std::nothrow) T;
+        if (value != nullptr) {
+            base::thread_atexit(delete_object<T>, value);
+        }
+        return value;
+    }
+    static THREAD_LOCAL T* value;
+};
+
+template <typename T> THREAD_LOCAL T* ThreadLocalHelper<T>::value = nullptr;
+
+}  // namespace detail
+
+template <typename T> inline T* get_thread_local() {
+    return detail::ThreadLocalHelper<T>::get();
+}
+
+}  // namespace base
 
 }  // namespace bubblefs
 

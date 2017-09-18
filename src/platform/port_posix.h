@@ -171,9 +171,49 @@ extern void cacheline_aligned_free(void *memblock);
 
 extern void Crash(const std::string& srcfile, int srcline);
 
+extern int ExecuteCMD(const char* cmd, char* result);
+
+//=====================sys_info=========================
+
 extern int GetMaxOpenFiles();
 
-extern int ExecuteCMD(const char* cmd, char* result);
+/**
+ * Return value: memory usage ratio (from 0-1)
+ */
+extern double GetMemoryUsage();
+
+// Return the number of bytes of physical memory on the current machine.
+extern int64_t AmountOfPhysicalMemory();
+
+// Return the number of bytes of virtual memory of this process. A return
+// value of zero means that there is no limit on the available virtual memory.
+extern int64_t AmountOfVirtualMemory();
+
+// Return the number of megabytes of physical memory on the current machine.
+int AmountOfPhysicalMemoryMB() {
+  return static_cast<int>(AmountOfPhysicalMemory() / 1024 / 1024);
+}
+
+// Return the number of megabytes of available virtual memory, or zero if it
+// is unlimited.
+int AmountOfVirtualMemoryMB() {
+  return static_cast<int>(AmountOfVirtualMemory() / 1024 / 1024);
+}
+
+// Return the number of logical processors/cores on the current machine.
+int NumberOfProcessors();
+
+// Returns the name of the host operating system.
+extern std::string OperatingSystemName();
+
+  // Returns the version of the host operating system.
+extern std::string OperatingSystemVersion();
+
+// Returns the architecture of the running operating system.
+// Exact return value may differ across platforms.
+// e.g. a 32-bit x86 kernel on a 64-bit capable CPU will return "x86",
+//      whereas a x86-64 kernel on the same CPU will return "x86_64"
+extern std::string OperatingSystemArchitecture();
 
 // Return the hostname of the machine on which this process is running
 extern std::string Hostname();
