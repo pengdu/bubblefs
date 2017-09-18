@@ -15,7 +15,7 @@ limitations under the License.
 
 // tensorflow/tensorflow/core/lib/strings/numbers_test.cc
 
-#include "utils/numbers.h"
+#include "utils/str_numbers.h"
 #include <string>
 #include "platform/test.h"
 

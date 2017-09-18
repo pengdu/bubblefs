@@ -12,8 +12,8 @@ limitations under the License.
 
 // tensorflow/tensorflow/core/lib/strings/numbers.h
 
-#ifndef BUBBLEFS_UTILS_NUMBERS_H_
-#define BUBBLEFS_UTILS_NUMBERS_H_
+#ifndef BUBBLEFS_UTILS_STR_NUMBERS_H_
+#define BUBBLEFS_UTILS_STR_NUMBERS_H_
 
 #include <string>
 #include "platform/types.h"
@@ -138,7 +138,12 @@ string HumanReadableNumBytes(int64 num_bytes);
 //   -10         -> "-10 s"
 string HumanReadableElapsedTime(double seconds);
 
+// The current version, represented as a single integer to make comparison
+// easier:  major * 10^6 + minor * 10^3 + micro
+// Converts a numeric version number to a string.
+std::string VersionString(int version);
+
 }  // namespace strings
 }  // namespace bubblefs
 
-#endif  // BUBBLEFS_UTILS_NUMBERS_H_
+#endif  // BUBBLEFS_UTILS_STR_NUMBERS_H_

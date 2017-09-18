@@ -129,7 +129,7 @@ limitations under the License. */
 #include <sstream>
 #include <utility>
 #include <vector>
-#include "utils/numbers.h"
+#include "utils/str_numbers.h"
 #include "utils/stringprintf.h"
 
 namespace bubblefs {

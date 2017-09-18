@@ -13,7 +13,7 @@ limitations under the License.
 // tensorflow/tensorflow/core/lib/strings/numbers.cc
 // brpc/src/butil/strings/string_number_conversions.cc
 
-#include "utils/numbers.h"
+#include "utils/str_numbers.h"
 #include <ctype.h>
 #include <errno.h>
 #include <float.h>
@@ -583,6 +583,23 @@ struct IntToStringT {
     return STR(it, outbuf.end());
   }
 };
+
+
+string VersionString(int version) {
+  int major = version / 1000000;
+  int minor = (version / 1000) % 1000;
+  int micro = version % 1000;
+
+  // 128 bytes should always be enough, but we use snprintf() anyway to be
+  // safe.
+  char buffer[128];
+  snprintf(buffer, sizeof(buffer), "%d.%d.%d", major, minor, micro);
+
+  // Guard against broken MSVC snprintf().
+  buffer[sizeof(buffer)-1] = '\0';
+
+  return buffer;
+}
 
 }  // namespace strings
 

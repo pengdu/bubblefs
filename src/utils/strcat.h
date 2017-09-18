@@ -23,7 +23,7 @@ limitations under the License.
 #include "platform/macros.h"
 #include "platform/types.h"
 #include "utils/stringpiece.h"
-#include "utils/numbers.h"
+#include "utils/str_numbers.h"
 
 // The AlphaNum type was designed to be used as the parameter type for StrCat().
 // Any routine accepting either a string or a number may accept it.
