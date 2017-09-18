@@ -64,6 +64,18 @@ if [ ! -f "${FLAG_DIR}/jemalloc_5_0_1" ] \
     touch "${FLAG_DIR}/jemalloc_5_0_1"
 fi
 
+# rapidjson
+if [ ! -f "${FLAG_DIR}/rapidjson_1_1_0" ] \
+    || [ ! -d "${DEPS_PREFIX}/include/rapidjson" ]; then
+    cd ${DEPS_PREFIX}/include
+    if [ -d "${DEPS_PREFIX}/include/rapidjson" ]; then
+        rm -rf ${DEPS_PREFIX}/include/rapidjson
+    fi
+    unzip ${DEPS_PACKAGE}/rapidjson-1.1.0.zip -d .
+    mv rapidjson-1.1.0 rapidjson
+    touch "${FLAG_DIR}/rapidjson_1_1_0"
+fi
+
 # cpp-btree
 if [ ! -f "${FLAG_DIR}/cpp-btree_1_0_1" ] \
     || [ ! -d "${DEPS_PREFIX}/include/cpp-btree" ]; then
@@ -230,41 +242,6 @@ if [ ! -f "${FLAG_DIR}/sofa-pbrpc_1_1_3" ] \
     cp -a include/sofa ${DEPS_PREFIX}/include
     touch "${FLAG_DIR}/sofa-pbrpc_1_1_3"
 fi
-
-# grpc
-#if [ ! -f "${FLAG_DIR}/grpc" ] \
-#    || [ ! -f "${DEPS_PREFIX}/bin/grpc_cpp_plugin" ] \
-#    || [ ! -f "${DEPS_PREFIX}/lib/libgpr.a" ] \
-#    || [ ! -f "${DEPS_PREFIX}/lib/libgrpc.a" ] \
-#    || [ ! -f "${DEPS_PREFIX}/lib/libgrpc_cronet.a" ] \
-#    || [ ! -f "${DEPS_PREFIX}/lib/libgrpc_unsecure.a" ] \
-#    || [ ! -f "${DEPS_PREFIX}/lib/libgrpc++.a" ] \
-#    || [ ! -f "${DEPS_PREFIX}/lib/libgrpc++_cronet.a" ] \
-#    || [ ! -f "${DEPS_PREFIX}/lib/libgrpc++_error_details.a" ] \
-#    || [ ! -f "${DEPS_PREFIX}/lib/libgrpc++_reflection.a" ] \
-#    || [ ! -f "${DEPS_PREFIX}/lib/libgrpc++_unsecure.a" ] \
-#    || [ ! -d "${DEPS_PREFIX}/include/grpc" ] \
-#    || [ ! -d "${DEPS_PREFIX}/include/grpc++" ]; then
-#    cd ${DEPS_SOURCE}
-#    if [ -d "${DEPS_SOURCE}/grpc" ]; then
-#    	rm -rf ${DEPS_SOURCE}/grpc
-#    fi
-#    git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc
-#    cd grpc
-#    git submodule update --init
-#    make -j4
-#    mkdir ${DEPS_BUILD}/grpc
-#    make prefix=${DEPS_BUILD}/grpc install
-#    cd ${DEPS_BUILD}/grpc
-#    cp -a bin/grpc_cpp_plugin ${DEPS_PREFIX}/bin
-#    cp -a lib/libgpr.a lib/libgrpc.a lib/libgrpc_cronet.a lib/libgrpc_unsecure.a \
-#    lib/libgrpc++.a lib/libgrpc++_cronet.a lib/libgrpc++_error_details.a \
-#    lib/libgrpc++_reflection.a lib/libgrpc++_unsecure.a \
-#    ${DEPS_PREFIX}/lib
-#    cp -a include/grpc ${DEPS_PREFIX}/include
-#    cp -a include/grpc++ ${DEPS_PREFIX}/include
-#    touch "${FLAG_DIR}/grpc"
-#fi
 
 cd ${WORK_DIR}
 

@@ -34,7 +34,7 @@
 *.pb.h
 
 #depends
-depends.mk
+#depends.mk
 #*_test
 output
 .build

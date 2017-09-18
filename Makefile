@@ -6,12 +6,7 @@ OPT ?= -g2 -Werror # (B) Debug mode, w/ full line-level debugging symbols
 #CXX=/opt/compiler/gcc-4.8.2/bin/g++
 
 # dependencies
-PROTOC=./third_party/bin/protoc
-PROTOBUF_PATH=./third_party
-LEVELDB_PATH=./third_party
-GRPC_PATH=./third_party
-GFLAGS_PATH=./third_party
-GTEST_PATH=./third_party
+include depends.mk
 
 INCLUDE_PATH = -I./src -I$(PROTOBUF_PATH)/include \
                -I$(LEVELDB_PATH)/include \
