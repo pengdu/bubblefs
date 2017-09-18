@@ -25,12 +25,12 @@ limitations under the License.
 // tensorflow/tensorflow/core/platform/file_system.cc
 // rocksdb/env/env.cc
 
+#include "platform/env.h"
 #include <sys/stat.h>
 #include <unistd.h>
 #include <deque>
 #include <utility>
 #include <vector>
-#include "platform/env.h"
 #include "platform/port.h"
 #include "platform/protobuf.h"
 #include "utils/errors.h"
@@ -132,6 +132,11 @@ Status Env::RegisterFileSystem(const string& scheme,
 
 string Env::TranslateName(const string& name) const {
   return io::CleanPath(name);
+}
+
+uint64_t Env::GetThreadID() const {
+  std::hash<std::thread::id> hasher;
+  return hasher(std::this_thread::get_id());
 }
 
 Status Env::ReuseWritableFile(const string& fname,
@@ -420,9 +425,6 @@ bool Env::LocalTempFilename(string* filename) {
   }
   return false;
 }
-
-
-EnvWrapper::~EnvWrapper() {}
 
 Status ReadFileToString(Env* env, const string& fname, string* data) {
   uint64 file_size;

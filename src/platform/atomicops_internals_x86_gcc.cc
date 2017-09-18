@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// chromium/base/atomicops_internals_x86_gcc.cc
+// brpc/src/butil/atomicops_internals_x86_gcc.cc
 
 // This module gets enough CPU information to optimize the
 // atomicops module on x86.
@@ -15,7 +15,7 @@
 // depends on structs that are defined in that file.  If atomicops.h
 // doesn't sub-include that file, then we aren't needed, and shouldn't
 // try to do anything.
-#ifdef BUBBLEFS_PLATFORM_ATOMICOPS_INTERNALS_X86_GCC_H_
+#ifdef BASE_ATOMICOPS_INTERNALS_X86_GCC_H_
 
 // Inline cpuid instruction.  In PIC compilations, %ebx contains the address
 // of the global offset table.  To avoid breaking such executables, this code
@@ -41,7 +41,6 @@
 // default values should hopefully be pretty safe.
 struct AtomicOps_x86CPUFeatureStruct AtomicOps_Internalx86CPUFeatures = {
   false,          // bug can't exist before process spawns multiple threads
-  false,          // no SSE2
 };
 
 namespace {
@@ -83,9 +82,6 @@ void AtomicOps_Internalx86CPUFeaturesInit() {
   } else {
     AtomicOps_Internalx86CPUFeatures.has_amd_lock_mb_bug = false;
   }
-
-  // edx bit 26 is SSE2 which we use to tell use whether we can use mfence
-  AtomicOps_Internalx86CPUFeatures.has_sse2 = ((edx >> 26) & 1);
 }
 
 class AtomicOpsx86Initializer {

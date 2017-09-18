@@ -48,10 +48,29 @@ limitations under the License. */
 #include <math.h>
 #include <algorithm>
 #include <utility>
+#include "platform/platform.h"
 
 namespace bubblefs {
 namespace mathutil {
 
+template <typename Float>
+inline bool IsFinite(const Float& number) {
+#if defined(OS_POSIX)
+  return isfinite(number) != 0;
+#elif defined(OS_WIN)
+  return _finite(number) != 0;
+#endif
+}
+
+template <typename Float>
+inline bool IsNaN(const Float& number) {
+#if defined(OS_POSIX)
+  return isnan(number) != 0;
+#elif defined(OS_WIN)
+  return _isnan(number) != 0;
+#endif
+}  
+  
 /**
  * calculate the non-negative remainder of a/b
  * @param[in] a

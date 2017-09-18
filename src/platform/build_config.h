@@ -31,7 +31,7 @@
 #endif
 
 #ifndef TF_USE_SNAPPY
-#define TF_USE_SNAPPY 1
+#define TF_USE_SNAPPY 0
 #endif
 
 #ifndef TF_USE_PTHREAD_SPINLOCK
@@ -42,4 +42,4 @@
 #define TF_SUPPORT_THREAD_LOCAL 1
 #endif
 
-#endif // #ifndef BUBBLEFS_PLATFORM_BUILD_CONFIG_H_
+#endif // BUBBLEFS_PLATFORM_BUILD_CONFIG_H_

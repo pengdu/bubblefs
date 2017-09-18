@@ -46,16 +46,6 @@
 #define IOSTATS_TIMER_GUARD(metric)
 #define TEST_SYNC_POINT_CALLBACK(x, y)
 
-// For non linux platform, the following macros are used only as place
-// holder.
-#if !(defined OS_LINUX) && !(defined CYGWIN) && !(defined OS_AIX)
-#define POSIX_FADV_NORMAL 0     /* [MC1] no further special treatment */
-#define POSIX_FADV_RANDOM 1     /* [MC1] expect random page refs */
-#define POSIX_FADV_SEQUENTIAL 2 /* [MC1] expect sequential page refs */
-#define POSIX_FADV_WILLNEED 3   /* [MC1] will need these pages */
-#define POSIX_FADV_DONTNEED 4   /* [MC1] dont need these pages */
-#endif
-
 namespace bubblefs {
 
 // A wrapper for fadvise, if the platform doesn't support fadvise,
@@ -860,7 +850,7 @@ Status PosixWritableFile::Close() {
 }
 
 // write out the cached data to the OS cache
-Status PosixWritableFile::Flush() { return Status::OK(); }
+Status PosixWritableFile::Flush() { return Sync(); }
 
 Status PosixWritableFile::Sync() {
   if (fdatasync(fd_) < 0) {
@@ -1030,6 +1020,10 @@ Status PosixRandomRWFile::Close() {
   }
   fd_ = -1;
   return Status::OK();
+}
+
+PosixReadOnlyMemoryRegion::~PosixReadOnlyMemoryRegion() {
+  munmap(const_cast<void*>(address_), length_);
 }
 
 /*

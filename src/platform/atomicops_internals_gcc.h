@@ -6,7 +6,7 @@
 // instead. This file is for platforms that use GCC intrinsics rather than
 // platform-specific assembly code for atomic operations.
 
-// chromium/base/atomicops_internals_gcc.h
+// brpc/src/butil/atomicops_internals_gcc.h
 
 #ifndef BUBBLEFS_PLATFORM_ATOMICOPS_INTERNALS_GCC_H_
 #define BUBBLEFS_PLATFORM_ATOMICOPS_INTERNALS_GCC_H_

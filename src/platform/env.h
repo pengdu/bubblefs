@@ -16,10 +16,17 @@ limitations under the License.
 // Copyright (c) 2011 The LevelDB Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
-//
 
 // tensorflow/tensorflow/core/platform/env.h
 // rocksdb/include/rocksdb/env.h
+
+// An Env is an interface used by the rocksdb implementation to access
+// operating system functionality like the filesystem etc.  Callers
+// may wish to provide a custom Env object when opening a database to
+// get fine gain control; e.g., to rate limit file system operations.
+//
+// All Env implementations are safe for concurrent access from
+// multiple threads without any external synchronization.
 
 #ifndef BUBBLEFS_PLATFORM_ENV_H_
 #define BUBBLEFS_PLATFORM_ENV_H_
@@ -40,9 +47,7 @@ limitations under the License.
 #include "utils/status.h"
 #include "utils/stringpiece.h"
 
-namespace bubblefs {  
-  
-const size_t kDefaultPageSize = 4 * 1024;   
+namespace bubblefs { 
   
 class Thread;
 struct ThreadOptions;
@@ -54,6 +59,11 @@ class RandomAccessFile;
 class WritableFile;
 class RandomRWFile;
 class ReadOnlyMemoryRegion;
+
+using std::unique_ptr;
+using std::shared_ptr;
+
+const size_t kDefaultPageSize = 4 * 1024;  
 
 // Options while opening a file to read/write
 struct EnvOptions {
@@ -127,6 +137,7 @@ class Env {
   };
    
   Env() {};
+  // Env() : thread_status_updater_(nullptr) {}
   virtual ~Env() = default;
 
   /// \brief Returns a default environment suitable for the current operating
@@ -137,13 +148,6 @@ class Env {
   ///
   /// The result of Default() belongs to this library and must never be deleted.
   static Env* Default();
-  
-  /// \brief Translate an URI to a filename for the FileSystem implementation.
-  ///
-  /// The implementation in this class cleans up the path, removing
-  /// duplicate /'s, resolving .. and . (more details in
-  /// tensorflow::lib::io::CleanPath).
-  virtual string TranslateName(const string& name) const;
 
   /// \brief Returns the FileSystem object to handle operations on the file
   /// specified by 'fname'. The FileSystem object is used as the implementation
@@ -157,6 +161,13 @@ class Env {
 
   // \brief Register a file system for a scheme.
   //virtual Status RegisterFileSystem(const string& scheme, FileSystemRegistry::Factory factory);
+  
+  /// \brief Translate an URI to a filename for the FileSystem implementation.
+  ///
+  /// The implementation in this class cleans up the path, removing
+  /// duplicate /'s, resolving .. and . (more details in
+  /// tensorflow::lib::io::CleanPath).
+  virtual string TranslateName(const string& name) const;
   
   // Create a brand new sequentially-readable file with the specified name.
   // On success, stores a pointer to the new file in *result and returns OK.
@@ -193,7 +204,7 @@ class Env {
   //
   // The returned file may be concurrently accessed by multiple threads.
   virtual Status NewRandomAccessFile(const std::string& fname,
-                                     unique_ptr<RandomAccessFile>* result,
+                                     std::unique_ptr<RandomAccessFile>* result,
                                      const EnvOptions& options) = 0;
 
   /// \brief Creates an object that writes to a new file with the specified
@@ -220,7 +231,7 @@ class Env {
   //
   // The returned file will only be accessed by one thread at a time.
   virtual Status NewWritableFile(const std::string& fname,
-                                 unique_ptr<WritableFile>* result,
+                                 std::unique_ptr<WritableFile>* result,
                                  const EnvOptions& options) = 0;
   
   // Create an object that writes to a new file with the specified
@@ -299,7 +310,7 @@ class Env {
   /// if status is not null, populate the vector with a detailed status
   /// for each file.
   virtual bool FilesExist(const std::vector<string>& files,
-                  std::vector<Status>* status);
+                          std::vector<Status>* status);
 
   /// \brief Stores in *result the names of the children of the specified
   /// directory. The names are relative to "dir".
@@ -501,7 +512,7 @@ class Env {
 
   // Get full directory name for this db.
   virtual Status GetAbsolutePath(const string& db_path,
-      string* output_path) = 0;
+                                 string* output_path) = 0;
 
   // The number of background worker threads of a specific thread pool
   // for this environment. 'LOW' is the default pool.
@@ -521,7 +532,9 @@ class Env {
   virtual string TimeToString(uint64_t time) = 0;  
   
   // Generates a unique id that can be used to identify a db
-  virtual string GenerateUniqueId();
+  virtual string GenerateUniqueId() {
+    static_assert(false, "Env::GenerateUniqueId() is unsupported");
+  }
   
   // Returns the ID of the current thread.
   virtual uint64_t GetThreadID() const;
@@ -574,7 +587,7 @@ class Env {
   // "version" should be the version of the library or NULL
   // returns the name that LoadLibrary() can use
   virtual string FormatLibraryFileName(const string& name,
-      const string& version) = 0;
+                                       const string& version) = 0;
 
  private:
   //std::unique_ptr<FileSystemRegistry> file_system_registry_;
@@ -587,8 +600,8 @@ class Env {
 class EnvWrapper : public Env {
  public:
   // Initialize an EnvWrapper that delegates all calls to *t
-  explicit EnvWrapper(Env* t) : target_(t) { }
-  ~EnvWrapper() override;
+  explicit EnvWrapper(Env* t) : target_(t) {}
+  ~EnvWrapper() override {};
 
   // Return the target to which this Env forwards all calls
   Env* target() const { return target_; }
@@ -624,7 +637,7 @@ struct ThreadOptions {
 class FileLock {
  public:
   FileLock() { }
-  virtual ~FileLock();
+  virtual ~FileLock() {};
  private:
   // No copying allowed
   DISALLOW_COPY_AND_ASSIGN(FileLock);
@@ -657,7 +670,7 @@ struct FileStatistics {
 class SequentialFile {
  public:
   SequentialFile() { }
-  virtual ~SequentialFile();
+  virtual ~SequentialFile() {};
 
   // Read up to "n" bytes from the file.  "scratch[0..n-1]" may be
   // written by this routine.  Sets "*result" to the data that was
@@ -705,7 +718,7 @@ class SequentialFile {
 class RandomAccessFile {
  public:
   RandomAccessFile() {}
-  virtual ~RandomAccessFile();
+  virtual ~RandomAccessFile() {};
 
   /// \brief Reads up to `n` bytes from the file starting at `offset`.
   ///
@@ -729,6 +742,26 @@ class RandomAccessFile {
   virtual Status Prefetch(uint64_t offset, size_t n) {
     return Status::OK();
   }
+  
+  // Tries to get an unique ID for this file that will be the same each time
+  // the file is opened (and will stay the same while the file is open).
+  // Furthermore, it tries to make this ID at most "max_size" bytes. If such an
+  // ID can be created this function returns the length of the ID and places it
+  // in "id"; otherwise, this function returns 0, in which case "id"
+  // may not have been modified.
+  //
+  // This function guarantees, for IDs from a given environment, two unique ids
+  // cannot be made equal to each other by adding arbitrary bytes to one of
+  // them. That is, no unique ID is the prefix of another.
+  //
+  // This function guarantees that the returned ID will not be interpretable as
+  // a single varint.
+  //
+  // Note: these IDs are only valid for the duration of the process.
+  virtual size_t GetUniqueId(char* id, size_t max_size) const {
+    return 0; // Default implementation to prevent issues with backwards
+              // compatibility.
+  };
   
   enum AccessPattern { NORMAL, RANDOM, SEQUENTIAL, WILLNEED, DONTNEED };
   
@@ -764,7 +797,7 @@ class WritableFile {
       preallocation_block_size_(0),
       io_priority_(Env::IO_TOTAL) {
   }
-  virtual ~WritableFile();
+  virtual ~WritableFile() {};
 
   /// \brief Append 'data' to the file.
   virtual Status Append(const StringPiece& data) = 0;
@@ -789,7 +822,7 @@ class WritableFile {
   //
   // PositionedAppend() requires aligned buffer to be passed in. The alignment
   // required is queried via GetRequiredBufferAlignment()
-  virtual Status PositionedAppend(const Slice& /* data */, uint64_t /* offset */) {
+  virtual Status PositionedAppend(const StringPiece& /* data */, uint64_t /* offset */) {
     return Status::NotSupported();
   }
   
@@ -885,6 +918,11 @@ class WritableFile {
                                       size_t* last_allocated_block) {
     *last_allocated_block = last_preallocated_block_;
     *block_size = preallocation_block_size_;
+  }
+  
+  // For documentation, refer to RandomAccessFile::GetUniqueId()
+  virtual size_t GetUniqueId(char* id, size_t max_size) const {
+    return 0; // Default implementation to prevent issues with backwards
   }
 
   // Remove any kind of caching of data from the offset to offset+length

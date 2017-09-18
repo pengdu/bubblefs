@@ -8,7 +8,6 @@
 // Author: yanshiguang02@baidu.com
 
 // baidu/common/include/atomic.h
-// chromium/base/atomicops.h
 // brpc/src/butil/atomicops.h
 
 #ifndef BUBBLEFS_PLATFORM_ATOMICOPS_H_
@@ -19,11 +18,8 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace base {
-
-#if !defined(__i386__) && !defined(__x86_64__)
-#error    "Arch not supprot asm atomic!"
-#endif  
+  
+namespace bdcommon {
   
 /**
  * Note: use gcc.
@@ -34,17 +30,13 @@ namespace base {
  * $, $0x means constants.
  * %0 means output ... %n-1 means input operand(expression), "=" specifies output operand.
  * 
-**/ 
-
+**/   
+  
 /**
- * @brief atomic add
- * lock xadd guarantees atomic ops and memory fence for muliti processors;
- * xadd exchanges the first operand (destination operand) with the second operand (source operand), 
- * then loads the sum of the two values into the destination operand. 
- * The destination operand can be a register or a memory location; 
- * the source operand is a register.
- * @param [in/out] mem  atomic operand
- * @param [in] add              : add operand
+ * @brief 原子加,返回原值
+ *
+ * @param [in/out] mem 原子变量
+ * @param [in] add              : 加数
  * @return  inline int
  * @author yanshiguang02
  * @date 2012/09/09 13:55:38
@@ -71,7 +63,7 @@ static inline long atomic_add64(volatile long* mem, long add)
 }
 
 /**
- * @brief atomic increment
+ * @brief 原子自增
  *
  * @param [in/out] mem   : volatile int*
  * @return  inline void
@@ -96,7 +88,7 @@ static inline void atomic_inc64(volatile long *mem)
 }
 
 /**
- * @brief atomic decrement
+ * @brief 原子自减
  *
  * @param [in/out] mem   : volatile int*
  * @return  inline void
@@ -177,7 +169,7 @@ static inline int atomic_comp_swap(volatile void *mem, int xchg, int cmp)
 }
 
 /**
- * @brief 64bit if set
+ * @brief 64位 if set
  *
  * @param [in/out] mem   : volatile void*
  * @param [in/out] xchg   : long long
@@ -194,8 +186,16 @@ static inline long atomic_comp_swap64(volatile void *mem, long long xchg, long l
             :"d"(xchg), "r"(mem), "a"(cmp)
     );
     return cmp;
-}
+}  
+  
+} // namespace bdcommon
+  
+namespace base {
 
+#if !defined(__i386__) && !defined(__x86_64__)
+#error    "Arch not supprot asm atomic!"
+#endif  
+  
 // For atomic operations on reference counts, see atomic_refcount.h.
 // For atomic operations on sequence numbers, see atomic_sequence_num.h.
 
@@ -399,6 +399,7 @@ private:
 };
 
 } // namespace base
+
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_ATOMICOPS_H_

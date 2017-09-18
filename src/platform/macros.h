@@ -1,22 +1,3 @@
-// Modifications copyright (C) 2017, Baidu.com, Inc.
-// Copyright 2017 The Apache Software Foundation
-
-// Licensed to the Apache Software Foundation (ASF) under one
-// or more contributor license agreements.  See the NOTICE file
-// distributed with this work for additional information
-// regarding copyright ownership.  The ASF licenses this file
-// to you under the Apache License, Version 2.0 (the
-// "License"); you may not use this file except in compliance
-// with the License.  You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
 /* Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,8 +20,6 @@ limitations under the License.
 
 // tensorflow/tensorflow/core/platform/macros.h
 // tensorflow/tensorflow/core/platform/default/dynamic_annotations.h
-// chromium/base/compiler_specific.h
-// chromium/base/macros.h
 // brpc/src/butil/macros.h
 
 #ifndef BUBBLEFS_PLATFORM_MACROS_H_
@@ -48,8 +27,8 @@ limitations under the License.
 
 #include <stddef.h>  // For size_t.
 #include <string.h>  // For memcpy.
-#include "platform/build_config.h"
 #include "platform/base_export.h"
+#include "platform/build_config.h"
 #include "platform/compiler_specific.h"
 #include "platform/platform.h"
 
@@ -221,8 +200,8 @@ namespace bubblefs {
 namespace base {
 template <bool> struct CAssert { static const int x = 1; };
 template <> struct CAssert<false> { static const char * x; };
-} // ns base
-} // ns bubblefs
+} // namespace base
+} // namespace bubblefs
 
 #define BASE_CASSERT(expr, msg)                                \
     enum { BASE_CONCAT(BASE_CONCAT(LINE_, __LINE__), __##msg) \
@@ -296,7 +275,7 @@ enum LinkerInitialized { LINKER_INITIALIZED };
   } while (0)
 #endif
 
-// dynamic_annotations.h, Do nothing for this platform.
+// tensorflow/tensorflow/core/platform/default/dynamic_annotations.h, Do nothing for this platform.
 
 #define ANNOTATE_MEMORY_IS_INITIALIZED(ptr, bytes) \
   do {                                                \
@@ -317,6 +296,23 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 // Used to format real long long integers.
 #define LL_FORMAT "ll"  // As in "%lld". Note that "q" is poor form also.
 #endif
+
+// This is not very useful as it does not expand defined symbols if
+// called directly. Use its counterpart without the _NO_EXPANSION
+// suffix, below.
+#define STRINGIZE_NO_EXPANSION(x) #x
+
+// Use this to quote the provided parameter, first expanding it if it
+// is a preprocessor symbol.
+//
+// For example, if:
+//   #define A FOO
+//   #define B(x) myobj->FunctionCall(x)
+//
+// Then:
+//   STRINGIZE(A) produces "FOO"
+//   STRINGIZE(B(y)) produces "myobj->FunctionCall(y)"
+#define STRINGIZE(x) STRINGIZE_NO_EXPANSION(x)
 
 // Convert symbol to string
 #ifndef BASE_SYMBOLSTR

@@ -25,12 +25,6 @@ namespace port {
 // TODO(jeff,sanjay): Make portable
 constexpr bool kLittleEndian = __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__;
 
-// Returns an estimate of the number of schedulable CPUs for this
-// process.  Usually, it's constant throughout the lifetime of a
-// process, but it might change if the underlying cluster management
-// software can change it dynamically.
-int NumSchedulableCPUs();
-
 // Mostly ISA related features that we care about
 enum CPUFeature {
   // Do not change numeric assignments.
@@ -99,6 +93,15 @@ int CPUFamily();
 
 // Returns CPU model number.
 int CPUModelNum();
+
+// Returns an estimate of the number of schedulable CPUs for this
+// process.  Usually, it's constant throughout the lifetime of a
+// process, but it might change if the underlying cluster management
+// software can change it dynamically.
+int NumSchedulableCPUs();
+
+// Returns nominal core processor cycles per second of each processor.
+double NominalCPUFrequency() { return 1.0; };
 
 // Called by the framework when we expect heavy CPU computation and we want to
 // be sure that the code has been compiled to run optimally on the current

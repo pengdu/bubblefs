@@ -129,10 +129,16 @@ static int LockOrUnlock(const string& fname, int fd, bool lock) {
   return value;
 }
 
-class PosixFileLock : public FileLock {
+class StdThread : public Thread {
  public:
-  int fd_;
-  std::string filename;
+  // name and thread_options are both ignored.
+  StdThread(const ThreadOptions& thread_options, const string& name,
+            std::function<void()> fn)
+      : thread_(fn) {}
+  ~StdThread() override { thread_.join(); }
+
+ private:
+  std::thread thread_;
 };
 
 class PosixEnv : public Env {
@@ -150,9 +156,9 @@ class PosixEnv : public Env {
     // Env::Default().  This is to avoid the free-after-use error when
     // Env::Default() is destructed while some other child threads are
     // still trying to update thread status.
-    if (this != Env::Default()) {
-      //delete thread_status_updater_;
-    }
+    /*if (this != Env::Default()) {
+      delete thread_status_updater_;
+    }*/
   }
 
   void SetFD_CLOEXEC(int fd, const EnvOptions* options) {
@@ -559,7 +565,7 @@ class PosixEnv : public Env {
     return Status::OK();
   }
   
-  bool MatchPath(const string& path, const string& pattern) override {
+  virtual bool MatchPath(const string& path, const string& pattern) override {
     return fnmatch(pattern.c_str(), path.c_str(), FNM_PATHNAME) == 0;
   }
 
@@ -998,18 +1004,6 @@ void PosixEnv::WaitForJoin() {
   }
   threads_to_join_.clear();
 }
-
-class StdThread : public Thread {
- public:
-  // name and thread_options are both ignored.
-  StdThread(const ThreadOptions& thread_options, const string& name,
-            std::function<void()> fn)
-      : thread_(fn) {}
-  ~StdThread() override { thread_.join(); }
-
- private:
-  std::thread thread_;
-};
 
 Thread* PosixEnv::StartThread(const ThreadOptions& thread_options, const string& name,
                     std::function<void()> fn) override {

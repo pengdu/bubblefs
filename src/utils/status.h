@@ -74,42 +74,10 @@ class Status {
     return Status(error::ABORTED, msg, msg2);
   }
 
-  static Status Corruption(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::CORRUPTION, msg, msg2);
-  }
-  static Status Corruption(error::SubCode msg = error::NONE) {
-    return Status(error::CORRUPTION, msg);
-  }
-
   static Status IOError(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::IOERROR, msg, msg2);
   }
   static Status IOError(error::SubCode msg =  error::NONE) { return Status(error::IOERROR, msg); }
-
-  static Status Incomplete(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::INCOMPLETE, msg, msg2);
-  }
-  static Status Incomplete(error::SubCode msg = error::NONE) {
-    return Status(error::INCOMPLETE, msg);
-  }
-
-  static Status ShutdownInProgress(error::SubCode msg = error::NONE) {
-    return Status(error::SHUTDOWN_IN_PROGRESS, msg);
-  }
-  static Status ShutdownInProgress(const StringPiece& msg,
-                                   const StringPiece& msg2 = StringPiece()) {
-    return Status(error::SHUTDOWN_IN_PROGRESS, msg, msg2);
-  }
-
-  static Status Expired(error::SubCode msg = error::NONE) { return Status(error::EXPIRED, msg); }
-  static Status Expired(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::EXPIRED, msg, msg2);
-  }
-
-  static Status TryAgain(error::SubCode msg = error::NONE) { return Status(error::TRY_AGAIN, msg); }
-  static Status TryAgain(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::TRY_AGAIN, msg, msg2);
-  }
   
   static Status NotSupported(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::NOT_SUPPORTED, msg, msg2);
@@ -117,88 +85,21 @@ class Status {
   static Status NotSupported(error::SubCode msg = error::NONE) {
     return Status(error::NOT_SUPPORTED, msg);
   }
-  
-  static Status TimedOut(error::SubCode msg = error::NONE) { return Status(error::TIMEDOUT, msg); }
-  static Status TimedOut(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::TIMEDOUT, msg, msg2);
-  }
-  
-  static Status Busy(error::SubCode msg = error::NONE) { return Status(error::BUSY, msg); }
-  static Status Busy(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::BUSY, msg, msg2);
-  }
-
-  static Status NoSpace() { return Status(error::IOERROR, error::NOSPACE); }
-  static Status NoSpace(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::IOERROR, error::NOSPACE, msg, msg2);
-  }
-
-  static Status MemoryLimit() { return Status(error::ABORTED, error::MEMORY_LIMIT); }
-  static Status MemoryLimit(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::ABORTED, error::MEMORY_LIMIT, msg, msg2);
-  }
 
   /// Returns true iff the status indicates success.
   bool ok() const { return (state_ == nullptr); }
   
   // Returns true iff the status indicates a NotFound error.
   bool IsNotFound() const { return code() == error::NOT_FOUND; }
-
-  // Returns true iff the status indicates a Corruption error.
-  bool IsCorruption() const { return code() == error::CORRUPTION; }
-
+  
   // Returns true iff the status indicates a NotSupported error.
   bool IsNotSupported() const { return code() == error::NOT_SUPPORTED; }
 
   // Returns true iff the status indicates an InvalidArgument error.
   bool IsInvalidArgument() const { return code() == error::INVALID_ARGUMENT; }
-
+  
   // Returns true iff the status indicates an IOError.
   bool IsIOError() const { return code() == error::IOERROR; }
-
-  // Returns true iff the status indicates Incomplete
-  bool IsIncomplete() const { return code() == error::INCOMPLETE; }
-
-  // Returns true iff the status indicates Shutdown In progress
-  bool IsShutdownInProgress() const { return code() == error::SHUTDOWN_IN_PROGRESS; }
-
-  bool IsTimedOut() const { return code() == error::TIMEDOUT; }
-
-  bool IsAborted() const { return code() == error::ABORTED; }
-
-  bool IsLockLimit() const {
-    return code() == error::ABORTED && subcode() == error::LOCK_LIMIT;
-  }
-
-  // Returns true iff the status indicates that a resource is Busy and
-  // temporarily could not be acquired.
-  bool IsBusy() const { return code() == error::BUSY; }
-
-  bool IsDeadlock() const { return code() == error::BUSY && subcode() == error::DEAD_LOCK; }
-
-  // Returns true iff the status indicated that the operation has Expired.
-  bool IsExpired() const { return code() == error::EXPIRED; }
-
-  // Returns true iff the status indicates a TryAgain error.
-  // This usually means that the operation failed, but may succeed if
-  // re-attempted.
-  bool IsTryAgain() const { return code() == error::TRY_AGAIN; }
-
-  // Returns true iff the status indicates a NoSpace error
-  // This is caused by an I/O error returning the specific "out of space"
-  // error condition. Stricto sensu, an NoSpace error is an I/O error
-  // with a specific subcode, enabling users to take the appropriate action
-  // if needed
-  bool IsNoSpace() const {
-    return (code() == error::IOERROR) && (subcode() == error::NOSPACE);
-  }
-
-  // Returns true iff the status indicates a memory limit error.  There may be
-  // cases where we limit the memory used in certain operations (eg. the size
-  // of a write batch) in order to avoid out of memory exceptions.
-  bool IsMemoryLimit() const {
-    return (code() == error::ABORTED) && (subcode() == error::MEMORY_LIMIT);
-  }
 
   error::Code code() const {
     return ok() ? error::OK : state_->code;

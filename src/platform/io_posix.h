@@ -12,7 +12,21 @@
 #ifndef BUBBLEFS_PLATFORM_IO_POSIX_H_
 #define BUBBLEFS_PLATFORM_IO_POSIX_H_
 
+#include <errno.h>
+#include <unistd.h>
+#include <atomic>
+#include <string>
 #include "platform/env.h"
+
+// For non linux platform, the following macros are used only as place
+// holder.
+#if !(defined OS_LINUX) && !(defined CYGWIN) && !(defined OS_AIX)
+#define POSIX_FADV_NORMAL 0     /* [MC1] no further special treatment */
+#define POSIX_FADV_RANDOM 1     /* [MC1] expect random page refs */
+#define POSIX_FADV_SEQUENTIAL 2 /* [MC1] expect sequential page refs */
+#define POSIX_FADV_WILLNEED 3   /* [MC1] will need these pages */
+#define POSIX_FADV_DONTNEED 4   /* [MC1] dont need these pages */
+#endif
 
 namespace bubblefs {  
   
@@ -220,7 +234,7 @@ class PosixReadOnlyMemoryRegion : public ReadOnlyMemoryRegion {
  public:
   PosixReadOnlyMemoryRegion(const void* address, uint64 length)
       : address_(address), length_(length) {}
-  ~PosixReadOnlyMemoryRegion();
+  ~PosixReadOnlyMemoryRegion() override;
   const void* data() override { return address_; }
   uint64 length() override { return length_; }
 
@@ -228,7 +242,6 @@ class PosixReadOnlyMemoryRegion : public ReadOnlyMemoryRegion {
   const void* const address_;
   const uint64 length_;
 };
-
 class PosixDirectory : public Directory {
  public:
   explicit PosixDirectory(int fd) : fd_(fd) {}

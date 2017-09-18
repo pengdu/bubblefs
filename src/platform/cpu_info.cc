@@ -21,6 +21,7 @@ limitations under the License.
 #include <string.h>
 #include <unistd.h>
 #include <mutex>
+#include <string>
 #include <thread>
 #include "platform/logging.h"
 #include "platform/platform.h"
@@ -59,24 +60,6 @@ namespace bubblefs {
 namespace port {
   
 namespace { // namespace anonymous
-  
-int NumSchedulableCPUs() {
-#if defined(__linux__) && !defined(__ANDROID__)
-  cpu_set_t cpuset;
-  if (sched_getaffinity(0, sizeof(cpu_set_t), &cpuset) == 0) {
-    return CPU_COUNT(&cpuset);
-  }
-  perror("sched_getaffinity");
-#endif
-#if (defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__)
-  unsigned int count = std::thread::hardware_concurrency();
-  if (count > 0) return static_cast<int>(count);
-#endif
-  const int kDefaultCores = 4;  // Semi-conservative guess
-  fprintf(stderr, "can't determine number of CPU cores: assuming %d\n",
-          kDefaultCores);
-  return kDefaultCores;
-}
 
 #ifdef PLATFORM_IS_X86
 class CPUIDInfo;
@@ -374,6 +357,24 @@ int CPUModelNum() {
 #endif
 }
 
+int NumSchedulableCPUs() {
+#if defined(__linux__) && !defined(__ANDROID__)
+  cpu_set_t cpuset;
+  if (sched_getaffinity(0, sizeof(cpu_set_t), &cpuset) == 0) {
+    return CPU_COUNT(&cpuset);
+  }
+  perror("sched_getaffinity");
+#endif
+#if (defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__)
+  unsigned int count = std::thread::hardware_concurrency();
+  if (count > 0) return static_cast<int>(count);
+#endif
+  const int kDefaultCores = 4;  // Semi-conservative guess
+  fprintf(stderr, "can't determine number of CPU cores: assuming %d\n",
+          kDefaultCores);
+  return kDefaultCores;
+}
+
 namespace { // namespace anonymous
 
 // If the CPU feature isn't present, log a fatal error.
@@ -386,7 +387,7 @@ void CheckFeatureOrDie(CPUFeature feature, const string& feature_name) {
 #else
     LOG(FATAL)
 #endif
-        << "The library was compiled to use " << feature_name
+        << "The TensorFlow library was compiled to use " << feature_name
         << " instructions, but these aren't available on your machine.";
   }
 }
@@ -443,7 +444,7 @@ CPUFeatureGuard g_cpu_feature_guard_singleton;
 
 std::once_flag g_cpu_feature_guard_warn_once_flag;
 
-}  // namespace anonymous
+}  // namespace
 
 void InfoAboutUnusedCPUFeatures() {
   std::call_once(g_cpu_feature_guard_warn_once_flag, [] {
