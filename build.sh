@@ -67,12 +67,14 @@ fi
 # rapidjson
 if [ ! -f "${FLAG_DIR}/rapidjson_1_1_0" ] \
     || [ ! -d "${DEPS_PREFIX}/include/rapidjson" ]; then
-    cd ${DEPS_PREFIX}/include
-    if [ -d "${DEPS_PREFIX}/include/rapidjson" ]; then
-        rm -rf ${DEPS_PREFIX}/include/rapidjson
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/rapidjson" ]; then
+        rm -rf ${DEPS_SOURCE}/rapidjson
     fi
     unzip ${DEPS_PACKAGE}/rapidjson-1.1.0.zip -d .
     mv rapidjson-1.1.0 rapidjson
+    cd rapidjson
+    cp -a include/rapidjson ${DEPS_PREFIX}/include
     touch "${FLAG_DIR}/rapidjson_1_1_0"
 fi
 
