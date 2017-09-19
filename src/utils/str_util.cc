@@ -139,6 +139,16 @@ const string kNullptrString = "nullptr";
   
 static char hex_char[] = "0123456789abcdef";
 
+static const char kWhitespaceASCII[] = {
+  0x09,    // CHARACTER TABULATION
+  0x0A,    // LINE FEED (LF)
+  0x0B,    // LINE TABULATION
+  0x0C,    // FORM FEED (FF)
+  0x0D,    // CARRIAGE RETURN (CR)
+  0x20,    // SPACE
+  0
+};
+
 // for micros < 10ms, print "XX us".
 // for micros < 10sec, print "XX ms".
 // for micros >= 10 sec, print "XX sec".
@@ -222,7 +232,7 @@ string NumberToHumanString(int64_t num) {
   } else {
     snprintf(buf, sizeof(buf), "%" PRIi64 "G", num / 1000000000);
   }
-  return std::string(buf);
+  return string(buf);
 }
 
 string BytesToHumanString(uint64_t bytes) {
@@ -241,7 +251,7 @@ string BytesToHumanString(uint64_t bytes) {
 
   char buf[20];
   snprintf(buf, sizeof(buf), "%.2f %s", final_size, size_name[size_idx]);
-  return std::string(buf);
+  return string(buf);
 }
 
 bool ParseBoolean(const string& type, const string& value) {
@@ -374,7 +384,7 @@ string Str2Hex(const char* _str, unsigned int _len) {
         outbuffer[outoffset] = (char)strtol(tmp,&p,16);
         outoffset++;
     }
-    std::string ret ;
+    string ret ;
     ret.assign(outbuffer,outoffset);
     return ret;
 }
@@ -834,6 +844,59 @@ string TrimString(const string& str, const string& trim) {
     return str.substr(pos);
 }
 
+template<typename STR>
+TrimPositions TrimStringT(const STR& input,
+                          const STR& trim_chars,
+                          TrimPositions positions,
+                          STR* output) {
+  // Find the edges of leading/trailing whitespace as desired.
+  const size_t last_char = input.length() - 1;
+  const size_t first_good_char = (positions & TRIM_LEADING) ?
+      input.find_first_not_of(trim_chars) : 0;
+  const size_t last_good_char = (positions & TRIM_TRAILING) ?
+      input.find_last_not_of(trim_chars) : last_char;
+
+  // When the string was all whitespace, report that we stripped off whitespace
+  // from whichever position the caller was interested in.  For empty input, we
+  // stripped no whitespace, but we still need to clear |output|.
+  if (input.empty() ||
+      (first_good_char == STR::npos) || (last_good_char == STR::npos)) {
+    bool input_was_empty = input.empty();  // in case output == &input
+    output->clear();
+    return input_was_empty ? TRIM_NONE : positions;
+  }
+
+  // Trim the whitespace.
+  *output =
+      input.substr(first_good_char, last_good_char - first_good_char + 1);
+
+  // Return where we trimmed from.
+  return static_cast<TrimPositions>(
+      ((first_good_char == 0) ? TRIM_NONE : TRIM_LEADING) |
+      ((last_good_char == last_char) ? TRIM_NONE : TRIM_TRAILING));
+}
+
+bool TrimString(const string& input,
+                const StringPiece& trim_chars,
+                string* output) {
+  return TrimStringT(input, trim_chars.as_string(), TRIM_ALL, output) !=
+      TRIM_NONE;
+}
+
+TrimPositions TrimWhitespaceASCII(const string& input,
+                                  TrimPositions positions,
+                                  string* output) {
+  return TrimStringT(input, string(kWhitespaceASCII), positions, output);
+}
+
+// This function is only for backward-compatibility.
+// To be removed when all callers are updated.
+TrimPositions TrimWhitespace(const string& input,
+                             TrimPositions positions,
+                             string* output) {
+  return TrimWhitespaceASCII(input, positions, output);
+}
+
 // Return lower-cased version of s.
 string Lowercase(StringPiece s) {
   string result(s.data(), s.size());
@@ -912,6 +975,39 @@ void TitlecaseString(string* s, StringPiece delimiters) {
     }
     upper = (delimiters.find(*ss) != StringPiece::npos);
   }
+}
+
+template<typename STR>
+bool ReplaceCharsT(const STR& input,
+                   const STR& replace_chars,
+                   const STR& replace_with,
+                   STR* output) {
+  bool removed = false;
+  size_t replace_length = replace_with.length();
+
+  *output = input;
+
+  size_t found = output->find_first_of(replace_chars);
+  while (found != STR::npos) {
+    removed = true;
+    output->replace(found, 1, replace_with);
+    found = output->find_first_of(replace_chars, found + replace_length);
+  }
+
+  return removed;
+}
+
+bool ReplaceChars(const string& input,
+                  const StringPiece& replace_chars,
+                  const string& replace_with,
+                  string* output) {
+  return ReplaceCharsT(input, replace_chars.as_string(), replace_with, output);
+}
+
+bool RemoveChars(const string& input,
+                 const StringPiece& remove_chars,
+                 string* output) {
+  return ReplaceChars(input, remove_chars.as_string(), string(), output);
 }
 
 string StringReplace(StringPiece s, StringPiece oldsub, StringPiece newsub,
@@ -1051,7 +1147,97 @@ string DebugString(const string& src) {
     return dst.substr(0, j);
 }
 
-void SplitString(const string& str,
+namespace {
+  
+template <typename STR>
+void SplitStringT(const STR& str,
+                  const typename STR::value_type s,
+                  bool trim_whitespace,
+                  std::vector<STR>* r) {
+  r->clear();
+  size_t last = 0;
+  size_t c = str.size();
+  for (size_t i = 0; i <= c; ++i) {
+    if (i == c || str[i] == s) {
+      STR tmp(str, last, i - last);
+      if (trim_whitespace)
+        TrimWhitespace(tmp, TRIM_ALL, &tmp);
+      // Avoid converting an empty or all-whitespace source string into a vector
+      // of one empty string.
+      if (i != c || !r->empty() || !tmp.empty())
+        r->push_back(tmp);
+      last = i + 1;
+    }
+  }
+}
+
+template <typename STR>
+void SplitStringUsingSubstrT(const STR& str,
+                                    const STR& s,
+                                    std::vector<STR>* r) {
+  r->clear();
+  typename STR::size_type begin_index = 0;
+  while (true) {
+    const typename STR::size_type end_index = str.find(s, begin_index);
+    if (end_index == STR::npos) {
+      const STR term = str.substr(begin_index);
+      STR tmp;
+      TrimWhitespace(term, TRIM_ALL, &tmp);
+      r->push_back(tmp);
+      return;
+    }
+    const STR term = str.substr(begin_index, end_index - begin_index);
+    STR tmp;
+    TrimWhitespace(term, TRIM_ALL, &tmp);
+    r->push_back(tmp);
+    begin_index = end_index + s.size();
+  }
+}
+
+template<typename STR>
+void SplitStringAlongWhitespaceT(const STR& str, std::vector<STR>* result) {
+  result->clear();
+  const size_t length = str.length();
+  if (!length)
+    return;
+
+  bool last_was_ws = false;
+  size_t last_non_ws_start = 0;
+  for (size_t i = 0; i < length; ++i) {
+    switch (str[i]) {
+      // HTML 5 defines whitespace as: space, tab, LF, line tab, FF, or CR.
+      case L' ':
+      case L'\t':
+      case L'\xA':
+      case L'\xB':
+      case L'\xC':
+      case L'\xD':
+        if (!last_was_ws) {
+          if (i > 0) {
+            result->push_back(
+                str.substr(last_non_ws_start, i - last_non_ws_start));
+          }
+          last_was_ws = true;
+        }
+        break;
+
+      default:  // Not a space character.
+        if (last_was_ws) {
+          last_was_ws = false;
+          last_non_ws_start = i;
+        }
+        break;
+    }
+  }
+  if (!last_was_ws) {
+    result->push_back(
+        str.substr(last_non_ws_start, length - last_non_ws_start));
+  }
+}
+
+} // namespace
+
+void StringSplit(const string& str,
                  const string& delim,
                  std::vector<string>* result) {
     result->clear();
@@ -1079,14 +1265,88 @@ void SplitString(const string& str,
     }
 }
 
-std::vector<string> StringSplit(const string& arg, char delim) {
-  std::vector<string> splits;
-  stringstream ss(arg);
-  string item;
-  while (std::getline(ss, item, delim)) {
-    splits.push_back(item);
+void SplitString(const string& str,
+                 char c,
+                 std::vector<string>* r) {
+#if CHAR_MIN < 0
+  DCHECK(c >= 0);
+#endif
+  DCHECK(c < 0x7F);
+  SplitStringT(str, c, true, r);
+}
+
+void SplitStringUsingSubstr(const string& str,
+                            const string& s,
+                            std::vector<string>* r) {
+  SplitStringUsingSubstrT(str, s, r);
+}
+
+void SplitStringDontTrim(const string& str,
+                         char c,
+                         std::vector<string>* r) {
+#if CHAR_MIN < 0
+  DCHECK(c >= 0);
+#endif
+  DCHECK(c < 0x7F);
+  SplitStringT(str, c, false, r);
+}
+
+void SplitStringAlongWhitespace(const string& str,
+                                std::vector<string>* result) {
+  SplitStringAlongWhitespaceT(str, result);
+}
+
+bool SplitStringIntoKeyValue(const string& line,
+                             char key_value_delimiter,
+                             string* key,
+                             string* value) {
+  key->clear();
+  value->clear();
+
+  // Find the delimiter.
+  size_t end_key_pos = line.find_first_of(key_value_delimiter);
+  if (end_key_pos == string::npos) {
+    DVLOG(1) << "cannot find delimiter in: " << line;
+    return false;    // no delimiter
   }
-  return splits;
+  key->assign(line, 0, end_key_pos);
+
+  // Find the value string.
+  string remains(line, end_key_pos, line.size() - end_key_pos);
+  size_t begin_value_pos = remains.find_first_not_of(key_value_delimiter);
+  if (begin_value_pos == string::npos) {
+    DVLOG(1) << "cannot parse value from line: " << line;
+    return false;   // no value
+  }
+  value->assign(remains, begin_value_pos, remains.size() - begin_value_pos);
+  return true;
+}
+
+bool SplitStringIntoKeyValuePairs(const string& line,
+                                  char key_value_delimiter,
+                                  char key_value_pair_delimiter,
+                                  StringPairs* key_value_pairs) {
+  key_value_pairs->clear();
+
+  std::vector<string> pairs;
+  SplitString(line, key_value_pair_delimiter, &pairs);
+
+  bool success = true;
+  for (size_t i = 0; i < pairs.size(); ++i) {
+    // Don't add empty pairs into the result.
+    if (pairs[i].empty())
+      continue;
+
+    string key;
+    string value;
+    if (!SplitStringIntoKeyValue(pairs[i], key_value_delimiter, &key, &value)) {
+      // Don't return here, to allow for pairs without associated
+      // value or key; just record that the split failed.
+      success = false;
+    }
+    key_value_pairs->push_back(make_pair(key, value));
+  }
+  return success;
 }
 
 static const uint32_t MAX_PATH_LENGTH = 10240;
@@ -1110,59 +1370,6 @@ static bool SplitPath(const string& path,
         *isdir = (path[path.size() - 1] == '/');
     }
     return true;
-}
-
-bool SplitStringIntoKeyValue(const std::string& line,
-                             char key_value_delimiter,
-                             std::string* key,
-                             std::string* value) {
-  key->clear();
-  value->clear();
-
-  // Find the delimiter.
-  size_t end_key_pos = line.find_first_of(key_value_delimiter);
-  if (end_key_pos == std::string::npos) {
-    DVLOG(1) << "cannot find delimiter in: " << line;
-    return false;    // no delimiter
-  }
-  key->assign(line, 0, end_key_pos);
-
-  // Find the value string.
-  std::string remains(line, end_key_pos, line.size() - end_key_pos);
-  size_t begin_value_pos = remains.find_first_not_of(key_value_delimiter);
-  if (begin_value_pos == std::string::npos) {
-    DVLOG(1) << "cannot parse value from line: " << line;
-    return false;   // no value
-  }
-  value->assign(remains, begin_value_pos, remains.size() - begin_value_pos);
-  return true;
-}
-
-bool SplitStringIntoKeyValuePairs(const std::string& line,
-                                  char key_value_delimiter,
-                                  char key_value_pair_delimiter,
-                                  StringPairs* key_value_pairs) {
-  key_value_pairs->clear();
-
-  std::vector<std::string> pairs;
-  SplitString(line, key_value_pair_delimiter, &pairs);
-
-  bool success = true;
-  for (size_t i = 0; i < pairs.size(); ++i) {
-    // Don't add empty pairs into the result.
-    if (pairs[i].empty())
-      continue;
-
-    std::string key;
-    std::string value;
-    if (!SplitStringIntoKeyValue(pairs[i], key_value_delimiter, &key, &value)) {
-      // Don't return here, to allow for pairs without associated
-      // value or key; just record that the split failed.
-      success = false;
-    }
-    key_value_pairs->push_back(make_pair(key, value));
-  }
-  return success;
 }
 
 bool SplitAndParseAsInts(StringPiece text, char delim,

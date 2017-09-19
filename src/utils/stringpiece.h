@@ -138,6 +138,11 @@ class StringPiece {
   // Return a string that contains the copy of the referenced data.
   string ToString(bool hex) const;
   
+  string as_string() const {
+    // std::string doesn't like to take a NULL pointer even with a 0 size.
+    return empty() ? string() : string(data(), size());
+  }
+  
   // Decodes the current slice interpreted as an hexadecimal string into result,
   // if successful returns true, if this isn't a valid hex string
   // (e.g not coming from Slice::ToString(true)) DecodeHex returns false.
@@ -297,6 +302,41 @@ class PinnableSlice : public StringPiece, public Cleanable {
 
 // allow StringPiece to be logged
 extern std::ostream& operator<<(std::ostream& o, StringPiece piece);
+
+// Hashing ---------------------------------------------------------------------
+
+// We provide appropriate hash functions so StringPiece and StringPiece16 can
+// be used as keys in hash sets and maps.
+
+// This hash function is copied from butil/containers/hash_tables.h. We don't
+// use the ones already defined for string and string16 directly because it
+// would require the string constructors to be called, which we don't want.
+#define HASH_STRING_PIECE(StringPieceType, string_piece)                \
+  std::size_t result = 0;                                               \
+  for (StringPieceType::const_iterator i = string_piece.begin();        \
+       i != string_piece.end(); ++i)                                    \
+    result = (result * 131) + *i;                                       \
+  return result;                                                        \
+
+namespace BASE_HASH_NAMESPACE {
+#if defined(COMPILER_GCC)
+
+template<>
+struct hash<StringPiece> {
+  std::size_t operator()(const StringPiece& sp) const {
+    HASH_STRING_PIECE(StringPiece, sp);
+  }
+};
+
+#elif defined(COMPILER_MSVC)
+
+inline size_t hash_value(const StringPiece& sp) {
+  HASH_STRING_PIECE(StringPiece, sp);
+}
+
+#endif  // COMPILER
+
+}  // namespace BASE_HASH_NAMESPACE
 
 }  // namespace bubblefs
 

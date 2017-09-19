@@ -69,6 +69,8 @@ limitations under the License. */
 #define BUBBLEFS_UTILS_STR_UTIL_H_
 
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include <functional>
 #include <sstream>
 #include <string>
@@ -149,6 +151,35 @@ inline string ToString(T value) {
   return os.str();
 #endif
 }
+
+// Reserves enough memory in |str| to accommodate |length_with_null| characters,
+// sets the size of |str| to |length_with_null - 1| characters, and returns a
+// pointer to the underlying contiguous array of characters.  This is typically
+// used when calling a function that writes results into a character array, but
+// the caller wants the data to be managed by a string-like object.  It is
+// convenient in that is can be used inline in the call, and fast in that it
+// avoids copying the results of the call from a char* into a string.
+//
+// |length_with_null| must be at least 2, since otherwise the underlying string
+// would have size 0, and trying to access &((*str)[0]) in that case can result
+// in a number of problems.
+//
+// Internally, this takes linear time because the resize() call 0-fills the
+// underlying array for potentially all
+// (|length_with_null - 1| * sizeof(string_type::value_type)) bytes.  Ideally we
+// could avoid this aspect of the resize() call, as we expect the caller to
+// immediately write over this memory, but there is no other way to set the size
+// of the string, and not doing that will mean people who access |str| rather
+// than str.c_str() will get back a string of whatever size |str| had on entry
+// to this function (probably 0).
+template <class string_type>
+inline typename string_type::value_type* WriteInto(string_type* str,
+                                                   size_t length_with_null) {
+  DCHECK_GT(length_with_null, 1u);
+  str->reserve(length_with_null);
+  str->resize(length_with_null - 1);
+  return &((*str)[0]);
+}
   
 inline bool IsVisible(char c) {
     return (c >= 0x20 && c <= 0x7E);
@@ -198,6 +229,24 @@ inline uint16_t ToUpperASCII(uint16_t c) {
   return (c >= 'a' && c <= 'z') ? (c + ('A' - 'a')) : c;
 }
 
+// Function objects to aid in comparing/searching strings.
+// butil::CaseInsensitiveCompare<typename STR::value_type>()
+template<typename Char> struct CaseInsensitiveCompare {
+ public:
+  bool operator()(Char x, Char y) const {
+    // TODO(darin): Do we really want to do locale sensitive comparisons here?
+    // See http://crbug.com/24917
+    return tolower(x) == tolower(y);
+  }
+};
+
+template<typename Char> struct CaseInsensitiveCompareASCII {
+ public:
+  bool operator()(Char x, Char y) const {
+    return ToLowerASCII(x) == ToLowerASCII(y);
+  }
+};
+
 // Determines the type of ASCII character, independent of locale (the C
 // library versions will change based on locale).
 template <typename Char>
@@ -226,6 +275,18 @@ inline bool IsHexDigit(Char c) {
   return (c >= '0' && c <= '9') ||
          (c >= 'A' && c <= 'F') ||
          (c >= 'a' && c <= 'f');
+}
+
+template <typename Char>
+inline Char HexDigitToInt(Char c) {
+  DCHECK(IsHexDigit(c));
+  if (c >= '0' && c <= '9')
+    return c - '0';
+  if (c >= 'A' && c <= 'F')
+    return c - 'A' + 10;
+  if (c >= 'a' && c <= 'f')
+    return c - 'a' + 10;
+  return 0;
 }
 
 // Append a human-readable time in micros.
@@ -373,6 +434,34 @@ void Trim(std::vector<string>* str_list);
 
 string TrimString(const string& str, const string& trim);
 
+// Trims any whitespace from either end of the input string.  Returns where
+// whitespace was found.
+// The non-wide version has two functions:
+// * TrimWhitespaceASCII()
+//   This function is for ASCII strings and only looks for ASCII whitespace;
+// Please choose the best one according to your usage.
+// NOTE: Safe to use the same variable for both input and output.
+enum TrimPositions {
+  TRIM_NONE     = 0,
+  TRIM_LEADING  = 1 << 0,
+  TRIM_TRAILING = 1 << 1,
+  TRIM_ALL      = TRIM_LEADING | TRIM_TRAILING,
+};
+
+bool TrimString(const string& input,
+                const StringPiece& trim_chars,
+                string* output);
+
+TrimPositions TrimWhitespaceASCII(const string& input,
+                                  TrimPositions positions,
+                                  string* output);
+
+// Deprecated. This function is only for backward compatibility and calls
+// TrimWhitespaceASCII().
+TrimPositions TrimWhitespace(const string& input,
+                             TrimPositions positions,
+                             string* output);
+
 // Return lower-cased version of s.
 string Lowercase(StringPiece s);
 
@@ -399,8 +488,8 @@ void TitlecaseString(string* s, StringPiece delimiters);
 string StringReplace(StringPiece s, StringPiece oldsub, StringPiece newsub,
                      bool replace_all);
 
-void string_replace(const std::string &sub_str1,
-                    const std::string &sub_str2, std::string *str);
+void string_replace(const string &sub_str1,
+                    const string &sub_str2, string *str);
 
 // Join functionality
 template <typename T>
@@ -427,25 +516,55 @@ struct SkipWhitespace {
 
 string DebugString(const string& src);
 
-void SplitString(const string& str,
+void StringSplit(const string& str,
                  const string& delim,
                  std::vector<string>* result);
 
-std::vector<string> StringSplit(const string& arg, char delim);
+// |str| should not be in a multi-byte encoding like Shift-JIS or GBK in which
+// the trailing byte of a multi-byte character can be in the ASCII range.
+// UTF-8, and other single/multi-byte ASCII-compatible encodings are OK.
+// Note: |c| must be in the ASCII range.
+void SplitString(const string& str,
+                 char c,
+                 std::vector<string>* r);
 
-static bool SplitPath(const string& path,
-                      std::vector<string>* element,
-                      bool* isdir = nullptr);
+// The same as SplitString, but use a substring delimiter instead of a char.
+void SplitStringUsingSubstr(const string& str,
+                            const string& s,
+                            std::vector<string>* r);
+
+// |str| should not be in a multi-byte encoding like Shift-JIS or GBK in which
+// the trailing byte of a multi-byte character can be in the ASCII range.
+// UTF-8, and other single/multi-byte ASCII-compatible encodings are OK.
+// Note: |c| must be in the ASCII range.
+void SplitStringDontTrim(const string& str,
+                         char c,
+                         std::vector<string>* r);
+
+// WARNING: this uses whitespace as defined by the HTML5 spec. If you need
+// a function similar to this but want to trim all types of whitespace, then
+// factor this out into a function that takes a string containing the characters
+// that are treated as whitespace.
+//
+// Splits the string along whitespace (where whitespace is the five space
+// characters defined by HTML 5). Each contiguous block of non-whitespace
+// characters is added to result.
+void SplitStringAlongWhitespace(const string& str,
+                                std::vector<string>* result);
 
 // Splits |line| into key value pairs according to the given delimiters and
 // removes whitespace leading each key and trailing each value. Returns true
 // only if each pair has a non-empty key and value. |key_value_pairs| will
 // include ("","") pairs for entries without |key_value_delimiter|.
-typedef std::vector<std::pair<std::string, std::string> > StringPairs;
-BASE_EXPORT bool SplitStringIntoKeyValuePairs(const std::string& line,
-                                              char key_value_delimiter,
-                                              char key_value_pair_delimiter,
-                                              StringPairs* key_value_pairs);
+typedef std::vector<std::pair<string, string> > StringPairs;
+bool SplitStringIntoKeyValuePairs(const string& line,
+                                  char key_value_delimiter,
+                                  char key_value_pair_delimiter,
+                                  StringPairs* key_value_pairs);
+
+static bool SplitPath(const string& path,
+                      std::vector<string>* element,
+                      bool* isdir = nullptr);
 
 // Split strings using any of the supplied delimiters. For example:
 // Split("a,b.c,d", ".,") would return {"a", "b", "c", "d"}.

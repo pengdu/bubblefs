@@ -68,6 +68,29 @@
 namespace bubblefs {
 namespace timeutil {
 
+static const int64 kSecondsPerMinute = 60;
+static const int64 kSecondsPerHour = 3600;
+static const int64 kSecondsPerDay = kSecondsPerHour * 24;
+static const int64 kSecondsPer400Years =
+    kSecondsPerDay * (400 * 365 + 400 / 4 - 3);
+// Seconds from 0001-01-01T00:00:00 to 1970-01-01T:00:00:00
+static const int64 kSecondsFromEraToEpoch = 62135596800LL;
+// The range of timestamp values we support.
+static const int64 kMinTime = -62135596800LL;  // 0001-01-01T00:00:00
+static const int64 kMaxTime = 253402300799LL;  // 9999-12-31T23:59:59
+
+static const int64_t kMillisPerSecond = 1000;
+static const int64_t kMicrosPerSecond = 1000000;
+static const int64_t kMicrosPerMillisecond = 1000;
+static const int64_t kMicrosPerSecond = kMicrosPerMillisecond * kMillisPerSecond;
+static const int64_t kMicrosPerMinute = kMicrosPerSecond * 60;
+static const int64_t kMicrosPerHour = kMicrosPerMinute * 60;
+static const int64_t kMicrosPerDay = kMicrosPerHour * 24;
+static const int64_t kMicrosPerWeek = kMicrosPerDay * 7;
+static const int64_t kNanosPerMicrosecond = 1000;
+static const int64_t kNanosPerMillisecond = 1000000;
+static const int64_t kNanosPerSecond = 1000000000;  
+  
 // The min/max Timestamp/Duration values we support.
 //
 // For "0001-01-01T00:00:00Z".
@@ -75,7 +98,9 @@ static const int64 kTimestampMinSeconds = -62135596800LL;
 // For "9999-12-31T23:59:59.999999999Z".
 static const int64 kTimestampMaxSeconds = 253402300799LL;
 static const int64 kDurationMinSeconds = -315576000000LL;
-static const int64 kDurationMaxSeconds = 315576000000LL;  
+static const int64 kDurationMaxSeconds = 315576000000LL;
+
+static const char kTimestampFormat[] = "%E4Y-%m-%dT%H:%M:%S";
   
 typedef int64_t nsecs_t;       // nano-seconds
 
@@ -171,13 +196,13 @@ enum Precision {
     kUsec,
 };
 
-static inline long get_micros() {
+static inline int64_t get_micros() {
     struct timeval tv;
     gettimeofday(&tv, nullptr);
-    return static_cast<long>(tv.tv_sec) * 1000000 + tv.tv_usec; // us
+    return static_cast<int64_t>(tv.tv_sec) * 1000000 + tv.tv_usec; // us
 }
 
-static inline long get_millis() {
+static inline int32_t get_millis() {
    return static_cast<int32_t>(get_micros() / 1000); // ms
 }
 
@@ -244,6 +269,21 @@ static inline void make_timeout(struct timespec* pts, long millisecond) {
 // ----------------------
 // timespec manipulations
 // ----------------------
+
+inline timespec make_timespec(int64_t sec, int64_t nsec) {
+  timespec tm;
+  tm.tv_sec = sec;
+  tm.tv_nsec = nsec;
+  return tm;
+}
+
+inline timespec max_timespec() {
+  return make_timespec(-1, 0);
+}
+
+inline bool is_max_timespec(timespec &tm) {
+  return (-1 == tm.tv_sec);
+}
 
 // Let tm->tv_nsec be in [0, 1,000,000,000) if it's not.
 inline void timespec_normalize(timespec* tm) {
@@ -367,6 +407,14 @@ inline timespec seconds_to_timespec(int64_t s) {
 // For conversions between timespec and timeval, use TIMEVAL_TO_TIMESPEC
 // and TIMESPEC_TO_TIMEVAL defined in <sys/time.h>
 // ---------------------------------------------------------------------
+
+inline timeval make_timeval(int64_t sec, int64_t usec) {
+  timeval tv;
+  tv.tv_sec = sec;
+  tv.tv_usec = usec;
+  return tv;
+}
+
 inline int64_t timeval_to_microseconds(const timeval& tv) {
     return tv.tv_sec * 1000000L + tv.tv_usec;
 }
@@ -464,7 +512,7 @@ inline int64_t cpuwide_time_s() {
 // --------------------------------------------------------------------
 inline int64_t gettimeofday_us() {
     timeval now;
-    gettimeofday(&now, NULL);
+    gettimeofday(&now, nullptr);
     return now.tv_sec * 1000000L + now.tv_usec;
 }
 

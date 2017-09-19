@@ -152,6 +152,8 @@ int PickUnusedPortOrDie() {
 }  // namespace internal
 
 namespace port {
+
+////////////////////////////////Lock///////////////////////////////////////  
   
 static int PthreadCall(const char* label, int result) {
   if (result != 0 && result != ETIMEDOUT) {
@@ -312,6 +314,8 @@ void RWMutex::WriteLock() { PthreadCall("write lock", pthread_rwlock_wrlock(&mu_
 void RWMutex::ReadUnlock() { PthreadCall("read unlock", pthread_rwlock_unlock(&mu_)); }
 
 void RWMutex::WriteUnlock() { PthreadCall("write unlock", pthread_rwlock_unlock(&mu_)); }
+
+////////////////////////////////Lock/////////////////////////////////////////////////////////
 
 int PhysicalCoreID() {
 #if defined(__x86_64__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 22))
