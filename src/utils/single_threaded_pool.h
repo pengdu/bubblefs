@@ -21,6 +21,8 @@
 #define BUBBLEFS_UTILS_SINGLE_THREADED_POOL_H_
 
 #include <stdlib.h>   // malloc & free
+#include <algorithm>
+#include "platform/macros.h"
 
 namespace bubblefs {
 namespace base {
