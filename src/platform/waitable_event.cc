@@ -154,15 +154,15 @@ class SyncWaiter : public WaitableEvent::Waiter {
 };
 
 void WaitableEvent::Wait() {
-  bool result = TimedWait(timeutil::max_timespec());
+  bool result = TimedWait(-1);
   DCHECK(result) << "TimedWait() should never fail with infinite timeout";
 }
 
-bool WaitableEvent::TimedWait(const struct timespec& max_time) {
+bool WaitableEvent::TimedWait(const int64_t max_time) {
   //butil::ThreadRestrictions::AssertWaitAllowed();
   const int64_t now_time = timeutil::get_micros();
-  const int64_t end_time = now_time + timeutil::timespec_to_microseconds(max_time);
-  const bool finite_time = !timeutil::is_max_timespec(max_time);
+  const int64_t end_time = now_time + max_time;
+  const bool finite_time = -1 != max_time;
 
   kernel_->lock_.Acquire();
   if (kernel_->signaled_) {

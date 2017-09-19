@@ -223,7 +223,7 @@ class BASE_EXPORT ConditionVariable {
   // Wait() releases the caller's critical section atomically as it starts to
   // sleep, and the reacquires it when it is signaled.
   void Wait();
-  void TimedWait(const struct timespec &max_time);
+  void TimedWait(const int64_t &max_time);
   // Broadcast() revives all waiting threads.
   void Broadcast();
   // Signal() revives one waiting thread.

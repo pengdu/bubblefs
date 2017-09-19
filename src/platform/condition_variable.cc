@@ -33,11 +33,9 @@ void ConditionVariable::Wait() {
   DCHECK_EQ(0, rv);
 }
 
-void ConditionVariable::TimedWait(const struct timespec &max_time) {
+void ConditionVariable::TimedWait(const int64_t max_time) {
   //butil::ThreadRestrictions::AssertWaitAllowed();
-  struct timespec relative_time;
-  relative_time.tv_sec = max_time.tv_sec;
-  relative_time.tv_nsec = max_time.tv_nsec;
+  struct timespec relative_time = timeutil::milliseconds_to_timespec(max_time);
 
 #if defined(OS_MACOSX)
   int rv = pthread_cond_timedwait_relative_np(

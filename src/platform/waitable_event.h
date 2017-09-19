@@ -80,7 +80,7 @@ class BASE_EXPORT WaitableEvent {
   // Wait up until max_time has passed for the event to be signaled.  Returns
   // true if the event was signaled.  If this method returns false, then it
   // does not necessarily mean that max_time was exceeded.
-  bool TimedWait(const struct timespec& max_time);
+  bool TimedWait(const int64_t max_time);
 
 #if defined(OS_WIN)
   HANDLE handle() const { return handle_; }

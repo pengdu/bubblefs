@@ -30,7 +30,7 @@
 
 namespace bubblefs {
 
-namespace thread {
+namespace concurrent {
 // Valid values for SetThreadPriority()
 enum ThreadPriority{
   kThreadPriority_Normal,
@@ -155,8 +155,8 @@ class BASE_EXPORT PlatformThread {
   // Yield the current thread so another thread can be scheduled.
   static void YieldCurrentThread();
 
-  // Sleeps for the specified duration.
-  static void Sleep(struct timespec& duration);
+  // Sleeps for the specified duration us.
+  static void Sleep(int64_t duration);
 
   // Sets the thread name visible to debuggers/tools. This has no effect
   // otherwise. This name pointer is not copied internally. Thus, it must stay
@@ -203,7 +203,7 @@ class BASE_EXPORT PlatformThread {
   DISALLOW_IMPLICIT_CONSTRUCTORS(PlatformThread);
 };
 
-} // namespace thread
+} // namespace concurrent
   
 namespace bdcommon {
 

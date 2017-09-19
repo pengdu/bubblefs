@@ -104,8 +104,103 @@ inline bool RefCounted::RefCountIsOne() const {
   return (ref_.load(std::memory_order_acquire) == 1);
 }
 
+///////////////////////////////////////////////////////////
+
+class BASE_EXPORT RefCountedBase {
+ public:
+  bool HasOneRef() const { return ref_count_ == 1; }
+
+ protected:
+  RefCountedBase()
+      : ref_count_(0)
+      , in_dtor_(false)
+      {
+  }
+
+  ~RefCountedBase() {
+  #ifndef NDEBUG
+    DCHECK(in_dtor_) << "RefCounted object deleted without calling Release()";
+  #endif
+  }
+
+  void AddRef() const {
+    // TODO(maruel): Add back once it doesn't assert 500 times/sec.
+    // Current thread books the critical section "AddRelease"
+    // without release it.
+    // DFAKE_SCOPED_LOCK_THREAD_LOCKED(add_release_);
+  #ifndef NDEBUG
+    DCHECK(!in_dtor_);
+  #endif
+    ++ref_count_;
+  }
+
+  // Returns true if the object should self-delete.
+  bool Release() const {
+    // TODO(maruel): Add back once it doesn't assert 500 times/sec.
+    // Current thread books the critical section "AddRelease"
+    // without release it.
+    // DFAKE_SCOPED_LOCK_THREAD_LOCKED(add_release_);
+  #ifndef NDEBUG
+    DCHECK(!in_dtor_);
+  #endif
+    if (--ref_count_ == 0) {
+  #ifndef NDEBUG
+      in_dtor_ = true;
+  #endif
+      return true;
+    }
+    return false;
+  }
+
+ private:
+  mutable int ref_count_;
+#if defined(__clang__)
+  mutable bool ALLOW_UNUSED  in_dtor_;
+#else
+  mutable bool in_dtor_;
+#endif
+
+  DISALLOW_COPY_AND_ASSIGN(RefCountedBase);
+};
+
 //
-// A thread-safe variant of RefCounted<T>
+// A base class for reference counted classes.  Otherwise, known as a cheap
+// knock-off of WebKit's RefCountedThreadUnsafe<T> class.  To use this guy just extend your
+// class from it like so:
+//
+//   class MyFoo : public butil::RefCountedThreadUnsafe<MyFoo> {
+//    ...
+//    private:
+//     friend class butil::RefCountedThreadUnsafe<MyFoo>;
+//     ~MyFoo();
+//   };
+//
+// You should always make your destructor private, to avoid any code deleting
+// the object accidently while there are references to it.
+template <class T>
+class RefCountedThreadUnsafe : public RefCountedBase {
+ public:
+  RefCountedThreadUnsafe() {}
+
+  void AddRef() const {
+    RefCountedBase::AddRef();
+  }
+
+  void Release() const {
+    if (RefCountedBase::Release()) {
+      delete static_cast<const T*>(this);
+    }
+  }
+
+ protected:
+  ~RefCountedThreadUnsafe() {}
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(RefCountedThreadUnsafe<T>);
+};
+
+//
+// A thread-safe variant of RefCountedThreadUnsafe<T>
 //
 //   class MyFoo : public butil::RefCountedThreadSafe<MyFoo> {
 //    ...
@@ -116,7 +211,6 @@ inline bool RefCounted::RefCountIsOne() const {
 //    private:
 //     friend class butil::RefCountedThreadSafe<MyFoo>;
 //     ~MyFoo();
-
 class BASE_EXPORT RefCountedThreadSafeBase {
  public:
   bool HasOneRef() const;
