@@ -9,34 +9,36 @@ PROJECT_DIR=../..
 SRC_PATH=$(PROJECT_DIR)/src
 
 # dependencies
+BOOST_PATH=$(PROJECT_DIR)/third_party/boost
 GTEST_PATH=$(PROJECT_DIR)/third_party
 GLOG_PATH=$(PROJECT_DIR)/third_party
 
 INCLUDE_PATH = -I$(SRC_PATH) \
+               -I$(BOOST_PATH) \
                -I$(GTEST_PATH)/include \
                -I$(GLOG_PATH)/include
 
 LDFLAGS = -L$(GTEST_PATH)/lib -lgtest \
           -L$(GLOG_PATH)/lib -lglog \
-          -lgflags -lpthread -lz -lrt
+          -lgflags -lpthread -ldl -lz -lrt
 
 SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ldl \
               -shared -Wl,--version-script,so-version-script # hide symbol of third_party libs
 
-CXXFLAGS = -pthread -std=c++11 -Wall -fPIC $(OPT)
+CXXFLAGS = -pthread -std=c++11 -fmax-errors=5 -Wall -fPIC $(OPT)
 
-ATOMICOPS_TEST_SRC = $(wildcard *.cc)
-ATOMICOPS_TEST_OBJ = $(patsubst %.cc, %.o, $(ATOMICOPS_TEST_SRC))
-ATOMICOPS_TEST_HEADER = $(wildcard *.h)
+BDCOMMON_TEST_SRC = $(wildcard *.cc)
+BDCOMMON_TEST_OBJ = $(patsubst %.cc, %.o, $(BDCOMMON_TEST_SRC))
+BDCOMMON_TEST_HEADER = $(wildcard *.h)
 
-OBJS = $(ATOMICOPS_TEST_OBJ)
+OBJS = $(BDCOMMON_TEST_OBJ)
 
-BIN = atomicops_test
+BIN = bdcommon_test
 
 all: $(BIN)
 	@echo 'Done'
 	
-atomicops_test: $(ATOMICOPS_TEST_OBJ)
+bdcommon_test: $(BDCOMMON_TEST_OBJ)
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 %.o: %.cc
