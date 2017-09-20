@@ -16,6 +16,7 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_MUTEX_H_
 #define BUBBLEFS_PLATFORM_MUTEX_H_
 
+#include <pthread.h>
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
@@ -57,6 +58,82 @@ class SCOPED_LOCKABLE mutex_lock : public std::unique_lock<std::mutex> {
 
 // Catch bug where variable name is omitted, e.g. mutex_lock (mu);
 #define mutex_lock(x) static_assert(0, "mutex_lock_decl_missing_var_name");
+
+namespace port { 
+
+class CondVar;
+
+// A Mutex represents an exclusive lock.
+class Mutex {
+ public:
+// We want to give users opportunity to default all the mutexes to adaptive if
+// not specified otherwise. This enables a quick way to conduct various
+// performance related experiements.
+//
+// NB! Support for adaptive mutexes is turned on by definining
+// ROCKSDB_PTHREAD_ADAPTIVE_MUTEX during the compilation. If you use RocksDB
+// build environment then this happens automatically; otherwise it's up to the
+// consumer to define the identifier.
+  Mutex();
+  Mutex(bool adaptive);
+  ~Mutex();
+
+  void Lock(const char* msg = nullptr, int64_t msg_threshold = 5000);
+  bool TryLock();
+  bool TimedLock(long _millisecond);
+  void Unlock();
+  bool IsLocked();
+  // this will assert if the mutex is not locked
+  // it does NOT verify that mutex is held by a calling thread
+  void AssertHeld();
+
+ private:
+  void AfterLock(const char* msg = nullptr, int64_t msg_threshold = 5000);
+  void BeforeUnlock();
+   
+  friend class CondVar;
+  pthread_mutex_t mu_;
+  pthread_t owner_;
+#ifndef NDEBUG
+  bool locked_;
+#endif
+  DISALLOW_COPY_AND_ASSIGN(Mutex);
+};
+
+class CondVar {
+ public:
+  explicit CondVar(Mutex* mu);
+  ~CondVar();
+  void Wait(const char* msg = nullptr);
+  // Timed condition wait.  Returns true if timeout occurred.
+  bool TimedWait(uint64_t abs_time_us, const char* msg = nullptr);
+  // Time wait in timeout ms, return true if signalled
+  bool IntervalWait(uint64_t timeout_interval, const char* msg = nullptr);
+  void Signal();
+  void SignalAll();
+  void Broadcast();
+ private:
+  pthread_cond_t cv_;
+  Mutex* mu_;
+};
+
+class RWMutex {
+ public:
+  RWMutex();
+  ~RWMutex();
+
+  void ReadLock();
+  void WriteLock();
+  void ReadUnlock();
+  void WriteUnlock();
+  void AssertHeld() { }
+
+ private:
+  pthread_rwlock_t mu_; // the underlying platform mutex
+  DISALLOW_COPY_AND_ASSIGN(RWMutex);
+};
+  
+} // namespace port
 
 }  // namespace bubblefs
 

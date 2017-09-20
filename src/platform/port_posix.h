@@ -39,6 +39,7 @@ limitations under the License.
 #include <limits>
 #include <string>
 #include "platform/cpu_info.h"
+#include "platform/mutex.h"
 
 namespace bubblefs {
   
@@ -51,79 +52,7 @@ namespace port {
 static const int kMaxInt32 = std::numeric_limits<int32_t>::max();
 static const uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
 static const int64_t kMaxInt64 = std::numeric_limits<int64_t>::max();
-static const size_t kMaxSizet = std::numeric_limits<size_t>::max();  
-
-class CondVar;
-
-// A Mutex represents an exclusive lock.
-class Mutex {
- public:
-// We want to give users opportunity to default all the mutexes to adaptive if
-// not specified otherwise. This enables a quick way to conduct various
-// performance related experiements.
-//
-// NB! Support for adaptive mutexes is turned on by definining
-// ROCKSDB_PTHREAD_ADAPTIVE_MUTEX during the compilation. If you use RocksDB
-// build environment then this happens automatically; otherwise it's up to the
-// consumer to define the identifier.
-  Mutex();
-  Mutex(bool adaptive);
-  ~Mutex();
-
-  void Lock(const char* msg = nullptr, int64_t msg_threshold = 5000);
-  bool TryLock();
-  bool TimedLock(long _millisecond);
-  void Unlock();
-  bool IsLocked();
-  // this will assert if the mutex is not locked
-  // it does NOT verify that mutex is held by a calling thread
-  void AssertHeld();
-
- private:
-  void AfterLock(const char* msg = nullptr, int64_t msg_threshold = 5000);
-  void BeforeUnlock();
-   
-  friend class CondVar;
-  pthread_mutex_t mu_;
-  pthread_t owner_;
-#ifndef NDEBUG
-  bool locked_;
-#endif
-  DISALLOW_COPY_AND_ASSIGN(Mutex);
-};
-
-class RWMutex {
- public:
-  RWMutex();
-  ~RWMutex();
-
-  void ReadLock();
-  void WriteLock();
-  void ReadUnlock();
-  void WriteUnlock();
-  void AssertHeld() { }
-
- private:
-  pthread_rwlock_t mu_; // the underlying platform mutex
-  DISALLOW_COPY_AND_ASSIGN(RWMutex);
-};
-
-class CondVar {
- public:
-  explicit CondVar(Mutex* mu);
-  ~CondVar();
-  void Wait(const char* msg = nullptr);
-  // Timed condition wait.  Returns true if timeout occurred.
-  bool TimedWait(uint64_t abs_time_us, const char* msg = nullptr);
-  // Time wait in timeout ms, return true if signalled
-  bool IntervalWait(uint64_t timeout_interval, const char* msg = nullptr);
-  void Signal();
-  void SignalAll();
-  void Broadcast();
- private:
-  pthread_cond_t cv_;
-  Mutex* mu_;
-};
+static const size_t kMaxSizet = std::numeric_limits<size_t>::max();
 
 static inline void AsmVolatilePause() {
 #if defined(__i386__) || defined(__x86_64__)
@@ -216,6 +145,7 @@ extern std::string OperatingSystemArchitecture();
 extern std::string Hostname();
 
 } // namespace port
+
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PORT_POSIX_H_
