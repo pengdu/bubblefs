@@ -562,6 +562,7 @@ bool SplitStringIntoKeyValuePairs(const string& line,
                                   char key_value_pair_delimiter,
                                   StringPairs* key_value_pairs);
 
+static const uint32_t MAX_PATH_LENGTH = 10240;
 static bool SplitPath(const string& path,
                       std::vector<string>* element,
                       bool* isdir = nullptr);

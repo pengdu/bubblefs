@@ -24,6 +24,42 @@ namespace core {
 
 // Lower-level versions of Get... that read directly from a character buffer
 // without any bounds checking.
+  
+inline void EncodeBigEndian(char* buf, uint64_t value) {
+    buf[0] = (value >> 56) & 0xff;
+    buf[1] = (value >> 48) & 0xff;
+    buf[2] = (value >> 40) & 0xff;
+    buf[3] = (value >> 32) & 0xff;
+    buf[4] = (value >> 24) & 0xff;
+    buf[5] = (value >> 16) & 0xff;
+    buf[6] = (value >> 8) & 0xff;
+    buf[7] = value & 0xff;
+}
+
+inline uint64_t DecodeBigEndian64(const char* buf) {
+    return ((static_cast<uint64_t>(static_cast<unsigned char>(buf[0]))) << 56
+        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[1])) << 48)
+        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[2])) << 40)
+        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[3])) << 32)
+        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[4])) << 24)
+        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[5])) << 16)
+        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[6])) << 8)
+        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[7]))));
+}
+
+inline void EncodeBigEndian(char* buf, uint32_t value) {
+    buf[0] = (value >> 24) & 0xff;
+    buf[1] = (value >> 16) & 0xff;
+    buf[2] = (value >> 8) & 0xff;
+    buf[3] = value & 0xff;
+}
+
+inline uint32_t DecodeBigEndian32(const char* buf) {
+    return ((static_cast<uint64_t>(static_cast<unsigned char>(buf[0])) << 24)
+        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[1])) << 16)
+        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[2])) << 8)
+        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[3]))));
+}
 
 inline uint16 DecodeFixed16(const char* ptr) {
   if (port::kLittleEndian) {

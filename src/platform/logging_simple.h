@@ -4,7 +4,7 @@
 //
 // Author: yanshiguang02@baidu.com
 
-// baidu/common/logging.h in c++11
+// baidu/common/logging.h
 
 #ifndef BUBBLEFS_PLATFORM_LOGGING_SIMPLE_H_
 #define BUBBLEFS_PLATFORM_LOGGING_SIMPLE_H_

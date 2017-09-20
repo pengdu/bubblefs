@@ -169,7 +169,7 @@ class StringPiece {
   // Compare two slices and returns the first byte where they differ
   size_t difference_offset(const StringPiece& b) const;
 
- private:
+  // private: make these public for rocksdbjni access
   const char* data_;
   size_t size_;
 
@@ -335,7 +335,6 @@ inline size_t hash_value(const StringPiece& sp) {
 }
 
 #endif  // COMPILER
-
 }  // namespace BASE_HASH_NAMESPACE
 
 }  // namespace bubblefs

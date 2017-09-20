@@ -1349,7 +1349,6 @@ bool SplitStringIntoKeyValuePairs(const string& line,
   return success;
 }
 
-static const uint32_t MAX_PATH_LENGTH = 10240;
 static bool SplitPath(const string& path,
                       std::vector<string>* element,
                       bool* isdir) {

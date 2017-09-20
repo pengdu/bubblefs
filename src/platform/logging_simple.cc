@@ -4,7 +4,7 @@
 //
 // Author: yanshiguang02@baidu.com
 
-// baidu/common/src/logging.cc in c++11
+// baidu/common/src/logging.cc
 
 #include "platform/logging_simple.h"
 #include <sys/time.h>

@@ -76,42 +76,6 @@ inline void TF_UNALIGNED_STORE64(void *p, uint64 v) {
   memcpy(p, &v, sizeof v);
 }
 #endif // TF_USE_UNALIGNED  
-  
-static inline void EncodeBigEndian(char* buf, uint64_t value) {
-    buf[0] = (value >> 56) & 0xff;
-    buf[1] = (value >> 48) & 0xff;
-    buf[2] = (value >> 40) & 0xff;
-    buf[3] = (value >> 32) & 0xff;
-    buf[4] = (value >> 24) & 0xff;
-    buf[5] = (value >> 16) & 0xff;
-    buf[6] = (value >> 8) & 0xff;
-    buf[7] = value & 0xff;
-}
-
-static inline uint64_t DecodeBigEndian64(const char* buf) {
-    return ((static_cast<uint64_t>(static_cast<unsigned char>(buf[0]))) << 56
-        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[1])) << 48)
-        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[2])) << 40)
-        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[3])) << 32)
-        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[4])) << 24)
-        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[5])) << 16)
-        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[6])) << 8)
-        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[7]))));
-}
-
-static inline void EncodeBigEndian(char* buf, uint32_t value) {
-    buf[0] = (value >> 24) & 0xff;
-    buf[1] = (value >> 16) & 0xff;
-    buf[2] = (value >> 8) & 0xff;
-    buf[3] = value & 0xff;
-}
-
-static inline uint32_t DecodeBigEndian32(const char* buf) {
-    return ((static_cast<uint64_t>(static_cast<unsigned char>(buf[0])) << 24)
-        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[1])) << 16)
-        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[2])) << 8)
-        | (static_cast<uint64_t>(static_cast<unsigned char>(buf[3]))));
-}
 
 // Maximum number of bytes occupied by a varint32.
 static const int kMaxVarint32Bytes = 5;
@@ -185,36 +149,6 @@ extern char* EncodeVarint64(char* dst, uint64 v);
 
 // Returns the length of the varint32 or varint64 encoding of "v"
 extern int VarintLength(uint64_t v);
-
-// Lower-level versions of Get... that read directly from a character buffer
-// without any bounds checking.
-
-inline uint32_t DecodeFixed32(const char* ptr) {
-  if (port::kLittleEndian) {
-    // Load the raw bytes
-    uint32_t result;
-    memcpy(&result, ptr, sizeof(result));  // gcc optimizes this to a plain load
-    return result;
-  } else {
-    return ((static_cast<uint32_t>(static_cast<unsigned char>(ptr[0])))
-        | (static_cast<uint32_t>(static_cast<unsigned char>(ptr[1])) << 8)
-        | (static_cast<uint32_t>(static_cast<unsigned char>(ptr[2])) << 16)
-        | (static_cast<uint32_t>(static_cast<unsigned char>(ptr[3])) << 24));
-  }
-}
-
-inline uint64_t DecodeFixed64(const char* ptr) {
-  if (port::kLittleEndian) {
-    // Load the raw bytes
-    uint64_t result;
-    memcpy(&result, ptr, sizeof(result));  // gcc optimizes this to a plain load
-    return result;
-  } else {
-    uint64_t lo = DecodeFixed32(ptr);
-    uint64_t hi = DecodeFixed32(ptr + 4);
-    return (hi << 32) | lo;
-  }
-}
 
 template<class T>
 #if defined(__clang__)
