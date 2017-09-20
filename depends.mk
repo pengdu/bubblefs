@@ -15,4 +15,5 @@ PROTOBUF_PATH=./third_party
 PROTOC_PATH=./third_party/bin
 PROTOC=$(PROTOC_PATH)/protoc
 SOFA_PBRPC_PATH=./third_party
+TCMALLOC_PATH=./thirdparty
 

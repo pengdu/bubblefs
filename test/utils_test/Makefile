@@ -5,10 +5,10 @@ OPT ?= -g2 -Werror # (B) Debug mode, w/ full line-level debugging symbols
 
 #CXX=/opt/compiler/gcc-4.8.2/bin/g++
 
-# dependencies
 PROJECT_DIR=../..
 SRC_PATH=$(PROJECT_DIR)/src
 
+# dependencies
 GTEST_PATH=$(PROJECT_DIR)/third_party
 GLOG_PATH=$(PROJECT_DIR)/third_party
 
@@ -20,8 +20,8 @@ LDFLAGS = -L$(GTEST_PATH)/lib -lgtest \
           -L$(GLOG_PATH)/lib -lglog \
           -lgflags -lpthread -lz -lrt
 
-SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ldl
-              #-shared -Wl,--version-script,so-version-script # hide symbol of third_party libs
+SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ldl \
+              -shared -Wl,--version-script,so-version-script # hide symbol of third_party libs
 
 CXXFLAGS = -pthread -std=c++11 -Wall -fPIC $(OPT)
 
@@ -37,7 +37,7 @@ all: $(BIN)
 	@echo 'Done'
 	
 atomicops_test: $(ATOMICOPS_TEST_OBJ)
-	$(CXX) $^ -o $@ $(LDFLAGS) $(SO_LDFLAGS)
+	$(CXX) $^ -o $@ $(LDFLAGS)
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) -c $< -o $@

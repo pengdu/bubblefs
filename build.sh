@@ -245,6 +245,53 @@ if [ ! -f "${FLAG_DIR}/sofa-pbrpc_1_1_3" ] \
     touch "${FLAG_DIR}/sofa-pbrpc_1_1_3"
 fi
 
+# libunwind for gperftools
+if [ ! -f "${FLAG_DIR}/libunwind_1_0_0" ] \
+    || [ ! -f "${DEPS_PREFIX}/lib/libunwind.a" ] \
+    || [ ! -f "${DEPS_PREFIX}/include/libunwind.h" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/libunwind" ] \
+        || [ -d "${DEPS_BUILD}/libunwind" ]; then
+        rm -rf ${DEPS_SOURCE}/libunwind
+        rm -rf ${DEPS_BUILD}/libunwind
+    fi
+    unzip ${DEPS_PACKAGE}/libunwind-vanilla_pathscale.zip -d .
+    mv libunwind-vanilla_pathscale libunwind
+    cd libunwind
+    ./autogen.sh
+    ./configure --prefix=${DEPS_BUILD}/libunwind --disable-shared --with-pic
+    make CFLAGS=-fPIC -j4
+    make CFLAGS=-fPIC install
+    cd ${DEPS_BUILD}/libunwind
+    cp -a lib/libunwind.a ${DEPS_PREFIX}/lib
+    cp -a include/libunwind.h ${DEPS_PREFIX}/include
+    touch "${FLAG_DIR}/libunwind_1_0_0"
+fi
+
+# gperftools (tcmalloc)
+if [ ! -f "${FLAG_DIR}/gperftools_2_5_0" ] \
+    || [ ! -f "${DEPS_PREFIX}/lib/libtcmalloc.a" ] \
+    || [ ! -f "${DEPS_PREFIX}/lib/libtcmalloc_minimal.a" ] \
+    || [ ! -d "${DEPS_PREFIX}/include/gperftools" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/gperftools" ] \
+        || [ -d "${DEPS_BUILD}/gperftools" ]; then
+        rm -rf ${DEPS_SOURCE}/gperftools
+        rm -rf ${DEPS_BUILD}/gperftools
+    fi
+    unzip ${DEPS_PACKAGE}/gperftools-gperftools-2.5.zip -d .
+    mv gperftools-gperftools-2.5 gperftools
+    cd gperftools
+    ./autogen.sh
+    ./configure --prefix=${DEPS_BUILD}/gperftools --disable-shared --with-pic CPPFLAGS=-I${DEPS_PREFIX}/include LDFLAGS=-L${DEPS_PREFIX}/lib
+    make -j4
+    make install
+    cd ${DEPS_BUILD}/gperftools
+    cp -a lib/libtcmalloc.a lib/libtcmalloc_minimal.a ${DEPS_PREFIX}/lib
+    cp -a include/gperftools ${DEPS_PREFIX}/include
+    touch "${FLAG_DIR}/gperftools_2_5_0"
+fi
+
 cd ${WORK_DIR}
 
 ########################################
