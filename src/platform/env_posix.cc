@@ -286,7 +286,8 @@ class PosixEnv : public Env {
     if (f == nullptr) {
       s = IOError(fname, errno);
     } else {
-      result->reset(new PosixWritableFile(fname, f));
+      int fd = fileno(f);
+      result->reset(new PosixWritableFile(fname, fd));
     }
     return s;
   }
@@ -491,7 +492,8 @@ class PosixEnv : public Env {
     if (f == nullptr) {
       s = IOError(fname, errno);
     } else {
-      result->reset(new PosixWritableFile(fname, f));
+      int fd = fileno(f);
+      result->reset(new PosixWritableFile(fname, fd));
     }
     return s;
   }
@@ -901,6 +903,43 @@ class PosixEnv : public Env {
              t.tm_sec);
     return dummy;
   }
+  
+  Thread* StartThread(const ThreadOptions& thread_options, const string& name,
+                      std::function<void()> fn) override {
+    return new StdThread(thread_options, name, fn);
+  }
+
+  void SchedClosure(std::function<void()> closure) override {
+    // TODO(b/27290852): Spawning a new thread here is wasteful, but
+    // needed to deal with the fact that many `closure` functions are
+    // blocking in the current codebase.
+    std::thread closure_thread(closure);
+    closure_thread.detach();
+  }
+
+  void SchedClosureAfter(int64 micros, std::function<void()> closure) override {
+    // TODO(b/27290852): Consuming a thread here is wasteful, but this
+    // code is (currently) only used in the case where a step fails
+    // (AbortStep). This could be replaced by a timer thread
+    SchedClosure([this, micros, closure]() {
+      SleepForMicroseconds(micros);
+      closure();
+    });
+  }
+
+  Status LoadLibrary(const char* library_filename, void** handle) override {
+    return internal::LoadLibrary(library_filename, handle);
+  }
+
+  Status GetSymbolFromLibrary(void* handle, const char* symbol_name,
+                              void** symbol) override {
+    return internal::GetSymbolFromLibrary(handle, symbol_name, symbol);
+  }
+
+  string FormatLibraryFileName(const string& name,
+                               const string& version) override {
+    return internal::FormatLibraryFileName(name, version);
+  }
 
  private:
   bool checkedDiskForMmap_;
@@ -1003,43 +1042,6 @@ void PosixEnv::WaitForJoin() {
     pthread_join(tid, nullptr);
   }
   threads_to_join_.clear();
-}
-
-Thread* PosixEnv::StartThread(const ThreadOptions& thread_options, const string& name,
-                    std::function<void()> fn) override {
-  return new StdThread(thread_options, name, fn);
-}
-
-void PosixEnv::SchedClosure(std::function<void()> closure) override {
-  // TODO(b/27290852): Spawning a new thread here is wasteful, but
-  // needed to deal with the fact that many `closure` functions are
-  // blocking in the current codebase.
-  std::thread closure_thread(closure);
-  closure_thread.detach();
-}
-
-void PosixEnv::SchedClosureAfter(int64 micros, std::function<void()> closure) override {
-  // TODO(b/27290852): Consuming a thread here is wasteful, but this
-  // code is (currently) only used in the case where a step fails
-  // (AbortStep). This could be replaced by a timer thread
-  SchedClosure([this, micros, closure]() {
-    SleepForMicroseconds(micros);
-    closure();
-  });
-}
-
-Status LoadLibrary(const char* library_filename, void** handle) override {
-  return internal::LoadLibrary(library_filename, handle);
-}
-
-Status GetSymbolFromLibrary(void* handle, const char* symbol_name,
-                            void** symbol) override {
-  return internal::GetSymbolFromLibrary(handle, symbol_name, symbol);
-}
-
-string FormatLibraryFileName(const string& name,
-                             const string& version) override {
-  return internal::FormatLibraryFileName(name, version);
 }
 
 }  // namespace

@@ -110,7 +110,7 @@ class PosixWritableFile : public WritableFile {
 
  public:
   PosixWritableFile(const string& fname, int fd)
-      : filename_(fname), fd_(fd) {}
+      : filename_(fname), fd_(fd), use_direct_io_(false) {}
   PosixWritableFile(const string& fname, int fd,
                     const EnvOptions& options);
 
@@ -132,8 +132,6 @@ class PosixWritableFile : public WritableFile {
   virtual size_t GetRequiredBufferAlignment() const override {
     return logical_sector_size_;
   }
-  virtual Status Allocate(uint64_t offset, uint64_t len) override;
-  virtual Status RangeSync(uint64_t offset, uint64_t nbytes) override;
 #ifdef OS_LINUX
   virtual Status Allocate(uint64_t offset, uint64_t len) override;
 #endif
@@ -157,7 +155,7 @@ class PosixMmapReadableFile : public RandomAccessFile {
   PosixMmapReadableFile(const int fd, const string& fname, void* base,
                         size_t length, const EnvOptions& options);
   virtual ~PosixMmapReadableFile();
-  virtual Status Read(uint64_t offset, size_t n, Slice* result,
+  virtual Status Read(uint64_t offset, size_t n, StringPiece* result,
                       char* scratch) const override;
   virtual Status InvalidateCache(size_t offset, size_t length) override;
 };

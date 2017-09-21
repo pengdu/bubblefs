@@ -45,8 +45,8 @@ class Status {
   Status(error::Code code, error::SubCode subcode = error::NONE);
   Status(error::Code code, error::SubCode subcode, StringPiece msg, StringPiece msg2);
   
-  Status(Code _code, const StringPiece& msg, const StringPiece& msg2)
-      : Status(_code, error::NONE, msg, msg2) {}
+  Status(error::Code code, const StringPiece& msg, const StringPiece& msg2)
+      : Status(code, error::NONE, msg, msg2) {}
 
   /// Copy the specified status.
   Status(const Status& s);
@@ -60,16 +60,16 @@ class Status {
     return Status(error::NOT_FOUND, msg, msg2);
   }
   // Fast path for not found without malloc;
-  static Status NotFound(error::SubCode msg = error::NONE) { return Status(error::NOT_FOUND, msg); }
+  static Status NotFound(error::SubCode subcode = error::NONE) { return Status(error::NOT_FOUND, subcode); }
   
   static Status InvalidArgument(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::INVALID_ARGUMENT, msg, msg2);
   }
-  static Status InvalidArgument(error::SubCode msg = error::NONE) {
-    return Status(error::INVALID_ARGUMENT, msg);
+  static Status InvalidArgument(error::SubCode subcode = error::NONE) {
+    return Status(error::INVALID_ARGUMENT, subcode);
   }
   
-  static Status Aborted(error::SubCode msg = error::NONE) { return Status(error::ABORTED, msg); }
+  static Status Aborted(error::SubCode subcode = error::NONE) { return Status(error::ABORTED, subcode); }
   static Status Aborted(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::ABORTED, msg, msg2);
   }
@@ -77,20 +77,20 @@ class Status {
   static Status IOError(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::IOERROR, msg, msg2);
   }
-  static Status IOError(error::SubCode msg =  error::NONE) { return Status(error::IOERROR, msg); }
+  static Status IOError(error::SubCode subcode =  error::NONE) { return Status(error::IOERROR, subcode); }
   
   static Status NotSupported(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::NOT_SUPPORTED, msg, msg2);
   }
-  static Status NotSupported(error::SubCode msg = error::NONE) {
-    return Status(error::NOT_SUPPORTED, msg);
+  static Status NotSupported(error::SubCode subcode = error::NONE) {
+    return Status(error::NOT_SUPPORTED, subcode);
   }
   
   static Status Incomplete(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::INCOMPLETE, msg, msg2);
   }
-  static Status Incomplete(SubCode msg = error::NONE) {
-    return Status(error::INCOMPLETE, msg);
+  static Status Incomplete(error::SubCode subcode = error::NONE) {
+    return Status(error::INCOMPLETE, subcode);
   }
 
   /// Returns true iff the status indicates success.

@@ -138,6 +138,7 @@ class StringPiece {
   };
 
   // Return a string that contains the copy of the referenced data.
+  string ToString() const { return string(data_, size_); }
   string ToString(bool hex) const;
   
   string as_string() const {
@@ -227,6 +228,9 @@ inline size_t StringPiece::difference_offset(const StringPiece& b) const {
   return off;
 }
 
+// allow StringPiece to be logged
+extern std::ostream& operator<<(std::ostream& o, StringPiece piece);
+
 /**
  * A StringPiece that can be pinned with some cleanup tasks, which will be run upon
  * ::Reset() or object destruction, whichever is invoked first. This can be used
@@ -301,9 +305,6 @@ class PinnableSlice : public StringPiece, public Cleanable {
   string* buf_;
   bool pinned_ = false;
 };
-
-// allow StringPiece to be logged
-extern std::ostream& operator<<(std::ostream& o, StringPiece piece);
 
 }  // namespace bubblefs
 

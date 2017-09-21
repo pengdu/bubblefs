@@ -80,9 +80,8 @@ static const int64 kMinTime = -62135596800LL;  // 0001-01-01T00:00:00
 static const int64 kMaxTime = 253402300799LL;  // 9999-12-31T23:59:59
 
 static const int64_t kMillisPerSecond = 1000;
-static const int64_t kMicrosPerSecond = 1000000;
 static const int64_t kMicrosPerMillisecond = 1000;
-static const int64_t kMicrosPerSecond = kMicrosPerMillisecond * kMillisPerSecond;
+static const int64_t kMicrosPerSecond = 1000000;
 static const int64_t kMicrosPerMinute = kMicrosPerSecond * 60;
 static const int64_t kMicrosPerHour = kMicrosPerMinute * 60;
 static const int64_t kMicrosPerDay = kMicrosPerHour * 24;

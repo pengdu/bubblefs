@@ -6,32 +6,52 @@ OPT ?= -g2 -Werror # (B) Debug mode, w/ full line-level debugging symbols
 #CXX=/opt/compiler/gcc-4.8.2/bin/g++
 
 # dependencies
-PROJECT_DIR=../..
-RAPIDJSON_PATH=$(PROJECT_DIR)/third_party
+include depends.mk
 
-INCLUDE_PATH = -I$(RAPIDJSON_PATH)/include
-               
+PROJECT_DIR=.
 
-LDFLAGS = -lpthread -lz -lrt
+INCLUDE_PATH = -I$(PROJECT_DIR)/src \
+               -I$(BOOST_PATH) \
+               -I$(RAPIDJSON_PATH)/include \
+               -I$(GTEST_PATH)/include \
+               -I$(GLOG_PATH)/include \
+               -I$(SNAPPY_PATH)/include \
+               -I$(LEVELDB_PATH)/include \
+               -I$(PROTOBUF_PATH)/include \
+               -I$(SOFA_PBRPC_PATH)/include \
+               -I$(GPERFTOOLS_PATH)/include
+
+LDFLAGS = -L$(GTEST_PATH)/lib -lgtest \
+          -L$(GLOG_PATH)/lib -lglog \
+          -L$(SNAPPY_PATH)/lib -lsnappy \
+          -L$(LEVELDB_PATH)/lib -lleveldb \
+          -L$(PROTOBUF_PATH)/lib -lprotobuf \
+          -L$(SOFA_PBRPC_PATH)/lib -lsofa-pbrpc \
+          -L$(GPERFTOOLS_PATH)/lib -ltcmalloc_minimal \
+          -lgflags -lpthread -ldl -lz -lrt
 
 SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ldl \
               -shared -Wl,--version-script,so-version-script # hide symbol of third_party libs
 
-CXXFLAGS = -pthread -std=c++11 -Wall -fPIC $(OPT)
+CXXFLAGS = -pthread -std=c++11 -fmax-errors=3 -Wall -fPIC $(OPT)
 
-SIMPLEDOM_SRC = $(wildcard *.cc)
-SIMPLEDOM_OBJ = $(patsubst %.cc, %.o, $(SIMPLEDOM_SRC))
-SIMPLEDOM_HEADER = $(wildcard *.h)
+PLATFORM_HDR = $(wildcard src/platform/*.h)
+PLATFORM_SRC = $(wildcard src/platform/*.cc)
+PLATFORM_OBJ = $(patsubst %.cc, %.o, $(PLATFORM_SRC))
 
-OBJS = $(SIMPLEDOM_OBJ)
+UTILS_HDR = $(wildcard src/utils/*.h)
+UTILS_SRC = $(wildcard src/utils/*.cc)
+UTILS_OBJ = $(patsubst %.cc, %.o, $(UTILS_SRC))
 
-BIN = simpledom
+OBJS = $(PLATFORM_OBJ) $(UTILS_OBJ)
 
-all: $(BIN)
+BIN = bubblefs_test
+
+all: $(OBJS)
 	@echo 'Done'
 	
-simpledom: $(SIMPLEDOM_OBJ)
-	$(CXX) $^ -o $@ $(LDFLAGS)
+bubblefs_test: $(OBJS)
+#	$(CXX) $^ -o $@ $(LDFLAGS)
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) -c $< -o $@

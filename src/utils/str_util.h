@@ -331,7 +331,7 @@ size_t ParseSizeT(const string& value);
 
 std::vector<int> ParseVectorInt(const string& value);
 
-bool SerializeIntVector(const vector<int>& vec, string* value);
+bool SerializeIntVector(const std::vector<int>& vec, string* value);
 
 void ToUpper(string* str);
 
@@ -635,14 +635,6 @@ void Join(Iterator start, Iterator end,
     }
     strings::StrAppend(result, *it);
   }
-}
-
-template <typename Range>
-string Join(const Range& components,
-            const char* delim) {
-  string result;
-  Join(components.begin(), components.end(), delim, &result);
-  return result;
 }
 
 inline std::vector<string> Split(StringPiece text, StringPiece delims) {

@@ -449,7 +449,7 @@ PosixMmapReadableFile::PosixMmapReadableFile(const int fd,
 PosixMmapReadableFile::~PosixMmapReadableFile() {
   int ret = munmap(mmapped_region_, length_);
   if (ret != 0) {
-    fprintf(stdout, "failed to munmap %p length %" ROCKSDB_PRIszt " \n",
+    fprintf(stdout, "failed to munmap %p length %lu\n",
             mmapped_region_, length_);
   }
 }

@@ -201,7 +201,7 @@ LogMessageFatal::~LogMessageFatal() {
 }
 
 void LogString(const char* fname, int line, int severity,
-               const string& message) {
+               const std::string& message) {
   LogMessage(fname, line, severity) << message;
 }
 

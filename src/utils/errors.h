@@ -39,13 +39,13 @@ void AppendToMessage(Status* status, Args... args) {
 #define TF_RETURN_IF_ERROR(expr)                         \
   do {                                                   \
     const ::bubblefs::Status _status = (expr);         \
-    if (TF_PREDICT_FALSE(!_status.ok())) return _status; \
+    if (PREDICT_FALSE(!_status.ok())) return _status; \
   } while (0)
 
 #define TF_RETURN_WITH_CONTEXT_IF_ERROR(expr, ...)                  \
   do {                                                              \
     ::bubblefs::Status _status = (expr);                          \
-    if (TF_PREDICT_FALSE(!_status.ok())) {                          \
+    if (PREDICT_FALSE(!_status.ok())) {                          \
       ::bubblefs::errors::AppendToMessage(&_status, __VA_ARGS__); \
       return _status;                                               \
     }                                                               \
@@ -61,7 +61,7 @@ void AppendToMessage(Status* status, Args... args) {
   template <typename... Args>                                            \
   ::bubblefs::Status FUNC(Args... args) {                              \
     return ::bubblefs::Status(::bubblefs::error::CONST,              \
-                                ::bubblefs::strings::StrCat(args...)); \
+                              ::bubblefs::strings::StrCat(args...)); \
   }                                                                      \
   inline bool Is##FUNC(const ::bubblefs::Status& status) {             \
     return status.code() == ::bubblefs::error::CONST;                  \

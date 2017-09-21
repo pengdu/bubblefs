@@ -9,6 +9,7 @@
 #define BUBBLEFS_PLATFORM_CONDITION_VARIABLE_H_
 
 #include <pthread.h>
+#include <stdint.h>
 #include <time.h>
 #include "platform/base_export.h"
 #include "platform/macros.h"
@@ -223,7 +224,7 @@ class BASE_EXPORT ConditionVariable {
   // Wait() releases the caller's critical section atomically as it starts to
   // sleep, and the reacquires it when it is signaled.
   void Wait();
-  void TimedWait(const int64_t &max_time);
+  void TimedWait(const int64_t max_time);
   // Broadcast() revives all waiting threads.
   void Broadcast();
   // Signal() revives one waiting thread.

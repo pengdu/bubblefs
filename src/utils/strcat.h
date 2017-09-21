@@ -135,7 +135,7 @@ class AlphaNum {
   // Use ":" not ':'
   AlphaNum(char c);  // NOLINT(runtime/explicit)
 
-  TF_DISALLOW_COPY_AND_ASSIGN(AlphaNum);
+  DISALLOW_COPY_AND_ASSIGN(AlphaNum);
 };
 
 // ----------------------------------------------------------------------
@@ -181,7 +181,7 @@ void AppendPieces(string *dest, std::initializer_list<StringPiece> pieces);
 template <typename... AV>
 string StrCat(const AlphaNum &a, const AlphaNum &b, const AlphaNum &c,
               const AlphaNum &d, const AlphaNum &e,
-              const AV &... args) TF_MUST_USE_RESULT;
+              const AV &... args) WARN_UNUSED_RESULT;
 
 template <typename... AV>
 string StrCat(const AlphaNum &a, const AlphaNum &b, const AlphaNum &c,

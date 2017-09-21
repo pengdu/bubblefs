@@ -138,12 +138,6 @@ bool FindCopy(const Collection& collection,
   return true;
 }
 
-// Returns true if and only if the given collection contains the given key.
-template <class Collection, class Key>
-bool ContainsKey(const Collection& collection, const Key& key) {
-  return collection.find(key) != collection.end();
-}
-
 // Returns true if and only if the given collection contains the given key-value
 // pair.
 template <class Collection, class Key, class Value>

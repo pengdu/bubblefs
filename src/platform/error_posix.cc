@@ -180,7 +180,7 @@ static string IOErrorMsg(const string& context,
 }
 
 // file_name can be left empty if it is not unkown.
-static Status IOError(const string& context, const string& file_name,
+Status IOError(const string& context, const string& file_name,
                       int err_number) {
   auto code = ErrnoToCode(err_number);
   return Status(code, strings::StrCat(IOErrorMsg(context, file_name), "; ", strerror(err_number)));

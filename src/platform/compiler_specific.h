@@ -186,8 +186,10 @@
 #if defined(COMPILER_GCC) && __cplusplus >= 201103 && \
       (__GNUC__ * 10000 + __GNUC_MINOR__ * 100) >= 40700
 #define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#define MUST_USE_RESULT __attribute__((warn_unused_result))
 #else
 #define WARN_UNUSED_RESULT
+#define MUST_USE_RESULT
 #endif
 
 // Tell the compiler a function is using a printf-style format string.

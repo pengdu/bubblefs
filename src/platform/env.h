@@ -533,7 +533,8 @@ class Env {
   
   // Generates a unique id that can be used to identify a db
   virtual string GenerateUniqueId() {
-    static_assert(false, "Env::GenerateUniqueId() is unsupported");
+    assert(false);
+    return "InvalidId";
   }
   
   // Returns the ID of the current thread.
@@ -680,7 +681,7 @@ class SequentialFile {
   // If an error was encountered, returns a non-OK status.
   //
   // REQUIRES: External synchronization
-  virtual Status Read(size_t n, Slice* result, char* scratch) = 0;
+  virtual Status Read(size_t n, StringPiece* result, char* scratch) = 0;
 
   // Skip "n" bytes from the file. This is guaranteed to be no
   // slower that reading the same data, but may be faster.
@@ -708,7 +709,7 @@ class SequentialFile {
 
   // Positioned Read for direct I/O
   // If Direct I/O enabled, offset, n, and scratch should be properly aligned
-  virtual Status PositionedRead(uint64_t offset, size_t n, Slice* result,
+  virtual Status PositionedRead(uint64_t offset, size_t n, StringPiece* result,
                                 char* scratch) {
     return Status::NotSupported();
   }

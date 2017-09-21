@@ -162,7 +162,8 @@ Status Env::GetChildrenFileAttributes(const string& dir,
   size_t result_size = 0;
   for (size_t i = 0; i < child_fnames.size(); ++i) {
     const string path = dir + "/" + child_fnames[i];
-    if (!(s = GetFileSize(path, &(*result)[result_size].size_bytes)).ok()) {
+    s = GetFileSize(path, &(*result)[result_size].size_bytes);
+    if (!s.ok()) {
       if (FileExists(path).IsNotFound()) {
         // The file may have been deleted since we listed the directory
         continue;
@@ -238,7 +239,7 @@ Status Env::GetMatchingPaths(const string& pattern,
         children_dir_status[i] = IsDirectory(child_path);
       }
     });
-    for (int i = 0; i < children.size(); ++i) {
+    for (std::size_t i = 0; i < children.size(); ++i) {
       const string child_path = io::JoinPath(current_dir, children[i]);
       // If the IsDirectory call was cancelled we bail.
       if (children_dir_status[i].code() == error::CANCELLED) {
@@ -415,7 +416,7 @@ bool Env::LocalTempFilename(string* filename) {
     uint64 now_microsec = NowMicros();
 
     *filename = io::JoinPath(
-        dir, strings::Printf("tempfile-%s-%x-%d-%llx", port::Hostname().c_str(),
+        dir, strings::Printf("tempfile-%s-%x-%d-%lx", port::Hostname().c_str(),
                              tid, pid, now_microsec));
     if (FileExists(*filename).ok()) {
       filename->clear();
