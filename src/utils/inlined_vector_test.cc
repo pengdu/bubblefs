@@ -769,7 +769,7 @@ static void BM_InlinedVectorFillRange(int iters, int len) {
     ia[j] = j;
   }
   for (int i = 0; i < iters; i++) {
-    IntVec TF_ATTRIBUTE_UNUSED v(ia.get(), ia.get() + len);
+    IntVec ALLOW_UNUSED v(ia.get(), ia.get() + len);
   }
   testing::BytesProcessed((int64{iters} * len) * sizeof(int));
 }

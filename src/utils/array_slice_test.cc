@@ -302,7 +302,7 @@ TEST(IntSlice, InlinedVectorConversion) {
 TEST(IntSlice, StaticArrayConversion) {
   int array[20];
   IntVec vec;
-  Fill(&vec, TF_ARRAYSIZE(array));
+  Fill(&vec, ARRAYSIZE_UNSAFE(array));
   std::copy(vec.begin(), vec.end(), array);
   IntSlice v = array;  // Test assignment
   static_cast<void>(v);
@@ -335,7 +335,7 @@ static const int test_const_array[] = {0, 1, 2};
 
 TEST(IntSlice, ConstStaticArrayConversion) {
   IntVec vec;
-  Fill(&vec, TF_ARRAYSIZE(test_const_array));
+  Fill(&vec, ARRAYSIZE_UNSAFE(test_const_array));
   IntSlice v = test_const_array;  // Test assignment
   static_cast<void>(v);
   TestImplicitConversion(test_const_array, vec);
@@ -536,7 +536,7 @@ TEST(MutableIntSlice, StaticArrayConversion) {
   int array[20];
   MutableIntSlice v = array;  // Test assignment
   static_cast<void>(v);
-  TestImplicitConversion(array, array, TF_ARRAYSIZE(array));
+  TestImplicitConversion(array, array, ARRAYSIZE_UNSAFE(array));
 }
 
 TEST(MutableIntSlice, StdArrayConversion) {

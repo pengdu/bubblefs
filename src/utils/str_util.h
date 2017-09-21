@@ -563,9 +563,9 @@ bool SplitStringIntoKeyValuePairs(const string& line,
                                   StringPairs* key_value_pairs);
 
 static const uint32_t MAX_PATH_LENGTH = 10240;
-static bool SplitPath(const string& path,
-                      std::vector<string>* element,
-                      bool* isdir = nullptr);
+bool SplitPath(const string& path,
+               std::vector<string>* element,
+               bool* isdir = nullptr);
 
 // Split strings using any of the supplied delimiters. For example:
 // Split("a,b.c,d", ".,") would return {"a", "b", "c", "d"}.

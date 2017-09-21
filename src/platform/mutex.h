@@ -89,7 +89,7 @@ class Mutex {
 
  private:
   void AfterLock(const char* msg = nullptr, int64_t msg_threshold = 5000);
-  void BeforeUnlock();
+  void BeforeUnlock(const char* msg = nullptr);
    
   friend class CondVar;
   pthread_mutex_t mu_;

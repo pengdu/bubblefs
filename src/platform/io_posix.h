@@ -101,8 +101,8 @@ class PosixRandomAccessFile : public RandomAccessFile {
 class PosixWritableFile : public WritableFile {
  private:
   string filename_;
-  int fd_;
   const bool use_direct_io_;
+  int fd_;
   uint64_t filesize_;
   size_t logical_sector_size_;
   bool allow_fallocate_;
@@ -110,7 +110,7 @@ class PosixWritableFile : public WritableFile {
 
  public:
   PosixWritableFile(const string& fname, int fd)
-      : filename_(fname), fd_(fd), use_direct_io_(false) {}
+      : filename_(fname), use_direct_io_(false), fd_(fd) {}
   PosixWritableFile(const string& fname, int fd,
                     const EnvOptions& options);
 

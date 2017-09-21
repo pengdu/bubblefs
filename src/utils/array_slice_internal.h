@@ -65,7 +65,7 @@ struct Size {
 
 struct MutableStringData {
   // Defined only for string.
-  static char* Get(string* v) { return v->empty() ? nullptr : &*v->begin(); }
+  static char* Get(std::string* v) { return v->empty() ? nullptr : &*v->begin(); }
 };
 
 // Checks whether M::Get(C*) is defined and has a return type R such that

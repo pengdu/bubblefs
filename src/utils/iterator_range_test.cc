@@ -51,7 +51,7 @@ TEST(IteratorRange, PartArray) {
   iterator_range<int*> range(&v[1], &v[4]);  // 3, 5, 7
   int index = 1;
   for (int prime : range) {
-    ASSERT_LT(index, TF_ARRAYSIZE(v));
+    ASSERT_LT(index, ARRAYSIZE_UNSAFE(v));
     EXPECT_EQ(v[index], prime);
     ++index;
   }
@@ -63,7 +63,7 @@ TEST(IteratorRange, ArrayMakeRange) {
   auto range = make_range(&v[1], &v[4]);  // 3, 5, 7
   int index = 1;
   for (int prime : range) {
-    ASSERT_LT(index, TF_ARRAYSIZE(v));
+    ASSERT_LT(index, ARRAYSIZE_UNSAFE(v));
     EXPECT_EQ(v[index], prime);
     ++index;
   }

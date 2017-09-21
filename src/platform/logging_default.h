@@ -57,7 +57,7 @@ class LogMessage : public std::basic_ostringstream<char> {
 class LogMessageFatal : public LogMessage {
  public:
   LogMessageFatal(const char* file, int line) ATTRIBUTE_COLD;
-  TF_ATTRIBUTE_NORETURN ~LogMessageFatal();
+  NORETURN ~LogMessageFatal();
 };
 
 #define _TF_LOG_INFO \
@@ -84,7 +84,7 @@ class LogMessageFatal : public LogMessage {
 #endif
 
 #define VLOG(lvl)      \
-  if (TF_PREDICT_FALSE(VLOG_IS_ON(lvl))) \
+  if (PREDICT_FALSE(VLOG_IS_ON(lvl))) \
   ::bubblefs::internal::LogMessage(__FILE__, __LINE__, bubblefs::INFO)
 
 // CHECK dies with a fatal error if condition is not true.  It is *not*
@@ -92,7 +92,7 @@ class LogMessageFatal : public LogMessage {
 // compilation mode.  Therefore, it is safe to do things like:
 //    CHECK(fp->Write(x) == 4)
 #define CHECK(condition)              \
-  if (TF_PREDICT_FALSE(!(condition))) \
+  if (PREDICT_FALSE(!(condition))) \
   LOG(FATAL) << "Check failed: " #condition " "
 
 // Function is overloaded for integral types to allow static const
@@ -194,7 +194,7 @@ string* MakeCheckOpString(const T1& v1, const T2& v2, const char* exprtext) {
   template <typename T1, typename T2>                                     \
   inline string* name##Impl(const T1& v1, const T2& v2,                   \
                             const char* exprtext) {                       \
-    if (TF_PREDICT_TRUE(v1 op v2))                                        \
+    if (PREDICT_TRUE(v1 op v2))                                        \
       return NULL;                                                        \
     else                                                                  \
       return ::bubblefs::internal::MakeCheckOpString(v1, v2, exprtext); \
@@ -203,14 +203,14 @@ string* MakeCheckOpString(const T1& v1, const T2& v2, const char* exprtext) {
     return name##Impl<int, int>(v1, v2, exprtext);                        \
   }                                                                       \
   inline string* name##Impl(const size_t v1, const int v2, const char* exprtext) {       \
-    if (TF_PREDICT_FALSE(v2 < 0)) {                                       \
+    if (PREDICT_FALSE(v2 < 0)) {                                       \
        return ::bubblefs::internal::MakeCheckOpString(v1, v2, exprtext);\
     }                                                                     \
     const size_t uval = (size_t)((unsigned)v1);                           \
     return name##Impl<size_t, size_t>(uval, v2, exprtext);                \
   }                                                                       \
   inline string* name##Impl(const int v1, const size_t v2, const char* exprtext) {       \
-    if (TF_PREDICT_FALSE(v2 >= std::numeric_limits<int>::max())) {      \
+    if (PREDICT_FALSE(v2 >= std::numeric_limits<int>::max())) {      \
        return ::bubblefs::internal::MakeCheckOpString(v1, v2, exprtext);\
     }                                                                     \
     const size_t uval = (size_t)((unsigned)v2);                           \

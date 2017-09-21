@@ -14,8 +14,8 @@
 // the low-level platform-specific abstraction to the OS's threading interface.
 // You should instead be using a message-loop driven Thread, see thread.h.
 
-#ifndef  BUBBLEFS_UTILS_THREAD_H_
-#define  BUBBLEFS_UTILS_THREAD_H_
+#ifndef  BUBBLEFS_PLATFORM_PLATFORM_THREAD_H_
+#define  BUBBLEFS_PLATFORM_PLATFORM_THREAD_H_
 
 #include <errno.h>
 #include <pthread.h>
@@ -293,7 +293,7 @@ public:
         memset(&tid_, 0, sizeof(tid_));
     }
     int64_t CurrentId() {
-        return reinterpret_cast<int64_t>(pthread_self());
+        return static_cast<int64_t>(pthread_self());
     }
     bool Start(std::function<void ()> thread_proc) {
         user_proc_ = thread_proc;
@@ -360,4 +360,4 @@ private:
 } // namespace bdcommon
 } // namespace bubblefs
 
-#endif  // BUBBLEFS_UTILS_THREAD_H_
+#endif  // BUBBLEFS_PLATFORM_PLATFORM_THREAD_H_

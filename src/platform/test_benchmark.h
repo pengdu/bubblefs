@@ -24,7 +24,7 @@ limitations under the License.
 
 #define BENCHMARK(n)                                            \
   static ::bubblefs::testing::Benchmark* TF_BENCHMARK_CONCAT( \
-      __benchmark_, n, __LINE__) TF_ATTRIBUTE_UNUSED =          \
+      __benchmark_, n, __LINE__) ALLOW_UNUSED =          \
       (new ::bubblefs::testing::Benchmark(#n, (n)))
 #define TF_BENCHMARK_CONCAT(a, b, c) TF_BENCHMARK_CONCAT2(a, b, c)
 #define TF_BENCHMARK_CONCAT2(a, b, c) a##b##c

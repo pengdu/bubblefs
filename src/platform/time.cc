@@ -178,9 +178,9 @@ int64 SecondsSinceCommonEra(const DateTime& time) {
 // precision to represent the exact value.
 string FormatNanos(int32 nanos) {
   if (nanos % kNanosPerMillisecond == 0) {
-    return strings::Printf("%03d", nanos / kNanosPerMillisecond);
+    return strings::Printf("%03ld", nanos / kNanosPerMillisecond);
   } else if (nanos % kNanosPerMicrosecond == 0) {
-    return strings::Printf("%06d", nanos / kNanosPerMicrosecond);
+    return strings::Printf("%06ld", nanos / kNanosPerMicrosecond);
   } else {
     return strings::Printf("%09d", nanos);
   }

@@ -26,22 +26,18 @@ limitations under the License.
 #include "platform/test_benchmark.h"
 #include "utils/stringpiece.h"
 
-namespace bubblefs {
-
 GTEST_API_ int main(int argc, char** argv) {
   std::cout << "Running main() from test_main.cc\n";
 
   testing::InitGoogleTest(&argc, argv);
   for (int i = 1; i < argc; i++) {
-    if (StringPiece(argv[i]).starts_with("--benchmarks=")) {
+    if (bubblefs::StringPiece(argv[i]).starts_with("--benchmarks=")) {
       const char* pattern = argv[i] + strlen("--benchmarks=");
-      testing::Benchmark::Run(pattern);
+      bubblefs::testing::Benchmark::Run(pattern);
       return 0;
     }
   }
   return RUN_ALL_TESTS();
 }
-
-} // namespace bubblefs
 
 #endif // #if defined(PLATFORM_GOOGLE) || defined(__ANDROID__)

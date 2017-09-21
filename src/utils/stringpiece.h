@@ -42,7 +42,6 @@ limitations under the License.
 #include <string>
 #include "platform/types.h"
 #include "utils/cleanable.h"
-#include "utils/hash_tables.h"
 
 namespace bubblefs {
 
@@ -307,37 +306,5 @@ class PinnableSlice : public StringPiece, public Cleanable {
 };
 
 }  // namespace bubblefs
-
-// Hashing ---------------------------------------------------------------------
-
-namespace BASE_HASH_NAMESPACE {
-
-// We provide appropriate hash functions so StringPiece and StringPiece16 can
-// be used as keys in hash sets and maps.
-
-// This hash function is copied from butil/containers/hash_tables.h. We don't
-// use the ones already defined for string and string16 directly because it
-// would require the string constructors to be called, which we don't want.
-#define HASH_STRING_PIECE(StringPieceType, string_piece)                \
-  std::size_t result = 0;                                               \
-  for (StringPieceType::const_iterator i = string_piece.begin();        \
-       i != string_piece.end(); ++i)                                    \
-    result = (result * 131) + *i;                                       \
-  return result;                                                        \
-
-#if defined(COMPILER_GCC)
-template<>
-struct hash<bubblefs::StringPiece> {
-  std::size_t operator()(const bubblefs::StringPiece& sp) const {
-    HASH_STRING_PIECE(bubblefs::StringPiece, sp);
-  }
-};
-#elif defined(COMPILER_MSVC)
-inline size_t hash_value(const bubblefs::StringPiece& sp) {
-  HASH_STRING_PIECE(bubblefs::StringPiece, sp);
-}
-#endif  // COMPILER
-
-}  // namespace BASE_HASH_NAMESPACE
 
 #endif  // BUBBLEFS_UTILS_STRINGPIECE_H_

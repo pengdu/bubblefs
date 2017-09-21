@@ -30,6 +30,7 @@ limitations under the License.
 #include "platform/base_export.h"
 #include "platform/build_config.h"
 #include "platform/compiler_specific.h"
+#include "platform/dynamic_annotations.h"
 #include "platform/platform.h"
 
 // There must be many copy-paste versions of these macros which are same
@@ -279,10 +280,6 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 
 #define ANNOTATE_MEMORY_IS_INITIALIZED(ptr, bytes) \
   do {                                                \
-  } while (0)
-
-#define ANNOTATE_BENIGN_RACE(ptr, description) \
-  do {                                            \
   } while (0)
 
 #ifdef _MSC_VER

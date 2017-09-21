@@ -306,9 +306,7 @@ double GetMemoryUsage() {
 int64_t AmountOfMemory(int pages_name) {
   long pages = sysconf(pages_name);
   long page_size = sysconf(_SC_PAGESIZE);
-  if (pages == -1 || page_size == -1) {}  // namespace bubblefs
-
-namespace bubblefs {
+  if (pages == -1 || page_size == -1) {
     DCHECK(false);
     return 0;
   }

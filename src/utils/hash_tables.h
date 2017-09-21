@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 //
 
+// brpc/src/butil/containers/hash_tables.h
+
 //
 // Deal with the differences between Microsoft and GNU implemenations
 // of hash_map. Allows all platforms to use |butil::hash_map| and
@@ -17,8 +19,6 @@
 // header file) and keep it specific to just pointers to that class.  This is
 // because identity hashes are not desirable for all types that might show up
 // in containers as pointers.
-
-// brpc/src/butil/containers/hash_tables.h
 
 #ifndef BUBBLEFS_UTILS_HASH_TABLES_H_
 #define BUBBLEFS_UTILS_HASH_TABLES_H_
@@ -127,19 +127,19 @@ using BASE_HASH_NAMESPACE::hash_set;
 //   h32(x32, y32) = (h64(x32, y32) * rand_odd64 + rand16 * 2^16) % 2^64 / 2^32
 //
 // Contact danakj@chromium.org for any questions.
-inline std::size_t HashInts32(uint32_t value1, uint32_t value2) {
+inline size_t HashInts32(uint32_t value1, uint32_t value2) {
   uint64_t value1_64 = value1;
   uint64_t hash64 = (value1_64 << 32) | value2;
 
-  if (sizeof(std::size_t) >= sizeof(uint64_t))
-    return static_cast<std::size_t>(hash64);
+  if (sizeof(size_t) >= sizeof(uint64_t))
+    return static_cast<size_t>(hash64);
 
   uint64_t odd_random = 481046412LL << 32 | 1025306955LL;
   uint32_t shift_random = 10121U << 16;
 
   hash64 = hash64 * odd_random + shift_random;
-  std::size_t high_bits = static_cast<std::size_t>(
-      hash64 >> (8 * (sizeof(uint64_t) - sizeof(std::size_t))));
+  size_t high_bits =
+      static_cast<size_t>(hash64 >> (8 * (sizeof(uint64_t) - sizeof(size_t))));
   return high_bits;
 }
 
@@ -148,7 +148,7 @@ inline std::size_t HashInts32(uint32_t value1, uint32_t value2) {
 // breaking the two 64-bit inputs into 4 32-bit values:
 // http://opendatastructures.org/versions/edition-0.1d/ods-java/node33.html#SECTION00832000000000000000
 // Then we reduce our result to 32 bits if required, similar to above.
-inline std::size_t HashInts64(uint64_t value1, uint64_t value2) {
+inline size_t HashInts64(uint64_t value1, uint64_t value2) {
   uint32_t short_random1 = 842304669U;
   uint32_t short_random2 = 619063811U;
   uint32_t short_random3 = 937041849U;
@@ -166,17 +166,38 @@ inline std::size_t HashInts64(uint64_t value1, uint64_t value2) {
 
   uint64_t hash64 = product1 + product2 + product3 + product4;
 
-  if (sizeof(std::size_t) >= sizeof(uint64_t))
-    return static_cast<std::size_t>(hash64);
+  if (sizeof(size_t) >= sizeof(uint64_t))
+    return static_cast<size_t>(hash64);
 
   uint64_t odd_random = 1578233944LL << 32 | 194370989LL;
   uint32_t shift_random = 20591U << 16;
 
   hash64 = hash64 * odd_random + shift_random;
-  std::size_t high_bits = static_cast<std::size_t>(
-      hash64 >> (8 * (sizeof(uint64_t) - sizeof(std::size_t))));
+  size_t high_bits =
+      static_cast<size_t>(hash64 >> (8 * (sizeof(uint64_t) - sizeof(size_t))));
   return high_bits;
 }
+
+template <typename T1, typename T2>
+inline size_t HashInts(T1 value1, T2 value2) {
+  // This condition is expected to be compile-time evaluated and optimised away
+  // in release builds.
+  if (sizeof(T1) > sizeof(uint32_t) || (sizeof(T2) > sizeof(uint32_t)))
+    return HashInts64(value1, value2);
+
+  return HashInts32(value1, value2);
+}
+
+// A templated hasher for pairs of integer types.
+template <typename T>
+struct IntPairHash;
+
+template <typename Type1, typename Type2>
+struct IntPairHash<std::pair<Type1, Type2>> {
+  size_t operator()(std::pair<Type1, Type2> value) const {
+    return HashInts(value.first, value.second);
+  }
+};
 
 #define DEFINE_32BIT_PAIR_HASH(Type1, Type2) \
 inline std::size_t HashPair(Type1 value1, Type2 value2) { \
@@ -230,45 +251,6 @@ DEFINE_64BIT_PAIR_HASH(uint64_t, uint64_t);
 
 #undef DEFINE_64BIT_PAIR_HASH
 }  // namespace bubblefs
-
-namespace BASE_HASH_NAMESPACE {
-
-// Implement methods for hashing a pair of integers, so they can be used as
-// keys in STL containers.
-
-// NOTE(gejun): Specialize ptr as well which is supposed to work with 
-// containers by default
-
-#if defined(COMPILER_MSVC)
-
-template<typename Type1, typename Type2>
-inline std::size_t hash_value(const std::pair<Type1, Type2>& value) {
-  return bubblefs::HashPair(value.first, value.second);
-}
-template<typename Type>
-inline std::size_t hash_value(Type* ptr) {
-  return (uintptr_t)ptr;
-}
-
-#elif defined(COMPILER_GCC)
-template<typename Type1, typename Type2>
-struct hash<std::pair<Type1, Type2> > {
-  std::size_t operator()(std::pair<Type1, Type2> value) const {
-    return bubblefs::HashPair(value.first, value.second);
-  }
-};
-template<typename Type>
-struct hash<Type*> {
-  std::size_t operator()(Type* ptr) const {
-    return (uintptr_t)ptr;
-  }
-};
-
-#else
-#error define hash<std::pair<Type1, Type2> > for your compiler
-#endif  // COMPILER
-
-}
 
 #undef DEFINE_PAIR_HASH_FUNCTION_START
 #undef DEFINE_PAIR_HASH_FUNCTION_END

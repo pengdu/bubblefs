@@ -38,7 +38,7 @@ struct CachedItem {
 }  // namespace
 
 TEST(MRUCacheTest, Basic) {
-  typedef base::MRUCache<int, CachedItem> Cache;
+  typedef MRUCache<int, CachedItem> Cache;
   Cache cache(Cache::NO_AUTO_EVICT);
 
   // Check failure conditions
@@ -118,7 +118,7 @@ TEST(MRUCacheTest, Basic) {
 }
 
 TEST(MRUCacheTest, GetVsPeek) {
-  typedef base::MRUCache<int, CachedItem> Cache;
+  typedef MRUCache<int, CachedItem> Cache;
   Cache cache(Cache::NO_AUTO_EVICT);
 
   static const int kItem1Key = 1;
@@ -153,7 +153,7 @@ TEST(MRUCacheTest, GetVsPeek) {
 }
 
 TEST(MRUCacheTest, KeyReplacement) {
-  typedef base::MRUCache<int, CachedItem> Cache;
+  typedef MRUCache<int, CachedItem> Cache;
   Cache cache(Cache::NO_AUTO_EVICT);
 
   static const int kItem1Key = 1;
@@ -191,7 +191,7 @@ TEST(MRUCacheTest, KeyReplacement) {
 
 // Make sure that the owning version release its pointers properly.
 TEST(MRUCacheTest, Owning) {
-  using Cache = base::MRUCache<int, std::unique_ptr<CachedItem>>;
+  using Cache = MRUCache<int, std::unique_ptr<CachedItem>>;
   Cache cache(Cache::NO_AUTO_EVICT);
 
   int initial_count = cached_item_live_count;
@@ -234,7 +234,7 @@ TEST(MRUCacheTest, Owning) {
 }
 
 TEST(MRUCacheTest, AutoEvict) {
-  using Cache = base::MRUCache<int, std::unique_ptr<CachedItem>>;
+  using Cache = MRUCache<int, std::unique_ptr<CachedItem>>;
   static const Cache::size_type kMaxSize = 3;
 
   int initial_count = cached_item_live_count;
@@ -259,7 +259,7 @@ TEST(MRUCacheTest, AutoEvict) {
 
 TEST(MRUCacheTest, HashingMRUCache) {
   // Very simple test to make sure that the hashing cache works correctly.
-  typedef base::HashingMRUCache<std::string, CachedItem> Cache;
+  typedef HashingMRUCache<std::string, CachedItem> Cache;
   Cache cache(Cache::NO_AUTO_EVICT);
 
   CachedItem one(1);
@@ -276,7 +276,7 @@ TEST(MRUCacheTest, HashingMRUCache) {
 }
 
 TEST(MRUCacheTest, Swap) {
-  typedef base::MRUCache<int, CachedItem> Cache;
+  typedef MRUCache<int, CachedItem> Cache;
   Cache cache1(Cache::NO_AUTO_EVICT);
 
   // Insert two items into cache1.

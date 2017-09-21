@@ -204,8 +204,8 @@ void PlatformThread::Sleep(int64_t duration) {
 // static
 const char* PlatformThread::GetName() {
   //return ThreadIdNameManager::GetInstance()->GetName(CurrentId());
-  static_assert(false, "PlatformThread::GetName is unimplemented");
-  return "";
+  assert(false);
+  return "UnknownThreadName";
 }
 
 // static

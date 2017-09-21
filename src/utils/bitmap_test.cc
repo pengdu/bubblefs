@@ -15,6 +15,7 @@ limitations under the License.
 #include "utils/bitmap.h"
 #include "platform/macros.h"
 #include "platform/test.h"
+#include "utils/philox_random.h"
 
 namespace bubblefs {
 namespace core {
@@ -22,14 +23,6 @@ namespace { // namespace anonymous
 
 // Return next size to test after n.
 size_t NextSize(size_t n) { return n + ((n < 75) ? 1 : 25); }
-
-static void MakeRandomBitmap(random::SimplePhilox* rnd, Bitmap* bitmap) {
-  size_t n = rnd->Uniform(200);
-  bitmap->Reset(n);
-  for (size_t i = 0; i < n; i++) {
-    if (rnd->OneIn(2)) bitmap->set(i);
-  }
-}
 
 TEST(BitmapTest, Basic) {
   for (size_t n = 0; n < 200; n = NextSize(n)) {
@@ -68,7 +61,7 @@ TEST(BitmapTest, FirstUnset) {
         // Fill rest with a pattern of 0 followed by q 1s.
         while (i < n) {
           i++;
-          for (int j = 0; j < q && i < n; j++, i++) {
+          for (size_t j = 0; j < q && i < n; j++, i++) {
             one_count++;
             bitmap.set(i);
           }

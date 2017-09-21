@@ -129,7 +129,7 @@ public:
         typename std::unordered_map<Key, ListIterator>::iterator _it;
     };
 
-    LruCache(size_t max_size) : _max_size(max_size) { }
+    WeakLruCache(size_t max_size) : _max_size(max_size) { }
 
     void put(const Key& key, const Value& value) {
         auto it = _cache_items_map.find(key);

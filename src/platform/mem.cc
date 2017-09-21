@@ -69,7 +69,7 @@ void* Malloc(size_t size) {
 }
 
 void* Realloc(void* ptr, size_t size) {
-#ifdef TF_USE_JEMALLOC
+#if TF_USE_JEMALLOC
   return je_realloc(ptr, size);
 #else
   return realloc(ptr, size);

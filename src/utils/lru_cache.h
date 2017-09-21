@@ -306,3 +306,5 @@ class LRUCache : public ShardedCache {
 
 }  // namespace core
 }  // namespace rocksdb
+
+#endif // BUBBLEFS_UTILS_LRU_CACHE_H_

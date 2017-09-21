@@ -318,17 +318,20 @@ Atomic64 Acquire_Load(volatile const Atomic64* ptr);
 Atomic64 Release_Load(volatile const Atomic64* ptr);
 #endif  // ARCH_CPU_64_BITS
 
+} // namespace base
+
+} // namespace bubblefs
+
 // Include our platform specific implementation.
-#if defined(OS_NACL)
-#include "platform/atomicops_internals_gcc.h"
-#elif defined(COMPILER_GCC) && defined(ARCH_CPU_X86_FAMILY)
+#if defined(COMPILER_GCC) && defined(ARCH_CPU_X86_FAMILY)
 #include "platform/atomicops_internals_x86_gcc.h"
 #else
 #error "Atomic operations are not supported on your platform"
 #endif
 
 // ========= Provide base::atomic<T> =========
-
+namespace bubblefs {
+namespace base {
 // static_atomic<> is a work-around for C++03 to declare global atomics
 // w/o constructing-order issues. It can also used in C++11 though.
 // Example:
@@ -374,7 +377,6 @@ private:
 };
 
 } // namespace base
-
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_ATOMICOPS_H_

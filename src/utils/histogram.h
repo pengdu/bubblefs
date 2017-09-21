@@ -22,7 +22,6 @@ limitations under the License.
 #include "platform/thread_annotations.h"
 #include "platform/types.h"
 #include "utils/array_slice.h"
-#include "boost/boost/math/tools/minima.hpp"
 
 namespace bubblefs {
 

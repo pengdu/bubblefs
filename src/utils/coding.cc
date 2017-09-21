@@ -294,18 +294,6 @@ const char* GetVarint32Ptr(const char* p, const char* limit,
   return GetVarint32PtrFallback(p, limit, value);
 }
 
-bool GetVarint32(StringPiece* input, uint32* value) {
-  const char* p = input->data();
-  const char* limit = p + input->size();
-  const char* q = GetVarint32Ptr(p, limit, value);
-  if (q == nullptr) {
-    return false;
-  } else {
-    *input = StringPiece(q, limit - q);
-    return true;
-  }
-}
-
 const char* GetVarint64Ptr(const char* p, const char* limit, uint64* value) {
   uint64 result = 0;
   for (uint32 shift = 0; shift <= 63 && p < limit; shift += 7) {
@@ -321,18 +309,6 @@ const char* GetVarint64Ptr(const char* p, const char* limit, uint64* value) {
     }
   }
   return nullptr;
-}
-
-bool GetVarint64(StringPiece* input, uint64* value) {
-  const char* p = input->data();
-  const char* limit = p + input->size();
-  const char* q = GetVarint64Ptr(p, limit, value);
-  if (q == nullptr) {
-    return false;
-  } else {
-    *input = StringPiece(q, limit - q);
-    return true;
-  }
 }
 
 }  // namespace core

@@ -79,7 +79,7 @@ Status InputBuffer::ReadNBytes(int64 bytes_to_read, string* result) {
   result->resize(bytes_to_read);
   size_t bytes_read = 0;
   Status status = ReadNBytes(bytes_to_read, &(*result)[0], &bytes_read);
-  if (bytes_read < bytes_to_read) result->resize(bytes_read);
+  if (static_cast<int64>(bytes_read) < bytes_to_read) result->resize(bytes_read);
   return status;
 }
 

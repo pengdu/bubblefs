@@ -251,7 +251,7 @@
 // namely kylin already has the macro.
 #if defined(COMPILER_GCC)
 #  if defined(__cplusplus)
-#    define PREDICT_TRUE(x) (__builtin_expect((bool)(x), ture))
+#    define PREDICT_TRUE(x) (__builtin_expect((bool)(x), true))
 #    define PREDICT_FALSE(x) (__builtin_expect((bool)(x), false))
 #    define LIKELY(expr) (__builtin_expect((bool)(expr), true))
 #    define UNLIKELY(expr) (__builtin_expect((bool)(expr), false))

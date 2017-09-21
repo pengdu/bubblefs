@@ -223,7 +223,7 @@ private:
   static void dataDestructor(void* p) { delete (T*)p; }
 
   void updateMap(T* p) {
-    pid_t tid = gettid();
+    pid_t tid = syscall(SYS_gettid);
     CHECK_NE(tid, -1);
     std::lock_guard<std::mutex> guard(mutex_);
     auto ret = threadMap_.insert(std::make_pair(tid, p));
