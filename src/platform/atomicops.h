@@ -329,31 +329,6 @@ Atomic64 Release_Load(volatile const Atomic64* ptr);
 
 // ========= Provide base::atomic<T> =========
 
-using ::std::memory_order;
-using ::std::memory_order_relaxed;
-using ::std::memory_order_consume;
-using ::std::memory_order_acquire;
-using ::std::memory_order_release;
-using ::std::memory_order_acq_rel;
-using ::std::memory_order_seq_cst;
-using ::std::atomic_thread_fence;
-using ::std::atomic_signal_fence;
-template <typename T> class atomic : public ::std::atomic<T> {
-public:
-    atomic() {}
-    atomic(T v) : ::std::atomic<T>(v) {}
-    atomic& operator=(T v) {
-        this->store(v);
-        return *this;
-    }
-private:
-    DISALLOW_COPY_AND_ASSIGN(atomic);
-    // Make sure memory layout of std::atomic<T> and boost::atomic<T>
-    // are same so that different compilation units seeing different 
-    // definitions(enable C++11 or not) should be compatible.
-    BASE_CASSERT(sizeof(T) == sizeof(::std::atomic<T>), size_must_match);
-};
-
 // static_atomic<> is a work-around for C++03 to declare global atomics
 // w/o constructing-order issues. It can also used in C++11 though.
 // Example:
@@ -368,32 +343,32 @@ template <typename T> struct static_atomic {
     T val;
 
     // NOTE: the memory_order parameters must be present.
-    T load(memory_order o) { return ref().load(o); }
-    void store(T v, memory_order o) { return ref().store(v, o); }
-    T exchange(T v, memory_order o) { return ref().exchange(v, o); }
-    bool compare_exchange_weak(T& e, T d, memory_order o)
+    T load(std::memory_order o) { return ref().load(o); }
+    void store(T v, std::memory_order o) { return ref().store(v, o); }
+    T exchange(T v, std::memory_order o) { return ref().exchange(v, o); }
+    bool compare_exchange_weak(T& e, T d, std::memory_order o)
     { return ref().compare_exchange_weak(e, d, o); }
-    bool compare_exchange_weak(T& e, T d, memory_order so, memory_order fo)
+    bool compare_exchange_weak(T& e, T d, std::memory_order so, std::memory_order fo)
     { return ref().compare_exchange_weak(e, d, so, fo); }
-    bool compare_exchange_strong(T& e, T d, memory_order o)
+    bool compare_exchange_strong(T& e, T d, std::memory_order o)
     { return ref().compare_exchange_strong(e, d, o); }
-    bool compare_exchange_strong(T& e, T d, memory_order so, memory_order fo)
+    bool compare_exchange_strong(T& e, T d, std::memory_order so, std::memory_order fo)
     { return ref().compare_exchange_strong(e, d, so, fo); }
-    T fetch_add(T v, memory_order o) { return ref().fetch_add(v, o); }
-    T fetch_sub(T v, memory_order o) { return ref().fetch_sub(v, o); }
-    T fetch_and(T v, memory_order o) { return ref().fetch_and(v, o); }
-    T fetch_or(T v, memory_order o) { return ref().fetch_or(v, o); }
-    T fetch_xor(T v, memory_order o) { return ref().fetch_xor(v, o); }
+    T fetch_add(T v, std::memory_order o) { return ref().fetch_add(v, o); }
+    T fetch_sub(T v, std::memory_order o) { return ref().fetch_sub(v, o); }
+    T fetch_and(T v, std::memory_order o) { return ref().fetch_and(v, o); }
+    T fetch_or(T v, std::memory_order o) { return ref().fetch_or(v, o); }
+    T fetch_xor(T v, std::memory_order o) { return ref().fetch_xor(v, o); }
     static_atomic& operator=(T v) {
-        store(v, memory_order_seq_cst);
+        store(v, std::memory_order_seq_cst);
         return *this;
     }
 private:
     DISALLOW_ASSIGN(static_atomic);
-    BASE_CASSERT(sizeof(T) == sizeof(atomic<T>), size_must_match);
-    atomic<T>& ref() {
+    BASE_CASSERT(sizeof(T) == sizeof(std::atomic<T>), size_must_match);
+    std::atomic<T>& ref() {
         // Suppress strict-alias warnings.
-        atomic<T>* p = reinterpret_cast<atomic<T>*>(&val);
+        std::atomic<T>* p = reinterpret_cast<std::atomic<T>*>(&val);
         return *p;
     }
 };

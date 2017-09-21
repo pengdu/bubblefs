@@ -26,9 +26,8 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_PORT_POSIX_H_
 #define BUBBLEFS_PLATFORM_PORT_POSIX_H_
 
-#include "platform/macros.h"
-#include <assert.h>
 #include <sys/types.h>
+#include <assert.h>
 #include <byteswap.h>
 #include <dirent.h>
 #include <inttypes.h>
@@ -39,6 +38,7 @@ limitations under the License.
 #include <limits>
 #include <string>
 #include "platform/cpu_info.h"
+#include "platform/macros.h"
 #include "platform/mutex.h"
 
 namespace bubblefs {
@@ -65,31 +65,25 @@ static inline void AsmVolatilePause() {
   // it's okay for other platforms to be no-ops
 }
 
+// Pause instruction to prevent excess processor bus usage, only works in GCC
+static inline void AsmVolatileCpuRelax() {
+  asm volatile("pause\n": : :"memory");
+}
+
+// Compile read-write barrier
+static inline void AsmVolatileBarrier() {
+  asm volatile("": : :"memory");
+}
+
+// Make blocking ops in the pthread returns -1 and EINTR.
+// Returns what pthread_kill returns.
+int interrupt_pthread(pthread_t th);
+
 // Returns -1 if not available on this platform
 extern int PhysicalCoreID();
 
 typedef pthread_once_t OnceType;
 extern void InitOnce(OnceType* once, void (*initializer)());
-
-// Cacheline related --------------------------------------
-
-#ifndef CACHE_LINE_SIZE
-  #if defined(__s390__)
-    #define CACHE_LINE_SIZE 256U
-  #elif defined(__powerpc__) || defined(__aarch64__)
-    #define CACHE_LINE_SIZE 128U
-  #else
-    #define CACHE_LINE_SIZE 64U
-  #endif
-#endif
-
-#ifdef _MSC_VER
-# define CACHE_LINE_ALIGNMENT __declspec(align(CACHE_LINE_SIZE))
-#elifdef __GNUC__
-# define CACHE_LINE_ALIGNMENT __attribute__((aligned(CACHE_LINE_SIZE)))
-#else
-# define CACHE_LINE_ALIGNMENT
-#endif /* _MSC_VER */
 
 extern void *cacheline_aligned_alloc(size_t size);
 

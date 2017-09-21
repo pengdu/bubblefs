@@ -314,4 +314,24 @@
 # endif
 #endif
 
+// Cacheline related --------------------------------------
+
+#ifndef CACHE_LINE_SIZE
+  #if defined(__s390__)
+    #define CACHE_LINE_SIZE 256U
+  #elif defined(__powerpc__) || defined(__aarch64__)
+    #define CACHE_LINE_SIZE 128U
+  #else
+    #define CACHE_LINE_SIZE 64U
+  #endif
+#endif
+
+#ifdef _MSC_VER
+# define CACHE_LINE_ALIGNMENT __declspec(align(CACHE_LINE_SIZE))
+#elifdef __GNUC__
+# define CACHE_LINE_ALIGNMENT __attribute__((aligned(CACHE_LINE_SIZE)))
+#else
+# define CACHE_LINE_ALIGNMENT
+#endif /* _MSC_VER */
+
 #endif  // BUBBLEFS_PLATFORM_COMPILER_SPECIFIC_H_

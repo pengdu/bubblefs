@@ -23,10 +23,81 @@ limitations under the License. */
 #include <list>
 #include <mutex>
 #include <vector>
+#include <utility>
+#include "platform/macros.h"
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
 namespace core {
+  
+// This queue reduces the chance to allocate memory for deque
+template <typename T, int N>
+class SmallQueue {
+public:
+    SmallQueue() : _begin(0), _size(0), _full(NULL) {}
+    
+    void push(const T& val) {
+        if (_full != NULL && !_full->empty()) {
+            _full->push_back(val);
+        } else if (_size < N) {
+            int tail = _begin + _size;
+            if (tail >= N) {
+                tail -= N;
+            }
+            _c[tail] = val;
+            ++_size;
+        } else {
+            if (_full == NULL) {
+                _full = new std::deque<T>;
+            }
+            _full->push_back(val);
+        }
+    }
+    bool pop(T* val) {
+        if (_size > 0) {
+            *val = _c[_begin];
+            ++_begin;
+            if (_begin >= N) {
+                _begin -= N;
+            }
+            --_size;
+            return true;
+        } else if (_full && !_full->empty()) {
+            *val = _full->front();
+            _full->pop_front();
+            return true;
+        }
+        return false;
+    }
+    bool empty() const {
+        return _size == 0 && (_full == NULL || _full->empty());
+    }
+
+    size_t size() const {
+        return _size + (_full ? _full->size() : 0);
+    }
+
+    void clear() {
+        _size = 0;
+        _begin = 0;
+        if (_full) {
+            _full->clear();
+        }
+    }
+
+    ~SmallQueue() {
+        delete _full;
+        _full = NULL;
+    }
+    
+private:
+    DISALLOW_COPY_AND_ASSIGN(SmallQueue);
+    
+    int _begin;
+    int _size;
+    T _c[N];
+    std::deque<T>* _full;
+};  
   
 template <class T>
 class RingQueue {
@@ -78,7 +149,6 @@ public:
   }
 };
   
-  
 /**
  * A thread-safe queue that automatically grows but never shrinks.
  * Dequeue a empty queue will block current thread. Enqueue an element
@@ -87,7 +157,7 @@ public:
  * For example.
  * @code{.cpp}
  *
- * paddle::Queue<int> q;
+ * paddle::BlockingSimpleQueue<int> q;
  * END_OF_JOB=-1
  * void thread1() {
  *   while (true) {
@@ -112,15 +182,15 @@ public:
  * @endcode
  */
 template <class T>
-class Queue {
+class BlockingSimpleQueue {
 public:
   typedef T ValueType;
   /**
    * @brief Construct Function. Default capacity of Queue is zero.
    */
-  Queue() : numElements_(0) {}
+  BlockingSimpleQueue() : numElements_(0) {}
 
-  ~Queue() {}
+  ~BlockingSimpleQueue() {}
 
   /**
    * @brief enqueue an element into Queue.
@@ -227,7 +297,7 @@ private:
  * For example.
  * @code{.cpp}
  *
- * paddle::BlockingQueue<int> q(capacity);
+ * paddle::BlockingCircularQueue<int> q(capacity);
  * END_OF_JOB=-1
  * void thread1() {
  *   while (true) {
@@ -250,14 +320,14 @@ private:
  * }
  */
 template <typename T>
-class BlockingFifoQueue {
+class BlockingCircularQueue {
 public:
   typedef T ValueType;
   /**
    * @brief Construct Function.
    * @param[in] capacity the max numer of elements the queue can have.
    */
-  explicit BlockingFifoQueue(size_t capacity) : capacity_(capacity) {}
+  explicit BlockingCircularQueue(size_t capacity) : capacity_(capacity) {}
 
   /**
    * @brief enqueue an element into Queue.

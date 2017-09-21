@@ -160,6 +160,21 @@ static int PthreadCall(const char* label, int result) {
   }
   return result;
 }
+
+// TODO: Make sure SIGURG is not used by user.
+// This empty handler is simply for triggering EINTR in blocking syscalls.
+void do_nothing_handler(int) {}
+
+static pthread_once_t register_sigurg_once = PTHREAD_ONCE_INIT;
+
+static void register_sigurg() {
+    signal(SIGURG, do_nothing_handler);
+}
+
+int interrupt_pthread(pthread_t th) {
+    pthread_once(&register_sigurg_once, register_sigurg);
+    return pthread_kill(th, SIGURG);
+}
   
 int PhysicalCoreID() {
 #if defined(__x86_64__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 22))
