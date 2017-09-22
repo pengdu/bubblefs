@@ -63,7 +63,7 @@ class ReadOnlyMemoryRegion;
 using std::unique_ptr;
 using std::shared_ptr;
 
-const size_t kDefaultPageSize = 4 * 1024;  
+const size_t kDefaultPageSize = 4 * 1024;
 
 // Options while opening a file to read/write
 struct EnvOptions {
@@ -404,7 +404,7 @@ class Env {
   virtual Status RenameFile(const string& src, const string& target) = 0;
   
   // Hard Link file src to target.
-  virtual Status LinkFile(const std::string& src, const std::string& target) {
+  virtual Status LinkFile(const string& src, const string& target) {
     return Status::NotSupported("LinkFile is not supported for this Env");
   }
   
@@ -422,12 +422,40 @@ class Env {
   // to go away.
   //
   // May create the named file if it does not already exist.
-  virtual Status LockFile(const std::string& fname, FileLock** lock) = 0;
+  virtual Status LockFile(const string& fname, FileLock** lock) = 0;
 
   // Release the lock acquired by a previous successful call to LockFile.
   // REQUIRES: lock was returned by a successful LockFile() call
   // REQUIRES: lock has not already been unlocked.
   virtual Status UnlockFile(FileLock* lock) = 0;
+  
+  virtual Status CallStat(const char* path, FileStatistics* stats) = 0;
+  
+  virtual Status CallLstat(const char* path, FileStatistics* stats) = 0;
+  
+  virtual Status RealPath(const string& path, string& real_path) = 0;
+  
+  virtual string MakeAbsoluteFilePath(const string& input) = 0;
+  
+  virtual Status SetPosixFilePermissions(const string& path, int mode) = 0;
+  
+  virtual bool IsLink(const string& file_path) = 0;
+  
+  virtual int WriteFileDescriptor(const int fd, const char* data, int size) = 0;
+  
+  virtual FILE* OpenFile(const string& filename, const char* mode) = 0;
+  
+  virtual int ReadFile(const string& filename, char* data, int max_size) = 0;
+  
+  virtual int WriteFile(const string& filename, const char* data, int size) = 0;
+  
+  virtual int AppendToFile(const string& filename, const char* data, int size) = 0;
+  
+  virtual Status GetCurrentDirectory(string& path) = 0;
+  
+  virtual Status SetCurrentDirectory(const string& path) = 0;
+  
+  virtual Status CopyFileUnsafe(const string& from_path, const string& to_path) = 0;
 
   /// \brief Returns the absolute path of the current executable. It resolves
   /// symlinks if there is any.
@@ -654,6 +682,12 @@ class Directory {
 };
 
 struct FileStatistics {
+  // protection
+  uint64_t mode;
+  // user ID of owner
+  uint64_t uid;
+  // group ID of owner
+  uint64_t gid;
   // The length of the file or -1 if finding file length is not supported.
   int64 length = -1;
   // The last modified time in nanoseconds.
@@ -663,7 +697,7 @@ struct FileStatistics {
 
   FileStatistics() {}
   FileStatistics(int64 length, int64 mtime_nsec, bool is_directory)
-      : length(length), mtime_nsec(mtime_nsec), is_directory(is_directory) {}
+      : mode(0), uid(0), gid(0), length(length), mtime_nsec(mtime_nsec), is_directory(is_directory) {}
   ~FileStatistics() {}
 };
 

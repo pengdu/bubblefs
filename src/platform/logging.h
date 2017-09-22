@@ -37,6 +37,13 @@ limitations under the License. */
 
 namespace bubblefs {
   
+#if defined(NDEBUG) && defined(OS_CHROMEOS)
+#define NOTREACHED() LOG(ERROR) << "NOTREACHED() hit in "       \
+    << __FUNCTION__ << ". "
+#else
+#define NOTREACHED() DCHECK(false)
+#endif  
+  
 void InitializeLogging(int argc, char** argv);
 
 namespace logging {

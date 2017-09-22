@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// brpc/src/butil/threading/watchdog.h
+
 // The Watchdog class creates a second thread that can Alarm if a specific
 // duration of time passes without proper attention.  The duration of time is
 // specified at construction time.  The Watchdog may be used many times by
@@ -15,8 +17,6 @@
 // a second thread, and their methods call (Arm() and Disarm()) return very
 // quickly.
 
-// brpc/src/butil/threading/watchdog.h
-
 #ifndef BUBBLEFS_UTILS_WATCHDOG_H_
 #define BUBBLEFS_UTILS_WATCHDOG_H_
 
@@ -28,8 +28,8 @@
 #include "platform/time.h"
 
 namespace bubblefs {
-namespace concurrent {
-
+namespace core {
+  
 class BASE_EXPORT Watchdog {
  public:
   // Constructor specifies how long the Watchdog will wait before alarming.
@@ -62,7 +62,7 @@ class BASE_EXPORT Watchdog {
   static void ResetStaticData();
 
  private:
-  class ThreadDelegate : public PlatformThread::Delegate {
+  class ThreadDelegate : public concurrent::PlatformThread::Delegate {
    public:
     explicit ThreadDelegate(Watchdog* watchdog) : watchdog_(watchdog) {
     }
@@ -77,12 +77,12 @@ class BASE_EXPORT Watchdog {
 
   bool enabled_;
 
-  Lock lock_;  // Mutex for state_.
-  ConditionVariable condition_variable_;
+  concurrent::Lock lock_;  // Mutex for state_.
+  concurrent::ConditionVariable condition_variable_;
   State state_;
   const int64_t duration_;  // How long after start_time_ do we alarm?
   const std::string thread_watched_name_;
-  PlatformThreadHandle handle_;
+  concurrent::PlatformThreadHandle handle_;
   ThreadDelegate delegate_;  // Store it, because it must outlive the thread.
 
   int64_t start_time_;  // Start of epoch, and alarm after duration_.
@@ -90,7 +90,7 @@ class BASE_EXPORT Watchdog {
   DISALLOW_COPY_AND_ASSIGN(Watchdog);
 };
 
-}  // namespace concurrent
+}  // namespace core
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_WATCHDOG_H_

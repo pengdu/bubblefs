@@ -61,6 +61,15 @@ uint64 New64();
 // std::mersenne_twister_engine::default_seed as seed value.
 uint64 New64DefaultSeed();
 
+// --------------------------------------------------------------------------
+// NOTE(gejun): Functions in this header read from /dev/urandom in posix
+// systems and are not proper for performance critical situations.
+// For fast random numbers, check fast_rand.h
+// --------------------------------------------------------------------------
+
+// Returns a random number in range [0, kuint64max]. Thread-safe.
+BASE_EXPORT uint64_t RandUint64();
+
 // Returns a random number between min and max (inclusive). Thread-safe.
 BASE_EXPORT int RandInt(int min, int max);
 

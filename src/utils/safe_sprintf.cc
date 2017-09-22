@@ -89,7 +89,7 @@ class Buffer {
 #if defined(BASE_CXX11_ENABLED) \
     && !(defined(__GNUC__) && __GNUC__ * 10000 + __GNUC_MINOR__ * 100 < 40600) \
     && !defined(OS_ANDROID) && !defined(OS_MACOSX) && !defined(OS_IOS)
-    BASE_CASSERT(kSSizeMaxConst == \
+    COMPILE_ASSERT(kSSizeMaxConst == \
                  static_cast<size_t>(std::numeric_limits<ssize_t>::max()),
                  kSSizeMax_is_the_max_value_of_an_ssize_t);
 #endif

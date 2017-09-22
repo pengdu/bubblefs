@@ -321,12 +321,7 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 # if defined(BASE_CXX11_ENABLED)
 #  define BASE_TYPEOF decltype
 # else
-#  ifdef _MSC_VER
-#   include <boost/typeof/typeof.hpp>
-#   define BASE_TYPEOF BOOST_TYPEOF
-#  else
-#   define BASE_TYPEOF typeof
-#  endif
+#  define BASE_TYPEOF typeof
 # endif // BASE_CXX11_ENABLED
 #endif  // BASE_TYPEOF
 

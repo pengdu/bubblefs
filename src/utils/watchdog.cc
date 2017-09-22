@@ -9,9 +9,10 @@
 #include "platform/logging.h"
 #include "platform/time.h"
 #include "utils/lazy_instance.h"
+#include <boost/concept_check.hpp>
 
 namespace bubblefs {
-namespace concurrent {
+namespace core {
 
 namespace {
 
@@ -21,6 +22,12 @@ namespace {
 // time of other alarms to step past the debugging break.
 // Without this safety net, any alarm will typically trigger a host of follow
 // on alarms from callers that specify old times.
+  
+using concurrent::Lock;
+using concurrent::AutoLock;
+using concurrent::AutoUnlock;
+using concurrent::ConditionVariable;
+using concurrent::PlatformThread;
 
 struct StaticData {
   // Lock for access of static data...
@@ -183,5 +190,5 @@ void Watchdog::ResetStaticData() {
   static_data->last_debugged_alarm_delay = timeutil::get_micros();
 }
 
-}  // namespace concurrent
+}  // namespace core
 }  // namespace bubblefs

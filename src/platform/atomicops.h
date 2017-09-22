@@ -368,7 +368,7 @@ template <typename T> struct static_atomic {
     }
 private:
     DISALLOW_ASSIGN(static_atomic);
-    BASE_CASSERT(sizeof(T) == sizeof(std::atomic<T>), size_must_match);
+    COMPILE_ASSERT(sizeof(T) == sizeof(std::atomic<T>), size_must_match);
     std::atomic<T>& ref() {
         // Suppress strict-alias warnings.
         std::atomic<T>* p = reinterpret_cast<std::atomic<T>*>(&val);

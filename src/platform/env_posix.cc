@@ -43,6 +43,7 @@ limitations under the License.
 #include <limits>
 #include <thread>
 #include <vector>
+#include "platform/eintr_wrapper.h"
 #include "platform/env.h"
 #include "platform/error.h"
 #include "platform/io_posix.h"
@@ -83,7 +84,31 @@ limitations under the License.
 namespace bubblefs {
 
 using std::unique_ptr;
-using std::shared_ptr;  
+using std::shared_ptr;
+
+#if defined(OS_BSD) || defined(OS_MACOSX) || defined(OS_NACL)
+typedef struct stat stat_wrapper_t;
+#else
+typedef struct stat64 stat_wrapper_t;
+#endif
+
+// Bits and masks of the file permission.
+enum FilePermissionBits {
+  FILE_PERMISSION_MASK              = S_IRWXU | S_IRWXG | S_IRWXO,
+  FILE_PERMISSION_USER_MASK         = S_IRWXU,
+  FILE_PERMISSION_GROUP_MASK        = S_IRWXG,
+  FILE_PERMISSION_OTHERS_MASK       = S_IRWXO,
+
+  FILE_PERMISSION_READ_BY_USER      = S_IRUSR,
+  FILE_PERMISSION_WRITE_BY_USER     = S_IWUSR,
+  FILE_PERMISSION_EXECUTE_BY_USER   = S_IXUSR,
+  FILE_PERMISSION_READ_BY_GROUP     = S_IRGRP,
+  FILE_PERMISSION_WRITE_BY_GROUP    = S_IWGRP,
+  FILE_PERMISSION_EXECUTE_BY_GROUP  = S_IXGRP,
+  FILE_PERMISSION_READ_BY_OTHERS    = S_IROTH,
+  FILE_PERMISSION_WRITE_BY_OTHERS   = S_IWOTH,
+  FILE_PERMISSION_EXECUTE_BY_OTHERS = S_IXOTH,
+};
   
 namespace {  
   
@@ -615,6 +640,9 @@ class PosixEnv : public Env {
     if (stat(fname.c_str(), &sbuf) != 0) {
       s = IOError(fname, errno);
     } else {
+      stats->mode = sbuf.st_mode;
+      stats->uid = sbuf.st_uid;
+      stats->gid = sbuf.st_gid;
       stats->length = sbuf.st_size;
       stats->mtime_nsec = sbuf.st_mtime * 1e9;
       stats->is_directory = S_ISDIR(sbuf.st_mode);
@@ -698,6 +726,201 @@ class PosixEnv : public Env {
     close(my_lock->fd_);
     delete my_lock;
     return result;
+  }
+  
+  virtual Status CallStat(const char* path, FileStatistics* stats) override {
+    stat_wrapper_t sb;
+    int ret = stat64(path, &sb);
+    if (ret)
+      return IOError("stat64", path, errno);
+    stats->mode = sb.st_mode;
+    stats->uid = sb.st_uid;
+    stats->gid = sb.st_gid;
+    stats->length = sb.st_size;
+    stats->mtime_nsec = sb.st_mtime * 1e9;
+    stats->is_directory = S_ISDIR(sb.st_mode);
+    return Status::OK();
+  }
+  
+  virtual Status CallLstat(const char* path, FileStatistics* stats) override {
+    stat_wrapper_t sb;
+    int ret = lstat64(path, &sb);
+    if (ret)
+      return IOError("lstat64", path, errno);
+    stats->mode = sb.st_mode;
+    stats->uid = sb.st_uid;
+    stats->gid = sb.st_gid;
+    stats->length = sb.st_size;
+    stats->mtime_nsec = sb.st_mtime * 1e9;
+    stats->is_directory = S_ISDIR(sb.st_mode);
+    return Status::OK();
+  }
+  
+  virtual Status RealPath(const string& path, string& real_path) override {
+    char buf[PATH_MAX];
+    if (!realpath(path.c_str(), buf))
+      return IOError("realpath", path, errno);
+    
+    real_path = buf;
+    return Status::OK();
+  }
+  
+  virtual string MakeAbsoluteFilePath(const string& input) override {
+    char full_path[PATH_MAX];
+    if (realpath(input.c_str(), full_path) == NULL)
+      return "";
+    return full_path;
+  }
+  
+  virtual Status SetPosixFilePermissions(const string& path, int mode) override {
+    //ThreadRestrictions::AssertIOAllowed();
+    DCHECK((mode & ~FILE_PERMISSION_MASK) == 0);
+    FileStatistics stats;
+    if (!CallStat(path.c_str(), &stats).ok())
+      return IOError("set file permissions", path, errno);
+    // Clears the existing permission bits, and adds the new ones.
+    mode_t updated_mode_bits = stats.mode & ~FILE_PERMISSION_MASK;
+    updated_mode_bits |= mode & FILE_PERMISSION_MASK;
+    
+    if (HANDLE_EINTR(chmod(path.c_str(), updated_mode_bits)) != 0)
+      return IOError("chmod", path, errno);
+    return Status::OK();
+  }
+  
+  virtual bool IsLink(const string& file_path) override {
+    FileStatistics stats;
+    // If we can't lstat the file, it's safe to assume that the file won't at
+    // least be a 'followable' link.
+    if (!CallLstat(file_path.c_str(), &stats).ok())
+      return false;
+    if (S_ISLNK(stats.mode))
+      return true;
+    else
+      return false;
+  }
+  
+  virtual int WriteFileDescriptor(const int fd, const char* data, int size) override {
+    // Allow for partial writes.
+    ssize_t bytes_written_total = 0;
+    for (ssize_t bytes_written_partial = 0; bytes_written_total < size;
+         bytes_written_total += bytes_written_partial) {
+      bytes_written_partial =
+        HANDLE_EINTR(write(fd, data + bytes_written_total, size - bytes_written_total));
+      if (bytes_written_partial < 0)
+        return -1;
+    }
+    return bytes_written_total;
+  }
+  
+  virtual FILE* OpenFile(const string& filename, const char* mode) override {
+    //ThreadRestrictions::AssertIOAllowed();
+    FILE* result = NULL;
+    do {
+      result = fopen(filename.c_str(), mode);
+    } while (!result && errno == EINTR);
+    return result;
+  }
+  
+  virtual int ReadFile(const string& filename, char* data, int max_size) override {
+    //ThreadRestrictions::AssertIOAllowed();
+    int fd = HANDLE_EINTR(open(filename.c_str(), O_RDONLY));
+    if (fd < 0)
+      return -1;
+    ssize_t bytes_read = HANDLE_EINTR(read(fd, data, max_size));
+    if (IGNORE_EINTR(close(fd)) < 0)
+      return -1;
+    return bytes_read;
+  }
+  
+  virtual int WriteFile(const string& filename, const char* data, int size) override {
+    //ThreadRestrictions::AssertIOAllowed();
+    int fd = HANDLE_EINTR(creat(filename.c_str(), 0640));
+    if (fd < 0)
+      return -1;
+    int bytes_written = WriteFileDescriptor(fd, data, size);
+    if (IGNORE_EINTR(close(fd)) < 0)
+      return -1;
+    return bytes_written;
+  }
+  
+  virtual int  AppendToFile(const string& filename, const char* data, int size) override {
+    //ThreadRestrictions::AssertIOAllowed();
+    int fd = HANDLE_EINTR(open(filename.c_str(), O_WRONLY | O_APPEND));
+    if (fd < 0)
+      return -1;
+    int bytes_written = WriteFileDescriptor(fd, data, size);
+    if (IGNORE_EINTR(close(fd)) < 0)
+      return -1;
+    return bytes_written;
+  }
+  
+  // Gets the current working directory for the process.
+  virtual Status GetCurrentDirectory(string& dir) override {
+    // getcwd can return ENOENT, which implies it checks against the disk.
+    char system_buffer[PATH_MAX] = "";
+    if (!getcwd(system_buffer, sizeof(system_buffer))) {
+      NOTREACHED();
+      return IOError("getcwd", errno);
+    }
+    dir = system_buffer;
+    return Status::OK();
+  }
+  
+  // Sets the current working directory for the process.
+  Status SetCurrentDirectory(const string& path) override {
+    int ret = chdir(path.c_str());
+    if (ret)
+      return IOError("chdir", path, errno);
+    return Status::OK();
+  }
+  
+  virtual Status CopyFileUnsafe(const string& from_path, const string& to_path) override {
+    //ThreadRestrictions::AssertIOAllowed();
+    int infile = HANDLE_EINTR(open(from_path.c_str(), O_RDONLY));
+    if (infile < 0)
+      return IOError("open file", from_path, errno);
+    
+    int outfile = HANDLE_EINTR(creat(to_path.c_str(), 0666));
+    if (outfile < 0) {
+      close(infile);
+      return IOError("open file", to_path, errno);
+    }
+    
+    const size_t kBufferSize = 32768;
+    std::vector<char> buffer(kBufferSize);
+    bool result = true;
+    
+    while (result) {
+      ssize_t bytes_read = HANDLE_EINTR(read(infile, &buffer[0], buffer.size()));
+      if (bytes_read < 0) {
+        result = false;
+        break;
+      }
+      if (bytes_read == 0)
+        break;
+      // Allow for partial writes
+      ssize_t bytes_written_per_read = 0;
+      do {
+        ssize_t bytes_written_partial = HANDLE_EINTR(write(
+          outfile,
+          &buffer[bytes_written_per_read],
+          bytes_read - bytes_written_per_read));
+        if (bytes_written_partial < 0) {
+          result = false;
+          break;
+        }
+        bytes_written_per_read += bytes_written_partial;
+      } while (bytes_written_per_read < bytes_read);
+    }
+    
+    if (IGNORE_EINTR(close(infile)) < 0)
+      result = false;
+    if (IGNORE_EINTR(close(outfile)) < 0)
+      result = false;
+    
+    if (false == result)
+      return IOError("copy file", from_path + "->" + to_path, errno);
+    return Status::OK();
   }
   
   virtual void GetLocalTempDirectories(std::vector<string>* list) override {

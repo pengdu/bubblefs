@@ -400,6 +400,8 @@ bool Env::LocalTempFilename(string* filename) {
 
   // Try each directory, as they might be full, have inappropriate
   // permissions or have different problems at times.
+  // return std::string(".org.chromium.Chromium.XXXXXX");
+
   for (const string& dir : dirs) {
 #ifdef __APPLE__
     uint64_t tid64;
