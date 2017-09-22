@@ -192,7 +192,7 @@ class SimpleThreadPoolTempl : public ThreadPoolInterface {
   bool exiting_ = false;
 
   PerThread* GetPerThread() const {
-    TF_STATIC_THREAD_LOCAL PerThread per_thread;
+    STATIC_THREAD_LOCAL PerThread per_thread;
     return &per_thread;
   }
 };
@@ -201,8 +201,7 @@ typedef SimpleThreadPoolTempl<StlThreadEnvironment> SimpleThreadPool;
   
 struct ThreadPool::Impl : SimpleThreadPool {
   Impl(Env* env, const ThreadOptions& thread_options, const string& name,
-       int num_threads, bool low_latency_hint)
-      { SimpleThreadPool(num_threads); }
+       int num_threads, bool low_latency_hint): SimpleThreadPool(num_threads) { }
 };
 
 ThreadPool::ThreadPool(Env* env, const string& name, int num_threads)

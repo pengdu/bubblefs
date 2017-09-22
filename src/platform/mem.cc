@@ -34,7 +34,7 @@ limitations under the License.
 
 namespace bubblefs {
 namespace port {
-
+  
 void* AlignedMalloc(size_t size, int minimum_alignment) {
 #if defined(__ANDROID__)
   return memalign(minimum_alignment, size);

@@ -10,11 +10,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-// chromium/base/memory/aligned_memory.h
+// brpc/src/butil/memory/aligned_memory.h
 // tensorflow/tensorflow/core/platform/mem.h
 
 #ifndef BUBBLEFS_PLATFORM_MEM_H_
 #define BUBBLEFS_PLATFORM_MEM_H_
+
+#include "platform/types.h"
 
 namespace bubblefs {
 namespace port {
@@ -50,6 +52,8 @@ namespace port {
   
 // AlignedMemory is specialized for all supported alignments.
 // Make sure we get a compiler error if someone uses an unsupported alignment.
+// AlignedMemory is specialized for all supported alignments.
+// Make sure we get a compiler error if someone uses an unsupported alignment.
 template <size_t Size, size_t ByteAlignment>
 struct AlignedMemory {};
 
@@ -57,7 +61,7 @@ struct AlignedMemory {};
     template <size_t Size> \
     class AlignedMemory<Size, byte_alignment> { \
      public: \
-      alignas(byte_alignment) uint8 data_[Size]; \
+      ALIGNAS(byte_alignment) uint8_t data_[Size]; \
       void* void_data() { return static_cast<void*>(data_); } \
       const void* void_data() const { \
         return static_cast<const void*>(data_); \
@@ -77,7 +81,19 @@ struct AlignedMemory {};
 // does not understand ALIGNAS(ALIGNOF(Type)) or ALIGNAS(template_param).
 // Greater than 4096 alignment is not supported by some compilers, so 4096 is
 // the maximum specified here.
-// BASE_DECL_ALIGNED_MEMORY(1024);
+BASE_DECL_ALIGNED_MEMORY(1);
+BASE_DECL_ALIGNED_MEMORY(2);
+BASE_DECL_ALIGNED_MEMORY(4);
+BASE_DECL_ALIGNED_MEMORY(8);
+BASE_DECL_ALIGNED_MEMORY(16);
+BASE_DECL_ALIGNED_MEMORY(32);
+BASE_DECL_ALIGNED_MEMORY(64);
+BASE_DECL_ALIGNED_MEMORY(128);
+BASE_DECL_ALIGNED_MEMORY(256);
+BASE_DECL_ALIGNED_MEMORY(512);
+BASE_DECL_ALIGNED_MEMORY(1024);
+BASE_DECL_ALIGNED_MEMORY(2048);
+BASE_DECL_ALIGNED_MEMORY(4096);
 
 #undef BASE_DECL_ALIGNED_MEMORY
 

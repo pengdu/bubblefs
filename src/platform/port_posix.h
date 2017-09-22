@@ -37,6 +37,7 @@ limitations under the License.
 #include <pthread.h>
 #include <limits>
 #include <string>
+#include <thread>
 #include "platform/cpu_info.h"
 #include "platform/macros.h"
 #include "platform/mutex.h"
@@ -53,6 +54,8 @@ static const int kMaxInt32 = std::numeric_limits<int32_t>::max();
 static const uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
 static const int64_t kMaxInt64 = std::numeric_limits<int64_t>::max();
 static const size_t kMaxSizet = std::numeric_limits<size_t>::max();
+
+using Thread = std::thread;
 
 static inline void AsmVolatilePause() {
 #if defined(__i386__) || defined(__x86_64__)

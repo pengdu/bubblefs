@@ -38,7 +38,6 @@ Status::Status(error::Code code, error::SubCode subcode, StringPiece msg, String
   assert(subcode != error::MAX_SUB_CODE);
   state_ = std::unique_ptr<State>(new State);
   state_->code = code;
-  state_->subcode = error::NONE;
   const size_t len1 = msg.size();
   const size_t len2 = msg2.size();
   const size_t size = len1 + (len2 ? (2 + len2) : 0);
@@ -50,7 +49,7 @@ Status::Status(error::Code code, error::SubCode subcode, StringPiece msg, String
     memcpy(result + len1 + 2, msg2.data(), len2);
   }
   result[size] = '\0';  // null terminator for C style string
-  state_ = result;
+  state_->msg = result;
   state_->subcode = error::NONE;
 }
 
@@ -160,11 +159,11 @@ string Status::ToString() const {
     }
     string result(type);
     result += ": ";
-    error::SubCode subcode = subcode();
-    if (subcode != error::NONE) {
+    error::SubCode sub = subcode();
+    if (sub != error::NONE) {
       memset(tmp, 0, sizeof(tmp));
       snprintf(tmp, sizeof(tmp), "Subode(%d), ",
-                 static_cast<int>(subcode));
+                 static_cast<int>(sub));
       result.append(tmp);
     }
     result += state_->msg;

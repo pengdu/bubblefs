@@ -1349,9 +1349,9 @@ bool SplitStringIntoKeyValuePairs(const string& line,
   return success;
 }
 
-static bool SplitPath(const string& path,
-                      std::vector<string>* element,
-                      bool* isdir) {
+bool SplitPath(const string& path,
+               std::vector<string>* element,
+               bool* isdir) {
     if (path.empty() || path[0] != '/' || path.size() > MAX_PATH_LENGTH) {
         return false;
     }

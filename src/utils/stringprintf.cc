@@ -122,10 +122,10 @@ string PrintfVector(const char* format, const std::vector<string>& v) {
   // or displaying random chunks of memory to users.
 
   const char* cstr[kStringPrintfVectorMaxArgs];
-  for (int i = 0; i < v.size(); ++i) {
+  for (std::size_t i = 0; i < v.size(); ++i) {
     cstr[i] = v[i].c_str();
   }
-  for (int i = v.size(); i < ARRAYSIZE_UNSAFE(cstr); ++i) {
+  for (std::size_t i = v.size(); i < ARRAYSIZE_UNSAFE(cstr); ++i) {
     cstr[i] = &string_printf_empty_block[0];
   }
 

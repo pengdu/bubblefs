@@ -238,7 +238,7 @@ bool safe_strtou64(StringPiece str, uint64* value) {
   int64 result = 0;
   do {
     int digit = SafeFirstChar(str) - '0';
-    if ((kuint64max - digit) / 10 < result) {
+    if (static_cast<int64>(kuint64max - digit) / 10 < result) {
       return false;
     }
     result = result * 10 + digit;
@@ -351,14 +351,14 @@ char* FloatToBuffer(float value, char* buffer) {
 
 string FpToString(Fprint fp) {
   char buf[17];
-  snprintf(buf, sizeof(buf), "%016llx", static_cast<uint64>(fp));
+  snprintf(buf, sizeof(buf), "%016lx", static_cast<uint64>(fp));
   return string(buf);
 }
 
 bool StringToFp(const string& s, Fprint* fp) {
   char junk;
   uint64 result;
-  if (sscanf(s.c_str(), "%llx%c", &result, &junk) == 1) {
+  if (sscanf(s.c_str(), "%lx%c", &result, &junk) == 1) {
     *fp = result;
     return true;
   } else {
@@ -405,7 +405,7 @@ string HumanReadableNum(int64 value) {
     value = -value;
   }
   if (value < 1000) {
-    Appendf(&s, "%lld", value);
+    Appendf(&s, "%ld", value);
   } else if (value >= static_cast<int64>(1e15)) {
     // Number bigger than 1E15; use that notation.
     Appendf(&s, "%0.3G", static_cast<double>(value));
@@ -437,7 +437,7 @@ string HumanReadableNumBytes(int64 num_bytes) {
   if (num_bytes < 1024) {
     // No fractions for bytes.
     char buf[8];  // Longest possible string is '-XXXXB'
-    snprintf(buf, sizeof(buf), "%s%lldB", neg_str,
+    snprintf(buf, sizeof(buf), "%s%ldB", neg_str,
              static_cast<int64>(num_bytes));
     return string(buf);
   }

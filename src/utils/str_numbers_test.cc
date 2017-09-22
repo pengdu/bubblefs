@@ -120,35 +120,35 @@ TEST(HumanReadableElapsedTime, Basic) {
 TEST(safe_strto32, Int32s) {
   int32 result;
 
-  EXPECT_EQ(true, safe_strto32("1", &result));
+  EXPECT_TRUE(safe_strto32("1", &result));
   EXPECT_EQ(1, result);
-  EXPECT_EQ(true, safe_strto32("123", &result));
+  EXPECT_TRUE(safe_strto32("123", &result));
   EXPECT_EQ(123, result);
-  EXPECT_EQ(true, safe_strto32(" -123 ", &result));
+  EXPECT_TRUE(safe_strto32(" -123 ", &result));
   EXPECT_EQ(-123, result);
-  EXPECT_EQ(true, safe_strto32("2147483647", &result));
+  EXPECT_TRUE(safe_strto32("2147483647", &result));
   EXPECT_EQ(2147483647, result);
-  EXPECT_EQ(true, safe_strto32("-2147483648", &result));
+  EXPECT_TRUE(safe_strto32("-2147483648", &result));
   EXPECT_EQ(-2147483648, result);
 
   // Invalid argument
-  EXPECT_EQ(false, safe_strto32(" 132as ", &result));
-  EXPECT_EQ(false, safe_strto32(" 132.2 ", &result));
-  EXPECT_EQ(false, safe_strto32(" -", &result));
-  EXPECT_EQ(false, safe_strto32("", &result));
-  EXPECT_EQ(false, safe_strto32("  ", &result));
-  EXPECT_EQ(false, safe_strto32("123 a", &result));
+  EXPECT_FALSE(safe_strto32(" 132as ", &result));
+  EXPECT_FALSE(safe_strto32(" 132.2 ", &result));
+  EXPECT_FALSE(safe_strto32(" -", &result));
+  EXPECT_FALSE(safe_strto32("", &result));
+  EXPECT_FALSE(safe_strto32("  ", &result));
+  EXPECT_FALSE(safe_strto32("123 a", &result));
 
   // Overflow
-  EXPECT_EQ(false, safe_strto32("2147483648", &result));
-  EXPECT_EQ(false, safe_strto32("-2147483649", &result));
+  EXPECT_FALSE(safe_strto32("2147483648", &result));
+  EXPECT_FALSE(safe_strto32("-2147483649", &result));
 
   // Check that the StringPiece's length is respected.
-  EXPECT_EQ(true, safe_strto32(StringPiece("123", 1), &result));
+  EXPECT_TRUE(safe_strto32(StringPiece("123", 1), &result));
   EXPECT_EQ(1, result);
-  EXPECT_EQ(true, safe_strto32(StringPiece(" -123", 4), &result));
+  EXPECT_TRUE(safe_strto32(StringPiece(" -123", 4), &result));
   EXPECT_EQ(-12, result);
-  EXPECT_EQ(false, safe_strto32(StringPiece(nullptr, 0), &result));
+  EXPECT_FALSE(safe_strto32(StringPiece(nullptr, 0), &result));
 }
 
 TEST(safe_strtou32, UInt32s) {
@@ -187,37 +187,37 @@ TEST(safe_strtou32, UInt32s) {
 TEST(safe_strto64, Int64s) {
   int64 result;
 
-  EXPECT_EQ(true, safe_strto64("1", &result));
+  EXPECT_TRUE(safe_strto64("1", &result));
   EXPECT_EQ(1, result);
-  EXPECT_EQ(true, safe_strto64("123", &result));
+  EXPECT_TRUE(safe_strto64("123", &result));
   EXPECT_EQ(123, result);
-  EXPECT_EQ(true, safe_strto64(" -123 ", &result));
+  EXPECT_TRUE(safe_strto64(" -123 ", &result));
   EXPECT_EQ(-123, result);
-  EXPECT_EQ(true, safe_strto64("9223372036854775807", &result));
+  EXPECT_TRUE(safe_strto64("9223372036854775807", &result));
   EXPECT_EQ(9223372036854775807, result);
-  EXPECT_EQ(true, safe_strto64("-9223372036854775808", &result));
+  EXPECT_TRUE(safe_strto64("-9223372036854775808", &result));
   // kint64min == -9223372036854775808
   // Use -9223372036854775808 directly results in out of range error
   EXPECT_EQ(kint64min, result);
 
   // Invalid argument
-  EXPECT_EQ(false, safe_strto64(" 132as ", &result));
-  EXPECT_EQ(false, safe_strto64(" 132.2 ", &result));
-  EXPECT_EQ(false, safe_strto64(" -", &result));
-  EXPECT_EQ(false, safe_strto64("", &result));
-  EXPECT_EQ(false, safe_strto64("  ", &result));
-  EXPECT_EQ(false, safe_strto64("123 a", &result));
+  EXPECT_FALSE(safe_strto64(" 132as ", &result));
+  EXPECT_FALSE(safe_strto64(" 132.2 ", &result));
+  EXPECT_FALSE(safe_strto64(" -", &result));
+  EXPECT_FALSE(safe_strto64("", &result));
+  EXPECT_FALSE(safe_strto64("  ", &result));
+  EXPECT_FALSE(safe_strto64("123 a", &result));
 
   // Overflow
-  EXPECT_EQ(false, safe_strto64("9223372036854775808", &result));
-  EXPECT_EQ(false, safe_strto64("-9223372036854775809", &result));
+  EXPECT_FALSE(safe_strto64("9223372036854775808", &result));
+  EXPECT_FALSE(safe_strto64("-9223372036854775809", &result));
 
   // Check that the StringPiece's length is respected.
-  EXPECT_EQ(true, safe_strto64(StringPiece("123", 1), &result));
+  EXPECT_TRUE(safe_strto64(StringPiece("123", 1), &result));
   EXPECT_EQ(1, result);
-  EXPECT_EQ(true, safe_strto64(StringPiece(" -123", 4), &result));
+  EXPECT_TRUE(safe_strto64(StringPiece(" -123", 4), &result));
   EXPECT_EQ(-12, result);
-  EXPECT_EQ(false, safe_strto64(StringPiece(nullptr, 0), &result));
+  EXPECT_FALSE(safe_strto64(StringPiece(nullptr, 0), &result));
 }
 
 TEST(safe_strtou64, UInt64s) {

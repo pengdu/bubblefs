@@ -20,6 +20,7 @@ limitations under the License.
 #include <assert.h>
 #include "platform/macros.h"
 #include "platform/logging.h"
+#include "utils/atomic_ref_count.h"
 
 namespace bubblefs {
   
@@ -104,7 +105,7 @@ inline bool RefCounted::RefCountIsOne() const {
   return (ref_.load(std::memory_order_acquire) == 1);
 }
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 
 class BASE_EXPORT RefCountedBase {
  public:
@@ -163,6 +164,30 @@ class BASE_EXPORT RefCountedBase {
   DISALLOW_COPY_AND_ASSIGN(RefCountedBase);
 };
 
+class BASE_EXPORT RefCountedThreadSafeBase {
+ public:
+  bool HasOneRef() const;
+
+ protected:
+  RefCountedThreadSafeBase();
+  ~RefCountedThreadSafeBase();
+
+  void AddRef() const;
+
+  // Returns true if the object should self-delete.
+  bool Release() const;
+
+ private:
+  mutable base::AtomicRefCount ref_count_;
+#if defined(__clang__)
+  mutable bool ALLOW_UNUSED  in_dtor_;
+#else
+  mutable bool in_dtor_;
+#endif
+
+  DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafeBase);
+};
+
 //
 // A base class for reference counted classes.  Otherwise, known as a cheap
 // knock-off of WebKit's RefCountedThreadUnsafe<T> class.  To use this guy just extend your
@@ -199,42 +224,6 @@ class RefCountedThreadUnsafe : public RefCountedBase {
   DISALLOW_COPY_AND_ASSIGN(RefCountedThreadUnsafe<T>);
 };
 
-//
-// A thread-safe variant of RefCountedThreadUnsafe<T>
-//
-//   class MyFoo : public butil::RefCountedThreadSafe<MyFoo> {
-//    ...
-//   };
-//
-// If you're using the default trait, then you should add compile time
-// asserts that no one else is deleting your object.  i.e.
-//    private:
-//     friend class butil::RefCountedThreadSafe<MyFoo>;
-//     ~MyFoo();
-class BASE_EXPORT RefCountedThreadSafeBase {
- public:
-  bool HasOneRef() const;
-  
-  void AddRef() const;
-
-  // Returns true if the object should self-delete.
-  bool Release() const;
-
- protected:
-  RefCountedThreadSafeBase();
-  ~RefCountedThreadSafeBase();
-
- private:
-  mutable std::atomic_int_fast32_t ref_count_;
-#if defined(__clang__)
-  mutable bool ALLOW_UNUSED  in_dtor_;
-#else
-  mutable bool in_dtor_;
-#endif
-
-  DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafeBase);
-};
-
 // Forward declaration.
 template <class T, typename Traits> class RefCountedThreadSafe;
 
@@ -251,6 +240,18 @@ struct DefaultRefCountedThreadSafeTraits {
   }
 };
 
+//
+// A thread-safe variant of RefCounted<T>
+//
+//   class MyFoo : public butil::RefCountedThreadSafe<MyFoo> {
+//    ...
+//   };
+//
+// If you're using the default trait, then you should add compile time
+// asserts that no one else is deleting your object.  i.e.
+//    private:
+//     friend class butil::RefCountedThreadSafe<MyFoo>;
+//     ~MyFoo();
 template <class T, typename Traits = DefaultRefCountedThreadSafeTraits<T> >
 class RefCountedThreadSafe : public RefCountedThreadSafeBase {
  public:

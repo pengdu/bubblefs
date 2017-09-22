@@ -37,6 +37,9 @@ class BASE_EXPORT ThreadIdNameManager {
   // Remove the name for the given id.
   void RemoveName(PlatformThreadHandle::Handle handle, PlatformThreadId id);
 
+  ThreadIdNameManager();
+  ~ThreadIdNameManager();
+  
  private:
   friend struct DefaultSingletonTraits<ThreadIdNameManager>;
 
@@ -45,9 +48,6 @@ class BASE_EXPORT ThreadIdNameManager {
   typedef std::map<PlatformThreadHandle::Handle, std::string*>
       ThreadHandleToInternedNameMap;
   typedef std::map<std::string, std::string*> NameToInternedNameMap;
-
-  ThreadIdNameManager();
-  ~ThreadIdNameManager();
 
   // lock_ protects the name_to_interned_name_, thread_id_to_handle_ and
   // thread_handle_to_interned_name_ maps.

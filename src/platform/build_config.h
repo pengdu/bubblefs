@@ -22,8 +22,8 @@
 #define TF_USE_GLOG 1
 #endif
 
-#ifndef TF_USE_PYTHON
-#define TF_USE_PYTHON 2.7
+#ifndef TF_USE_PYTHON2
+#define TF_USE_PYTHON2 0
 #endif
 
 #ifndef TF_USE_JEMALLOC

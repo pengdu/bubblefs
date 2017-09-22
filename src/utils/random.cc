@@ -68,10 +68,6 @@ int RandInt(int min, int max) {
   return result;
 }
 
-double RandDouble() {
-  return BitsToOpenEndedUnitInterval(New64());
-}
-
 double BitsToOpenEndedUnitInterval(uint64_t bits) {
   // We try to get maximum precision by masking out as many bits as will fit
   // in the target type's mantissa, and raising it to an appropriate power to
@@ -86,6 +82,10 @@ double BitsToOpenEndedUnitInterval(uint64_t bits) {
   DCHECK_GE(result, 0.0);
   DCHECK_LT(result, 1.0);
   return result;
+}
+
+double RandDouble() {
+  return BitsToOpenEndedUnitInterval(New64());
 }
 
 uint64_t RandGenerator(uint64_t range) {

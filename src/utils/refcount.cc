@@ -10,7 +10,8 @@ namespace bubblefs {
 namespace core {  
   
 bool RefCountedThreadSafeBase::HasOneRef() const {
-  return (ref_count_.load(std::memory_order_acquire) == 1);
+  return base::AtomicRefCountIsOne(
+      &const_cast<RefCountedThreadSafeBase*>(this)->ref_count_);
 }
 
 RefCountedThreadSafeBase::RefCountedThreadSafeBase() : ref_count_(0) {
@@ -23,7 +24,6 @@ RefCountedThreadSafeBase::~RefCountedThreadSafeBase() {
 #ifndef NDEBUG
   DCHECK(in_dtor_) << "RefCountedThreadSafe object deleted without "
                       "calling Release()";
-  DCHECK_EQ(ref_.load(), 0);
 #endif
 }
 
@@ -31,19 +31,17 @@ void RefCountedThreadSafeBase::AddRef() const {
 #ifndef NDEBUG
   DCHECK(!in_dtor_);
 #endif
-  DCHECK_GE(ref_count_.load(), 1);
-  ref_count_.fetch_add(1, std::memory_order_relaxed);
+  base::AtomicRefCountInc(&ref_count_);
 }
 
 bool RefCountedThreadSafeBase::Release() const {
 #ifndef NDEBUG
   DCHECK(!in_dtor_);
-  DCHECK_GT(ref_.load(), 0);
+  DCHECK(!base::AtomicRefCountIsZero(&ref_count_));
 #endif
-  if (HasOneRef() || ref_count_.fetch_sub(1) == 1) {
+  if (!base::AtomicRefCountDec(&ref_count_)) {
 #ifndef NDEBUG
     in_dtor_ = true;
-    DCHECK((ref_.store(0), true));
 #endif
     return true;
   }

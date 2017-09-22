@@ -88,7 +88,7 @@ void Watchdog::Arm() {
 }
 
 void Watchdog::ArmSomeTimeDeltaAgo(const int64_t time_delta) {
-  ArmAtStartTime((timeutil::get_micros() - time_delta);
+  ArmAtStartTime(timeutil::get_micros() - time_delta);
 }
 
 // Start clock for watchdog.
@@ -133,7 +133,7 @@ void Watchdog::ThreadDelegate::ThreadMain() {
     DCHECK(ARMED == watchdog_->state_);
     remaining_duration = watchdog_->duration_ -
         (timeutil::get_micros() - watchdog_->start_time_);
-    if (remaining_duration.InMilliseconds() > 0) {
+    if (remaining_duration > 0) {
       // Spurios wake?  Timer drifts?  Go back to sleep for remaining time.
       watchdog_->condition_variable_.TimedWait(remaining_duration);
       continue;

@@ -18,7 +18,7 @@ limitations under the License. */
 
 #include "platform/macros.h"
 
-#if TF_USE_PYTHON == 2.7  // Note:use python2.7!
+#if TF_USE_PYTHON2 == 1
 
 #include <python2.7/Python.h>
 #include <python2.7/frameobject.h>
@@ -334,6 +334,6 @@ void initPython(int argc, char** argv);
 
 }  // namespace bubblefs
 
-#endif // TF_USE_PYTHON == 2.7
+#endif // TF_USE_PYTHON2
 
 #endif // BUBBLEFS_UTILS_PYTHON_UTIL_H_

@@ -6,33 +6,8 @@
 
 #include "utils/safe_sprintf.h"
 #include <limits>
-#if !defined(NDEBUG)
-// In debug builds, we use RAW_CHECK() to print useful error messages, if
-// SafeSPrintf() is called with broken arguments.
-// As our contract promises that SafeSPrintf() can be called from any
-// restricted run-time context, it is not actually safe to call logging
-// functions from it; and we only ever do so for debug builds and hope for the
-// best. We should _never_ call any logging function other than RAW_CHECK(),
-// and we should _never_ include any logging code that is active in production
-// builds. Most notably, we should not include these logging functions in
-// unofficial release builds, even though those builds would otherwise have
-// DEBUG_CHECKS() enabled.
-// In other words; please do not remove the #ifdef around this #include.
-// Instead, in production builds we opt for returning a degraded result,
-// whenever an error is encountered.
-// E.g. The broken function call
-//        SafeSPrintf("errno = %d (%x)", errno, strerror(errno))
-//      will print something like
-//        errno = 13, (%x)
-//      instead of
-//        errno = 13 (Access denied)
-//      In most of the anticipated use cases, that's probably the preferred
-//      behavior.
-#include "platform/logging.h"
-#define DEBUG_CHECK RAW_CHECK
-#else
+
 #define DEBUG_CHECK(x, msg) do { if (x) { } } while (0)
-#endif
 
 namespace bubblefs {
 namespace strings {
@@ -114,9 +89,9 @@ class Buffer {
 #if defined(BASE_CXX11_ENABLED) \
     && !(defined(__GNUC__) && __GNUC__ * 10000 + __GNUC_MINOR__ * 100 < 40600) \
     && !defined(OS_ANDROID) && !defined(OS_MACOSX) && !defined(OS_IOS)
-    BAIDU_CASSERT(kSSizeMaxConst == \
-                   static_cast<size_t>(std::numeric_limits<ssize_t>::max()),
-                   kSSizeMax_is_the_max_value_of_an_ssize_t);
+    BASE_CASSERT(kSSizeMaxConst == \
+                 static_cast<size_t>(std::numeric_limits<ssize_t>::max()),
+                 kSSizeMax_is_the_max_value_of_an_ssize_t);
 #endif
     DEBUG_CHECK(size > 0, "");
     DEBUG_CHECK(size <= kSSizeMax, "");

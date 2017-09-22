@@ -18,7 +18,7 @@ limitations under the License.
 #include "platform/mutex.h"
 #include "platform/test.h"
 #include "platform/test_benchmark.h"
-#include "boost/boost/math/tools/minima.hpp"
+#include "boost/math/tools/minima.hpp"
 
 namespace bubblefs {
 namespace thread {
@@ -124,7 +124,7 @@ static void BM_Sequential(int iters) {
   // Decrement count sequentially until 0.
   int count = iters;
   mutex done_lock;
-  condition_variable done;
+  std::condition_variable done;
   bool done_flag = false;
   std::function<void()> work = [&pool, &count, &done_lock, &done, &done_flag,
                                 &work]() {
@@ -149,7 +149,7 @@ static void BM_Parallel(int iters) {
   // Decrement count concurrently until 0.
   std::atomic_int_fast32_t count(iters);
   mutex done_lock;
-  condition_variable done;
+  std::condition_variable done;
   bool done_flag = false;
   for (int i = 0; i < iters; ++i) {
     pool.Schedule([&count, &done_lock, &done, &done_flag]() {

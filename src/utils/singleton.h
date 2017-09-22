@@ -315,7 +315,7 @@ class Singleton {
 
   // This class is safe to be constructed and copy-constructed since it has no
   // member.
-
+ public:
   // Return a pointer to the one true instance of the class.
   static Type* get() {
     // The load has acquire memory ordering as the thread which reads the

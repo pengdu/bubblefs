@@ -22,13 +22,13 @@ limitations under the License.
 #ifndef BUBBLEFS_UTILS_STRINGPRINTF_H_
 #define BUBBLEFS_UTILS_STRINGPRINTF_H_
 
-#include "platform/macros.h"
 #include <ctype.h>
 #include <stdarg.h>  // va_list
 #include <stdio.h>
 #include <string>
 #include <vector>
 #include "platform/compiler_specific.h"
+#include "platform/macros.h"
 #include "platform/types.h"
 
 namespace bubblefs {

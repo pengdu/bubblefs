@@ -18,9 +18,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+#include <errno.h>
+#include <string.h>
 #include <algorithm>
-#include <cerrno>
-#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -121,8 +121,8 @@ std::string& Properties::trim(std::string& s)  {
 // split string by '='
 void Properties::splitkv(const std::string& s, std::string& k, std::string& v) {
     const char sep = '=';
-    int start = 0;
-    int end = 0;
+    std::size_t start = 0;
+    std::size_t end = 0;
     if ((end = s.find(sep, start)) != std::string::npos) {
         k = s.substr(start, end - start);
         v = s.substr(end + 1);
@@ -142,7 +142,7 @@ bool Properties::replaceenv(std::string& s) {
             return false;
         }
         std::string envkey = s.substr(start + 2, end - start - 2);
-        const char* envval = std::getenv(envkey.c_str());
+        const char* envval = getenv(envkey.c_str());
         if (envval == NULL) {
             return false;
         }

@@ -55,10 +55,6 @@ enum Code {
   // instead for those errors).
   PERMISSION_DENIED = 7,
 
-  // The request does not have valid authentication credentials for the
-  // operation.
-  UNAUTHENTICATED = 16,
-
   // Some resource has been exhausted, perhaps a per-user quota, or
   // perhaps the entire file system is out of space.
   RESOURCE_EXHAUSTED = 8,
@@ -144,6 +140,10 @@ enum Code {
   TIMEDOUT = 23,
   
   BUSY = 24,
+  
+  // The request does not have valid authentication credentials for the
+  // operation.
+  UNAUTHENTICATED = 25,
 
   // An extra enum entry to prevent people from writing code that
   // fails to compile when a new code is added.

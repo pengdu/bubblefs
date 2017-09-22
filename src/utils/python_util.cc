@@ -16,7 +16,7 @@ limitations under the License. */
 #include <sstream>
 #include <vector>
 
-#if TF_USE_PYTHON == 2.7  // Note:use python2.7!
+#if TF_USE_PYTHON2 == 1
 
 namespace bubblefs {
 
@@ -155,4 +155,4 @@ void initPython(int argc, char** argv) {
 
 }  // namespace bubblefs
 
-#endif // #if TF_USE_PYTHON == 2.7
+#endif // TF_USE_PYTHON2
