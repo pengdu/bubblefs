@@ -100,7 +100,7 @@ extern void cacheline_aligned_free(void *memblock);
 
 extern void Crash(const std::string& srcfile, int srcline);
 
-extern pid_t os_gettid();
+extern pid_t Gettid();
 
 extern int GetMaxOpenFiles();
 

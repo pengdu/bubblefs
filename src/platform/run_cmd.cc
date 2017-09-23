@@ -28,13 +28,6 @@ namespace port {
 
 using std::ostringstream;
 
-#define TEMP_FAILURE_RETRY(expression) ({     \
-  __typeof(expression) __result;              \
-  do {                                        \
-    __result = (expression);                  \
-  } while (__result == -1 && errno == EINTR); \
-  __result; })
-
 # define VOID_TEMP_FAILURE_RETRY(expression) \
     static_cast<void>(TEMP_FAILURE_RETRY(expression))
 

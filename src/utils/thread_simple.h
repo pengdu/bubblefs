@@ -6,6 +6,9 @@
 
 // baidu/common/include/thread.h
 
+#ifndef BUBBLEFS_UTILS_THREAD_SIMPLE_H_
+#define BUBBLEFS_UTILS_THREAD_SIMPLE_H_
+
 #include <errno.h>
 #include <pthread.h>
 #include <sched.h>
@@ -16,7 +19,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <functional>
-#include <boost/concept_check.hpp>
 #include "platform/io_prio.h"
 #include "platform/macros.h"
 
@@ -105,13 +107,14 @@ private:
 // simple thread implement
 class Thread {
 public:
-    Thread() : tid_(0), pid_(0), ioprio_class_(-1), ioprio_prio_(-1),
-               cpuid_(-1), thread_name_("ThreadUnknown") { }
-    static int64_t CurrentId() {
+    Thread() { 
+      memset(&tid_, 0, sizeof(tid_));
+    }
+    static int64_t CurrentThreadId() {
         return static_cast<int64_t>(pthread_self());
     }
-    const pthread_t GetThreadId() const {
-        return tid_;
+    const int64_t GetThreadId() const {
+        return static_cast<int64_t>(tid_);
     }
     bool IsStarted() const {
         return (0 != tid_);
@@ -129,7 +132,7 @@ public:
         int ret = pthread_create(&tid_, nullptr, proc, arg);
         return (ret == 0);
     }
-    bool Start(Proc proc, void* arg, std::string name, size_t stack_size, bool joinable = true);
+    bool Start(Proc proc, void* arg, size_t stack_size, bool joinable = true);
     bool Join() {
         int ret = pthread_join(tid_, nullptr);
         return (ret == 0);
@@ -152,7 +155,7 @@ public:
         while (nanosleep(&sleep_time, &remaining) == -1 && errno == EINTR)
           sleep_time = remaining;
     }
-    bool kill(int signal) {
+    bool Kill(int signal) {
       int ret = 0;
       if (tid_)
         ret = pthread_kill(tid_, signal);
@@ -162,8 +165,6 @@ public:
       int ret = pthread_detach(tid_);
       return (ret == 0);
     }
-    void SetIoprio(int cls, int prio);
-    bool SetAffinity(int id);
 private:
     static void* ProcWrapper(void* arg) {
         reinterpret_cast<Thread*>(arg)->user_proc_();
@@ -174,11 +175,9 @@ private:
 private:
     std::function<void ()> user_proc_;
     pthread_t tid_;
-    pid_t pid_;
-    int ioprio_class_, ioprio_prio_;
-    int cpuid_;
-    std::string thread_name_;
 };
 
 } // namespace bdcommon
 } // namespace bubblefs
+
+#endif // BUBBLEFS_UTILS_THREAD_SIMPLE_H_

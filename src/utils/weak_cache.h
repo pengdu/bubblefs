@@ -8,18 +8,31 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
-
+/*
+ * Ceph - scalable distributed file system
+ *
+ * Copyright (C) 2004-2006 Sage Weil <sage@newdream.net>
+ *
+ * This is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License version 2.1, as published by the Free Software 
+ * Foundation.  See file COPYING.
+ * 
+ */
 
 // Paddle/paddle/utils/Util.h
+// ceph/src/common/simple_cache.hpp
 
 #ifndef BUBBLEFS_UTILS_WEAK_CACHE_H_
 #define BUBBLEFS_UTILS_WEAK_CACHE_H_
 
 #include <assert.h>
 #include <stdint.h>
+#include <condition_variable>
 #include <functional>
 #include <iterator>
 #include <list>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -165,7 +178,91 @@ private:
     std::list<KeyValuePair> _cache_items_list;
     std::unordered_map<Key, ListIterator> _cache_items_map;
     size_t _max_size;
-};  
+};
+
+template <class K, class V, class C = std::less<K>, class H = std::hash<K> >
+class SimpleLRU {
+  std::mutex lock;
+  size_t max_size;
+  std::unordered_map<K, typename std::list<pair<K, V> >::iterator, H> contents;
+  std::list<pair<K, V> > lru;
+  std::map<K, V, C> pinned;
+
+  void trim_cache() {
+    while (lru.size() > max_size) {
+      contents.erase(lru.back().first);
+      lru.pop_back();
+    }
+  }
+
+  void _add(K key, V&& value) {
+    lru.emplace_front(key, std::move(value)); // can't move key because we access it below
+    contents[key] = lru.begin();
+    trim_cache();
+  }
+
+public:
+  SimpleLRU(size_t max_size) : lock("SimpleLRU::lock"), max_size(max_size) {
+    contents.rehash(max_size);
+  }
+
+  void pin(K key, V val) {
+    std::lock_guard<std::mutex> l(lock);
+    pinned.emplace(std::move(key), std::move(val));
+  }
+
+  void clear_pinned(K e) {
+    std::lock_guard<std::mutex> l(lock);
+    for (typename map<K, V, C>::iterator i = pinned.begin();
+         i != pinned.end() && i->first <= e;
+         pinned.erase(i++)) {
+      typename std::unordered_map<K, typename std::list<pair<K, V> >::iterator, H>::iterator iter =
+        contents.find(i->first);
+      if (iter == contents.end())
+        _add(i->first, std::move(i->second));
+      else
+        lru.splice(lru.begin(), lru, iter->second);
+    }
+  }
+
+  void clear(K key) {
+    std::lock_guard<std::mutex> l(lock);
+    typename std::unordered_map<K, typename std::list<pair<K, V> >::iterator, H>::iterator i =
+      contents.find(key);
+    if (i == contents.end())
+      return;
+    lru.erase(i->second);
+    contents.erase(i);
+  }
+
+  void set_size(size_t new_size) {
+    std::lock_guard<std::mutex> l(lock);
+    max_size = new_size;
+    trim_cache();
+  }
+
+  bool lookup(K key, V *out) {
+    std::lock_guard<std::mutex> l(lock);
+    typename std::unordered_map<K, typename std::list<pair<K, V> >::iterator, H>::iterator i =
+      contents.find(key);
+    if (i != contents.end()) {
+      *out = i->second->second;
+      lru.splice(lru.begin(), lru, i->second);
+      return true;
+    }
+    typename std::map<K, V, C>::iterator i_pinned = pinned.find(key);
+    if (i_pinned != pinned.end()) {
+      *out = i_pinned->second;
+      return true;
+    }
+    return false;
+  }
+
+  void add(K key, V value) {
+    std::lock_guard<std::mutex> l(lock);
+    _add(std::move(key), std::move(value));
+  }
+};
   
 } // namespace core
 } // namespace bubblefs

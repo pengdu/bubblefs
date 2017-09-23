@@ -9,10 +9,33 @@
  * Foundation.  See file COPYING.
  *
  */
+/****************************************************************************
+ Copyright (c) 2014 cocos2d-x.org
+ Copyright (c) 2014-2017 Chukong Technologies Inc.
+ http://www.cocos2d-x.org
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ ****************************************************************************/
 
 // ceph/src/common/utf8.c
+// cocos2d-x/cocos/base/ccUTF8.cpp
 
 #include "utils/utf8.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 namespace bubblefs {
@@ -20,6 +43,14 @@ namespace str_util {
   
 #define MAX_UTF8_SZ 6
 #define INVALID_UTF8_CHAR 0xfffffffful
+  
+template<typename T>
+std::string toString(T arg)
+{
+    std::stringstream ss;
+    ss << arg;
+    return ss.str();
+}
 
 static int high_bits_set(int c)
 {
@@ -186,6 +217,132 @@ int check_for_control_characters(const char *buf, int len)
 int check_for_control_characters_cstr(const char *buf)
 {
         return check_for_control_characters(buf, strlen(buf));
+}
+
+/*
+ * @str:    the string to search through.
+ * @c:        the character to not look for.
+ *
+ * Return value: the index of the last character that is not c.
+ * */
+unsigned int getIndexOfLastNotChar16(const std::vector<char16_t>& str, char16_t c)
+{
+    int len = static_cast<int>(str.size());
+
+    int i = len - 1;
+    for (; i >= 0; --i)
+        if (str[i] != c) return i;
+
+    return i;
+}
+
+/*
+ * @str:    the string to trim
+ * @index:    the index to start trimming from.
+ *
+ * Trims str st str=[0, index) after the operation.
+ *
+ * Return value: the trimmed string.
+ * */
+static void trimUTF16VectorFromIndex(std::vector<char16_t>& str, int index)
+{
+    int size = static_cast<int>(str.size());
+    if (index >= size || index < 0)
+        return;
+
+    str.erase(str.begin() + index, str.begin() + size);
+}
+    
+/*
+ * @str:    the string to trim
+ * @index:    the index to start trimming from.
+ *
+ * Trims str st str=[0, index) after the operation.
+ *
+ * Return value: the trimmed string.
+ * */
+static void trimUTF32VectorFromIndex(std::vector<char32_t>& str, int index)
+{
+    int size = static_cast<int>(str.size());
+    if (index >= size || index < 0)
+        return;
+    
+    str.erase(str.begin() + index, str.begin() + size);
+}
+
+/*
+ * @ch is the unicode character whitespace?
+ *
+ * Reference: http://en.wikipedia.org/wiki/Whitespace_character#Unicode
+ *
+ * Return value: weather the character is a whitespace character.
+ * */
+bool isUnicodeSpace(char32_t ch)
+{
+    return  (ch >= 0x0009 && ch <= 0x000D) || ch == 0x0020 || ch == 0x0085 || ch == 0x00A0 || ch == 0x1680
+    || (ch >= 0x2000 && ch <= 0x200A) || ch == 0x2028 || ch == 0x2029 || ch == 0x202F
+    ||  ch == 0x205F || ch == 0x3000;
+}
+
+bool isCJKUnicode(char32_t ch)
+{
+    return (ch >= 0x4E00 && ch <= 0x9FBF)   // CJK Unified Ideographs
+        || (ch >= 0x2E80 && ch <= 0x2FDF)   // CJK Radicals Supplement & Kangxi Radicals
+        || (ch >= 0x2FF0 && ch <= 0x30FF)   // Ideographic Description Characters, CJK Symbols and Punctuation & Japanese
+        || (ch >= 0x3100 && ch <= 0x31BF)   // Korean
+        || (ch >= 0xAC00 && ch <= 0xD7AF)   // Hangul Syllables
+        || (ch >= 0xF900 && ch <= 0xFAFF)   // CJK Compatibility Ideographs
+        || (ch >= 0xFE30 && ch <= 0xFE4F)   // CJK Compatibility Forms
+        || (ch >= 0x31C0 && ch <= 0x4DFF)   // Other extensions
+        || (ch >= 0x1f004 && ch <= 0x1f682);// Emoji
+}
+
+void trimUTF16Vector(std::vector<char16_t>& str)
+{
+    int len = static_cast<int>(str.size());
+
+    if ( len <= 0 )
+        return;
+
+    int last_index = len - 1;
+
+    // Only start trimming if the last character is whitespace..
+    if (isUnicodeSpace(str[last_index]))
+    {
+        for (int i = last_index - 1; i >= 0; --i)
+        {
+            if (isUnicodeSpace(str[i]))
+                last_index = i;
+            else
+                break;
+        }
+
+        trimUTF16VectorFromIndex(str, last_index);
+    }
+}
+
+void trimUTF32Vector(std::vector<char32_t>& str)
+{
+    int len = static_cast<int>(str.size());
+    
+    if ( len <= 0 )
+        return;
+    
+    int last_index = len - 1;
+    
+    // Only start trimming if the last character is whitespace..
+    if (isUnicodeSpace(str[last_index]))
+    {
+        for (int i = last_index - 1; i >= 0; --i)
+        {
+            if (isUnicodeSpace(str[i]))
+                last_index = i;
+            else
+                break;
+        }
+        
+        trimUTF32VectorFromIndex(str, last_index);
+    }
 }
 
 } // namespace str_util

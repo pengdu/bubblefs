@@ -209,12 +209,6 @@ void InitOnce(OnceType* once, void (*initializer)()) {
   PthreadCall("once", pthread_once(once, initializer));
 }
 
-void Crash(const std::string& srcfile, int srcline) {
-  fprintf(stdout, "Crashing at %s:%d\n", srcfile.c_str(), srcline);
-  fflush(stdout);
-  kill(getpid(), SIGTERM);
-}
-
 void *cacheline_aligned_alloc(size_t size) {
 #if __GNUC__ < 5 && defined(__SANITIZE_ADDRESS__)
   return malloc(size);
@@ -233,7 +227,13 @@ void cacheline_aligned_free(void *memblock) {
   free(memblock);
 }
 
-pid_t os_gettid(void)
+void Crash(const std::string& srcfile, int srcline) {
+  fprintf(stdout, "Crashing at %s:%d\n", srcfile.c_str(), srcline);
+  fflush(stdout);
+  kill(getpid(), SIGTERM);
+}
+
+pid_t Gettid(void)
 {
   return syscall(SYS_gettid); // __linux__
 }

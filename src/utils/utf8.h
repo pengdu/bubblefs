@@ -9,11 +9,37 @@
  * Foundation.  See file COPYING.
  *
  */
+/****************************************************************************
+ Copyright (c) 2014 cocos2d-x.org
+ Copyright (c) 2014-2017 Chukong Technologies Inc.
+ http://www.cocos2d-x.org
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ ****************************************************************************/
 
 // ceph/src/common/utf8.h
+// cocos2d-x/cocos/base/ccUTF8.h
 
 #ifndef BUBBLEFS_UTILS_UTF8_H_
 #define BUBBLEFS_UTILS_UTF8_H_
+
+#include <locale>
+#include <string>
+#include <sstream>
+#include <vector>
 
 namespace bubblefs {
 namespace str_util {
@@ -54,6 +80,37 @@ int encode_utf8(unsigned long u, unsigned char *buf);
  * Upon error, return INVALID_UTF8_CHAR.
  */
 unsigned long decode_utf8(unsigned char *buf, int nbytes);
+
+/**
+ *  @brief Trims the unicode spaces at the end of char16_t vector.
+ */
+void trimUTF16Vector(std::vector<char16_t>& str);
+    
+/**
+ *  @brief Trims the unicode spaces at the end of char32_t vector.
+ */
+void trimUTF32Vector(std::vector<char32_t>& str);
+
+/**
+ *  @brief Whether the character is a whitespace character.
+ *  @param ch    The unicode character.
+ *  @returns     Whether the character is a white space character.
+ *
+ *  @see http://en.wikipedia.org/wiki/Whitespace_character#Unicode
+ *
+ */
+bool isUnicodeSpace(char32_t ch);
+
+/**
+ *  @brief Whether the character is a Chinese/Japanese/Korean character.
+ *  @param ch    The unicode character.
+ *  @returns     Whether the character is a Chinese character.
+ *
+ *  @see http://www.searchtb.com/2012/04/chinese_encode.html
+ *  @see http://tieba.baidu.com/p/748765987
+ *
+ */
+bool isCJKUnicode(char32_t ch);
 
 } // namespace str_util
 } // namespace bubblefs
