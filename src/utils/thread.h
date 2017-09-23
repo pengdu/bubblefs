@@ -21,7 +21,7 @@
 namespace bubblefs {
 namespace base {
 
-class Thread {
+class ThreadBase {
  private:
   pthread_t thread_id;
   pid_t pid;
@@ -32,11 +32,11 @@ class Thread {
   void *EntryWrapper();
 
  public:
-  Thread(const Thread&) = delete;
-  Thread& operator=(const Thread&) = delete;
+  ThreadBase(const ThreadBase&) = delete;
+  ThreadBase& operator=(const ThreadBase&) = delete;
 
-  Thread();
-  virtual ~Thread();
+  ThreadBase();
+  virtual ~ThreadBase();
 
  protected:
   virtual void *Entry() = 0;

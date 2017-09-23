@@ -45,7 +45,7 @@ static pid_t os_gettid(void)
   return syscall(SYS_gettid); // __linux__
 }
 
-Thread::Thread()
+ThreadBase::ThreadBase()
   : thread_id(0),
     pid(0),
     ioprio_class(-1),
@@ -55,16 +55,16 @@ Thread::Thread()
 {
 }
 
-Thread::~Thread()
+ThreadBase::~ThreadBase()
 {
 }
 
-void *Thread::_entry_func(void *arg) {
-  void *r = ((Thread*)arg)->EntryWrapper();
+void *ThreadBase::_entry_func(void *arg) {
+  void *r = ((ThreadBase*)arg)->EntryWrapper();
   return r;
 }
 
-void *Thread::EntryWrapper()
+void *ThreadBase::EntryWrapper()
 {
   int p = os_gettid(); // may return -ENOSYS on other platforms
   if (p > 0)
@@ -76,22 +76,22 @@ void *Thread::EntryWrapper()
   return Entry();
 }
 
-const pthread_t &Thread::GetThreadId() const
+const pthread_t &ThreadBase::GetThreadId() const
 {
   return thread_id;
 }
 
-bool Thread::IsStarted() const
+bool ThreadBase::IsStarted() const
 {
   return thread_id != 0;
 }
 
-bool Thread::AmSelf() const
+bool ThreadBase::AmSelf() const
 {
   return (pthread_self() == thread_id);
 }
 
-bool Thread::Kill(int signal)
+bool ThreadBase::Kill(int signal)
 {
   int ret = 0;
   if (thread_id)
@@ -99,7 +99,7 @@ bool Thread::Kill(int signal)
   return (0 == ret);
 }
 
-bool Thread::TryCreate(size_t stacksize)
+bool ThreadBase::TryCreate(size_t stacksize)
 {
   pthread_attr_t *thread_attr = NULL;
   pthread_attr_t thread_attr_loc;
@@ -128,14 +128,14 @@ bool Thread::TryCreate(size_t stacksize)
   return (0 == r);
 }
 
-bool Thread::Create(const char *name, size_t stacksize)
+bool ThreadBase::Create(const char *name, size_t stacksize)
 {
   thread_name = name;
   bool ret = TryCreate(stacksize);
   return ret;
 }
 
-bool Thread::Join(void **prval)
+bool ThreadBase::Join(void **prval)
 {
   if (thread_id == 0) {
     assert("join on thread that was never started" == 0);
@@ -150,13 +150,13 @@ bool Thread::Join(void **prval)
   return (0 == ret);
 }
 
-bool Thread::Detach()
+bool ThreadBase::Detach()
 {
   int ret = pthread_detach(thread_id);
   return (0 == ret);
 }
 
-bool Thread::SetIoprio(int cls, int prio)
+bool ThreadBase::SetIoprio(int cls, int prio)
 {
   // fixme, maybe: this can race with create()
   ioprio_class = cls;
@@ -164,7 +164,7 @@ bool Thread::SetIoprio(int cls, int prio)
   return true;
 }
 
-bool Thread::SetAffinity(int id)
+bool ThreadBase::SetAffinity(int id)
 {
   bool r = false;
   cpuid = id;
