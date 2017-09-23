@@ -30,11 +30,13 @@ limitations under the License.
 #include <assert.h>
 #include <byteswap.h>
 #include <dirent.h>
+#include <errno.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 #include <limits>
 #include <string>
 #include <thread>
@@ -54,6 +56,10 @@ static const int kMaxInt32 = std::numeric_limits<int32_t>::max();
 static const uint64_t kMaxUint64 = std::numeric_limits<uint64_t>::max();
 static const int64_t kMaxInt64 = std::numeric_limits<int64_t>::max();
 static const size_t kMaxSizet = std::numeric_limits<size_t>::max();
+
+extern unsigned page_size;
+extern unsigned long page_mask;
+extern unsigned page_shift;
 
 using Thread = std::thread;
 
@@ -94,9 +100,7 @@ extern void cacheline_aligned_free(void *memblock);
 
 extern void Crash(const std::string& srcfile, int srcline);
 
-extern int ExecuteCMD(const char* cmd, char* result);
-
-//=====================sys_info=========================
+extern pid_t os_gettid();
 
 extern int GetMaxOpenFiles();
 
@@ -140,6 +144,8 @@ extern std::string OperatingSystemArchitecture();
 
 // Return the hostname of the machine on which this process is running
 extern std::string Hostname();
+
+
 
 } // namespace port
 

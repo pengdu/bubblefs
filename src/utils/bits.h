@@ -133,6 +133,15 @@ inline uint64 NextPowerOfTwo64(uint64 value) {
   return 1LL << exponent;
 }
 
+inline unsigned GetBitsOf(int v) {
+  unsigned n = 0;
+  while (v) {
+    ++n;
+    v >>= 1;
+  }
+  return n;
+}
+
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BITS_H_

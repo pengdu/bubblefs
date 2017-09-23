@@ -25,6 +25,7 @@ limitations under the License.
 #include <netinet/in.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
+#include <sys/syscall.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
@@ -37,10 +38,12 @@ limitations under the License.
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <algorithm>
 #include <unordered_set>
 #include "platform/logging.h"
 #include "platform/port_posix.h"
 #include "platform/time.h"
+#include "utils/bits.h"
 #include "utils/strcat.h"
 
 #if defined(__i386__) || defined(__x86_64__)
@@ -153,6 +156,10 @@ int PickUnusedPortOrDie() {
 
 namespace port {
 
+unsigned page_size = sysconf(_SC_PAGESIZE);
+unsigned long page_mask = ~(unsigned long)(page_size - 1);
+unsigned page_shift = GetBitsOf(page_size - 1); 
+  
 static int PthreadCall(const char* label, int result) {
   if (result != 0 && result != ETIMEDOUT) {
     fprintf(stderr, "pthread %s: %s\n", label, strerror(result));
@@ -226,26 +233,9 @@ void cacheline_aligned_free(void *memblock) {
   free(memblock);
 }
 
-constexpr int kExecuteCMDBufLength = 204800;  
-  
-int ExecuteCMD(const char* cmd, char* result) {
-  char bufPs[kExecuteCMDBufLength];
-  char ps[kExecuteCMDBufLength] = {0};
-  FILE* ptr = nullptr;
-  strncpy(ps, cmd, kExecuteCMDBufLength);
-  if ((ptr = popen(ps, "r")) != nullptr) {
-    size_t count = fread(bufPs, 1, kExecuteCMDBufLength, ptr);
-    memcpy(result,
-           bufPs,
-           count - 1);  // why count-1: remove the '\n' at the end
-    result[count] = 0;
-    pclose(ptr);
-    ptr = nullptr;
-    return count - 1;
-  } else {
-    LOG(FATAL) << "ExecuteCMD popen failed";
-    return -1;
-  }
+pid_t os_gettid(void)
+{
+  return syscall(SYS_gettid); // __linux__
 }
 
 int GetMaxOpenFiles() {

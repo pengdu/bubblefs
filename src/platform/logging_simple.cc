@@ -28,8 +28,8 @@
 #include <string>
 #include <vector>
 #include "platform/mutexlock.h"
-#include "platform/platform_thread.h"
 #include "platform/time.h"
+#include "utils/thread_simple.h"
 
 namespace bubblefs {
 namespace bdcommon {

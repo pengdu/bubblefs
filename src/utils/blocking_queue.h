@@ -99,6 +99,8 @@ private:
     std::deque<T>* _full;
 };  
   
+// ceph/src/common/QueueRing.h
+
 template <class T>
 class RingQueue {
   struct QueueBucket {
