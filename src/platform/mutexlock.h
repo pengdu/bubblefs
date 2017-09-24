@@ -21,6 +21,7 @@
 #include <mutex>
 #include <thread>
 #include "platform/macros.h"
+#include "platform/mutex.h"
 #include "platform/port.h"
 
 namespace bubblefs {

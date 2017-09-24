@@ -137,8 +137,8 @@ class StringPiece {
   };
 
   // Return a string that contains the copy of the referenced data.
-  string ToString() const { return string(data_, size_); }
-  string ToString(bool hex) const;
+  // when hex is true, returns a string of twice the length hex encoded (0-9A-F)
+  string ToString(bool hex = false) const;
   
   string as_string() const {
     // std::string doesn't like to take a NULL pointer even with a 0 size.
@@ -169,7 +169,7 @@ class StringPiece {
   }
   
   // Compare two slices and returns the first byte where they differ
-  size_t difference_offset(const StringPiece& b) const;
+  size_t difference_offset(const StringPiece b) const;
 
   // private: make these public for rocksdbjni access
   const char* data_;
@@ -218,7 +218,7 @@ inline int StringPiece::compare(StringPiece b) const {
 }
 
 // Compare two slices and returns the first byte where they differ
-inline size_t StringPiece::difference_offset(const StringPiece& b) const {
+inline size_t StringPiece::difference_offset(const StringPiece b) const {
   size_t off = 0;
   const size_t len = (size_ < b.size_) ? size_ : b.size_;
   for (; off < len; off++) {
