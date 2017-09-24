@@ -259,10 +259,10 @@ static inline void make_timeout(struct timespec* pts, long millisecond) {
     struct timeval tv;
     gettimeofday(&tv, nullptr);
     pts->tv_sec = millisecond / 1000 + tv.tv_sec;
-    pts->tv_nsec = (millisecond % 1000) * 1000 * 1000 + tv.tv_usec * 1000;
+    pts->tv_nsec = (millisecond % 1000) * 1000000 + tv.tv_usec * 1000;
 
-    pts->tv_sec += pts->tv_nsec / (1000 * 1000 * 1000);
-    pts->tv_nsec = pts->tv_nsec % (1000 * 1000 * 1000);
+    pts->tv_sec += pts->tv_nsec / 1000000000;
+    pts->tv_nsec = pts->tv_nsec % 1000000000;
 }
 
 int64_t clock_now_ns(); // ns

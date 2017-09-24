@@ -182,7 +182,7 @@ private:
         reinterpret_cast<ThreadPool*>(arg)->ThreadProc();
         return nullptr;
     }
-    int64_t get_micros() {
+    static int64_t get_micros() {
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
         return static_cast<int64_t>(ts.tv_sec) * 1000000 + static_cast<int64_t>(ts.tv_nsec) / 1000; // us

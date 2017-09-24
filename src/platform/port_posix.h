@@ -148,8 +148,6 @@ extern std::string OperatingSystemArchitecture();
 // Return the hostname of the machine on which this process is running
 extern std::string Hostname();
 
-
-
 } // namespace port
 
 } // namespace bubblefs

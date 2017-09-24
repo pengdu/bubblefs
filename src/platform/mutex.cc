@@ -11,19 +11,30 @@
 // rocksdb/port/port_posix.cc
 
 #include "platform/mutex.h"
+#include <sys/time.h>
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "platform/time.h"
+#include <time.h>
 
 namespace bubblefs {
   
 namespace port {
+  
+static void make_timeout(struct timespec* pts, long millisecond) {
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    pts->tv_sec = millisecond / 1000 + tv.tv_sec;
+    pts->tv_nsec = (millisecond % 1000) * 1000000 + tv.tv_usec * 1000;
+
+    pts->tv_sec += pts->tv_nsec / 1000000000;
+    pts->tv_nsec = pts->tv_nsec % 1000000000;
+}
 
 static int PthreadCall(const char* label, int result) {
-  if (result != 0 && result != ETIMEDOUT) {
-    fprintf(stderr, "pthread %s: %s\n", label, strerror(result));
+  if (result != 0) {
+    fprintf(stderr, "pthreadcall %s: %s\n", label, strerror(result));
     abort();
   }
   return result;
@@ -58,18 +69,20 @@ void Mutex::Lock(const char* msg, int64_t msg_threshold) {
 
 bool Mutex::TryLock() {
   int ret = pthread_mutex_trylock(&mu_);
-  if (0 == ret) { AfterLock(); return true; }
-  if (EBUSY == ret) return false;
-  if (EINVAL == ret) abort();
-  else if (EAGAIN == ret) abort();
-  else if (EDEADLK == ret) abort();
-  else if (0 != ret) abort();
+  switch (ret) {
+    case 0: AfterLock(); return true;
+    case EBUSY: return false;
+    case EINVAL: abort();
+    case EAGAIN: abort();
+    case EDEADLK: abort();
+    default: abort();
+  }
   return false;
 }
 
 bool Mutex::TimedLock(long _millisecond) {
   struct timespec ts;
-  timeutil::make_timeout(&ts, _millisecond);
+  make_timeout(&ts, _millisecond);
   int ret =  pthread_mutex_timedlock(&mu_, &ts);
   switch (ret) {
     case 0: AfterLock(); return true;
@@ -149,10 +162,16 @@ bool CondVar::TimedWait(uint64_t abs_time_us, const char* msg) {
 }
 
 bool CondVar::IntervalWait(uint64_t timeout_interval, const char* msg) {
+  timespec ts;
   struct timeval tv;
   gettimeofday(&tv, nullptr);
-  uint64_t abs_time_us = tv.tv_usec + timeout_interval * 1000LL + tv.tv_sec * 1000000LL;
-  return TimedWait(abs_time_us);
+  int64_t usec = tv.tv_usec + timeout_interval * 1000LL;
+  ts.tv_sec = tv.tv_sec + usec / 1000000;
+  ts.tv_nsec = (usec % 1000000) * 1000;
+  mu_->BeforeUnlock();
+  int ret = pthread_cond_timedwait(&cv_, &mu_->mu_, &ts);
+  mu_->AfterLock(msg);
+  return (ret == 0);
 }
 
 void CondVar::Signal() {

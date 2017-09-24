@@ -181,14 +181,14 @@ inline typename string_type::value_type* WriteInto(string_type* str,
   return &((*str)[0]);
 }
   
-inline bool IsVisible(char c) {
+static inline bool IsVisible(char c) {
     return (c >= 0x20 && c <= 0x7E);
 }
 
 // 2 small internal utility functions, for efficient hex conversions
 // and no need for snprintf, toupper etc...
 // Originally from wdt/util/EncryptionUtils.cpp - for ToString(true)/DecodeHex:
-inline char ToHex(uint8_t v) {
+static inline char ToHex(uint8_t v) {
   if (v <= 9) {
     return '0' + v;
   }

@@ -113,6 +113,24 @@ public:
     static int64_t CurrentThreadId() {
         return static_cast<int64_t>(pthread_self());
     }
+    static void Exit() {
+        pthread_exit(nullptr);
+    }
+    static void YieldCurrentThread() {
+        sched_yield();
+    }
+    static void Sleep(struct timespec &duration) {
+        struct timespec sleep_time, remaining;
+
+        // Break the duration into seconds and nanoseconds.
+        // NOTE: TimeDelta's microseconds are int64s while timespec's
+        // nanoseconds are longs, so this unpacking must prevent overflow.
+        sleep_time.tv_sec = duration.tv_sec;
+        sleep_time.tv_nsec = duration.tv_nsec;  // nanoseconds
+
+        while (nanosleep(&sleep_time, &remaining) == -1 && errno == EINTR)
+          sleep_time = remaining;
+    }
     const int64_t GetThreadId() const {
         return static_cast<int64_t>(tid_);
     }
@@ -136,24 +154,6 @@ public:
     bool Join() {
         int ret = pthread_join(tid_, nullptr);
         return (ret == 0);
-    }
-    void Exit() {
-        pthread_exit(nullptr);
-    }
-    void YieldCurrentThread() {
-        sched_yield();
-    }
-    void Sleep(struct timespec &duration) {
-        struct timespec sleep_time, remaining;
-
-        // Break the duration into seconds and nanoseconds.
-        // NOTE: TimeDelta's microseconds are int64s while timespec's
-        // nanoseconds are longs, so this unpacking must prevent overflow.
-        sleep_time.tv_sec = duration.tv_sec;
-        sleep_time.tv_nsec = duration.tv_nsec;  // nanoseconds
-
-        while (nanosleep(&sleep_time, &remaining) == -1 && errno == EINTR)
-          sleep_time = remaining;
     }
     bool Kill(int signal) {
       int ret = 0;
