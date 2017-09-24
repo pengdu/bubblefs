@@ -23,8 +23,10 @@
 
 namespace bubblefs {
 
-namespace concurrent {
+namespace base {
 
+using concurrent::WaitableEvent;  
+  
 void InitThreading();
 void InitOnThread();
 void TerminateOnThread();
@@ -316,6 +318,6 @@ size_t GetDefaultThreadStackSize(const pthread_attr_t& attributes) {
 #endif
 }
 
-} // namespace concurrent
+} // namespace base
 
 } // namespace bubblefs

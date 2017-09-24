@@ -62,7 +62,7 @@ class BASE_EXPORT Watchdog {
   static void ResetStaticData();
 
  private:
-  class ThreadDelegate : public concurrent::PlatformThread::Delegate {
+  class ThreadDelegate : public base::PlatformThread::Delegate {
    public:
     explicit ThreadDelegate(Watchdog* watchdog) : watchdog_(watchdog) {
     }
@@ -82,7 +82,7 @@ class BASE_EXPORT Watchdog {
   State state_;
   const int64_t duration_;  // How long after start_time_ do we alarm?
   const std::string thread_watched_name_;
-  concurrent::PlatformThreadHandle handle_;
+  base::PlatformThreadHandle handle_;
   ThreadDelegate delegate_;  // Store it, because it must outlive the thread.
 
   int64_t start_time_;  // Start of epoch, and alarm after duration_.

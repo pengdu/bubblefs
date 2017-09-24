@@ -17,7 +17,7 @@
 template <typename T> struct DefaultSingletonTraits;
 
 namespace bubblefs {
-namespace concurrent {
+namespace base {
 
 class BASE_EXPORT ThreadIdNameManager {
  public:
@@ -51,7 +51,7 @@ class BASE_EXPORT ThreadIdNameManager {
 
   // lock_ protects the name_to_interned_name_, thread_id_to_handle_ and
   // thread_handle_to_interned_name_ maps.
-  Lock lock_;
+  concurrent::Lock lock_;
 
   NameToInternedNameMap name_to_interned_name_;
   ThreadIdToHandleMap thread_id_to_handle_;
@@ -64,7 +64,7 @@ class BASE_EXPORT ThreadIdNameManager {
   DISALLOW_COPY_AND_ASSIGN(ThreadIdNameManager);
 };
 
-}  // namespace concurrent
+}  // namespace base
 }  // namespce bubblefs
 
 #endif  // BUBBLEFS_UTILS_THREAD_ID_NAME_MANAGER_H_

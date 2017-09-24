@@ -10,7 +10,7 @@
 #include "utils/str_util.h"
 
 namespace bubblefs {
-namespace concurrent {
+namespace base {
   
 namespace {
 
@@ -18,6 +18,8 @@ static const char kDefaultName[] = "";
 static std::string* g_default_name;
 
 }
+
+using concurrent::AutoLock;
 
 ThreadIdNameManager::ThreadIdNameManager()
     : main_process_name_(NULL),
@@ -110,5 +112,5 @@ void ThreadIdNameManager::RemoveName(PlatformThreadHandle::Handle handle,
   thread_id_to_handle_.erase(id_to_handle_iter);
 }
 
-}  // namespace concurrent
+}  // namespace base
 }  // namespace bubblefs

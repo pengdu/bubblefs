@@ -265,6 +265,8 @@ static inline void make_timeout(struct timespec* pts, long millisecond) {
     pts->tv_nsec = pts->tv_nsec % (1000 * 1000 * 1000);
 }
 
+int64_t clock_now_ns(); // ns
+
 // ----------------------
 // timespec manipulations
 // ----------------------

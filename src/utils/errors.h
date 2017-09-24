@@ -15,6 +15,7 @@ limitations under the License.
 #ifndef BUBBLEFS_UTILS_ERRORS_H_
 #define BUBBLEFS_UTILS_ERRORS_H_
 
+#include <stdarg.h>
 #include "platform/logging.h"
 #include "platform/macros.h"
 #include "utils/status.h"
@@ -22,7 +23,7 @@ limitations under the License.
 
 namespace bubblefs {
 namespace errors {
-
+  
 typedef ::bubblefs::error::Code Code;
 
 // Append some context to an error message.  Each time we append

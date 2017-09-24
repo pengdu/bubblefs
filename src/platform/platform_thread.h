@@ -23,7 +23,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace concurrent {
+namespace base {
 
 // Valid values for SetThreadPriority()
 enum ThreadPriority{
@@ -197,7 +197,7 @@ class BASE_EXPORT PlatformThread {
   DISALLOW_IMPLICIT_CONSTRUCTORS(PlatformThread);
 };
 
-} // namespace concurrent
+} // namespace base
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_PLATFORM_THREAD_H_

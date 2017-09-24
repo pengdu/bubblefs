@@ -23,11 +23,11 @@ namespace {
 // Without this safety net, any alarm will typically trigger a host of follow
 // on alarms from callers that specify old times.
   
+using base::PlatformThread;
 using concurrent::Lock;
 using concurrent::AutoLock;
 using concurrent::AutoUnlock;
 using concurrent::ConditionVariable;
-using concurrent::PlatformThread;
 
 struct StaticData {
   // Lock for access of static data...

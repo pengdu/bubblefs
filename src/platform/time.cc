@@ -32,6 +32,7 @@
 #include "platform/threadlocal.h"
 #include "utils/stringprintf.h"
 #include "utils/str_util.h"
+#include <boost/concept_check.hpp>
 
 namespace bubblefs {
 namespace timeutil {
@@ -404,6 +405,12 @@ bool ParseTime(const string& value, int64* seconds, int32* nanos) {
   }
   // Done with parsing.
   return *data == 0;
+}
+
+int64_t clock_now_ns() {
+  struct timespec tp;
+  clock_gettime(CLOCK_REALTIME, &tp);
+  return static_cast<int64_t>(tp.tv_sec)*1000000000LL + tp.tv_nsec;
 }
 
 clockid_t get_monotonic_clockid() {

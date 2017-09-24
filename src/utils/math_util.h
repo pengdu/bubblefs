@@ -39,6 +39,7 @@ limitations under the License. */
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Paddle/paddle/utils/Util.h
+// cocos2d-x/cocos/math/CCMathBase.h
 // protobuf/src/google/protobuf/stubs/mathutil.h
 
 #ifndef BUBBLEFS_UTILS_MATH_UTIL_H_
@@ -52,6 +53,19 @@ limitations under the License. */
 
 namespace bubblefs {
 namespace mathutil {
+  
+/**Util macro for conversion from degrees to radians.*/
+#define MATH_DEG_TO_RAD(x)          ((x) * 0.0174532925f)
+/**Util macro for conversion from radians to degrees.*/
+#define MATH_RAD_TO_DEG(x)          ((x)* 57.29577951f)
+/**
+@{ Util macro for const float such as epsilon, small float and float precision tolerance.
+*/
+#define MATH_FLOAT_SMALL            1.0e-37f
+#define MATH_TOLERANCE              2e-37f
+#define MATH_PIOVER2                1.57079632679489661923f
+#define MATH_EPSILON                0.000001f
+/**@}*/
 
 template <typename Float>
 inline bool IsFinite(const Float& number) {

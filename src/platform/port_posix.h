@@ -102,6 +102,9 @@ extern void Crash(const std::string& srcfile, int srcline);
 
 extern pid_t Gettid();
 
+extern bool get_env_bool(const char *key);
+extern int get_env_int(const char *key);
+
 extern int GetMaxOpenFiles();
 
 /**
