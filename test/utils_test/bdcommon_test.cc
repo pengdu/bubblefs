@@ -2,12 +2,15 @@
 #include <iostream>
 #include <string>
 #include "platform/atomicops.h"
-#include "utils/coding.h"
+#include "platform/mutex.h"
+#include "utils/raw_coding.h"
+#include "utils/thread_simple.h"
 #include "gtest/gtest.h"
 
 namespace bubblefs {
 namespace core {
 
+// case 1
 TEST(UtilTest, TestEncodeDecode) {
     char buf1[8];
     char buf2[8];
@@ -34,10 +37,28 @@ TEST(UtilTest, TestEncodeDecode) {
     ASSERT_EQ(DecodeBigEndian32(bufb), b);
 }
   
-}  
+}  // namespace core
+}  // namespace bubblefs
+
+// case 2
+bubblefs::port::Mutex x;
+void LockFunc() {
+    x.Lock();
+}
+
+void UnlockFunc() {
+    x.Unlock();
 }
 
 int main(int argc, char* argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+
+    bubblefs::bdcommon::Thread t1,t2;
+    t1.Start(LockFunc);
+    t1.Join();
+    t2.Start(UnlockFunc);
+    t2.Join();
+    printf("Done\n");
+
+    return RUN_ALL_TESTS();;
 }

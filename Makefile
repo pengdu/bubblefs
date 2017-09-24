@@ -35,15 +35,15 @@ SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ld
 
 CXXFLAGS = -pthread -std=c++11 -fmax-errors=3 -Wall -fPIC $(OPT)
 
-PLATFORM_HDR = $(wildcard src/platform/*.h)
-PLATFORM_SRC = $(wildcard src/platform/*.cc)
+PLATFORM_SRC = \
+
 PLATFORM_OBJ = $(patsubst %.cc, %.o, $(PLATFORM_SRC))
 
-UTILS_HDR = $(wildcard src/utils/*.h)
-UTILS_SRC = $(wildcard src/utils/*.cc)
+UTILS_SRC = \
+	
 UTILS_OBJ = $(patsubst %.cc, %.o, $(UTILS_SRC))
 
-OBJS = $(PLATFORM_OBJ) $(UTILS_OBJ)
+OBJS = 
 
 BIN = bubblefs_test
 

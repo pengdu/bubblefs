@@ -19,7 +19,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <functional>
-#include "platform/io_prio.h"
 #include "platform/macros.h"
 
 namespace bubblefs {
