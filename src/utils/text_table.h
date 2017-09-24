@@ -34,6 +34,12 @@ namespace core {
  *
  * Columns autosize to largest heading or datum.  One space is printed
  * between columns.
+ * 
+ * use like:
+ * tbl.define_column("NAME", TextTable::LEFT, TextTable::LEFT);
+ * tbl.define_column("ID", TextTable::LEFT, TextTable::LEFT);
+ * tbl << stringify(si_t(osd_sum.kb*1024)) << percentify(used*100) << TextTable::endrow;
+ * tbl.set_indent(4); stringstream ss << tbl;
  */
 
 class TextTable {
