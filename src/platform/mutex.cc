@@ -120,7 +120,7 @@ void Mutex::AssertHeld() {
 void Mutex::AfterLock(const char* msg, int64_t msg_threshold) {
 #ifndef NDEBUG
   locked_ = true;
-  printf("AfterLock %p\n", &mu_);
+  //printf("AfterLock %p\n", &mu_);
 #endif
   owner_ = pthread_self();
 }
@@ -128,7 +128,7 @@ void Mutex::AfterLock(const char* msg, int64_t msg_threshold) {
 void Mutex::BeforeUnlock(const char* msg) {
 #ifndef NDEBUG
   locked_ = false;
-  printf("BeforeUnlock %p\n", &mu_);
+  //printf("BeforeUnlock %p\n", &mu_);
 #endif
   owner_ = 0;
 }

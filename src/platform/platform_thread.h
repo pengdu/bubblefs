@@ -124,6 +124,10 @@ class PlatformThreadHandle {
 const PlatformThreadId kInvalidThreadId(0);
 
 // A namespace for low-level thread functions.
+// use like:
+// class TrivialThread : public PlatformThread::Delegate
+// ThreadParams* thread_params = static_cast<ThreadParams*>(params);
+// PlatformThread::Delegate* delegate = thread_params->delegate;
 class BASE_EXPORT PlatformThread {
  public:
   // Implement this interface to run code on a background thread.  Your

@@ -22,7 +22,6 @@
 #include <thread>
 #include "platform/macros.h"
 #include "platform/mutex.h"
-#include "platform/port.h"
 
 namespace bubblefs {
 
@@ -181,7 +180,7 @@ class SpinMutex {
         // success
         break;
       }
-      port::AsmVolatilePause();
+      asm_volatile_pause();
       if (tries > 100) {
         std::this_thread::yield();
       }
@@ -189,6 +188,14 @@ class SpinMutex {
   }
 
   void unlock() { locked_.store(false, std::memory_order_release); }
+  
+private:
+  void asm_volatile_pause() {
+#if defined(__i386__) || defined(__x86_64__)
+  asm volatile("pause");
+#endif
+  // it's okay for other platforms to be no-ops
+  }
 
  private:
   std::atomic<bool> locked_;

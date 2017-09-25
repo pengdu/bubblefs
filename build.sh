@@ -91,19 +91,33 @@ if [ ! -f "${FLAG_DIR}/cpp-btree_1_0_1" ] \
 fi
 
 # gflags
-if [ ! -f "${FLAG_DIR}/gflags_2_1_1" ]; then
+if [ ! -f "${FLAG_DIR}/gflags_2_0" ]; then
     cd ${DEPS_SOURCE}
     if [ -d "${DEPS_SOURCE}/gflags" ] ; then
     	rm -rf ${DEPS_SOURCE}/gflags
     fi
-    unzip ${DEPS_PACKAGE}/gflags-2.2.1.zip -d .
-    mv gflags-2.2.1 gflags
+    unzip ${DEPS_PACKAGE}/gflags-2.0.zip -d .
+    mv gflags-2.0 gflags
     cd gflags
-    cmake -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC
+    ./configure
     make -j4
-    make test
     sudo make install
-    touch "${FLAG_DIR}/gflags_2_1_1"
+    touch "${FLAG_DIR}/gflags_2_0"
+fi
+
+# glog
+if [ ! -f "${FLAG_DIR}/glog_0_3_0" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/glog" ] ; then
+    	rm -rf ${DEPS_SOURCE}/glog
+    fi
+    unzip ${DEPS_PACKAGE}/glog-0.3.0.zip -d .
+    mv glog-0.3.0 glog
+    cd glog
+    ./configure
+    make -j4
+    sudo make install
+    touch "${FLAG_DIR}/glog_0_3_0"
 fi
 
 # googletest
@@ -122,28 +136,6 @@ if [ ! -f "${FLAG_DIR}/googletest_1_8_0" ] \
     cp -a libgtest.a ${DEPS_PREFIX}/lib
     cp -a include/gtest ${DEPS_PREFIX}/include
     touch "${FLAG_DIR}/googletest_1_8_0"
-fi
-
-# glog
-if [ ! -f "${FLAG_DIR}/glog_0_3_5" ] \
-    || [ ! -f "${DEPS_PREFIX}/lib/libglog.a" ] \
-    || [ ! -d "${DEPS_PREFIX}/include/glog" ]; then
-    cd ${DEPS_SOURCE}
-    if [ -d "${DEPS_SOURCE}/glog" ] \
-    	|| [ -d "${DEPS_BUILD}/glog" ]; then
-    	rm -rf ${DEPS_SOURCE}/glog
-    	rm -rf ${DEPS_BUILD}/glog
-    fi
-    unzip ${DEPS_PACKAGE}/glog-0.3.5.zip -d .
-    mv glog-0.3.5 glog
-    mkdir ${DEPS_BUILD}/glog
-    cd ${DEPS_BUILD}/glog
-    export CXXFLAGS="-fPIC" && cmake ${DEPS_SOURCE}/glog && make VERBOSE=1
-    make
-    sudo make install
-    cp -a libglog.a ${DEPS_PREFIX}/lib
-    cp -a glog ${DEPS_PREFIX}/include
-    touch "${FLAG_DIR}/glog_0_3_5"
 fi
 
 # snappy

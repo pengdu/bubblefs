@@ -100,9 +100,6 @@ int CPUModelNum();
 // software can change it dynamically.
 int NumSchedulableCPUs();
 
-// Returns nominal core processor cycles per second of each processor.
-double NominalCPUFrequency() { return 1.0; };
-
 // Called by the framework when we expect heavy CPU computation and we want to
 // be sure that the code has been compiled to run optimally on the current
 // hardware. The first time it's called it will run lightweight checks of

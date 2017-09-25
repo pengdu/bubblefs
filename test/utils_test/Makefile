@@ -27,8 +27,7 @@ GPERFTOOLS_PATH=$(PROJECT_DIR)/thirdparty
 INCLUDE_PATH = -I$(PROJECT_DIR)/src \
                -I$(BOOST_PATH) \
                -I$(RAPIDJSON_PATH)/include \
-               -I$(GTEST_PATH)/include \
-               -I$(GLOG_PATH)/include \
+               -isystem -I$(GTEST_PATH)/include \
                -I$(SNAPPY_PATH)/include \
                -I$(LEVELDB_PATH)/include \
                -I$(PROTOBUF_PATH)/include \
@@ -36,18 +35,18 @@ INCLUDE_PATH = -I$(PROJECT_DIR)/src \
                -I$(GPERFTOOLS_PATH)/include
 
 LDFLAGS = -L$(GTEST_PATH)/lib -lgtest \
-          -L$(GLOG_PATH)/lib -lglog \
           -L$(SNAPPY_PATH)/lib -lsnappy \
           -L$(LEVELDB_PATH)/lib -lleveldb \
           -L$(PROTOBUF_PATH)/lib -lprotobuf \
           -L$(SOFA_PBRPC_PATH)/lib -lsofa-pbrpc \
           -L$(GPERFTOOLS_PATH)/lib -ltcmalloc_minimal \
-          -lgflags -lpthread -ldl -lz -lrt
+          -lglog -lgflags -lpthread -lstdc++ -ldl -lz -lrt
 
 SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ldl \
               -shared -Wl,--version-script,so-version-script # hide symbol of third_party libs
 
 CXXFLAGS = -pthread -std=c++11 -fmax-errors=3 -Wall -fPIC $(OPT)
+CXXFLAGS += -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE
 
 PLATFORM_SRC = \
 	$(PROJECT_DIR)/src/platform/mutex.cc

@@ -119,14 +119,9 @@ extern int64_t AmountOfPhysicalMemory();
 // value of zero means that there is no limit on the available virtual memory.
 extern int64_t AmountOfVirtualMemory();
 
-// Return the number of megabytes of physical memory on the current machine.
-int AmountOfPhysicalMemoryMB() {
-  return static_cast<int>(AmountOfPhysicalMemory() / 1024 / 1024);
-}
-
 // Return the number of megabytes of available virtual memory, or zero if it
 // is unlimited.
-int AmountOfVirtualMemoryMB() {
+static inline int AmountOfVirtualMemoryMB() {
   return static_cast<int>(AmountOfVirtualMemory() / 1024 / 1024);
 }
 
