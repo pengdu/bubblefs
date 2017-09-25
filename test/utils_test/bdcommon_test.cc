@@ -8,6 +8,7 @@
 #include "platform/time.h"
 #include "utils/counter.h"
 #include "utils/raw_coding.h"
+#include "utils/stringpiece.h"
 #include "utils/thread_simple.h"
 #include "utils/threadpool_simple.h"
 #include "gtest/gtest.h"
@@ -320,7 +321,7 @@ int main() {
 
 int main(int argc, char* argv[]) {
     const char* char_pointer = "char*";
-    std::string string = "std;";
+    bubblefs::StringPiece string = "std;";
     BDLOGS(bubblefs::bdcommon::INFO) << 88 << " " << char_pointer << " " << string;
     BDLOGS(bubblefs::bdcommon::INFO) << 88 << " " << char_pointer << " " << string;
 
