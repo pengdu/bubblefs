@@ -3,11 +3,13 @@
 #include <iostream>
 #include <string>
 #include "platform/atomicops.h"
+#include "platform/logging_simple.h"
 #include "platform/mutexlock.h"
 #include "platform/time.h"
 #include "utils/counter.h"
 #include "utils/raw_coding.h"
 #include "utils/thread_simple.h"
+#include "utils/threadpool_simple.h"
 #include "gtest/gtest.h"
 
 // case 1
@@ -15,7 +17,7 @@
 namespace bubblefs {
 namespace core {
 
-TEST(UtilTest, TestEncodeDecode) {
+TEST(UtilTest, TestEncodeDecode) { // [ RUN ] UtilTest.TestEncodeDecode
     char buf1[8];
     char buf2[8];
     uint64_t x = 123456789;
@@ -39,7 +41,7 @@ TEST(UtilTest, TestEncodeDecode) {
     ASSERT_TRUE(std::string(bufa, 4) < std::string(bufb, 4));
     ASSERT_EQ(DecodeBigEndian32(bufa), a);
     ASSERT_EQ(DecodeBigEndian32(bufb), b);
-}
+} // // [ OK ] UtilTest.TestEncodeDecode (ms)
   
 }  // namespace core
 }  // namespace bubblefs
@@ -123,7 +125,7 @@ int main(int arbdcommongc, char* argv[]) {
 */
 
 // case 4
-
+/*
 int* ring __attribute__((aligned(64)));
 int r_len __attribute__((aligned(64))) = 102400;
 volatile long r_s __attribute__((aligned(64))) = 0;
@@ -180,4 +182,147 @@ int main(int argc, char* argv[]) {
     }
     ring = new int[r_len];
     return bubblefs::bdcommon::Run(tnum);
+}
+*/
+
+// case 5
+/*
+namespace bubblefs {
+namespace bdcommon {
+
+class ThreadTest : public ::testing::Test {
+public:
+    ThreadTest() : task_done_(&task_mu_) {}
+    void Task() {
+        MutexLock l(&task_mu_);
+        task_done_.Signal();
+    }
+
+protected:
+    port::CondVar task_done_;
+    mutable port::Mutex task_mu_;
+};
+
+TEST_F(ThreadTest, Start) { // ThreadTest.Start
+    Thread t;
+    MutexLock l(&task_mu_);
+    t.Start(std::bind(&ThreadTest::Task, this));
+    bool ret = task_done_.IntervalWait(1000);
+    ASSERT_TRUE(ret);
+}
+
+} // namespace bdcommon
+} // namespace bubblefs
+
+int main(int argc, char* argv[]) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+*/
+
+// case 6
+/*
+const int kThreadNum = 8;
+const int kMaxPending = 10000;
+
+namespace bubblefs {
+namespace bdcommon {
+
+void Task() {
+}
+
+void* AddTask(void* arg) {
+    ThreadPool* tp = reinterpret_cast<ThreadPool*>(arg);
+    while (1) {
+        while (tp->PendingNum() > kMaxPending) {
+        }
+        tp->AddTask(Task);
+    }
+    return NULL;
+}
+
+void RunPerfTest() {
+    ThreadPool tp;
+    Thread* threads = new Thread[kThreadNum];
+    for (int i = 0; i < kThreadNum; i++) {
+        threads[i].Start(AddTask, &tp);
+    }
+    while (1) {
+        usleep(1000000);
+        std::string plog = tp.ProfilingLog();
+        long pending = tp.PendingNum();
+        printf("%ld %s\n", pending, plog.c_str());
+    }
+}
+
+} // namespace bdcommon
+} // namespace bubblefs
+
+int main(int argc, char* argv[]) {
+    bubblefs::bdcommon::RunPerfTest();
+    return 0;
+}
+*/
+
+// case 7
+/*
+namespace bubblefs {
+namespace bdcommon {
+
+port::Mutex mu;
+port::CondVar p(&mu);
+port::CondVar c(&mu);
+Counter items;
+Counter counter;
+
+void Consumer() {
+    MutexLock lock(&mu);
+    while(1) {
+        while(items.Get() == 0) {
+            p.Wait();
+        }
+        //printf("Consume\n");
+        items.Clear();
+        counter.Inc();
+        c.Signal();
+    }
+}
+
+void Producer() {
+    MutexLock lock(&mu);
+    while (1) {
+        while (items.Get() > 0) {
+            c.Wait();
+        }
+        //printf("Produce\n");
+        items.Inc();
+        p.Signal();
+    }
+}
+
+int Run() {
+    bubblefs::bdcommon::Thread t1,t2;
+    t1.Start(Consumer);
+    t2.Start(Producer);
+    while (1) {
+        sleep(1);
+        fprintf(stderr, "%ld\n", counter.Clear()); // 150000
+    }
+    return 0;
+}
+}
+}
+
+int main() {
+    return bubblefs::bdcommon::Run();
+}
+*/
+
+int main(int argc, char* argv[]) {
+    const char* char_pointer = "char*";
+    std::string string = "std;";
+    BDLOGS(bubblefs::bdcommon::INFO) << 88 << " " << char_pointer << " " << string;
+    BDLOGS(bubblefs::bdcommon::INFO) << 88 << " " << char_pointer << " " << string;
+
+    return 0;
 }

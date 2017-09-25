@@ -49,7 +49,8 @@ CXXFLAGS = -pthread -std=c++11 -fmax-errors=3 -Wall -fPIC $(OPT)
 CXXFLAGS += -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE
 
 PLATFORM_SRC = \
-	$(PROJECT_DIR)/src/platform/mutex.cc
+	$(PROJECT_DIR)/src/platform/mutex.cc \
+	$(PROJECT_DIR)/src/platform/logging_simple.cc
 
 PLATFORM_OBJ = $(addsuffix .o, $(basename $(PLATFORM_SRC)))
 
