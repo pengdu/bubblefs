@@ -5,10 +5,10 @@ OPT ?= -g2 -Werror # (B) Debug mode, w/ full line-level debugging symbols
 
 #CXX=/opt/compiler/gcc-4.8.2/bin/g++
 
+PROJECT_DIR = .
+
 # dependencies
 include depends.mk
-
-PROJECT_DIR=.
 
 INCLUDE_PATH = -I$(PROJECT_DIR)/src \
                -I$(BOOST_PATH) \

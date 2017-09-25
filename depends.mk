@@ -1,19 +1,18 @@
 ########################################
 # config depengs.mk
+# set PROJECT_DIR
 ########################################
 
-BOOST_PATH=./third_party/boost
-JEMALLOC_PATH=./third_party
-RAPIDJSON_PATH=./third_party
-CPP_BTREE_PATH=./third_party
-GFLAGS_PATH=./third_party
-GTEST_PATH=./third_party
-GLOG_PATH=./third_party
-SNAPPY_PATH=./third_party
-LEVELDB_PATH=./third_party
-PROTOBUF_PATH=./third_party
-PROTOC_PATH=./third_party/bin
+BOOST_PATH=$(PROJECT_DIR)/third_party/boost
+JEMALLOC_PATH=$(PROJECT_DIR)/third_party
+RAPIDJSON_PATH=$(PROJECT_DIR)/third_party
+CPP_BTREE_PATH=$(PROJECT_DIR)/third_party
+GTEST_PATH=$(PROJECT_DIR)/third_party
+SNAPPY_PATH=$(PROJECT_DIR)/third_party
+LEVELDB_PATH=$(PROJECT_DIR)/third_party
+PROTOBUF_PATH=$(PROJECT_DIR)/third_party
+PROTOC_PATH=$(PROJECT_DIR)/third_party/bin
 PROTOC=$(PROTOC_PATH)/protoc
-SOFA_PBRPC_PATH=./third_party
-GPERFTOOLS_PATH=./thirdparty
+SOFA_PBRPC_PATH=$(PROJECT_DIR)/third_party
+GPERFTOOLS_PATH=$(PROJECT_DIR)/thirdparty
 

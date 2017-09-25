@@ -6,23 +6,9 @@ OPT ?= -g2 -Werror # (B) Debug mode, w/ full line-level debugging symbols
 #CXX=/opt/compiler/gcc-4.8.2/bin/g++
 
 PROJECT_DIR=../..
-SRC_PATH=$(PROJECT_DIR)/src
 
 # dependencies
-BOOST_PATH=$(PROJECT_DIR)/third_party/boost
-JEMALLOC_PATH=$(PROJECT_DIR)/third_party
-RAPIDJSON_PATH=$(PROJECT_DIR)/third_party
-CPP_BTREE_PATH=$(PROJECT_DIR)/third_party
-GFLAGS_PATH=$(PROJECT_DIR)/third_party
-GTEST_PATH=$(PROJECT_DIR)/third_party
-GLOG_PATH=$(PROJECT_DIR)/third_party
-SNAPPY_PATH=$(PROJECT_DIR)/third_party
-LEVELDB_PATH=$(PROJECT_DIR)/third_party
-PROTOBUF_PATH=$(PROJECT_DIR)/third_party
-PROTOC_PATH=$(PROJECT_DIR)/third_party/bin
-PROTOC=$(PROTOC_PATH)/protoc
-SOFA_PBRPC_PATH=$(PROJECT_DIR)/third_party
-GPERFTOOLS_PATH=$(PROJECT_DIR)/thirdparty
+include $(PROJECT_DIR)/depends.mk
 
 INCLUDE_PATH = -I$(PROJECT_DIR)/src \
                -I$(BOOST_PATH) \
