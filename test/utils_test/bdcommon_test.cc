@@ -42,21 +42,30 @@ TEST(UtilTest, TestEncodeDecode) {
 
 // case 2
 bubblefs::port::Mutex x;
+std::mutex y;
 void LockFunc() {
-    x.Lock();
+    //x.Lock();
+  y.lock();
 }
 
 void UnlockFunc() {
-    x.Unlock();
+    //x.Unlock();
+  y.unlock();
+}
+
+void LockUnlockFun() {
+  x.Lock();
+  sleep(3);
+  x.Unlock();
 }
 
 int main(int argc, char* argv[]) {
     ::testing::InitGoogleTest(&argc, argv);
 
     bubblefs::bdcommon::Thread t1,t2;
-    t1.Start(LockFunc);
+    t1.Start(LockUnlockFun);
+    t2.Start(LockUnlockFun);
     t1.Join();
-    t2.Start(UnlockFunc);
     t2.Join();
     printf("Done\n");
 
