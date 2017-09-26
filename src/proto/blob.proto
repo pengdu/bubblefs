@@ -1,0 +1,12 @@
+
+syntax = "proto2";
+
+package bubblefs;
+
+message BlobMeta {
+    optional int64 blob_id = 1;
+    optional int64 blob_size = 2;
+    optional int64 checksum = 3;
+    optional int64 version = 4 [default = -1];
+    optional string store_path = 5;
+}

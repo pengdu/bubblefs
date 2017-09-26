@@ -62,32 +62,37 @@ PROTO_SRCS = $(patsubst %.proto,%.pb.cc, $(PROTO_FILES))
 PROTO_HDRS = $(patsubst %.proto,%.pb.h, $(PROTO_FILES))
 PROTO_OBJS = $(patsubst %.proto,%.pb.o, $(PROTO_FILES))
 
-OBJS = $(ALL_OBJS)
+OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS)
 
 LIBS =
 
-BIN = $(ALL_OBJS)
+BIN = $(PROTO_OBJS)
 
 all: $(BIN)
-	@echo 'Done'
+	@echo '*Done'
+
+# Depends
+$(PROTO_OBJS): $(PROTO_HDRS)
+
+# Targets
 	
 bubblefs_test: bubblefs_test.o $(OBJS)
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 %.pb.cc %.pb.h: %.proto
-	@echo "Protoc $@"
+	@echo "*Protoc $@"
 	$(PROTOC) --proto_path=$(PROJECT_DIR)/src/proto/ --proto_path=/usr/local/include --cpp_out=$(PROJECT_DIR)/src/proto/ $<
 
 %.o: %.cc
-	@echo "Compiling cc $@"
+	@echo "*Compiling cc $@"
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) -c $< -o $@
 
 %.o:%.cpp
-	@echo "Compiling cpp $@"
+	@echo "*Compiling cpp $@"
 	@$(CXX) -c $(HDRPATHS) $(CXXFLAGS) $< -o $@
 
 %.o:%.c
-	@echo "Compiling c $@"
+	@echo "*Compiling c $@"
 	@$(CC) -c $(HDRPATHS) $(CFLAGS) $< -o $@
 	
 .PHONY: clean
@@ -95,4 +100,5 @@ clean:
 	rm -rf $(BIN)
 	rm -rf $(OBJS)
 	rm -rf $(LIBS)
+	rm -rf $(PROTO_SRCS) $(PROTO_HDRS)
 	rm -rf *.o
