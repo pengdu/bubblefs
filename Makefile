@@ -43,17 +43,24 @@ CFLAGS = -Wall -W -fPIC $(DFLAGS) $(OPT)
 
 SRCEXTS = .c .cc .cpp .proto
 ALL_DIRS = $(PROJECT_DIR)/src/platform $(PROJECT_DIR)/src/utils
-ALL_SRCS = $(foreach d, $(ALL_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS))))
+ALL_SRCS = $(foreach d,$(ALL_DIRS),$(wildcard $(addprefix $(d)/*,$(SRCEXTS))))
 ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS))) 
 
-PLATFORM_OBJS = \
-        $(PROJECT_DIR)/src/platform/mutex.o \
-        $(PROJECT_DIR)/src/platform/logging_simple.o
+PLATFORM_SRCS = \
+        $(PROJECT_DIR)/src/platform/mutex.cc \
+        $(PROJECT_DIR)/src/platform/logging_simple.cc
+PLATFORM_OBJS = $(addsuffix .o, $(basename $(PLATFORM_SRCS))) 
 
-UTILS_OBJS = \
-        $(PROJECT_DIR)/src/utils/hash.o \
-        $(PROJECT_DIR)/src/utils/stringpiece.o \
-        $(PROJECT_DIR)/src/utils/thread_simple.o
+UTILS_SRCS = \
+        $(PROJECT_DIR)/src/utils/hash.cc \
+        $(PROJECT_DIR)/src/utils/stringpiece.cc \
+        $(PROJECT_DIR)/src/utils/thread_simple.cc
+UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS)))
+
+PROTO_FILES = $(wildcard src/proto/*.proto)
+PROTO_SRCS = $(patsubst %.proto,%.pb.cc, $(PROTO_FILES))
+PROTO_HDRS = $(patsubst %.proto,%.pb.h, $(PROTO_FILES))
+PROTO_OBJS = $(patsubst %.proto,%.pb.o, $(PROTO_FILES))
 
 OBJS = $(ALL_OBJS)
 
