@@ -43,7 +43,7 @@ CFLAGS = -Wall -W -fPIC $(DFLAGS) $(OPT)
 
 SRCEXTS = .c .cc .cpp .proto
 ALL_DIRS = $(PROJECT_DIR)/src/platform $(PROJECT_DIR)/src/utils
-ALL_SRCS = $(foreach d,$(ALL_DIRS),$(wildcard $(addprefix $(d)/*,$(SRCEXTS))))
+ALL_SRCS = $(foreach d, $(ALL_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS))))
 ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS))) 
 
 PLATFORM_SRCS = \
