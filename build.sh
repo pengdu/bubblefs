@@ -102,6 +102,7 @@ if [ ! -f "${FLAG_DIR}/gflags_2_0" ]; then
     ./configure
     make -j4
     sudo make install
+    sudo ldconfig
     touch "${FLAG_DIR}/gflags_2_0"
 fi
 
@@ -117,6 +118,7 @@ if [ ! -f "${FLAG_DIR}/glog_0_3_0" ]; then
     ./configure
     make -j4
     sudo make install
+    sudo ldconfig
     touch "${FLAG_DIR}/glog_0_3_0"
 fi
 

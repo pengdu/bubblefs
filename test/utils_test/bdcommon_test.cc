@@ -2,6 +2,8 @@
 #include <string.h>
 #include <iostream>
 #include <string>
+#include "gflags/gflags.h"
+#include "gtest/gtest.h"
 #include "platform/atomicops.h"
 #include "platform/logging_simple.h"
 #include "platform/mutexlock.h"
@@ -11,7 +13,6 @@
 #include "utils/stringpiece.h"
 #include "utils/thread_simple.h"
 #include "utils/threadpool_simple.h"
-#include "gtest/gtest.h"
 
 // case 1
 /*
@@ -319,6 +320,8 @@ int main() {
 }
 */
 
+// case 8
+/*
 int main(int argc, char* argv[]) {
     const char* char_pointer = "char*";
     bubblefs::StringPiece string = "std;";
@@ -326,4 +329,32 @@ int main(int argc, char* argv[]) {
     BDLOGS(bubblefs::bdcommon::INFO) << 88 << " " << char_pointer << " " << string;
 
     return 0;
+}
+*/
+
+// case 9
+
+using namespace std;
+DEFINE_string(confPath, "../conf/setup.ini", "program configure file.");
+DEFINE_int32(port, 9090, "program listen port");
+DEFINE_bool(daemon, true, "run daemon mode");
+ 
+int main(int argc, char** argv)
+{
+  google::ParseCommandLineFlags(&argc, &argv, true);
+ 
+  cout << "confPath = " << FLAGS_confPath << endl;
+  cout << "port = " << FLAGS_port << endl;
+ 
+  if (FLAGS_daemon) {
+    cout << "run background ..." << endl;
+  }
+  else {
+    cout << "run foreground ..." << endl;
+  }
+ 
+  cout << "good luck and good bye!" << endl;
+ 
+  google::ShutDownCommandLineFlags();
+  return 0;
 }
