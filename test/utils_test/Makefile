@@ -13,7 +13,7 @@ include $(PROJECT_DIR)/depends.mk
 INCLUDE_PATH = -I$(PROJECT_DIR)/src \
                -I$(BOOST_PATH) \
                -I$(RAPIDJSON_PATH)/include \
-               -isystem -I$(GTEST_PATH)/include \
+               -isystem $(GTEST_PATH)/include \
                -I$(SNAPPY_PATH)/include \
                -I$(LEVELDB_PATH)/include \
                -I$(PROTOBUF_PATH)/include \
@@ -34,20 +34,20 @@ SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ld
 CXXFLAGS = -pthread -std=c++11 -fmax-errors=3 -Wall -fPIC $(OPT)
 CXXFLAGS += -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE
 
-PLATFORM_SRC = \
+PLATFORM_SRCS = \
         $(PROJECT_DIR)/src/platform/mutex.cc \
         $(PROJECT_DIR)/src/platform/logging_simple.cc
 
-PLATFORM_OBJ = $(addsuffix .o, $(basename $(PLATFORM_SRC)))
+PLATFORM_OBJS = $(addsuffix .o, $(basename $(PLATFORM_SRCS)))
 
-UTILS_SRC = \
+UTILS_SRCS = \
         $(PROJECT_DIR)/src/utils/hash.cc \
         $(PROJECT_DIR)/src/utils/stringpiece.cc \
         $(PROJECT_DIR)/src/utils/thread_simple.cc
 
-UTILS_OBJ = $(addsuffix .o, $(basename $(UTILS_SRC)))
+UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS)))
 
-OBJS = $(UTILS_OBJ) $(PLATFORM_OBJ)
+OBJS = $(UTILS_OBJS) $(PLATFORM_OBJS)
 
 LIBS =
 

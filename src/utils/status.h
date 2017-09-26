@@ -55,6 +55,14 @@ class Status {
   // Return a success status.
   static Status OK() { return Status(); }
   
+  static Status UnimplementedError(StringPiece message = StringPiece()) {
+    return Status(error::UNIMPLEMENTED, message);
+  }
+  
+  static Status InternalError(StringPiece message = StringPiece()) {
+    return Status(error::INTERNAL, message);
+  }
+  
   // Return error status of an appropriate type.
   static Status NotFound(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::NOT_FOUND, msg, msg2);

@@ -17,10 +17,11 @@ limitations under the License.
 #include <ctype.h>
 #include <errno.h>
 #include <float.h>
+#include <math.h>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
-#include <cmath>
 #include <limits>
 #include <locale>
 #include <unordered_map>

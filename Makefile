@@ -5,16 +5,15 @@ OPT ?= -g2 -Werror # (B) Debug mode, w/ full line-level debugging symbols
 
 #CXX=/opt/compiler/gcc-4.8.2/bin/g++
 
-PROJECT_DIR = .
+PROJECT_DIR=.
 
 # dependencies
-include depends.mk
+include $(PROJECT_DIR)/depends.mk
 
 INCLUDE_PATH = -I$(PROJECT_DIR)/src \
                -I$(BOOST_PATH) \
                -I$(RAPIDJSON_PATH)/include \
-               -I$(GTEST_PATH)/include \
-               -I$(GLOG_PATH)/include \
+               -isystem $(GTEST_PATH)/include \
                -I$(SNAPPY_PATH)/include \
                -I$(LEVELDB_PATH)/include \
                -I$(PROTOBUF_PATH)/include \
@@ -22,36 +21,44 @@ INCLUDE_PATH = -I$(PROJECT_DIR)/src \
                -I$(GPERFTOOLS_PATH)/include
 
 LDFLAGS = -L$(GTEST_PATH)/lib -lgtest \
-          -L$(GLOG_PATH)/lib -lglog \
           -L$(SNAPPY_PATH)/lib -lsnappy \
           -L$(LEVELDB_PATH)/lib -lleveldb \
           -L$(PROTOBUF_PATH)/lib -lprotobuf \
           -L$(SOFA_PBRPC_PATH)/lib -lsofa-pbrpc \
           -L$(GPERFTOOLS_PATH)/lib -ltcmalloc_minimal \
-          -lgflags -lpthread -ldl -lz -lrt
+          -lglog -lgflags -lpthread -lstdc++ -ldl -lz -lrt
 
 SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ldl \
               -shared -Wl,--version-script,so-version-script # hide symbol of third_party libs
 
-CXXFLAGS = -pthread -std=c++11 -fmax-errors=3 -Wall -fPIC $(OPT)
+CXXFLAGS = -pthread -std=c++11 -fmax-errors=2 -Wall -fPIC $(OPT)
+CXXFLAGS += -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE
 
-PLATFORM_SRC = \
+SRCEXTS = .c .cc .cpp .proto
+ALL_DIRS = $(PROJECT_DIR)/src/platform $(PROJECT_DIR)/src/utils
+ALL_SRCS = $(foreach d, $(ALL_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS))))
+ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS))) 
 
-PLATFORM_OBJ = $(patsubst %.cc, %.o, $(PLATFORM_SRC))
+PLATFORM_OBJS = \
+        $(PROJECT_DIR)/src/platform/mutex.o \
+        $(PROJECT_DIR)/src/platform/logging_simple.o
 
-UTILS_SRC = \
-	
-UTILS_OBJ = $(patsubst %.cc, %.o, $(UTILS_SRC))
+UTILS_OBJS = \
+        $(PROJECT_DIR)/src/utils/hash.o \
+        $(PROJECT_DIR)/src/utils/stringpiece.o \
+        $(PROJECT_DIR)/src/utils/thread_simple.o
 
-OBJS = 
+OBJS = $(ALL_OBJS)
 
-BIN = bubblefs_test
+LIBS =
 
-all: $(OBJS)
+BIN = $(ALL_OBJS)
+
+all: $(BIN)
 	@echo 'Done'
 	
-bubblefs_test: $(OBJS)
-#	$(CXX) $^ -o $@ $(LDFLAGS)
+bubblefs_test: bubblefs_test.o $(OBJS)
+	$(CXX) $^ -o $@ $(LDFLAGS)
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) -c $< -o $@
@@ -61,3 +68,4 @@ clean:
 	rm -rf $(BIN)
 	rm -rf $(OBJS)
 	rm -rf $(LIBS)
+	rm -rf *.o
