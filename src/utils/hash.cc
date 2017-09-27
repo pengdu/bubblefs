@@ -51,7 +51,13 @@ uint32 Hash32(const char* data, size_t n, uint32 seed) {
   }
 
   // Handle the last few bytes of the input array
-
+  // Note: The original hash implementation used data[i] << shift, which
+  // promotes the char to int and then performs the shift. If the char is
+  // negative, the shift is undefined behavior in C++. The hash algorithm is
+  // part of the format definition, so we cannot change it; to obtain the same
+  // behavior in a legal way we just cast to uint32_t, which will do
+  // sign-extension. To guarantee compatibility with architectures where chars
+  // are unsigned we first cast the char to int8_t.
   switch (n) {
     case 3:
       h ^= ByteAs32(data[2]) << 16;

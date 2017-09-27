@@ -26,7 +26,7 @@ LDFLAGS = -L$(GTEST_PATH)/lib -lgtest \
           -L$(PROTOBUF_PATH)/lib -lprotobuf \
           -L$(SOFA_PBRPC_PATH)/lib -lsofa-pbrpc \
           -L$(GPERFTOOLS_PATH)/lib -ltcmalloc_minimal \
-          -lglog -lgflags -lpthread -lstdc++ -ldl -lz -lrt
+          -lglog -lgflags -lpthread -lstdc++ -ltbb -ldl -lz -lrt
 
 SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ldl \
               -shared -Wl,--version-script,so-version-script # hide symbol of third_party libs

@@ -1,7 +1,7 @@
 
 syntax = "proto2";
 
-package bubblefs;
+package bubblefs.bfs;
 
 message FileInfo {
     optional int64 entry_id = 1;

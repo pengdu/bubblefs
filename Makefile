@@ -66,7 +66,7 @@ OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS)
 
 LIBS =
 
-BIN = $(PROTO_OBJS)
+BIN = $(ALL_OBJS)
 
 all: $(BIN)
 	@echo '*Done'

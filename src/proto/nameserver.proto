@@ -4,7 +4,7 @@ syntax = "proto2";
 import "file.proto";
 import "status_code.proto";
 
-package bubblefs;
+package bubblefs.bfs;
 
 option cc_generic_services = true;
 

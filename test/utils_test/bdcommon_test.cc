@@ -8,6 +8,7 @@
 #include "platform/logging_simple.h"
 #include "platform/mutexlock.h"
 #include "platform/time.h"
+#include "tbb/concurrent_hash_map.h"
 #include "utils/counter.h"
 #include "utils/raw_coding.h"
 #include "utils/stringpiece.h"
@@ -333,7 +334,7 @@ int main(int argc, char* argv[]) {
 */
 
 // case 9
-
+/*
 using namespace std;
 DEFINE_string(confPath, "../conf/setup.ini", "program configure file.");
 DEFINE_int32(port, 9090, "program listen port");
@@ -356,5 +357,32 @@ int main(int argc, char** argv)
   cout << "good luck and good bye!" << endl;
  
   google::ShutDownCommandLineFlags();
+  return 0;
+}
+*/
+
+// case 10
+
+using namespace tbb;
+using namespace std;
+
+typedef concurrent_hash_map<long int, string> data_hash;
+
+int main(){
+  data_hash dh;
+  data_hash::accessor a;
+
+  long int k = 10;
+  dh.insert(a,k);
+  a->second = "hello";
+  for (data_hash::iterator j = dh.begin();j != dh.end(); ++j){
+    printf("%lu %s\n", j->first, j->second.c_str());
+  }
+  if (dh.find(a,9)){
+    printf("true\n");
+  } else {
+    printf("false\n");      
+  }
+  a.release();
   return 0;
 }

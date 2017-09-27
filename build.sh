@@ -41,6 +41,22 @@ if [ ! -f "${FLAG_DIR}/boost_1_65_0" ] \
     touch "${FLAG_DIR}/boost_1_65_0"
 fi
 
+# tbb
+if [ ! -f "${FLAG_DIR}/tbb_2017_U7" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/tbb" ]; then
+    	rm -rf ${DEPS_SOURCE}/tbb
+    fi
+    unzip ${DEPS_PACKAGE}/tbb-2017_U7.zip -d .
+    mv tbb-2017_U7 tbb
+    cd tbb
+    make
+    # mjh@mjh-Vostro-260:~/Documents/tbb/build/linux_intel64_gcc_cc4.8_libc2.19_kernel3.13.0_release$ source tbbvars.sh
+    # cp -a build/linux_intel64_gcc_cc4.8_libc2.19_kernel3.13.0_release/libtbb.so build/linux_intel64_gcc_cc4.8_libc2.19_kernel3.13.0_release/libtbb.so.2 ${DEPS_PREFIX}/lib
+    cp -a include/tbb ${DEPS_PREFIX}/include
+    touch "${FLAG_DIR}/tbb_2017_U7"
+fi
+
 # jemalloc
 if [ ! -f "${FLAG_DIR}/jemalloc_5_0_1" ] \
     || [ ! -f "${DEPS_PREFIX}/lib/libjemalloc.a" ] \
