@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "gflags/gflags.h"
+#include "glog/logging.h"
 #include "gtest/gtest.h"
 #include "platform/atomicops.h"
 #include "platform/logging_simple.h"
@@ -362,7 +363,7 @@ int main(int argc, char** argv)
 */
 
 // case 10
-
+/*
 using namespace tbb;
 using namespace std;
 
@@ -385,4 +386,16 @@ int main(){
   }
   a.release();
   return 0;
+}
+*/
+
+// case 11
+
+int main(int argc,char* argv[])
+{
+    google::InitGoogleLogging(argv[0]);  // 初始化 glog
+    google::ParseCommandLineFlags(&argc, &argv, true);  // 初始化 gflags
+    LOG(INFO) << "Hello, GOOGLE!";  // INFO 级别的日志
+    LOG(ERROR) << "ERROR, GOOGLE!";  // ERROR 级别的日志
+    return 0;
 }

@@ -123,19 +123,19 @@ if [ ! -f "${FLAG_DIR}/gflags_2_0" ]; then
 fi
 
 # glog
-if [ ! -f "${FLAG_DIR}/glog_0_3_0" ]; then
+if [ ! -f "${FLAG_DIR}/glog_0_3_4" ]; then
     cd ${DEPS_SOURCE}
     if [ -d "${DEPS_SOURCE}/glog" ] ; then
     	rm -rf ${DEPS_SOURCE}/glog
     fi
-    unzip ${DEPS_PACKAGE}/glog-0.3.0.zip -d .
-    mv glog-0.3.0 glog
+    unzip ${DEPS_PACKAGE}/glog-0.3.4.zip -d .
+    mv glog-0.3.4 glog
     cd glog
     ./configure
     make -j4
     sudo make install
     sudo ldconfig
-    touch "${FLAG_DIR}/glog_0_3_0"
+    touch "${FLAG_DIR}/glog_0_3_4"
 fi
 
 # googletest
