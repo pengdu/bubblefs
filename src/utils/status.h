@@ -167,6 +167,8 @@ class Status {
   // OK status has a `NULL` state_.  Otherwise, `state_` points to
   // a `State` structure containing the error code and message(s)
   std::unique_ptr<State> state_;
+  
+  static const char* msgs[static_cast<int>(error::SubCode::MAX_SUB_CODE)];
 
   void SlowCopyFrom(const State* src);
 };
