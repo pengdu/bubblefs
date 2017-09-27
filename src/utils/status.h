@@ -115,6 +115,12 @@ class Status {
   
   // Returns true iff the status indicates an IOError.
   bool IsIOError() const { return code() == error::IOERROR; }
+  
+  // Returns true iff the status indicates Incomplete
+  bool IsIncomplete() const { return code() == error::INCOMPLETE; }
+
+  // Returns true iff the status indicates Shutdown In progress
+  bool IsShutdownInProgress() const { return code() == error::SHUTDOWN_IN_PROGRESS; }
 
   error::Code code() const {
     return ok() ? error::OK : state_->code;
