@@ -13,6 +13,7 @@
 // ceph/src/common/pipe.c
 // ceph/src/common/run_cmd.cpp
 
+#include "platform/run_cmd.h"
 #include <sys/wait.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -127,25 +128,51 @@ std::string run_cmd(const char *cmd, ...)
   return oss.str();
 }
 
-constexpr int kExecuteCMDBufLength = 204800;  
-  
-int prun_cmd(const char* cmd, char* result) {
-  char bufPs[kExecuteCMDBufLength];
-  char ps[kExecuteCMDBufLength] = {0};
-  FILE* ptr = nullptr;
-  strncpy(ps, cmd, kExecuteCMDBufLength);
-  if ((ptr = popen(ps, "r")) != nullptr) {
-    size_t count = fread(bufPs, 1, kExecuteCMDBufLength, ptr);
-    memcpy(result,
-           bufPs,
-           count - 1);  // why count-1: remove the '\n' at the end
-    result[count] = 0;
-    pclose(ptr);
-    ptr = nullptr;
-    return count - 1;
-  } else {
-    return -1;
-  }
+bool ExecuteShellCmd(const std::string cmd, std::string* ret_str) {
+    char output_buffer[80];
+    FILE *fp = popen(cmd.c_str(), "r");
+    if (!fp) {
+        fprintf(stderr, "fail to execute cmd: %s\n", cmd.c_str());
+        return false;
+    }
+    fgets(output_buffer, sizeof(output_buffer), fp);
+    pclose(fp);
+    if (ret_str) {
+        *ret_str = std::string(output_buffer);
+    }
+    return true;
+}
+
+std::string GetCurrentLocationDir() {
+    char current_path[1024] = {'\0'};
+    std::string current_dir;
+
+    if (getcwd(current_path, 1024)) {
+        current_dir = current_path;
+    }
+    return current_dir;
+}
+
+std::string GetLocalHostAddr() {
+    std::string cmd =
+        "/sbin/ifconfig | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}'";
+    std::string addr;
+    if (!ExecuteShellCmd(cmd, &addr)) {
+        fprintf(stderr, "fail to fetch local host addr\n");
+    } else if (addr.length() > 1) {
+        addr.erase(addr.length() - 1, 1);
+    }
+    return addr;
+}
+
+std::string GetLocalHostName() {
+    char str[kMaxHostNameSize + 1];
+    if (0 != gethostname(str, kMaxHostNameSize + 1)) {
+        fprintf(stderr, "gethostname fail\n");
+        return "";
+    }
+    std::string hostname(str);
+    return hostname;
 }
 
 } // namespace port

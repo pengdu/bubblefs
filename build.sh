@@ -29,6 +29,32 @@ fi
 
 cd ${DEPS_SOURCE}
 
+# ldconfig for searching in /usr/lib
+# echo "/usr/local/lib" >> /etc/ld.so.conf for searching in /usr/local/lib
+# in .bashrc or /etc/profile or shell, export LD_LIBRARY_PATH=/PATH/TO/LIB:$LD_LIBRARY_PATH for searching lib*.so* in other dirs
+# or use -rpath/-R for runtime shared-lib searching, prio > LD_LIBRARY_PATH
+
+# tbb
+if [ ! -f "${FLAG_DIR}/tbb_2017_U7" ] \
+	|| [ ! -f "${DEPS_PREFIX}/lib/libtbb.so" ] \
+	|| [ ! -f "${DEPS_PREFIX}/lib/libtbb.so.2" ] \
+	|| [ ! -d "${DEPS_PREFIX}/include/tbb" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/tbb" ]; then
+    	rm -rf ${DEPS_SOURCE}/tbb
+    fi
+    unzip ${DEPS_PACKAGE}/tbb-2017_U7.zip -d .
+    mv tbb-2017_U7 tbb
+    cd tbb
+    make
+    # Note: replace linux_intel64_gcc_cc4.8_libc2.19_kernel3.13.0_release with your system
+    cd build/linux_intel64_gcc_cc4.8_libc2.19_kernel3.13.0_release
+    cp -a libtbb.so libtbb.so.2 ${DEPS_PREFIX}/lib
+    cd ../..
+    cp -a include/tbb ${DEPS_PREFIX}/include
+    touch "${FLAG_DIR}/tbb_2017_U7"
+fi
+
 # boost
 if [ ! -f "${FLAG_DIR}/boost_1_65_0" ] \
     || [ ! -d "${DEPS_PREFIX}/boost" ]; then
@@ -41,20 +67,20 @@ if [ ! -f "${FLAG_DIR}/boost_1_65_0" ] \
     touch "${FLAG_DIR}/boost_1_65_0"
 fi
 
-# tbb
-if [ ! -f "${FLAG_DIR}/tbb_2017_U7" ]; then
+# libco
+if [ ! -f "${FLAG_DIR}/libco-master" ] \
+	|| [ ! -f "${DEPS_PREFIX}/lib/libcolib.a" ]; then
     cd ${DEPS_SOURCE}
-    if [ -d "${DEPS_SOURCE}/tbb" ]; then
-    	rm -rf ${DEPS_SOURCE}/tbb
+    if [ -d "${DEPS_SOURCE}/libco" ]; then
+    	rm -rf ${DEPS_SOURCE}/libco
     fi
-    unzip ${DEPS_PACKAGE}/tbb-2017_U7.zip -d .
-    mv tbb-2017_U7 tbb
-    cd tbb
+    unzip ${DEPS_PACKAGE}/libco-master.zip -d .
+    mv libco-master libco
+    cp -a libco ${DEPS_PREFIX}/include
+    cd libco
     make
-    # mjh@mjh-Vostro-260:~/Documents/tbb/build/linux_intel64_gcc_cc4.8_libc2.19_kernel3.13.0_release$ source tbbvars.sh
-    # cp -a build/linux_intel64_gcc_cc4.8_libc2.19_kernel3.13.0_release/libtbb.so build/linux_intel64_gcc_cc4.8_libc2.19_kernel3.13.0_release/libtbb.so.2 ${DEPS_PREFIX}/lib
-    cp -a include/tbb ${DEPS_PREFIX}/include
-    touch "${FLAG_DIR}/tbb_2017_U7"
+    cp -a lib/libcolib.a ${DEPS_PREFIX}/lib
+    touch "${FLAG_DIR}/libco-master"
 fi
 
 # jemalloc

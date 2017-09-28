@@ -12,12 +12,28 @@
 
 // ceph/src/common/pipe.h
 // ceph/src/common/run_cmd.h
+// tera/src/utils/utils_cmd.cc
 
 #ifndef BUBBLEFS_PLATFORM_RUN_CMD_H_
 #define BUBBLEFS_PLATFORM_RUN_CMD_H_
 
 #include <string>
 
+namespace bubblefs {
+namespace port {
+  
+const uint32_t kMaxHostNameSize = 255;
+const std::string kUnknownIpAddr = "255.255.255.255:0000";
+  
+/** Create a pipe and set both ends to have F_CLOEXEC
+ *
+ * @param pipefd        pipe array, just as in pipe(2)
+ * @return              0 on success, errno otherwise 
+ */
+bool pipe_cloexec(int pipefd[2]);
+
+bool pipe2_cloexec(int pipefd[2]);
+  
 //
 // Fork a command and run it. The shell will not be invoked and shell
 // expansions will not be done.
@@ -29,22 +45,15 @@
 //
 // Returns an empty string on success, and an error string otherwise.
 //
-
-namespace bubblefs {
-namespace port {
-  
-/** Create a pipe and set both ends to have F_CLOEXEC
- *
- * @param pipefd        pipe array, just as in pipe(2)
- * @return              0 on success, errno otherwise 
- */
-bool pipe_cloexec(int pipefd[2]);
-
-bool pipe2_cloexec(int pipefd[2]);
-  
 std::string run_cmd(const char *cmd, ...);
 
-int prun_cmd(const char* cmd, char* result);
+bool ExecuteShellCmd(const std::string cmd, std::string* ret_str);
+
+std::string GetCurrentLocationDir();
+
+std::string GetLocalHostAddr();
+
+std::string GetLocalHostName();
 
 } // namespace port
 } // namespace bubblefs

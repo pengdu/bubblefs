@@ -68,28 +68,10 @@
 namespace bubblefs {
 namespace timeutil {
 
-static const int64 kSecondsPerMinute = 60;
-static const int64 kSecondsPerHour = 3600;
-static const int64 kSecondsPerDay = kSecondsPerHour * 24;
-static const int64 kSecondsPer400Years =
-    kSecondsPerDay * (400 * 365 + 400 / 4 - 3);
-// Seconds from 0001-01-01T00:00:00 to 1970-01-01T:00:00:00
-static const int64 kSecondsFromEraToEpoch = 62135596800LL;
 // The range of timestamp values we support.
 static const int64 kMinTime = -62135596800LL;  // 0001-01-01T00:00:00
 static const int64 kMaxTime = 253402300799LL;  // 9999-12-31T23:59:59
 
-static const int64_t kMillisPerSecond = 1000;
-static const int64_t kMicrosPerMillisecond = 1000;
-static const int64_t kMicrosPerSecond = 1000000;
-static const int64_t kMicrosPerMinute = kMicrosPerSecond * 60;
-static const int64_t kMicrosPerHour = kMicrosPerMinute * 60;
-static const int64_t kMicrosPerDay = kMicrosPerHour * 24;
-static const int64_t kMicrosPerWeek = kMicrosPerDay * 7;
-static const int64_t kNanosPerMicrosecond = 1000;
-static const int64_t kNanosPerMillisecond = 1000000;
-static const int64_t kNanosPerSecond = 1000000000;  
-  
 // The min/max Timestamp/Duration values we support.
 //
 // For "0001-01-01T00:00:00Z".
@@ -100,6 +82,25 @@ static const int64 kDurationMinSeconds = -315576000000LL;
 static const int64 kDurationMaxSeconds = 315576000000LL;
 
 static const char kTimestampFormat[] = "%E4Y-%m-%dT%H:%M:%S";
+  
+static const int64 kSecondsPerMinute = 60;
+static const int64 kSecondsPerHour = 3600;
+static const int64 kSecondsPerDay = kSecondsPerHour * 24;
+static const int64 kSecondsPer400Years =
+    kSecondsPerDay * (400 * 365 + 400 / 4 - 3);
+// Seconds from 0001-01-01T00:00:00 to 1970-01-01T:00:00:00
+static const int64 kSecondsFromEraToEpoch = 62135596800LL;
+
+static const int64_t kMillisPerSecond = 1000;
+static const int64_t kMicrosPerMillisecond = 1000;
+static const int64_t kMicrosPerSecond = 1000000;
+static const int64_t kMicrosPerMinute = kMicrosPerSecond * 60;
+static const int64_t kMicrosPerHour = kMicrosPerMinute * 60;
+static const int64_t kMicrosPerDay = kMicrosPerHour * 24;
+static const int64_t kMicrosPerWeek = kMicrosPerDay * 7;
+static const int64_t kNanosPerMicrosecond = 1000;
+static const int64_t kNanosPerMillisecond = 1000000;
+static const int64_t kNanosPerSecond = 1000000000;
   
 typedef int64_t nsecs_t;       // nano-seconds
 
@@ -201,12 +202,12 @@ static inline int64_t get_micros() {
     return static_cast<int64_t>(tv.tv_sec) * 1000000 + tv.tv_usec; // us
 }
 
-static inline int32_t get_millis() {
-   return static_cast<int32_t>(get_micros() / 1000); // ms
+static inline int64_t get_millis() {
+   return static_cast<int64_t>(get_micros() / 1000); // ms
 }
 
-static inline int32_t now_time() {
-    return static_cast<int32_t>(get_micros() / 1000000); // s
+static inline int64_t now_time() {
+    return static_cast<int64_t>(get_micros() / 1000000); // s
 }
 
 static inline int32_t now_time_str(char* buf, int32_t len, Precision p = kUsec) {
@@ -263,6 +264,38 @@ static inline void make_timeout(struct timespec* pts, long millisecond) {
 
     pts->tv_sec += pts->tv_nsec / 1000000000;
     pts->tv_nsec = pts->tv_nsec % 1000000000;
+}
+
+static inline std::string get_curtime_str() {
+    struct tm tt;
+    char buf[20];
+    time_t t = time(nullptr);
+    strftime(buf, 20, "%Y%m%d-%H:%M:%S", localtime_r(&t, &tt));
+    return std::string(buf, 17);
+}
+
+static inline std::string get_curtime_str_plain() {
+    struct tm tt;
+    char buf[20];
+    time_t t = time(NULL);
+    strftime(buf, 20, "%Y%m%d%H%M%S", localtime_r(&t, &tt));
+    return std::string(buf);
+}
+
+static inline int64_t get_unique_micros(int64_t ref) {
+    int64_t now;
+    do {
+        now = get_micros();
+    } while (now == ref);
+    return now;
+}
+
+static inline int64_t GetTimeStampInUs() {
+    return get_micros();
+}
+
+static inline int64_t GetTimeStampInMs() {
+    return get_millis();
 }
 
 int64_t clock_now_ns(); // ns

@@ -46,6 +46,8 @@ namespace bubblefs {
   
 void InitializeLogging(int argc, char** argv);
 
+void SetupLog(const std::string& program_name);
+
 namespace logging {
 
 void SetMinLogLevel(int level);
