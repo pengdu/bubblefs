@@ -36,22 +36,16 @@ class DynamicBloom {
   // num_probes: number of hash probes for a single key
   // locality:  If positive, optimize for cache line locality, 0 otherwise.
   // hash_func:  customized hash function
-  // huge_page_tlb_size:  if >0, try to allocate bloom bytes from huge page TLB
-  //                      within this page size. Need to reserve huge pages for
-  //                      it to be allocated, like:
-  //                         sysctl -w vm.nr_hugepages=20
-  //                     See linux doc Documentation/vm/hugetlbpage.txt
   explicit DynamicBloom(Allocator* allocator,
                         uint32_t total_bits, uint32_t locality = 0,
                         uint32_t num_probes = 6,
-                        uint32_t (*hash_func)(const StringPiece& key) = nullptr,
-                        size_t huge_page_tlb_size = 0);
+                        uint32_t (*hash_func)(const StringPiece& key) = nullptr);
 
   explicit DynamicBloom(uint32_t num_probes = 6,
                         uint32_t (*hash_func)(const StringPiece& key) = nullptr);
 
   void SetTotalBits(Allocator* allocator, uint32_t total_bits,
-                    uint32_t locality, size_t huge_page_tlb_size);
+                    uint32_t locality);
 
   ~DynamicBloom() {}
 

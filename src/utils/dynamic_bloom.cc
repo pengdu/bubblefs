@@ -30,10 +30,9 @@ uint32_t GetTotalBitsForLocality(uint32_t total_bits) {
 
 DynamicBloom::DynamicBloom(Allocator* allocator, uint32_t total_bits,
                            uint32_t locality, uint32_t num_probes,
-                           uint32_t (*hash_func)(const StringPiece& key),
-                           size_t huge_page_tlb_size)
+                           uint32_t (*hash_func)(const StringPiece& key))
     : DynamicBloom(num_probes, hash_func) {
-  SetTotalBits(allocator, total_bits, locality, huge_page_tlb_size);
+  SetTotalBits(allocator, total_bits, locality);
 }
 
 DynamicBloom::DynamicBloom(uint32_t num_probes,
@@ -51,8 +50,7 @@ void DynamicBloom::SetRawData(unsigned char* raw_data, uint32_t total_bits,
 }
 
 void DynamicBloom::SetTotalBits(Allocator* allocator,
-                                uint32_t total_bits, uint32_t locality,
-                                size_t huge_page_tlb_size) {
+                                uint32_t total_bits, uint32_t locality) {
   kTotalBits = (locality > 0) ? GetTotalBitsForLocality(total_bits)
                               : (total_bits + 7) / 8 * 8;
   kNumBlocks = (locality > 0) ? (kTotalBits / (CACHE_LINE_SIZE * 8)) : 0;
@@ -66,7 +64,7 @@ void DynamicBloom::SetTotalBits(Allocator* allocator,
   }
   assert(allocator);
 
-  char* raw = allocator->AllocAligned(sz, huge_page_tlb_size);
+  char* raw = allocator->AllocAligned(sz);
   memset(raw, 0, sz);
   auto cache_line_offset = reinterpret_cast<uintptr_t>(raw) % CACHE_LINE_SIZE;
   if (kNumBlocks > 0 && cache_line_offset > 0) {

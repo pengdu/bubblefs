@@ -33,7 +33,7 @@ namespace core {
 class Arena : public Allocator {
  public:
   // Allocates a thread-compatible arena with the specified block size.
-  explicit Arena(const size_t block_size);
+  explicit Arena(const size_t block_size = kMinBlockSize);
   virtual ~Arena();
   
   static const size_t kInlineSize = 2048;
@@ -51,18 +51,6 @@ class Arena : public Allocator {
   virtual size_t BlockSize() const override { return block_size_; }
 
   void Reset();
-
-// This should be the worst-case alignment for any type.  This is
-// good for IA-32, SPARC version 7 (the last one I know), and
-// supposedly Alpha.  i386 would be more time-efficient with a
-// default alignment of 8, but ::operator new() uses alignment of 4,
-// and an assertion will fail below after the call to MakeNewBlock()
-// if you try to use a larger alignment.
-#ifdef __i386__
-  static const int kDefaultAlignment = 4;
-#else
-  static const int kDefaultAlignment = 8;
-#endif
 
  protected:
   bool SatisfyAlignment(const size_t alignment);

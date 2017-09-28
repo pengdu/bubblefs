@@ -164,6 +164,8 @@ uint64_t RandGenerator(uint64_t range) {
   return value % range;
 }
 
+// rocksdb/util/random.cc
+
 Random* Random::GetTLSInstance() {
   static __thread Random* tls_instance;
   static __thread std::aligned_storage<sizeof(Random)>::type tls_instance_bytes;
