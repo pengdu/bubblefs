@@ -27,6 +27,7 @@ limitations under the License.
 
 #include <stddef.h>  // For size_t.
 #include <string.h>  // For memcpy.
+#include <unistd.h>
 #include "platform/base_export.h"
 #include "platform/build_config.h"
 #include "platform/compiler_specific.h"
@@ -432,5 +433,8 @@ namespace {  /*anonymous namespace */                           \
     static void __attribute__((constructor))    \
     BASE_CONCAT(base_global_init_, __LINE__)   
 #endif  // __cplusplus
+
+# define VOID_TEMP_FAILURE_RETRY(expression) \
+    static_cast<void>(TEMP_FAILURE_RETRY(expression))
 
 #endif // BUBBLEFS_PLATFORM_MACROS_H_

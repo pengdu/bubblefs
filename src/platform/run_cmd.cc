@@ -23,14 +23,12 @@
 #include <unistd.h>
 #include <sstream>
 #include <vector>
+#include "platform/macros.h"
 
 namespace bubblefs {
 namespace port {
 
 using std::ostringstream;
-
-# define VOID_TEMP_FAILURE_RETRY(expression) \
-    static_cast<void>(TEMP_FAILURE_RETRY(expression))
 
 bool pipe_cloexec(int pipefd[2])
 {
