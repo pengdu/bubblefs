@@ -83,6 +83,24 @@ if [ ! -f "${FLAG_DIR}/libco-master" ] \
     touch "${FLAG_DIR}/libco-master"
 fi
 
+# libuv
+if [ ! -f "${FLAG_DIR}/libuv_1_12_0" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/libuv" ] ; then
+    	rm -rf ${DEPS_SOURCE}/libuv
+    fi
+    unzip ${DEPS_PACKAGE}/libuv-1.12.0.zip -d .
+    mv libuv-1.12.0 libuv
+    cd libuv
+    sh autogen.sh
+    ./configure
+    make -j4
+    make check
+    sudo make install
+    sudo ldconfig
+    touch "${FLAG_DIR}/libuv_1_12_0"
+fi
+
 # jemalloc
 if [ ! -f "${FLAG_DIR}/jemalloc_5_0_1" ] \
     || [ ! -f "${DEPS_PREFIX}/lib/libjemalloc.a" ] \
