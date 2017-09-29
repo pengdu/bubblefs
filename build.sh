@@ -346,6 +346,38 @@ if [ ! -f "${FLAG_DIR}/gperftools_2_5_0" ] \
     touch "${FLAG_DIR}/gperftools_2_5_0"
 fi
 
+# redis
+if [ ! -f "${FLAG_DIR}/redis_3_2_11" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/redis" ] ; then
+    	rm -rf ${DEPS_SOURCE}/redis
+    fi
+    tar zxvf ${DEPS_PACKAGE}/redis-3.2.11.tar.gz -C .
+    mv redis-3.2.11 redis
+    cd redis
+    make
+    make test
+    touch "${FLAG_DIR}/redis_3_2_11"
+fi
+
+# hiredis
+if [ ! -f "${FLAG_DIR}/hiredis_0_13_3" ] \
+    || [ ! -f "${DEPS_PREFIX}/lib/libhiredis.a" ] \
+    || [ ! -d "${DEPS_PREFIX}/include/hiredis" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/hiredis" ] ; then
+    	rm -rf ${DEPS_SOURCE}/hiredis
+    fi
+    unzip ${DEPS_PACKAGE}/hiredis-0.13.3.zip -d .
+    mv hiredis-0.13.3 hiredis
+    cd hiredis
+    make
+    mkdir ${DEPS_PREFIX}/include/hiredis
+    cp -a hiredis.h ${DEPS_PREFIX}/include/hiredis
+    cp -a libhiredis.a ${DEPS_PREFIX}/lib
+    touch "${FLAG_DIR}/hiredis_0_13_3"
+fi
+
 cd ${WORK_DIR}
 
 ########################################
