@@ -49,6 +49,12 @@ extern void restore_sigset(const sigset_t *old_sigset);
 // old_sigset.
 extern void unblock_all_signals(sigset_t *old_sigset);
 
+// This works by setting up certain fatal signal handlers. Previous fatal
+// signal handlers will still be called when the signal is raised. Defaults
+// to being off.
+void setPrintStackTracesOnFatalSignal(bool print);
+bool printStackTracesOnFatalSignal();
+
 } // namespace port
 } // namespace bubblefs
 
