@@ -26,18 +26,18 @@
 namespace bubblefs {
 namespace port {
   
-int os_setxattr(const char *path, const char *name,
+int fs_setxattr(const char *path, const char *name,
                 const void *value, size_t size);
-int os_fsetxattr(int fd, const char *name, const void *value,
+int fs_fsetxattr(int fd, const char *name, const void *value,
                  size_t size);
-ssize_t os_getxattr(const char *path, const char *name,
+ssize_t fs_getxattr(const char *path, const char *name,
                     void *value, size_t size);
-ssize_t os_fgetxattr(int fd, const char *name, void *value,
+ssize_t fs_fgetxattr(int fd, const char *name, void *value,
                      size_t size);
-ssize_t os_listxattr(const char *path, char *list, size_t size);
-ssize_t os_flistxattr(int fd, char *list, size_t size);
-int os_removexattr(const char *path, const char *name);
-int os_fremovexattr(int fd, const char *name);
+ssize_t fs_listxattr(const char *path, char *list, size_t size);
+ssize_t fs_flistxattr(int fd, char *list, size_t size);
+int fs_removexattr(const char *path, const char *name);
+int fs_fremovexattr(int fd, const char *name);
 
 } // namespace port
 } // namespace bubblefs

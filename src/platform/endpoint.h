@@ -56,6 +56,16 @@ struct IPStr {
     char _buf[INET_ADDRSTRLEN];
 };
 
+// Represent ports inside [min_port, max_port]
+struct PortRange {
+    int min_port;
+    int max_port;
+
+    PortRange(int min_port2, int max_port2)
+        : min_port(min_port2), max_port(max_port2) {
+    }
+};
+
 // Convert IP to c-style string. Notice that you can serialize ip_t to
 // std::ostream directly. Use this function when you don't have streaming log.
 // Example: printf("ip=%s\n", ip2str(some_ip).c_str());

@@ -27,7 +27,7 @@
 #include <unistd.h>                     // syscall
 
 namespace bubblefs {
-namespace base {
+namespace port {
 
 extern const int futex_private_flag;
 
@@ -47,7 +47,7 @@ inline int futex_requeue_private(void* addr1, int nwake, void* addr2) {
                    nwake, NULL, addr2, 0);
 }
 
-}  // namespace base
+}  // namespace port
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_SYS_FUTEX_H_

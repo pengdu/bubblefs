@@ -21,7 +21,7 @@
 #include "platform/sys_futex.h"
 
 namespace bubblefs {
-namespace base {
+namespace port {
 
 const int SYS_FUTEX_PRIVATE_FLAG = 128;
 
@@ -36,5 +36,5 @@ static int get_futex_private_flag() {
 
 extern const int futex_private_flag = get_futex_private_flag();
 
-}  // namespace base
+}  // namespace port
 }  // namespace bubblefs

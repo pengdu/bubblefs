@@ -24,7 +24,7 @@
 #include <fcntl.h>  
 
 namespace bubblefs {
-namespace base {
+namespace port {
 
 int make_non_blocking(int fd) {
     const int flags = fcntl(fd, F_GETFL, 0);
@@ -57,5 +57,5 @@ int make_no_delay(int socket) {
     return setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
 }
 
-}  // namespace base
+}  // namespace port
 }  // namespace bubblefs

@@ -38,7 +38,7 @@ limitations under the License.
     }                                                           \
     bool is_native_tls() const { return true; }                 \
   private:                                                      \
-    SE_DISALLOW_COPY_AND_ASSIGN(ThreadLocal_##_var_);           \
+    DISALLOW_COPY_AND_ASSIGN(ThreadLocal_##_var_);           \
   } _var_;                                                      \
   }
 

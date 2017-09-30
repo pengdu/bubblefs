@@ -38,7 +38,7 @@ namespace port {
  * Returns 0 on success, -1 on failure.
  */
 int
-os_setxattr(const char *path, const char *name,
+fs_setxattr(const char *path, const char *name,
     const void *value, size_t size)
 {
         int error = -1;
@@ -58,7 +58,7 @@ os_setxattr(const char *path, const char *name,
 }
 
 int
-os_fsetxattr(int fd, const char *name, const void *value,
+fs_fsetxattr(int fd, const char *name, const void *value,
     size_t size)
 {
         int error = -1;
@@ -77,7 +77,7 @@ os_fsetxattr(int fd, const char *name, const void *value,
 }
 
 ssize_t
-os_getxattr(const char *path, const char *name,
+fs_getxattr(const char *path, const char *name,
 void *value, size_t size)
 {
         ssize_t error = -1;
@@ -112,7 +112,7 @@ void *value, size_t size)
 }
 
 ssize_t
-os_fgetxattr(int fd, const char *name, void *value,
+fs_fgetxattr(int fd, const char *name, void *value,
     size_t size)
 {
         ssize_t error = -1;
@@ -147,7 +147,7 @@ os_fgetxattr(int fd, const char *name, void *value,
 }
 
 ssize_t
-os_listxattr(const char *path, char *list, size_t size)
+fs_listxattr(const char *path, char *list, size_t size)
 {
         ssize_t error = -1;
 
@@ -196,7 +196,7 @@ os_listxattr(const char *path, char *list, size_t size)
 }
 
 ssize_t
-os_flistxattr(int fd, char *list, size_t size)
+fs_flistxattr(int fd, char *list, size_t size)
 {
         ssize_t error = -1;
 
@@ -245,7 +245,7 @@ os_flistxattr(int fd, char *list, size_t size)
 }
 
 int
-os_removexattr(const char *path, const char *name)
+fs_removexattr(const char *path, const char *name)
 {
         int error = -1;
 
@@ -264,7 +264,7 @@ os_removexattr(const char *path, const char *name)
 }
 
 int
-os_fremovexattr(int fd, const char *name)
+fs_fremovexattr(int fd, const char *name)
 {
         int error = -1;
 

@@ -25,13 +25,13 @@
 namespace bubblefs {
 namespace port {
 
-bool os_ioprio_set(int whence, int who, int ioprio)
+bool ioprio_set(int whence, int who, int ioprio)
 {
   int ret = syscall(SYS_ioprio_set, whence, who, ioprio);
   return (0 == ret);
 }
 
-int os_ioprio_string_to_class(const std::string& s)
+int ioprio_string_to_class(const std::string& s)
 {
   std::string l = s;
   std::transform(l.begin(), l.end(), l.begin(), ::tolower);

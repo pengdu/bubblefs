@@ -23,7 +23,7 @@
 #define BUBBLEFS_PLATFORM_FD_UTILITY_H_
 
 namespace bubblefs {
-namespace base {
+namespace port {
 
 // Make file descriptor |fd| non-blocking
 // Returns 0 on success, -1 otherwise and errno is set (by fcntl)
@@ -41,7 +41,7 @@ int make_close_on_exec(int fd);
 // Returns 0 on success, -1 when error and errno is set (by setsockopt)
 int make_no_delay(int socket);
 
-}  // namespace butil
+}  // namespace port
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_FD_UTILITY_H_

@@ -57,9 +57,9 @@ enum {
 namespace bubblefs {
 namespace port {
   
-extern bool os_ioprio_set(int whence, int who, int ioprio);
+extern bool ioprio_set(int whence, int who, int ioprio);
 
-extern int os_ioprio_string_to_class(const std::string& s);
+extern int ioprio_string_to_class(const std::string& s);
 
 } // namespace port
 } // namespace bubblefs

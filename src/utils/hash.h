@@ -170,17 +170,17 @@ struct hash<string> {
   }
 };
 
-template <>
-struct hash<StringPiece> {
-  size_t operator()(StringPiece sp) const {
-    return static_cast<size_t>(Hash64(sp.data(), sp.size()));
-  }
-};
-
 template <typename T, typename U>
 struct hash<std::pair<T, U>> {
   size_t operator()(const std::pair<T, U>& p) const {
     return Hash64Combine(hash<T>()(p.first), hash<U>()(p.second));
+  }
+};
+
+template <>
+struct hash<StringPiece> {
+  size_t operator()(StringPiece sp) const {
+    return static_cast<size_t>(Hash64(sp.data(), sp.size()));
   }
 };
 
