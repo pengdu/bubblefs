@@ -62,73 +62,7 @@ void ForEach(int first, int last, const std::function<void(int)>& f) {
 #endif
 }
 
-}  // anonymous namespace  
-  
-/*
-class FileSystemRegistryImpl : public FileSystemRegistry {
- public:
-  Status Register(const string& scheme, Factory factory) override;
-  FileSystem* Lookup(const string& scheme) override;
-  Status GetRegisteredFileSystemSchemes(std::vector<string>* schemes) override;
-
- private:
-  mutable mutex mu_;
-  mutable std::unordered_map<string, std::unique_ptr<FileSystem>> registry_
-      GUARDED_BY(mu_);
-};
-
-Status FileSystemRegistryImpl::Register(const string& scheme,
-                                        FileSystemRegistry::Factory factory) {
-  mutex_lock lock(mu_);
-  if (!registry_.emplace(string(scheme), std::unique_ptr<FileSystem>(factory()))
-           .second) {
-    return errors::AlreadyExists("File factory for ", scheme,
-                                 " already registered");
-  }
-  return Status::OK();
-}
-
-FileSystem* FileSystemRegistryImpl::Lookup(const string& scheme) {
-  mutex_lock lock(mu_);
-  const auto found = registry_.find(scheme);
-  if (found == registry_.end()) {
-    return nullptr;
-  }
-  return found->second.get();
-}
-
-Status FileSystemRegistryImpl::GetRegisteredFileSystemSchemes(
-    std::vector<string>* schemes) {
-  mutex_lock lock(mu_);
-  for (const auto& e : registry_) {
-    schemes->push_back(e.first);
-  }
-  return Status::OK();
-}
-
-Env::Env() : file_system_registry_(new FileSystemRegistryImpl) {}
-
-Status Env::GetFileSystemForFile(const string& fname, FileSystem** result) {
-  StringPiece scheme, host, path;
-  io::ParseURI(fname, &scheme, &host, &path);
-  FileSystem* file_system = file_system_registry_->Lookup(scheme.ToString());
-  if (!file_system) {
-    return errors::Unimplemented("File system scheme ", scheme,
-                                 " not implemented");
-  }
-  *result = file_system;
-  return Status::OK();
-}
-
-Status Env::GetRegisteredFileSystemSchemes(std::vector<string>* schemes) {
-  return file_system_registry_->GetRegisteredFileSystemSchemes(schemes);
-}
-
-Status Env::RegisterFileSystem(const string& scheme,
-                               FileSystemRegistry::Factory factory) {
-  return file_system_registry_->Register(scheme, std::move(factory));
-}
-*/
+}  // anonymous namespace
 
 string Env::TranslateName(const string& name) const {
   return io::CleanPath(name);

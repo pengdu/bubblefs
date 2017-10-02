@@ -20,7 +20,13 @@ limitations under the License.
 #include <stddef.h>  // For size_t.
 #include <stdint.h>  // For intptr_t.
 #include <limits>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <set>
 #include <string>
+#include <type_traits>
+#include <vector>
 #include "platform/macros.h"
 
 // Include appropriate platform-dependent implementations
@@ -56,7 +62,14 @@ typedef uint64_t uint64;
 
 namespace bubblefs {
 
+// Using statements for common classes that we refer to in caffe2 very often.
+// Note that we only place it inside caffe2 so the global namespace is not
+// polluted.
+/* using override */
+using std::set;
 using std::string;
+using std::unique_ptr;
+using std::vector;
 
 static const uint8 kuint8max = ((uint8)0xFF);
 static const uint16 kuint16max = ((uint16)0xFFFF);
@@ -73,6 +86,19 @@ static const int64 kint64max = ((int64)0x7FFFFFFFFFFFFFFFll);
 
 // A typedef for a uint64 used as a short fingerprint.
 typedef uint64 Fprint;
+
+// Data type for caffe2 Index/Size. We use size_t to be safe here as well as for
+// large matrices that are common in sparse math.
+typedef int64_t TIndex;
+
+// Note(Yangqing): NVCC does not play well with unordered_map on some platforms,
+// forcing us to use std::map instead of unordered_map. This may affect speed
+// in some cases, but in most of the computation code we do not access map very
+// often, so it should be fine for us. I am putting a CaffeMap alias so we can
+// change it more easily if things work out for unordered_map down the road.
+template <typename Key, typename Value>
+using CaffeMap = std::map<Key, Value>;
+// using CaffeMap = std::unordered_map;
 
 }  // namespace bubblefs
 

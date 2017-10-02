@@ -82,7 +82,7 @@ class TaskThreadPool{
 
     /// @brief Add task to the thread pool if a thread is currently available.
     template <typename Task>
-    void runTask(Task task) {
+    void RunTask(Task task) {
         std::unique_lock<std::mutex> lock(mutex_);
 
         // Set task and signal condition variable so that a worker thread will
@@ -93,7 +93,7 @@ class TaskThreadPool{
     }
 
     template <typename Task>
-    void runTaskWithID(Task task) {
+    void RunTaskWithID(Task task) {
       std::unique_lock<std::mutex> lock(mutex_);
 
       // Set task and signal condition variable so that a worker thread will
@@ -105,7 +105,7 @@ class TaskThreadPool{
     }
 
     /// @brief Wait for queue to be empty
-    void waitWorkComplete() {
+    void WaitWorkComplete() {
         std::unique_lock<std::mutex> lock(mutex_);
         while (!complete_)
           completed_.wait(lock);

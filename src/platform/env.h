@@ -619,7 +619,6 @@ class Env {
                                        const string& version) = 0;
 
  private:
-  //std::unique_ptr<FileSystemRegistry> file_system_registry_;
   DISALLOW_COPY_AND_ASSIGN(Env);
 };
 

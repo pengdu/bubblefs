@@ -92,6 +92,19 @@
 #define STATIC_CONST_MEMBER_DEFINITION
 #endif
 
+/**
+ * Macro for marking functions as having public visibility.
+ * Ported from folly/CPortability.h
+ */
+#ifndef GNUC_PREREQ
+#if defined __GNUC__ && defined __GNUC_MINOR__
+#define GNUC_PREREQ(maj, min) \
+  ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
+#else
+#define GNUC_PREREQ(maj, min) 0
+#endif
+#endif
+
 #if defined(COMPILER_GCC)
 #define NORETURN __attribute__((noreturn))
 #else
@@ -335,5 +348,17 @@
 #else
 # define CACHE_LINE_ALIGNMENT
 #endif /* _MSC_VER */
+
+////////////////////////////////////////////////////////////
+
+// dynamic cast reroute: if RTTI is disabled, go to reinterpret_cast
+template <typename Dst, typename Src>
+inline Dst dynamic_cast_if_rtti(Src ptr) {
+#ifdef __GXX_RTTI
+  return dynamic_cast<Dst>(ptr);
+#else
+  return reinterpret_cast<Dst>(ptr);
+#endif
+}
 
 #endif  // BUBBLEFS_PLATFORM_COMPILER_SPECIFIC_H_

@@ -51,6 +51,7 @@
 // protobuf/src/google/protobuf/stubs/time.h
 // baidu/common/timer.h
 // brpc/src/butil/time.h
+// caffe2/caffe2/core/timer.h
 
 #ifndef BUBBLEFS_PLATFORM_TIME_H_
 #define BUBBLEFS_PLATFORM_TIME_H_
@@ -62,6 +63,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <chrono>
 #include <string>
 #include "platform/types.h"
 
@@ -737,6 +739,42 @@ public:
 private:
     int64_t _stop;
     int64_t _start;
+};
+
+/**
+ * @brief A simple timer object for measuring time.
+ *
+ * This is a minimal class around a std::chrono::high_resolution_clock that
+ * serves as a utility class for testing code.
+ */
+class SimpleTimer {
+ public:
+  typedef std::chrono::high_resolution_clock clock;
+  typedef std::chrono::nanoseconds ns;
+  SimpleTimer() { Start(); }
+  /**
+   * @brief Starts a timer.
+   */
+  inline void Start() { start_time_ = clock::now(); }
+  inline float NanoSeconds() {
+    return std::chrono::duration_cast<ns>(clock::now() - start_time_).count();
+  }
+  /**
+   * @brief Returns the elapsed time in milliseconds.
+   */
+  inline float MilliSeconds() { return NanoSeconds() / 1000000.f; }
+  /**
+   * @brief Returns the elapsed time in microseconds.
+   */
+  inline float MicroSeconds() { return NanoSeconds() / 1000.f; }
+  /**
+   * @brief Returns the elapsed time in seconds.
+   */
+  inline float Seconds() { return NanoSeconds() / 1000000000.f; }
+
+ protected:
+  std::chrono::time_point<clock> start_time_;
+  DISALLOW_COPY_AND_ASSIGN(SimpleTimer);
 };
 
 } // namespace timeutil
