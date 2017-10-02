@@ -1,0 +1,63 @@
+
+syntax = "proto2";
+
+import "status_code.proto";
+
+package bubblefs.bfs.chunkserver;
+
+option cc_generic_services = true;
+
+message WriteBlobRequest {
+    optional int64 sequence_id = 1;
+    optional int64 blob_id = 2;
+    optional int64 offset = 3;
+    optional int32 packet_seq = 4;
+    optional bytes databuf = 5;
+    repeated string chunkservers = 6;
+    optional bool is_last = 7;
+    repeated string desc = 11;
+    repeated int64 timestamp = 12;
+    optional int32 recover_version = 13;
+    optional bool sync_on_close = 14;
+    optional int64 total_size = 15 [default = -1];
+}
+
+message WriteBlobResponse {
+    optional int64 sequence_id = 1;
+    optional StatusCode status = 2;
+    optional string bad_chunkserver = 3;
+    optional int64 current_size = 4;
+    optional int32 current_seq = 5;
+    repeated string desc = 11;
+    repeated int64 timestamp = 12;
+}
+
+message ReadBlobRequest {
+    optional int64 sequence_id = 1;
+    optional int64 blob_id = 2;
+    optional int64 offset = 3;
+    optional int32 read_len = 4;
+}
+message ReadBlobResponse {
+    optional int64 sequence_id = 1;
+    optional StatusCode status = 2;
+    optional bytes databuf = 3;
+    repeated int64 timestamp = 9;
+}
+
+message GetBlobInfoRequest {
+    optional int64 sequence_id = 1;
+    optional int64 blob_id = 2;
+}
+message GetBlobInfoResponse {
+    optional int64 sequence_id = 1;
+    optional StatusCode status = 2;
+    optional int64 blob_size = 3;
+    repeated int64 timestamp = 9;
+}
+
+service ChunkServer {
+    rpc WriteBlob(WriteBlobRequest) returns(WriteBlobResponse);
+    rpc ReadBlob(ReadBlobRequest) returns(ReadBlobResponse);
+    rpc GetBlobInfo(GetBlobInfoRequest) returns(GetBlobInfoResponse);
+}

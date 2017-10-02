@@ -1,0 +1,61 @@
+
+syntax = "proto2";
+
+import "nameserver.proto";
+import "status_code.proto";
+
+package bubblefs.bfs.metaserver;
+
+option cc_generic_services = true;
+
+message AddBlobRequest {
+    optional int64 sequence_id = 1;
+    optional string file_name = 2;
+    optional string client_address = 3;
+}
+message AddBlobResponse {
+    optional int64 sequence_id = 1;
+    optional StatusCode status = 2;
+}
+
+message SyncBlobRequest {
+    optional int64 sequence_id = 1;
+    optional int64 block_id = 2;
+    optional string file_name = 3;
+    optional int64 size = 4;
+}
+
+message SyncBlobResponse {
+    optional int64 sequence_id = 1;
+    optional StatusCode status = 2;
+}
+
+message FinishBlobRequest {
+    optional int64 sequence_id = 1;
+    optional int64 blob_id = 2;
+    optional int64 blob_version = 3;
+    optional string file_name = 4;
+    optional int64 block_size = 5;
+    optional bool close_with_error = 6;
+}
+message FinishBlobResponse {
+    optional int64 sequence_id = 1;
+    optional StatusCode status = 2;
+}
+
+message RemoveBlobRequest {
+    optional int64 sequence_id = 1;
+    optional int64 block_id = 2;
+}
+
+message RemoveBlobResponse {
+    optional int64 sequence_id = 1;
+    optional StatusCode status = 2;
+}
+
+service MetaServer {
+    rpc AddBlob(AddBlobRequest) returns(AddBlobResponse);
+    rpc SyncBlob(SyncBlobRequest) returns(SyncBlobResponse);
+    rpc FinishBlob(FinishBlobRequest) returns(FinishBlobResponse);
+    rpc RemoveBlob(RemoveBlobRequest) returns(RemoveBlobResponse);
+}

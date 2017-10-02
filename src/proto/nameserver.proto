@@ -4,7 +4,7 @@ syntax = "proto2";
 import "file.proto";
 import "status_code.proto";
 
-package bubblefs.bfs;
+package bubblefs.bfs.nameserver;
 
 option cc_generic_services = true;
 
@@ -16,7 +16,7 @@ message ChunkServerInfo {
     optional int32 last_heartbeat = 3;
     optional int64 data_size = 4;
     optional int64 disk_quota = 5;
-    optional int32 block_num = 7;
+    optional int32 blob_num = 7; //?
     optional bool is_dead = 8;
     optional ChunkServerStatus status = 9;
     optional int32 ip = 10;
@@ -35,7 +35,7 @@ message ChunkServerInfo {
     optional int32 r_qps = 23;
     optional int64 r_speed = 24;
     optional int64 writing_buffers = 25;
-    optional int64 active_blocks = 26;
+    optional int64 active_blocks = 26; // ?
     optional int64 recover_speed = 27;
 }
 
@@ -53,9 +53,9 @@ message CreateFileResponse {
     optional StatusCode status = 2;
 }
 
-message LocatedBlock {
-    optional int64 block_id = 1;
-    optional int64 block_size = 2;
+message LocatedBlob {
+    optional int64 blob_id = 1;
+    optional int64 blob_size = 2;
     repeated ChunkServerInfo chains = 3;
     optional int32 status = 4;
 }
@@ -64,14 +64,14 @@ message FileLocationRequest {
     optional int64 sequence_id = 1;
     optional string file_name = 2;
     optional int64 offset = 3;
-    optional int32 block_num = 4 [default = 10];
+    optional int32 blob_num = 4 [default = 10]; // ?
     optional string user = 5;
 }
 
 message FileLocationResponse {
     optional int64 sequence_id = 1;
     optional StatusCode status = 2;
-    repeated LocatedBlock blocks = 3;
+    repeated LocatedBlob blobs = 3;
 }
 
 message ListDirectoryRequest {
@@ -104,38 +104,38 @@ message RenameResponse {
     optional StatusCode status = 2;
 }
 
-message AddBlockRequest {
+message AddBlobRequest {
     optional int64 sequence_id = 1;
     optional string file_name = 2;
     optional string client_address = 3;
 }
-message AddBlockResponse {
+message AddBlobResponse {
     optional int64 sequence_id = 1;
     optional StatusCode status = 2;
-    optional LocatedBlock block = 3;
+    optional LocatedBlob blob = 3;
 }
 
-message SyncBlockRequest {
+message SyncBlobRequest {
     optional int64 sequence_id = 1;
-    optional int64 block_id = 2;
+    optional int64 blob_id = 2;
     optional string file_name = 3;
     optional int64 size = 4;
 }
 
-message SyncBlockResponse {
+message SyncBlobResponse {
     optional int64 sequence_id = 1;
     optional StatusCode status = 2;
 }
 
-message FinishBlockRequest {
+message FinishBlobRequest {
     optional int64 sequence_id = 1;
-    optional int64 block_id = 2;
-    optional int64 block_version = 3;
+    optional int64 blob_id = 2;
+    optional int64 blob_version = 3;
     optional string file_name = 4;
-    optional int64 block_size = 5;
+    optional int64 blob_size = 5;
     optional bool close_with_error = 6;
 }
-message FinishBlockResponse {
+message FinishBlobResponse {
     optional int64 sequence_id = 1;
     optional StatusCode status = 2;
 }
@@ -174,7 +174,7 @@ message HeartBeatRequest {
     optional string chunkserver_addr = 2;
     optional int32 chunkserver_id = 3;
     optional int64 namespace_version = 4;
-    optional int32 block_num = 5;
+    optional int32 blob_num = 5; // ?
     optional int64 data_size = 6;
     optional int32 buffers = 7;
     optional int32 pending_buf = 13;
@@ -194,14 +194,14 @@ message HeartBeatResponse {
     optional int32 report_size = 6 [default = -1];
 }
 
-message ReportBlockInfo {
-    optional int64 block_id = 1;
+message ReportBlobInfo {
+    optional int64 blob_id = 1;
     optional int64 version = 2;
-    optional int64 block_size = 3;
+    optional int64 blob_size = 3;
     optional bool is_recover = 4 [default = false];
 }
 message ReplicaInfo {
-    optional int64 block_id = 1;
+    optional int64 blob_id = 1;
     repeated string chunkserver_address = 2;
     //optional int64 block_size = 3;
     //optional int64 block_version = 4;
@@ -226,43 +226,43 @@ message RegisterResponse {
     optional int64 report_id = 9 [default = -1];
 }
 
-message BlockReportRequest {
+message BlobReportRequest {
     optional int64 sequence_id = 1;
     optional int32 chunkserver_id = 2;
     optional string chunkserver_addr = 3;
     optional int64 start = 4;
     optional int64 end = 5;
-    repeated ReportBlockInfo blocks = 6;
+    repeated ReportBlobInfo blobs = 6;
     optional int64 report_id = 7 [default = -1];
 }
-message BlockReportResponse {
+message BlobReportResponse {
     optional int64 sequence_id = 1;
     optional StatusCode status = 2;
-    repeated int64 obsolete_blocks = 3;
-    repeated int64 close_blocks = 4;
+    repeated int64 obsolete_blobs = 3;
+    repeated int64 close_blobs = 4;
     repeated ReplicaInfo new_replicas = 5;
     optional int64 report_id = 6 [default = -1];
 }
 
-message BlockReceivedRequest {
+message BlobReceivedRequest {
     optional int64 sequence_id = 1;
     optional int32 chunkserver_id = 2;
     optional string chunkserver_addr = 3;
-    repeated ReportBlockInfo blocks = 6;
+    repeated ReportBlobInfo blobs = 6;
 }
 
-message BlockReceivedResponse {
+message BlobReceivedResponse {
     optional int64 sequence_id = 1;
     optional StatusCode status = 2;
 }
 
-message PushBlockReportRequest {
+message PushBlobReportRequest {
     optional int64 sequence_id = 1;
     optional int32 chunkserver_id = 2;
-    repeated int64 blocks = 3;
+    repeated int64 blobs = 3;
     repeated StatusCode status = 4;
 }
-message PushBlockReportResponse {
+message PushBlobReportResponse {
     optional int64 sequence_id = 1;
     optional StatusCode status = 2;
 }
@@ -274,7 +274,7 @@ message SysStatRequest {
 message SysStatResponse {
     optional StatusCode status = 2;
     repeated ChunkServerInfo chunkservers = 3;
-    optional int64 block_num = 4;
+    optional int64 blob_num = 4; // ?
     optional int64 data_size = 5;
 }
 
@@ -366,13 +366,13 @@ message UnlockDirResponse {
 
 service NameServer {
     rpc CreateFile(CreateFileRequest) returns(CreateFileResponse);
-    rpc AddBlock(AddBlockRequest) returns(AddBlockResponse);
+    rpc AddBlob(AddBlobRequest) returns(AddBlobResponse);
     rpc GetFileLocation(FileLocationRequest) returns(FileLocationResponse);
     rpc ListDirectory(ListDirectoryRequest) returns(ListDirectoryResponse);
     rpc Stat(StatRequest) returns(StatResponse);
     rpc Rename(RenameRequest) returns(RenameResponse);
-    rpc SyncBlock(SyncBlockRequest) returns(SyncBlockResponse);
-    rpc FinishBlock(FinishBlockRequest) returns(FinishBlockResponse);
+    rpc SyncBlob(SyncBlobRequest) returns(SyncBlobResponse);
+    rpc FinishBlob(FinishBlobRequest) returns(FinishBlobResponse);
     rpc Unlink(UnlinkRequest) returns(UnlinkResponse);
     rpc DeleteDirectory(DeleteDirectoryRequest) returns(DeleteDirectoryResponse);
     rpc ChangeReplicaNum(ChangeReplicaNumRequest) returns(ChangeReplicaNumResponse);
@@ -382,9 +382,9 @@ service NameServer {
 
     rpc Register(RegisterRequest) returns(RegisterResponse);
     rpc HeartBeat(HeartBeatRequest) returns(HeartBeatResponse);
-    rpc BlockReport(BlockReportRequest) returns(BlockReportResponse);
-    rpc BlockReceived(BlockReceivedRequest) returns(BlockReceivedResponse);
-    rpc PushBlockReport(PushBlockReportRequest) returns(PushBlockReportResponse);
+    rpc BlobReport(BlobReportRequest) returns(BlobReportResponse);
+    rpc BlobReceived(BlobReceivedRequest) returns(BlobReceivedResponse);
+    rpc PushBlobReport(PushBlobReportRequest) returns(PushBlobReportResponse);
 
     rpc SysStat(SysStatRequest) returns(SysStatResponse);
     rpc Chmod(ChmodRequest) returns(ChmodResponse);
