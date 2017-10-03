@@ -24,7 +24,8 @@
 #endif
 
 namespace bubblefs {
-
+namespace caffe2 {
+  
 std::map<CaffeTypeId, string>& gTypeNames() {
   static std::map<CaffeTypeId, string> g_type_names;
   return g_type_names;
@@ -77,5 +78,5 @@ struct UninitializedTypeNameRegisterer {
 static UninitializedTypeNameRegisterer g_uninitialized_type_name_registerer;
 
 } // namespace
-
+} // namespace caffe2
 } // namespace bubblefs

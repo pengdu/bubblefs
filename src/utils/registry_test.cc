@@ -1,62 +1,56 @@
-/**
- * Copyright (c) 2016-present, Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-#include <iostream>
-#include <memory>
-#include "gtest/gtest.h"
-#include "platform/logging.h"
+#include <stdio.h>
+#include <functional>
 #include "utils/registry.h"
 
-namespace bubblefs {
-namespace {
-
-class Foo {
- public:
-  explicit Foo(int x) { LOG(INFO) << "Foo " << x; }
+namespace tree {
+  
+struct Tree {
+  virtual void Print() = 0;
+  virtual ~Tree() {}
 };
 
-CAFFE_DECLARE_REGISTRY(FooRegistry, Foo, int);
-CAFFE_DEFINE_REGISTRY(FooRegistry, Foo, int);
-#define REGISTER_FOO(clsname) \
-  CAFFE_REGISTER_CLASS(FooRegistry, clsname, clsname)
-
-class Bar : public Foo {
- public:
-  explicit Bar(int x) : Foo(x) { LOG(INFO) << "Bar " << x; }
-};
-REGISTER_FOO(Bar);
-
-class AnotherBar : public Foo {
- public:
-  explicit AnotherBar(int x) : Foo(x) {
-    LOG(INFO) << "AnotherBar " << x;
+struct BinaryTree : public Tree {
+  virtual void Print() {
+    printf("I am binary tree\n");
   }
 };
-REGISTER_FOO(AnotherBar);
 
-TEST(RegistryTest, CanRunCreator) {
-  unique_ptr<Foo> bar(FooRegistry()->Create("Bar", 1));
-  EXPECT_TRUE(bar != nullptr) << "Cannot create bar.";
-  unique_ptr<Foo> another_bar(FooRegistry()->Create("AnotherBar", 1));
-  EXPECT_TRUE(another_bar != nullptr);
+struct AVLTree : public Tree {
+  virtual void Print() {
+    printf("I am AVL tree\n");
+  }
+};
+
+// registry to get the trees
+struct TreeFactory
+    : public bubblefs::FunctionRegEntryBase<TreeFactory, std::function<Tree*()> > {
+};
+
+#define REGISTER_TREE(Name)                                             \
+  COMMON_REGISTRY_REGISTER(::tree::TreeFactory, TreeFactory, Name)        \
+  .set_body([]() { return new Name(); } )
+  
+}  // namespace tree
+
+namespace bubblefs {
+// usually this sits on a seperate file
+COMMON_REGISTRY_ENABLE(tree::TreeFactory);
+} // namespace bubblefs
+
+namespace tree {
+// Register the trees, can be in seperate files
+REGISTER_TREE(BinaryTree)
+.describe("This is a binary tree.");
+REGISTER_TREE(AVLTree);
+} // namespace tree
+
+int main(int argc, char *argv[]) {
+  // construct a binary tree
+  tree::Tree *binary = bubblefs::Registry<tree::TreeFactory>::Find("BinaryTree")->body();
+  binary->Print();
+  // construct a binary tree
+  tree::Tree *avl = bubblefs::Registry<tree::TreeFactory>::Find("AVLTree")->body();
+  avl->Print();
+  delete binary; delete avl;
+  return 0;
 }
-
-TEST(RegistryTest, ReturnNullOnNonExistingCreator) {
-  EXPECT_EQ(FooRegistry()->Create("Non-existing bar", 1), nullptr);
-}
-
-}  // namespace
-}  // namespace bubblefs

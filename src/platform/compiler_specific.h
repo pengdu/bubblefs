@@ -107,8 +107,10 @@
 
 #if defined(COMPILER_GCC)
 #define NORETURN __attribute__((noreturn))
+#define NORETURN_PTR __attribute__((__noreturn__))
 #else
 #define NORETURN
+#define NORETURN_PTR
 #endif
 
 // Annotate a variable indicating it's ok if the variable is not used.
@@ -118,8 +120,10 @@
 //   int x ALLOW_UNUSED = ...;
 #if defined(COMPILER_GCC)
 #define ALLOW_UNUSED __attribute__((unused))
+#define ATTRIBUTE_UNUSED __attribute__((unused))
 #else
 #define ALLOW_UNUSED
+#define ATTRIBUTE_UNUSED
 #endif
 
 // Annotate a function indicating it should not be inlined.

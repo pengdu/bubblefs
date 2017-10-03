@@ -57,6 +57,7 @@ PLATFORM_OBJS = $(addsuffix .o, $(basename $(PLATFORM_SRCS)))
 
 UTILS_SRCS = \
         $(PROJECT_DIR)/src/utils/hash.cc \
+        $(PROJECT_DIR)/src/utils/registry_test.cc \
         $(PROJECT_DIR)/src/utils/stringpiece.cc \
         $(PROJECT_DIR)/src/utils/thread_simple.cc
 UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS)))
@@ -66,43 +67,49 @@ PROTO_SRCS = $(patsubst %.proto,%.pb.cc, $(PROTO_FILES))
 PROTO_HDRS = $(patsubst %.proto,%.pb.h, $(PROTO_FILES))
 PROTO_OBJS = $(patsubst %.proto,%.pb.o, $(PROTO_FILES))
 
-OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS)
+OBJS = $(PROTO_OBJS)
 
 LIBS =
+ 
+BIN = $(OBJS)
 
-BIN = $(ALL_OBJS)
-
+.PHONY:all
 all: $(BIN)
-	@echo '*Done'
+	@echo "* Done"
+
+.PHONY:clean
+clean:
+	@echo "* Clean"
+	rm -rf $(BIN)
+	rm -rf $(ALL_OBJS)
+	rm -rf $(LIBS)
+	rm -rf $(PROTO_SRCS) $(PROTO_HDRS)
+	rm -rf *.o
+
+.SECONDARY: $(PROJECT_DIR)/%.o $(PROJECT_DIR)/src/%.cc
+#.PRECIOUS: %.o %.cc
 
 # Depends
 $(PROTO_OBJS): $(PROTO_HDRS)
 
 # Targets
-	
-bubblefs_test: bubblefs_test.o $(OBJS)
+
+# Tests	
+registry_test: $(PROJECT_DIR)/src/utils/registry_test.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 %.pb.cc %.pb.h: %.proto
-	@echo "*Protoc $@"
+	@echo "* Protoc gen $@"
 	$(PROTOC) --proto_path=$(PROJECT_DIR)/src/proto/ --proto_path=/usr/local/include --cpp_out=$(PROJECT_DIR)/src/proto/ $<
 
 %.o: %.cc
-	@echo "*Compiling cc $@"
+	@echo "* Compiling cc $@"
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) -c $< -o $@
 
 %.o:%.cpp
-	@echo "*Compiling cpp $@"
+	@echo "* Compiling cpp $@"
 	@$(CXX) -c $(HDRPATHS) $(CXXFLAGS) $< -o $@
 
 %.o:%.c
-	@echo "*Compiling c $@"
+	@echo "* Compiling c $@"
 	@$(CC) -c $(HDRPATHS) $(CFLAGS) $< -o $@
-	
-.PHONY: clean
-clean:
-	rm -rf $(BIN)
-	rm -rf $(OBJS)
-	rm -rf $(LIBS)
-	rm -rf $(PROTO_SRCS) $(PROTO_HDRS)
-	rm -rf *.o

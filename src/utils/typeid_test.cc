@@ -21,6 +21,7 @@
 #include "utils/typeid.h"
 
 namespace bubblefs {
+namespace caffe2 {
 namespace {
 
 class TypeMetaTestFoo {};
@@ -147,4 +148,5 @@ TEST(TypeMetaTest, CtorDtorAndCopy) {
 }
 
 }  // namespace
+}  // namespace caffe2
 }  // namespace bubblefs

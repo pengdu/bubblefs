@@ -34,7 +34,8 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-
+namespace caffe2 {
+  
 typedef intptr_t CaffeTypeId;
 std::map<CaffeTypeId, string>& gTypeNames();
 #ifdef __GXX_RTTI
@@ -318,6 +319,7 @@ class TypeMeta {
     return reinterpret_cast<CaffeTypeId>(type_id_bit); \
   }
 
+} // namespace caffe2
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_TYPEID_H_

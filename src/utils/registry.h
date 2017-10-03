@@ -1,37 +1,22 @@
-/**
- * Copyright (c) 2016-present, Facebook, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*!
+ *  Copyright (c) 2015 by Contributors
+ * \file registry.h
+ * \brief Registry utility that helps to build registry singletons.
  */
 
-// caffe2/caffe2/core/registry.h
+// dmlc-core/include/dmlc/registry.h
 
 #ifndef BUBBLEFS_UTILS_REGISTRY_H_
 #define BUBBLEFS_UTILS_REGISTRY_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <algorithm>
-#include <functional>
+#include <iostream>
 #include <map>
-#include <memory>
-#include <mutex>
+#include <string>
+#include <vector>
 #include "platform/macros.h"
-#include "platform/types.h"
-#include "utils/typeid.h"
 
-namespace bubblefs {
-
+namespace bubblefs { 
+  
 /*
 /// \brief A registry for file system implementations.
 ///
@@ -39,6 +24,7 @@ namespace bubblefs {
 /// [scheme://]<filename>.
 /// File system implementations are registered using the REGISTER_FILE_SYSTEM
 /// macro, providing the 'scheme' as the key.
+
 class FileSystemRegistry {
  public:
   typedef std::function<FileSystem*()> Factory;
@@ -115,189 +101,376 @@ Status Env::RegisterFileSystem(const string& scheme,
                                FileSystemRegistry::Factory factory) {
   return file_system_registry_->Register(scheme, std::move(factory));
 }
-*/
 
-/**
- * Simple registry implementation in Caffe2 that uses static variables to
- * register object creators during program initialization time.
- */
+//////////////////////////////////////////////////////////////////////////
 
-template <typename KeyType>
-inline void PrintOffendingKey(const KeyType& key) {
-  printf("[key type printing not supported]\n");
+static mutex* get_device_factory_lock() {
+  static mutex device_factory_lock;
+  return &device_factory_lock;
 }
 
-template <>
-inline void PrintOffendingKey(const string& key) {
-  printf("Offending key: %s.\n", key.c_str());
+struct FactoryItem {
+  std::unique_ptr<DeviceFactory> factory;
+  int priority;
+};
+
+std::unordered_map<string, FactoryItem>& device_factories() {
+  static std::unordered_map<string, FactoryItem>* factories =
+      new std::unordered_map<string, FactoryItem>;
+  return *factories;
 }
 
-/**
- * @brief A template class that allows one to register classes by keys.
+}  // namespace
+
+// static
+int32 DeviceFactory::DevicePriority(const string& device_type) {
+  mutex_lock l(*get_device_factory_lock());
+  std::unordered_map<string, FactoryItem>& factories = device_factories();
+  auto iter = factories.find(device_type);
+  if (iter != factories.end()) {
+    return iter->second.priority;
+  }
+
+  return -1;
+}
+
+// static
+void DeviceFactory::Register(const string& device_type, DeviceFactory* factory,
+                             int priority) {
+  mutex_lock l(*get_device_factory_lock());
+  std::unique_ptr<DeviceFactory> factory_ptr(factory);
+  std::unordered_map<string, FactoryItem>& factories = device_factories();
+  auto iter = factories.find(device_type);
+  if (iter == factories.end()) {
+    factories[device_type] = {std::move(factory_ptr), priority};
+  } else {
+    if (iter->second.priority < priority) {
+      iter->second = {std::move(factory_ptr), priority};
+    } else if (iter->second.priority == priority) {
+      LOG(FATAL) << "Duplicate registration of device factory for type "
+                 << device_type << " with the same priority " << priority;
+    }
+  }
+}
+
+DeviceFactory* DeviceFactory::GetFactory(const string& device_type) {
+  mutex_lock l(*get_device_factory_lock());  // could use reader lock
+  auto it = device_factories().find(device_type);
+  if (it == device_factories().end()) {
+    return nullptr;
+  }
+  return it->second.factory.get();
+}
+
+Status DeviceFactory::AddDevices(const SessionOptions& options,
+                                 const string& name_prefix,
+                                 std::vector<Device*>* devices) {
+  // CPU first. A CPU device is required.
+  auto cpu_factory = GetFactory("CPU");
+  if (!cpu_factory) {
+    return errors::NotFound(
+        "CPU Factory not registered.  Did you link in threadpool_device?");
+  }
+  size_t init_size = devices->size();
+  TF_RETURN_IF_ERROR(cpu_factory->CreateDevices(options, name_prefix, devices));
+  if (devices->size() == init_size) {
+    return errors::NotFound("No CPU devices are available in this process");
+  }
+
+  // Then the rest (including GPU).
+  mutex_lock l(*get_device_factory_lock());
+  for (auto& p : device_factories()) {
+    auto factory = p.second.factory.get();
+    if (factory != cpu_factory) {
+      TF_RETURN_IF_ERROR(factory->CreateDevices(options, name_prefix, devices));
+    }
+  }
+
+  return Status::OK();
+}
+
+Device* DeviceFactory::NewDevice(const string& type,
+                                 const SessionOptions& options,
+                                 const string& name_prefix) {
+  auto device_factory = GetFactory(type);
+  if (!device_factory) {
+    return nullptr;
+  }
+  SessionOptions opt = options;
+  (*opt.config.mutable_device_count())[type] = 1;
+  std::vector<Device*> devices;
+  TF_CHECK_OK(device_factory->CreateDevices(opt, name_prefix, &devices));
+  CHECK_EQ(devices.size(), size_t{1});
+  return devices[0];
+}
+*/  
+  
+/*!
+ * \brief Registry class.
+ *  Registry can be used to register global singletons.
+ *  The most commonly use case are factory functions.
  *
- * The keys are usually a string specifying the name, but can be anything that
- * can be used in a std::map.
- *
- * You should most likely not use the Registry class explicitly, but use the
- * helper macros below to declare specific registries as well as registering
- * objects.
+ * \tparam EntryType Type of Registry entries,
+ *     EntryType need to name a name field.
  */
-template <class SrcType, class ObjectType, class... Args>
+template<typename EntryType>
 class Registry {
  public:
-  typedef std::function<std::unique_ptr<ObjectType> (Args ...)> Creator;
-
-  Registry() : registry_() {}
-
-  void Register(const SrcType& key, Creator creator) {
-    // The if statement below is essentially the same as the following line:
-    // CHECK_EQ(registry_.count(key), 0) << "Key " << key
-    //                                   << " registered twice.";
-    // However, CHECK_EQ depends on google logging, and since registration is
-    // carried out at static initialization time, we do not want to have an
-    // explicit dependency on glog's initialization function.
-    std::lock_guard<std::mutex> lock(register_mutex_);
-    if (registry_.count(key) != 0) {
-      printf("Key already registered.\n");
-      PrintOffendingKey(key);
-      std::exit(1);
+  /*! \return list of entries in the registry(excluding alias) */
+  inline static const std::vector<const EntryType*>& List() {
+    return Get()->const_list_;
+  }
+  /*! \return list all names registered in the registry, including alias */
+  inline static std::vector<std::string> ListAllNames() {
+    const std::map<std::string, EntryType*> &fmap = Get()->fmap_;
+    typename std::map<std::string, EntryType*>::const_iterator p;
+    std::vector<std::string> names;
+    for (p = fmap.begin(); p !=fmap.end(); ++p) {
+      names.push_back(p->first);
     }
-    registry_[key] = creator;
+    return names;
   }
-
-  void Register(const SrcType& key, Creator creator, const string& help_msg) {
-    Register(key, creator);
-    help_message_[key] = help_msg;
-  }
-
-  inline bool Has(const SrcType& key) { return (registry_.count(key) != 0); }
-
-  std::unique_ptr<ObjectType> Create(const SrcType& key, Args ... args) {
-    if (registry_.count(key) == 0) {
-      // Returns nullptr if the key is not registered.
-      return nullptr;
-    }
-    return registry_[key](args...);
-  }
-
-  /**
-   * Returns the keys currently registered as a vector.
+  /*!
+   * \brief Find the entry with corresponding name.
+   * \param name name of the function
+   * \return the corresponding function, can be NULL
    */
-  std::vector<SrcType> Keys() {
-    std::vector<SrcType> keys;
-    for (const auto& it : registry_) {
-      keys.push_back(it.first);
+  inline static const EntryType *Find(const std::string &name) {
+    const std::map<std::string, EntryType*> &fmap = Get()->fmap_;
+    typename std::map<std::string, EntryType*>::const_iterator p = fmap.find(name);
+    if (p != fmap.end()) {
+      return p->second;
+    } else {
+      return NULL;
     }
-    return keys;
   }
-
-  const CaffeMap<SrcType, string>& HelpMessage() const {
-    return help_message_;
-  }
-
-  const char* HelpMessage(const SrcType& key) const {
-    auto it = help_message_.find(key);
-    if (it == help_message_.end()) {
-      return nullptr;
+  /*!
+   * \brief Add alias to the key_name
+   * \param key_name The original entry key
+   * \param alias The alias key.
+   */
+  inline void AddAlias(const std::string& key_name,
+                       const std::string& alias) {
+    EntryType* e = fmap_.at(key_name);
+    if (fmap_.count(alias)) {
+      std::cerr
+          << "Trying to register alias " << alias << " for key " << key_name
+          << " but " << alias << " is already taken" << std::endl;
+      abort();
+    } else {
+      fmap_[alias] = e;
     }
-    return it->second.c_str();
   }
+  /*!
+   * \brief Internal function to register a name function under name.
+   * \param name name of the function
+   * \return ref to the registered entry, used to set properties
+   */
+  inline EntryType &__REGISTER__(const std::string& name) {
+    if (fmap_.count(name) != 0U) {
+      std::cerr
+          << name << " already registered" << std::endl;
+      abort();
+    }
+    EntryType *e = new EntryType();
+    e->name = name;
+    fmap_[name] = e;
+    const_list_.push_back(e);
+    entry_list_.push_back(e);
+    return *e;
+  }
+  /*!
+   * \brief Internal function to either register or get registered entry
+   * \param name name of the function
+   * \return ref to the registered entry, used to set properties
+   */
+  inline EntryType &__REGISTER_OR_GET__(const std::string& name) {
+    if (fmap_.count(name) == 0) {
+      return __REGISTER__(name);
+    } else {
+      return *fmap_.at(name);
+    }
+  }
+  /*!
+   * \brief get a singleton of the Registry.
+   *  This function can be defined by DMLC_ENABLE_REGISTRY.
+   * \return get a singleton
+   */
+  static Registry *Get();
 
  private:
-  CaffeMap<SrcType, Creator> registry_;
-  CaffeMap<SrcType, string> help_message_;
-  std::mutex register_mutex_;
-
-  DISALLOW_COPY_AND_ASSIGN(Registry);
+  /*! \brief list of entry types */
+  std::vector<EntryType*> entry_list_;
+  /*! \brief list of entry types */
+  std::vector<const EntryType*> const_list_;
+  /*! \brief map of name->function */
+  std::map<std::string, EntryType*> fmap_;
+  /*! \brief constructor */
+  Registry() {}
+  /*! \brief destructor */
+  ~Registry() {
+    for (size_t i = 0; i < entry_list_.size(); ++i) {
+      delete entry_list_[i];
+    }
+  }
 };
 
-template <class SrcType, class ObjectType, class... Args>
-class Registerer {
+/*!
+ * \brief Common base class for function registry.
+ *
+ * \code
+ *  // This example demonstrates how to use Registry to create a factory of trees.
+ *  struct TreeFactory :
+ *      public FunctionRegEntryBase<TreeFactory, std::function<Tree*()> > {
+ *  };
+ *
+ *  // in a independent cc file
+ *  namespace bubblefs {
+ *  COMMON_REGISTRY_ENABLE(TreeFactory);
+ *  }
+ *  // register binary tree constructor into the registry.
+ *  COMMON_REGISTRY_REGISTER(TreeFactory, TreeFactory, BinaryTree)
+ *      .describe("Constructor of BinaryTree")
+ *      .set_body([]() { return new BinaryTree(); });
+ * 
+ * virtual void Init(const std::vector<std::pair<std::string, std::string> >& kwargs);
+ * MXNET_REGISTER_IO_ITER(SFrameDataIter)
+ * .describe("Naive SFrame data iterator prototype")
+ * .add_arguments(SFrameParam::__FIELDS__())
+ * .add_arguments(BatchParam::__FIELDS__())
+ * .add_arguments(PrefetcherParam::__FIELDS__()
+ * .set_body([]() {
+ *      return new PrefetcherIter(
+ *             new BatchLoader(
+ *             new SFrameDataIter()));
+ *             });
+ * \endcode
+ *
+ * \tparam EntryType The type of subclass that inheritate the base.
+ * \tparam FunctionType The function type this registry is registerd.
+ */
+
+/*!
+ * \brief Information about a parameter field in string representations.
+ */
+struct ParamFieldInfo {
+  /*! \brief name of the field */
+  std::string name;
+  /*! \brief type of the field in string format */
+  std::string type;
+  /*!
+   * \brief detailed type information string
+   *  This include the default value, enum constran and typename.
+   */
+  std::string type_info_str;
+  /*! \brief detailed description of the type */
+  std::string description;
+};
+
+template<typename EntryType, typename FunctionType>
+class FunctionRegEntryBase {
  public:
-  Registerer(const SrcType& key,
-             Registry<SrcType, ObjectType, Args...>* registry,
-             typename Registry<SrcType, ObjectType, Args...>::Creator creator,
-             const string& help_msg="") {
-    registry->Register(key, creator, help_msg);
+  /*! \brief name of the entry */
+  std::string name;
+  /*! \brief description of the entry */
+  std::string description;
+  /*! \brief additional arguments to the factory function */
+  std::vector<ParamFieldInfo> arguments;
+  /*! \brief Function body to create ProductType */
+  FunctionType body;
+  /*! \brief Return type of the function */
+  std::string return_type;
+
+  /*!
+   * \brief Set the function body.
+   * \param body Function body to set.
+   * \return reference to self.
+   */
+  inline EntryType &set_body(FunctionType body) {
+    this->body = body;
+    return this->self();
+  }
+  /*!
+   * \brief Describe the function.
+   * \param description The description of the factory function.
+   * \return reference to self.
+   */
+  inline EntryType &describe(const std::string &description) {
+    this->description = description;
+    return this->self();
+  }
+  /*!
+   * \brief Add argument information to the function.
+   * \param name Name of the argument.
+   * \param type Type of the argument.
+   * \param description Description of the argument.
+   * \return reference to self.
+   */
+  inline EntryType &add_argument(const std::string &name,
+                                 const std::string &type,
+                                 const std::string &description) {
+    ParamFieldInfo info;
+    info.name = name;
+    info.type = type;
+    info.type_info_str = info.type;
+    info.description = description;
+    arguments.push_back(info);
+    return this->self();
+  }
+  /*!
+   * \brief Append list if arguments to the end.
+   * \param args Additional list of arguments.
+   * \return reference to self.
+   */
+  inline EntryType &add_arguments(const std::vector<ParamFieldInfo> &args) {
+    arguments.insert(arguments.end(), args.begin(), args.end());
+    return this->self();
+  }
+  /*!
+  * \brief Set the return type.
+  * \param type Return type of the function, could be Symbol or Symbol[]
+  * \return reference to self.
+  */
+  inline EntryType &set_return_type(const std::string &type) {
+    return_type = type;
+    return this->self();
   }
 
-  template <class DerivedType>
-  static unique_ptr<ObjectType> DefaultCreator(Args ... args) {
-    // TODO(jiayq): old versions of NVCC does not handle make_unique well
-    // so we are forced to use a unique_ptr constructor here. Check if it is
-    // fine to use make_unique in the future.
-    // return make_unique<DerivedType>(args...);
-    return std::unique_ptr<ObjectType>(new DerivedType(args...));
+ protected:
+  /*!
+   * \return reference of self as derived type
+   */
+  inline EntryType &self() {
+    return *(static_cast<EntryType*>(this));
   }
 };
 
-/**
- * CAFFE_ANONYMOUS_VARIABLE(str) introduces an identifier starting with
- * str and ending with a number that varies with the line.
- * Pretty much a copy from 'folly/Preprocessor.h'
+/*!
+ * \def COMMON_REGISTRY_ENABLE
+ * \brief Macro to enable the registry of EntryType.
+ * This macro must be used under namespace dmlc, and only used once in cc file.
+ * \param EntryType Type of registry entry
  */
-#define CAFFE_CONCATENATE_IMPL(s1, s2) s1##s2
-#define CAFFE_CONCATENATE(s1, s2) CAFFE_CONCATENATE_IMPL(s1, s2)
-#ifdef __COUNTER__
-#define CAFFE_ANONYMOUS_VARIABLE(str) CAFFE_CONCATENATE(str, __COUNTER__)
-#else
-#define CAFFE_ANONYMOUS_VARIABLE(str) CAFFE_CONCATENATE(str, __LINE__)
-#endif
+#define COMMON_REGISTRY_ENABLE(EntryType)                                 \
+  template<>                                                            \
+  Registry<EntryType > *Registry<EntryType >::Get() {                   \
+    static Registry<EntryType > inst;                                   \
+    return &inst;                                                       \
+  }                                                                     \
 
-/**
- * CAFFE_DECLARE_TYPED_REGISTRY is a macro that expands to a function
- * declaration, as well as creating a convenient typename for its corresponding
- * registerer.
+/*!
+ * \brief Generic macro to register an EntryType
+ *  There is a complete example in FactoryRegistryEntryBase.
+ *
+ * \param EntryType The type of registry entry.
+ * \param EntryTypeName The typename of EntryType, must do not contain namespace :: .
+ * \param Name The name to be registered.
+ * \sa FactoryRegistryEntryBase
  */
-#define CAFFE_DECLARE_TYPED_REGISTRY(RegistryName, SrcType, ObjectType, ...) \
-  Registry<SrcType, ObjectType, ##__VA_ARGS__>* RegistryName();              \
-  typedef Registerer<SrcType, ObjectType, ##__VA_ARGS__>                     \
-      Registerer##RegistryName;
-
-#define CAFFE_DEFINE_TYPED_REGISTRY(RegistryName, SrcType, ObjectType, ...) \
-  Registry<SrcType, ObjectType, ##__VA_ARGS__>* RegistryName() {            \
-    static Registry<SrcType, ObjectType, ##__VA_ARGS__>* registry =         \
-        new Registry<SrcType, ObjectType, ##__VA_ARGS__>();                 \
-    return registry;                                                        \
-  }
-
-// Note(Yangqing): The __VA_ARGS__ below allows one to specify a templated
-// creator with comma in its templated arguments.
-#define CAFFE_REGISTER_TYPED_CREATOR(RegistryName, key, ...)                  \
-  namespace {                                                                 \
-  static Registerer##RegistryName CAFFE_ANONYMOUS_VARIABLE(g_##RegistryName)( \
-      key, RegistryName(), __VA_ARGS__);                                      \
-  }
-
-#define CAFFE_REGISTER_TYPED_CLASS(RegistryName, key, ...)                    \
-  namespace {                                                                 \
-  static Registerer##RegistryName CAFFE_ANONYMOUS_VARIABLE(g_##RegistryName)( \
-      key,                                                                    \
-      RegistryName(),                                                         \
-      Registerer##RegistryName::DefaultCreator<__VA_ARGS__>,                  \
-      TypeMeta::Name<__VA_ARGS__>());                                         \
-  }
-
-// CAFFE_DECLARE_REGISTRY and CAFFE_DEFINE_REGISTRY are hard-wired to use string
-// as the key
-// type, because that is the most commonly used cases.
-#define CAFFE_DECLARE_REGISTRY(RegistryName, ObjectType, ...) \
-  CAFFE_DECLARE_TYPED_REGISTRY(                               \
-      RegistryName, std::string, ObjectType, ##__VA_ARGS__)
-
-#define CAFFE_DEFINE_REGISTRY(RegistryName, ObjectType, ...) \
-  CAFFE_DEFINE_TYPED_REGISTRY(                               \
-      RegistryName, std::string, ObjectType, ##__VA_ARGS__)
-
-// CAFFE_REGISTER_CREATOR and CAFFE_REGISTER_CLASS are hard-wired to use string
-// as the key
-// type, because that is the most commonly used cases.
-#define CAFFE_REGISTER_CREATOR(RegistryName, key, ...) \
-  CAFFE_REGISTER_TYPED_CREATOR(RegistryName, #key, __VA_ARGS__)
-
-#define CAFFE_REGISTER_CLASS(RegistryName, key, ...) \
-  CAFFE_REGISTER_TYPED_CLASS(RegistryName, #key, __VA_ARGS__)
+#define COMMON_REGISTRY_REGISTER(EntryType, EntryTypeName, Name)          \
+  static ATTRIBUTE_UNUSED EntryType & __make_ ## EntryTypeName ## _ ## Name ## __ = \
+      ::bubblefs::Registry<EntryType>::Get()->__REGISTER__(#Name)           \
   
-} // namespace bubblefs
+} // namesapce bubblefs  
 
-#endif // BUBBLEFS_UTILS_REGISTRY_H_
+#endif  // BUBBLEFS_UTILS_REGISTRY_H_
