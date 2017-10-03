@@ -86,8 +86,8 @@ clean:
 	rm -rf $(PROTO_SRCS) $(PROTO_HDRS)
 	rm -rf *.o
 
-.SECONDARY: $(PROJECT_DIR)/%.o $(PROJECT_DIR)/src/%.cc
-#.PRECIOUS: %.o %.cc
+#.SECONDARY: $(PROTO_SRCS)
+.PRECIOUS: $(PROTO_SRCS)
 
 # Depends
 $(PROTO_OBJS): $(PROTO_HDRS)
@@ -100,7 +100,7 @@ registry_test: $(PROJECT_DIR)/src/utils/registry_test.o
 
 %.pb.cc %.pb.h: %.proto
 	@echo "* Protoc gen $@"
-	$(PROTOC) --proto_path=$(PROJECT_DIR)/src/proto/ --proto_path=/usr/local/include --cpp_out=$(PROJECT_DIR)/src/proto/ $<
+	$(PROTOC) --proto_path=$(PROJECT_DIR)/src/proto --proto_path=/usr/local/include --cpp_out=$(PROJECT_DIR)/src/proto/ $<
 
 %.o: %.cc
 	@echo "* Compiling cc $@"

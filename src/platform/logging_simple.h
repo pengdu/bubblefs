@@ -45,8 +45,8 @@ private:
     std::ostringstream oss_;
 };
 
-#define LOG(level, fmt, args...) ::bubblefs::bdcommon::Log(level, "[%s:%d] " fmt, __FILE__, __LINE__, ##args)
-#define LOGS(level) ::bubblefs::bdcommon::LogStream(level)
+#define Log(level, fmt, args...) ::bubblefs::bdcommon::Log(level, "[%s:%d] " fmt, __FILE__, __LINE__, ##args)
+#define Log(level) ::bubblefs::bdcommon::LogStream(level)
 
 } // namespace bdcommon
 } // namespace bubblefs
