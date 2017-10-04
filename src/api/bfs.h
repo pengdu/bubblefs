@@ -7,25 +7,11 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "api/error.h"
 #include "platform/macros.h"
 
 namespace bubblefs {
 namespace bfs {
-
-const char* StrError(int error_code);  
-  
-enum class StatusCode {
-  OK = 0,
-  BAD_PARAMETER = -1,
-  PERMISSION_DENIED = -2,
-  NOT_ENOUGH_QUOTA = -3,
-  NETWORK_UNAVAILABLE = -4,
-  TIMEOUT = -5,
-  NOT_ENOUGH_SPACE = -6,
-  OVERLOAD = -7,
-  META_NOT_AVAILABLE = -8,
-  UNKNOWN_ERROR = -9
-};
 
 enum class WriteMode {
   kWriteDefault,      // use write strategy specified by flag file by default

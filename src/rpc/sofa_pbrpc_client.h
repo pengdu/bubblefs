@@ -92,7 +92,7 @@ template <class T>
 bool NewStub(RpcClient* rpc_client, const std::string server, T** stub) {
   if (false == rpc_client)
     return false;
-  google::protobuf::RpcChannel* channel = rpc_client->GetRpcChannel(server); // channel is thread-safe ?
+  google::protobuf::RpcChannel* channel = rpc_client->GetRpcChannel(server); // do not delete channel
   *stub = new T(channel);
   return true;
 }
@@ -115,7 +115,7 @@ class SofaPbrpcClient : public RpcClient {
  private:
    sofa::pbrpc::RpcClient* rpc_client_;
    typedef std::map<std::string, sofa::pbrpc::RpcChannel*> HostMap;
-   HostMap host_map_;
+   HostMap host_map_; // shared RpcChannel
    port::Mutex host_map_lock_;
 };
 

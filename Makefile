@@ -45,10 +45,15 @@ DFLAGS = -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE
 CXXFLAGS = -pthread -std=c++11 -fmax-errors=2 -Wall -fPIC $(DFLAGS) $(OPT)
 CFLAGS = -Wall -W -fPIC $(DFLAGS) $(OPT)
 
+# Files
+
 SRCEXTS = .c .cc .cpp .proto
-ALL_DIRS = $(PROJECT_DIR)/src/platform $(PROJECT_DIR)/src/utils
+ALL_DIRS = $(PROJECT_DIR)/src/*
 ALL_SRCS = $(foreach d, $(ALL_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS))))
-ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS))) 
+ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS)))
+
+CLIENT_SRCS = $(wildcard $(PROJECT_DIR)/src/client/*.cc)
+CLIENT_OBJS = $(addsuffix .o, $(basename $(CLIENT_SRCS)))
 
 PLATFORM_SRCS = \
 		$(PROJECT_DIR)/src/platform/bdcommon_logging.cc \
@@ -60,18 +65,18 @@ PROTO_SRCS = $(patsubst %.proto,%.pb.cc, $(PROTO_FILES))
 PROTO_HDRS = $(patsubst %.proto,%.pb.h, $(PROTO_FILES))
 PROTO_OBJS = $(patsubst %.proto,%.pb.o, $(PROTO_FILES))
 
-RPC_SRCS = \
-        $(PROJECT_DIR)/src/rpc/sofa_pbrpc_client.cc
+RPC_SRCS = $(wildcard $(PROJECT_DIR)/src/rpc/*.cc)
 RPC_OBJS = $(addsuffix .o, $(basename $(RPC_SRCS)))
 
 UTILS_SRCS = \
 		$(PROJECT_DIR)/src/utils/bdcommon_thread.cc \
         $(PROJECT_DIR)/src/utils/hash.cc \
-        $(PROJECT_DIR)/src/utils/registry_test.cc \
+        $(PROJECT_DIR)/src/utils/string_format.cc \
+        $(PROJECT_DIR)/src/utils/string_util.cc \
         $(PROJECT_DIR)/src/utils/stringpiece.cc
 UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS)))
 
-OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS)
+OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(CLIENT_OBJS)
 
 LIBS =
  
@@ -79,11 +84,11 @@ BIN = $(OBJS)
 
 .PHONY:all
 all: $(BIN)
-	@echo "* Done"
+	@echo "# Done"
 
 .PHONY:clean
 clean:
-	@echo "* Clean"
+	@echo "# Clean"
 	rm -rf $(ALL_OBJS)
 	rm -rf $(BIN)
 	rm -rf $(PROTO_SRCS) $(PROTO_HDRS)
@@ -102,17 +107,17 @@ registry_test: $(PROJECT_DIR)/src/utils/registry_test.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 %.pb.cc %.pb.h: %.proto
-	@echo "* Protoc gen $@"
+	@echo "# Protoc gen $@"
 	$(PROTOC) --proto_path=$(PROJECT_DIR)/src/proto --proto_path=/usr/local/include --cpp_out=$(PROJECT_DIR)/src/proto/ $<
 
 %.o: %.cc
-	@echo "* Compiling cc $@"
+	@echo "# Compiling cc $@"
 	$(CXX) $(CXXFLAGS) $(INCLUDE_PATH) -c $< -o $@
 
 %.o:%.cpp
-	@echo "* Compiling cpp $@"
+	@echo "# Compiling cpp $@"
 	@$(CXX) -c $(HDRPATHS) $(CXXFLAGS) $< -o $@
 
 %.o:%.c
-	@echo "* Compiling c $@"
+	@echo "# Compiling c $@"
 	@$(CC) -c $(HDRPATHS) $(CFLAGS) $< -o $@
