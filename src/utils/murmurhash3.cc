@@ -10,6 +10,8 @@
 // compile and run any of them on any platform, but your performance with the
 // non-native version will be less than optimal.
 
+// brpc/src/butil/third_party/murmurhash3/murmurhash3.cc
+
 #include <stddef.h>  // size_t
 #include <string.h>  // memcpy
 #include <algorithm> // std::min

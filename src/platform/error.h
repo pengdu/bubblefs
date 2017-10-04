@@ -18,7 +18,7 @@ limitations under the License.
 #include "utils/status.h"
 
 namespace bubblefs {
-
+  
 Status IOError(const string& context, int err_number);
 
 Status IOError(const string& context, const string& file_name, int err_number);

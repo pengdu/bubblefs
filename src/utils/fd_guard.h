@@ -58,12 +58,16 @@ public:
         }
         _fd = fd;
     }
-
+    
     // Set internal fd to -1 and return the value before set.
     int release() {
         const int prev_fd = _fd;
         _fd = -1;
         return prev_fd;
+    }
+    
+    int getfd() const {
+      return _fd;
     }
     
     operator int() const { return _fd; }
