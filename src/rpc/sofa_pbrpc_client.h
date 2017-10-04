@@ -20,6 +20,10 @@
 namespace bubblefs {
 namespace rpc {
 
+std::string RemoteAddress(google::protobuf::RpcController* rpc_controller);
+
+int ErrorCode(google::protobuf::RpcController* rpc_controller);
+  
 template <class Stub, class Request, class Response, class Callback>
 static bool SendRequest(Stub* stub, void(Stub::*func)(
                         google::protobuf::RpcController*,
@@ -31,7 +35,7 @@ static bool SendRequest(Stub* stub, void(Stub::*func)(
   sofa::pbrpc::RpcController controller;
   controller.SetTimeout(rpc_timeout * 1000L);
   for (int32_t retry = 0; retry < retry_times; ++retry) {
-    (stub->*func)(&controller, request, response, NULL);
+    (stub->*func)(&controller, request, response, nullptr);
     if (controller.Failed()) {
       if (retry < retry_times - 1) {
         Log(DEBUG, "Send failed, retry ...");
@@ -49,22 +53,22 @@ static bool SendRequest(Stub* stub, void(Stub::*func)(
 }
    
 template <class Request, class Response, class Callback>
-static void RpcCallback(sofa::pbrpc::RpcController* rpc_controller,
+static void RpcCallback(google::protobuf::RpcController* rpc_controller,
                         const Request* request,
                         Response* response,
                         std::function<void (const Request*, Response*, bool, int)> callback) {
   bool failed = rpc_controller->Failed();
-  int error = rpc_controller->ErrorCode();
+  int error = ErrorCode(rpc_controller);
   if (failed || error) {
     assert(failed && error);
     if (error != sofa::pbrpc::RPC_ERROR_SEND_BUFFER_FULL) {
       Log(WARNING, "RpcCallback: %s %s\n",
-          rpc_controller->RemoteAddress().c_str(), rpc_controller->ErrorText().c_str());
+          RemoteAddress(rpc_controller).c_str(), rpc_controller->ErrorText().c_str());
     } else {
       ///TODO: Retry
     }
   }
-  delete rpc_controller; // Note: dlete rpc_controller in the callback
+  delete rpc_controller; // Note: delete AsyncRequest rpc_controller in the callback
   callback(request, response, failed, error);
 } 
     
@@ -83,7 +87,16 @@ static void AsyncRequest(Stub* stub, void(Stub::*func) (
     sofa::pbrpc::NewClosure(&RpcCallback<Request, Response, Callback>,
                             controller, request, response, callback);
   (stub->*func)(controller, request, response, done);
-} 
+}
+
+template <class T>
+bool NewStub(RpcClient* rpc_client, const std::string server, T** stub) {
+  if (false == rpc_client)
+    return false;
+  google::protobuf::RpcChannel* channel = rpc_client->GetRpcChannel(server); // channel is thread-safe ?
+  *stub = new T(channel);
+  return true;
+}
   
 class SofaPbrpcClient : public RpcClient {
  public:
@@ -97,25 +110,8 @@ class SofaPbrpcClient : public RpcClient {
      delete rpc_client_;
    }
    
-   virtual google::protobuf::RpcChannel& GetRpcChannel(const std::string server) override;
-   
-   virtual std::string RemoteAddress(google::protobuf::RpcController*) const override;
-   
-   template <class T>
-   bool GetStub(const std::string server, T** stub) {
-     MutexLock lock(&host_map_lock_);
-     sofa::pbrpc::RpcChannel* channel = nullptr;
-     HostMap::iterator it = host_map_.find(server);
-     if (it != host_map_.end()) {
-       channel = it->second;
-     } else {
-       sofa::pbrpc::RpcChannelOptions channel_options;
-       channel = new sofa::pbrpc::RpcChannel(rpc_client_, server, channel_options);
-       host_map_[server] = channel;
-     }
-     *stub = new T(channel);
-     return true;
-   }
+   // Not delete channel
+   virtual google::protobuf::RpcChannel* GetRpcChannel(const std::string server) override;
     
  private:
    sofa::pbrpc::RpcClient* rpc_client_;

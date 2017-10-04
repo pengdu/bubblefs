@@ -12,6 +12,7 @@
 #include <sstream>
 
 namespace bubblefs {
+  
 namespace bdcommon {
   
 enum LogLevel {
@@ -29,7 +30,7 @@ bool SetLogSize(int size); // in MB
 bool SetLogCount(int count);
 bool SetLogSizeLimit(int size); // in MB
 
-void Log(int level, const char* fmt, ...);
+void LogC(int level, const char* fmt, ...);
 
 class LogStream {
 public:
@@ -45,10 +46,17 @@ private:
     std::ostringstream oss_;
 };
 
-#define Log(level, fmt, args...) ::bubblefs::bdcommon::Log(level, "[%s:%d] " fmt, __FILE__, __LINE__, ##args)
-#define Log(level) ::bubblefs::bdcommon::LogStream(level)
-
 } // namespace bdcommon
+
+using bdcommon::DEBUG;
+using bdcommon::INFO;
+using bdcommon::WARNING;
+using bdcommon::ERROR;
+using bdcommon::FATAL;
+
+#define Log(level, fmt, args...) ::bubblefs::bdcommon::LogC(level, "[%s:%d] " fmt, __FILE__, __LINE__, ##args)
+#define LogS(level) ::bubblefs::bdcommon::LogStream(level)
+
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_LOGGING_SIMPLE_H_

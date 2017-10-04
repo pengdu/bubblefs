@@ -51,9 +51,18 @@ ALL_SRCS = $(foreach d, $(ALL_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS)))
 ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS))) 
 
 PLATFORM_SRCS = \
-        $(PROJECT_DIR)/src/platform/mutex.cc \
-        $(PROJECT_DIR)/src/platform/logging_simple.cc
+		$(PROJECT_DIR)/src/platform/logging_simple.cc \
+        $(PROJECT_DIR)/src/platform/mutex.cc
 PLATFORM_OBJS = $(addsuffix .o, $(basename $(PLATFORM_SRCS))) 
+
+PROTO_FILES = $(wildcard src/proto/*.proto)
+PROTO_SRCS = $(patsubst %.proto,%.pb.cc, $(PROTO_FILES))
+PROTO_HDRS = $(patsubst %.proto,%.pb.h, $(PROTO_FILES))
+PROTO_OBJS = $(patsubst %.proto,%.pb.o, $(PROTO_FILES))
+
+RPC_SRCS = \
+        $(PROJECT_DIR)/src/rpc/sofa_pbrpc_client.cc
+RPC_OBJS = $(addsuffix .o, $(basename $(RPC_SRCS)))
 
 UTILS_SRCS = \
         $(PROJECT_DIR)/src/utils/hash.cc \
@@ -62,12 +71,7 @@ UTILS_SRCS = \
         $(PROJECT_DIR)/src/utils/thread_simple.cc
 UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS)))
 
-PROTO_FILES = $(wildcard src/proto/*.proto)
-PROTO_SRCS = $(patsubst %.proto,%.pb.cc, $(PROTO_FILES))
-PROTO_HDRS = $(patsubst %.proto,%.pb.h, $(PROTO_FILES))
-PROTO_OBJS = $(patsubst %.proto,%.pb.o, $(PROTO_FILES))
-
-OBJS = $(PROTO_OBJS)
+OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS)
 
 LIBS =
  
@@ -80,9 +84,8 @@ all: $(BIN)
 .PHONY:clean
 clean:
 	@echo "* Clean"
-	rm -rf $(BIN)
 	rm -rf $(ALL_OBJS)
-	rm -rf $(LIBS)
+	rm -rf $(BIN)
 	rm -rf $(PROTO_SRCS) $(PROTO_HDRS)
 	rm -rf *.o
 

@@ -22,9 +22,7 @@ class RpcClient {
     
    virtual ~RpcClient() {}
    
-   virtual google::protobuf::RpcChannel& GetRpcChannel(const std::string server) = 0;
-   
-   virtual std::string RemoteAddress(google::protobuf::RpcController*) const = 0;
+   virtual google::protobuf::RpcChannel* GetRpcChannel(const std::string server) = 0;
 };
 
 } // namespace rpc

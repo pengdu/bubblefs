@@ -375,7 +375,7 @@ void Logv(int log_level, const char* format, va_list ap) {
     }
 }
 
-void Log(int level, const char* fmt, ...) {
+void LogC(int level, const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
 
@@ -391,7 +391,7 @@ void Log(int level, const char* fmt, ...) {
 LogStream::LogStream(int level) : level_(level) {}
 
 LogStream::~LogStream() {
-    Log(level_, "%s", oss_.str().c_str());
+    LogC(level_, "%s", oss_.str().c_str());
 }
 
 } // namespace bdcommon
