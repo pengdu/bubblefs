@@ -10,7 +10,7 @@
 #include "gtest/gtest.h"
 
 namespace bubblefs {
-namespace base {
+namespace core {
 
 //class TokenizerTest : public ::testing::Test, public Tokenizer {
 //public:
@@ -155,5 +155,5 @@ TEST(PropTreeTest, ParseFromString) {
     // LOG(ERROR) << pt.FormatString();
 }
 
-} // namespace base
+} // namespace core
 } // namespace bubblefs

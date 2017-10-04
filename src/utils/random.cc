@@ -11,6 +11,7 @@ limitations under the License.
 ==============================================================================*/
 
 // tensorflow/tensorflow/core/lib/random/random.cc
+// Pebble/src/common/random.cpp
 
 #include "utils/random.h"
 #include <errno.h>
@@ -26,13 +27,10 @@ limitations under the License.
 #include <thread>
 #include <type_traits>
 #include <utility>
-#include "platform/eintr_wrapper.h"
 #include "platform/logging.h"
 #include "platform/macros.h"
 #include "platform/mutex.h"
-#include "platform/threadlocal.h"
 #include "platform/types.h"
-#include "utils/lazy_instance.h"
 
 namespace bubblefs {
 namespace random {
@@ -60,73 +58,6 @@ uint64 New64DefaultSeed() {
   return rng();
 }
 
-namespace {
-
-// We keep the file descriptor for /dev/urandom around so we don't need to
-// reopen it (which is expensive), and since we may not even be able to reopen
-// it if we are later put in a sandbox. This class wraps the file descriptor so
-// we can use LazyInstance to handle opening it on the first access.
-class URandomFd {
- public:
-  URandomFd() : fd_(open("/dev/urandom", O_RDONLY)) {
-    DCHECK_GE(fd_, 0) << "Cannot open /dev/urandom: " << errno;
-  }
-
-  ~URandomFd() { close(fd_); }
-
-  int fd() const { return fd_; }
-
- private:
-  const int fd_;
-};
-
-base::LazyInstance<URandomFd>::Leaky g_urandom_fd = LAZY_INSTANCE_INITIALIZER;
-
-}  // namespace
-
-bool ReadFromFD(int fd, char* buffer, size_t bytes) {
-  size_t total_read = 0;
-  while (total_read < bytes) {
-    ssize_t bytes_read =
-        HANDLE_EINTR(read(fd, buffer + total_read, bytes - total_read));
-    if (bytes_read <= 0)
-      break;
-    total_read += bytes_read;
-  }
-  return total_read == bytes;
-}
-
-void RandBytes(void* output, size_t output_length) {
-  const int urandom_fd = g_urandom_fd.Pointer()->fd();
-  const bool success =
-      ReadFromFD(urandom_fd, static_cast<char*>(output), output_length);
-  CHECK(success);
-}
-
-// NOTE: This function must be cryptographically secure. http://crbug.com/140076
-uint64_t RandUint64() {
-  uint64_t number;
-  RandBytes(&number, sizeof(number));
-  return number;
-}
-
-int GetUrandomFD(void) {
-  return g_urandom_fd.Pointer()->fd();
-}
-
-int RandInt(int min, int max) {
-  DCHECK_LE(min, max);
-
-  uint64_t range = static_cast<uint64_t>(max) - min + 1;
-  // |range| is at most UINT_MAX + 1, so the result of RandGenerator(range)
-  // is at most UINT_MAX.  Hence it's safe to cast it from uint64_t to int64_t.
-  int result =
-      static_cast<int>(min + static_cast<int64_t>(RandGenerator(range)));
-  DCHECK_GE(result, min);
-  DCHECK_LE(result, max);
-  return result;
-}
-
 double BitsToOpenEndedUnitInterval(uint64_t bits) {
   // We try to get maximum precision by masking out as many bits as will fit
   // in the target type's mantissa, and raising it to an appropriate power to
@@ -141,10 +72,6 @@ double BitsToOpenEndedUnitInterval(uint64_t bits) {
   DCHECK_GE(result, 0.0);
   DCHECK_LT(result, 1.0);
   return result;
-}
-
-double RandDouble() {
-  return BitsToOpenEndedUnitInterval(New64());
 }
 
 uint64_t RandGenerator(uint64_t range) {
@@ -164,6 +91,29 @@ uint64_t RandGenerator(uint64_t range) {
   return value % range;
 }
 
+int RandInt(int min, int max) {
+  DCHECK_LE(min, max);
+
+  uint64_t range = static_cast<uint64_t>(max) - min + 1;
+  // |range| is at most UINT_MAX + 1, so the result of RandGenerator(range)
+  // is at most UINT_MAX.  Hence it's safe to cast it from uint64_t to int64_t.
+  int result =
+      static_cast<int>(min + static_cast<int64_t>(RandGenerator(range)));
+  DCHECK_GE(result, min);
+  DCHECK_LE(result, max);
+  return result;
+}
+
+double RandDouble() {
+  return BitsToOpenEndedUnitInterval(New64());
+}
+
+std::mt19937 &RandomHelper::getEngine() {
+    static std::random_device seed_gen;
+    static std::mt19937 engine(seed_gen());
+    return engine;
+}
+
 // rocksdb/util/random.cc
 
 Random* Random::GetTLSInstance() {
@@ -177,6 +127,34 @@ Random* Random::GetTLSInstance() {
     tls_instance = rv;
   }
   return rv;
+}
+
+// for unix
+TrueRandom::TrueRandom()
+    : m_fd(-1) {
+    m_fd = open("/dev/urandom", O_RDONLY, 0);
+    if (m_fd < 0) {
+        abort();
+    }
+}
+
+TrueRandom::~TrueRandom() {
+    close(m_fd);
+    m_fd = -1;
+}
+
+bool TrueRandom::NextBytes(void* buffer, size_t size) {
+    return read(m_fd, buffer, size) == static_cast<int32_t>(size);
+}
+
+uint32_t TrueRandom::NextUInt32() {
+    uint32_t random = -1;
+    NextBytes(&random, sizeof(random));
+    return random;
+}
+
+uint32_t TrueRandom::NextUInt32(uint32_t max_random) {
+    return NextUInt32() % max_random;
 }
 
 }  // namespace random

@@ -13,7 +13,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace base {
+namespace core {
 
 /*
  * An agile tree structure.
@@ -126,7 +126,7 @@ private:
     std::string state_;
 };
 
-}  // namespace base
+}  // namespace core
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PROP_TREE_H_

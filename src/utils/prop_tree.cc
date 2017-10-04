@@ -12,7 +12,7 @@
 #include <sstream>
 
 namespace bubblefs {
-namespace base {
+namespace core {
 
 // these chars are not belong to symbols
 bool IsIdentifierChar(const char c) {
@@ -335,5 +335,5 @@ void PropTree::AddError(const std::string& error_str) {
 }
 
 
-}  // namespace base
+}  // namespace core
 }  // namespace bubblefs

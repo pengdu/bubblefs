@@ -27,7 +27,7 @@
 #include "utils/properties.h"
 
 namespace bubblefs {
-namespace base {
+namespace core {
 
 std::list<Register::Field>* Register::_s_fieldlist = NULL;
 std::map<std::string, std::string>* confmap = NULL;
@@ -271,5 +271,5 @@ bool init(const char* filename, bool fillconfmap) {
     return true;
 }
 
-} // namespace base
+} // namespace core
 } // namespace bubblefs

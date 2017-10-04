@@ -5,7 +5,7 @@
 // brpc/src/butil/guid_posix.cc
 
 #include "platform/guid.h"
-#include "utils/random.h"
+#include "utils/randuint64.h"
 #include "utils/stringprintf.h"
 
 namespace bubblefs {

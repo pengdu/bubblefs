@@ -29,7 +29,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace base {
+namespace core {
 
 class Register {
 public:
@@ -124,7 +124,7 @@ extern std::map<std::string, std::string>* confmap;
 
 bool init(const char* filename, bool fillconfmap = false);
 
-} // namespace base
+} // namespace core
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PROPERTIES_H_
