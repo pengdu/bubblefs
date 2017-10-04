@@ -32,7 +32,7 @@
 #include "utils/thread_simple.h"
 
 namespace bubblefs {
-namespace bdcommon {
+namespace bdcommon { 
   
 int g_log_level = INFO;
 int64_t g_log_size = 0;
