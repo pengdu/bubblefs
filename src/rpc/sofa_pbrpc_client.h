@@ -11,11 +11,10 @@
 
 #include <assert.h>
 #include <functional>
+#include "platform/bdcommon_logging.h"
 #include "platform/mutex.h"
-#include "platform/logging_simple.h"
 #include "rpc/base_rpc_client.h"
 #include "sofa/pbrpc/pbrpc.h"
-#include "utils/threadpool_simple.h"
 
 namespace bubblefs {
 namespace rpc {

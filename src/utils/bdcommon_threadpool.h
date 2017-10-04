@@ -6,8 +6,8 @@
 
 // baidu/common/include/thread_pool.h
 
-#ifndef BUBBLEFS_UTILS_THREAD_POOL_SIMPLE_H_
-#define BUBBLEFS_UTILS_THREAD_POOL_SIMPLE_H_
+#ifndef BUBBLEFS_UTILS_BDCOMMON_THREAD_POOL_H_
+#define BUBBLEFS_UTILS_BDCOMMON_THREAD_POOL_H_
 
 #include <time.h>
 #include <deque>
@@ -286,4 +286,4 @@ private:
 } // namespace bdcommon
 } // namespace bubblefs
 
-#endif  // BUBBLEFS_UTILS_THREAD_POOL_SIMPLE_H_
+#endif  // BUBBLEFS_UTILS_BDCOMMON_THREAD_POOL_H_

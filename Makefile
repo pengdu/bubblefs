@@ -51,7 +51,7 @@ ALL_SRCS = $(foreach d, $(ALL_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS)))
 ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS))) 
 
 PLATFORM_SRCS = \
-		$(PROJECT_DIR)/src/platform/logging_simple.cc \
+		$(PROJECT_DIR)/src/platform/bdcommon_logging.cc \
         $(PROJECT_DIR)/src/platform/mutex.cc
 PLATFORM_OBJS = $(addsuffix .o, $(basename $(PLATFORM_SRCS))) 
 
@@ -65,17 +65,17 @@ RPC_SRCS = \
 RPC_OBJS = $(addsuffix .o, $(basename $(RPC_SRCS)))
 
 UTILS_SRCS = \
+		$(PROJECT_DIR)/src/utils/bdcommon_thread.cc \
         $(PROJECT_DIR)/src/utils/hash.cc \
         $(PROJECT_DIR)/src/utils/registry_test.cc \
-        $(PROJECT_DIR)/src/utils/stringpiece.cc \
-        $(PROJECT_DIR)/src/utils/thread_simple.cc
+        $(PROJECT_DIR)/src/utils/stringpiece.cc
 UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS)))
 
 OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS)
 
 LIBS =
  
-BIN = $(ALL_OBJS)
+BIN = $(OBJS)
 
 .PHONY:all
 all: $(BIN)

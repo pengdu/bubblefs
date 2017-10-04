@@ -1,5 +1,8 @@
+// Copyright (c) 2015, Baidu.com, Inc. All Rights Reserved
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-#include "utils/thread_simple.h"
+#include "utils/bdcommon_thread.h"
 
 namespace bubblefs {
 namespace bdcommon {

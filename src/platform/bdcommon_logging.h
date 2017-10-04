@@ -6,8 +6,8 @@
 
 // baidu/common/logging.h
 
-#ifndef BUBBLEFS_PLATFORM_LOGGING_SIMPLE_H_
-#define BUBBLEFS_PLATFORM_LOGGING_SIMPLE_H_
+#ifndef BUBBLEFS_PLATFORM_BDCOMMON_LOGGING_H_
+#define BUBBLEFS_PLATFORM_BDCOMMON_LOGGING_H_
 
 #include <sstream>
 
@@ -59,4 +59,4 @@ using bdcommon::FATAL;
 
 } // namespace bubblefs
 
-#endif // BUBBLEFS_PLATFORM_LOGGING_SIMPLE_H_
+#endif // BUBBLEFS_PLATFORM_BDCOMMON_LOGGING_H_

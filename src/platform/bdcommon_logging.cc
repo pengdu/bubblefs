@@ -6,7 +6,7 @@
 
 // baidu/common/src/logging.cc
 
-#include "platform/logging_simple.h"
+#include "platform/bdcommon_logging.h"
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -29,7 +29,7 @@
 #include <vector>
 #include "platform/mutexlock.h"
 #include "platform/time.h"
-#include "utils/thread_simple.h"
+#include "utils/bdcommon_thread.h"
 
 namespace bubblefs {
 namespace bdcommon { 
