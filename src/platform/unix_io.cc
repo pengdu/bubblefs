@@ -11,8 +11,12 @@
  */
 
 // ceph/src/common/safe_io.c
+// Pebble/src/common/dir_util.cpp
 
-#include "platform/safe_io.h"
+#include "platform/unix_io.h"
+#include <linux/limits.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -20,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "platform/base_error.h"
 
 // in linux/limits.h
 #ifndef PATH_MAX
@@ -230,6 +235,55 @@ int safe_read_file(const char *base, const char *file,
   VOID_TEMP_FAILURE_RETRY(close(fd));
 
   return len;
+}
+
+char DirUtil::m_last_error[256] = {0};
+
+int DirUtil::MakeDir(const std::string& path) {
+    if (path.empty()) {
+        _LOG_LAST_ERROR("param path is NULL");
+        return -1;
+    }
+
+    if (access(path.c_str(), F_OK | W_OK) == 0) {
+        return 0;
+    }
+
+    if (mkdir(path.c_str(), 0755) != 0) {
+        _LOG_LAST_ERROR("mkdir %s failed(%s)", path.c_str(), strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+int DirUtil::MakeDirP(const std::string& path) {
+    if (path.empty()) {
+        _LOG_LAST_ERROR("param path is NULL");
+        return -1;
+    }
+    if (path.size() > PATH_MAX) {
+        _LOG_LAST_ERROR("path length %ld > PATH_MAX(%d)", path.size(), PATH_MAX);
+        return -1;
+    }
+
+    int len = path.length();
+    char tmp[PATH_MAX] = {0};
+    snprintf(tmp, sizeof(tmp), "%s", path.c_str());
+
+    for (int i = 1; i < len; i++) {
+        if (tmp[i] != '/') {
+            continue;
+        }
+
+        tmp[i] = '\0';
+        if (MakeDir(tmp) != 0) {
+            return -1;
+        }
+        tmp[i] = '/';
+    }
+
+    return MakeDir(path);
 }
 
 } // namespace port

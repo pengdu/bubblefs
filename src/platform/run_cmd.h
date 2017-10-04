@@ -47,6 +47,9 @@ bool pipe2_cloexec(int pipefd[2]);
 //
 std::string run_cmd(const char *cmd, ...);
 
+/// @brief 获取当前程序名
+std::string GetSelfExeName();
+
 bool ExecuteShellCmd(const std::string cmd, std::string* ret_str);
 
 std::string GetCurrentLocationDir();

@@ -9,13 +9,27 @@
  * Foundation.  See file COPYING.
  *
  */
+/*
+ * Tencent is pleased to support the open source community by making Pebble available.
+ * Copyright (C) 2016 THL A29 Limited, a Tencent company. All rights reserved.
+ * Licensed under the MIT License (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * http://opensource.org/licenses/MIT
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ */
 
 // ceph/src/common/safe_io.h
+// Pebble/src/common/dir_util.h
 
-#ifndef BUBBLEFS_PALTFORM_SAFE_IO_
-#define BUBBLEFS_PALTFORM_SAFE_IO_
+#ifndef BUBBLEFS_PALTFORM_UNIX_IO_
+#define BUBBLEFS_PALTFORM_UNIX_IO_
 
 #include <sys/types.h>
+#include <string>
 #include "platform/macros.h"
 
 namespace bubblefs {
@@ -61,7 +75,27 @@ int safe_write_file(const char *base, const char *file,
 int safe_read_file(const char *base, const char *file,
                    char *val, size_t vallen);
 
+class DirUtil {
+public:
+    /// @brief 创建目录，仅在目录不存在时创建(同mkdir)
+    /// @param path 要创建的目录
+    /// @return 0成功，非0失败
+    static int MakeDir(const std::string& path);
+
+    /// @brief 创建多级目录，连同父目录一起创建(同mkdir -p)
+    /// @param path 要创建的目录
+    /// @return 0成功，非0失败
+    static int MakeDirP(const std::string& path);
+
+    static const char* GetLastError() {
+        return m_last_error;
+    }
+
+private:
+    static char m_last_error[256];
+};
+
 } // namespace port
 } // namespace bubblefs
 
-#endif // BUBBLEFS_PALTFORM_SAFE_IO_
+#endif // BUBBLEFS_PALTFORM_UNIX_IO_

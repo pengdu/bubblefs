@@ -14,9 +14,11 @@
 // ceph/src/common/run_cmd.cpp
 
 #include "platform/run_cmd.h"
+#include <linux/limits.h>
 #include <sys/wait.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -124,6 +126,18 @@ std::string run_cmd(const char *cmd, ...)
   ostringstream oss;
   oss << "run_cmd(" << cmd << "): terminated by unknown mechanism";
   return oss.str();
+}
+
+std::string GetSelfExeName() {
+    char path[64]       = {0};
+    char link[PATH_MAX] = {0};
+
+    snprintf(path, sizeof(path), "/proc/%d/exe", getpid());
+    readlink(path, link, sizeof(link));
+
+    std::string filename(strrchr(link, '/') + 1);
+
+    return filename;
 }
 
 bool ExecuteShellCmd(const std::string cmd, std::string* ret_str) {
