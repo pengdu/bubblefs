@@ -5,13 +5,14 @@
 // tera/src/common/base/string_number.h
 // tera/src/common/base/string_ext.h
 
-#ifndef BUBBLEFS_UTILS_STRING_UTIL_H_
-#define BUBBLEFS_UTILS_STRING_UTIL_H_
+#ifndef BUBBLEFS_UTILS_BDCOMMON_STR_UTIL_H_
+#define BUBBLEFS_UTILS_BDCOMMON_STR_UTIL_H_
 
 #include <float.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <string>
 #include <vector>
 #include "utils/ascii.h"
@@ -259,7 +260,14 @@ std::string DebugString(const std::string& src);
 std::string RoundNumberToNDecimalPlaces(double n, int d);
 int EditDistance(const std::string& a, const std::string& b);
 
+std::string GetLocalHostName();
+
+bool SplitPath(const std::string& path, 
+               std::vector<std::string>* element,
+               bool* isdir = nullptr);
+
+
 } // namespace bdcommon
 } // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_STRING_UTIL_H_
+#endif // BUBBLEFS_UTILS_BDCOMMON_STR_UTIL_H_

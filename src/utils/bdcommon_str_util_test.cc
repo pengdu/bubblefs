@@ -4,7 +4,7 @@
 
 // tera/src/common/base/test/string_number_test.cc
 
-#include "utils/string_util.h"
+#include "utils/bdcommon_str_util.h"
 #include <limits.h>
 #include <math.h>
 #include "gtest/gtest.h"

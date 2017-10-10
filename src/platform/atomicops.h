@@ -1,13 +1,30 @@
 // Copyright (c) 2012 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-// Copyright (c) 2014, Baidu.com, Inc. All Rights Reserved
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-//
-// Author: yanshiguang02@baidu.com
 
-// baidu/common/include/atomic.h
+// For atomic operations on reference counts, see atomic_refcount.h.
+// For atomic operations on sequence numbers, see atomic_sequence_num.h.
+
+// The routines exported by this module are subtle.  If you use them, even if
+// you get the code right, it will depend on careful reasoning about atomicity
+// and memory ordering; it will be less readable, and harder to maintain.  If
+// you plan to use these routines, you should have a good reason, such as solid
+// evidence that performance would otherwise suffer, or there being no
+// alternative.  You should assume only properties explicitly guaranteed by the
+// specifications in this file.  You are almost certainly _not_ writing code
+// just for the x86; if you assume x86 semantics, x86 hardware bugs and
+// implementations on other archtectures will cause your code to break.  If you
+// do not know what you are doing, avoid these routines, and use a Mutex.
+//
+// It is incorrect to make direct assignments to/from an atomic variable.
+// You should use one of the Load or Store routines.  The NoBarrier
+// versions are provided when no barriers are needed:
+//   NoBarrier_Store()
+//   NoBarrier_Load()
+// Although there are currently no compiler enforcement, you are encouraged
+// to use these.
+//
+
 // brpc/src/butil/atomicops.h
 
 #ifndef BUBBLEFS_PLATFORM_ATOMICOPS_H_
@@ -18,177 +35,6 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-  
-namespace bdcommon {
-  
-/**
- * Note: use gcc.
- * asm (statement : out : in : dirty clobbered regs or memory).
- * if asm conflicts, use __asm__ instead.
- * a,b,c,d,S,D means eax,ebx,ecx,edx,esi,edi.
- * r means any register, m means memory, i means imediate, g means any, %%reg refs register
- * $, $0x means constants.
- * %0 means output ... %n-1 means input operand(expression), "=" specifies output operand.
- * 
-**/   
-  
-/**
- * @brief 原子加,返回原值
- *
- * @param [in/out] mem 原子变量
- * @param [in] add              : 加数
- * @return  inline int
- * @author yanshiguang02
- * @date 2012/09/09 13:55:38
-**/
-static inline int atomic_add(volatile int *mem, int add)
-{
-    asm volatile(
-            "lock xadd %0, (%1);"
-            : "=a"(add)
-            : "r"(mem), "a"(add)
-            : "memory"
-    );
-    return add;
-}
-static inline long atomic_add64(volatile long* mem, long add)
-{
-    asm volatile (
-            "lock xaddq %0, (%1)"
-            : "=a" (add)
-            : "r" (mem), "a" (add)
-            : "memory"
-    );  
-    return add;
-}
-
-/**
- * @brief 原子自增
- *
- * @param [in/out] mem   : volatile int*
- * @return  inline void
- * @author yanshiguang02
- * @date 2012/09/09 13:56:46
-**/
-static inline void atomic_inc(volatile int *mem)
-{
-    asm volatile(
-            "lock incl %0;"
-            : "=m"(*mem)
-            : "m"(*mem)
-    );
-}
-static inline void atomic_inc64(volatile long *mem)
-{
-    asm volatile(
-            "lock incq %0;"
-            : "=m"(*mem)
-            : "m"(*mem)
-    );
-}
-
-/**
- * @brief 原子自减
- *
- * @param [in/out] mem   : volatile int*
- * @return  inline void
- * @author yanshiguang02
- * @date 2012/09/09 13:57:54
-**/
-static inline void atomic_dec(volatile int *mem)
-{
-    asm volatile(
-            "lock decl %0;"
-            : "=m"(*mem)
-            : "m"(*mem)
-    );
-}
-static inline void atomic_dec64(volatile long *mem)
-{
-    asm volatile(
-            "lock decq %0;"
-            : "=m"(*mem)
-            : "m"(*mem)
-    );
-}
-
-/**
- * @brief swap
- *
- * @param [in/out] lockword   : volatile void*
- * @param [in/out] value   : int
- * @return  inline int
- * @author yanshiguang02
- * @date 2012/09/09 13:55:25
-**/
-static inline int atomic_swap(volatile void *lockword, int value)
-{
-    asm volatile(
-            "lock xchg %0, (%1);"
-            : "=a"(value)
-            : "r"(lockword), "a"(value)
-            : "memory"
-    );
-    return value;
-}
-static inline long atomic_swap64(volatile void *lockword, long value)
-{
-    asm volatile(
-            "lock xchg %0, (%1);"
-            : "=a"(value)
-            : "r"(lockword), "a"(value)
-            : "memory"
-    );
-    return value;
-}
-
-
-/**
- * @brief if set
-    if(*mem == cmp)
-        *mem = xchg;
-    else
-        cmp = *mem;
-    return cmp;
- *
- * @param [in/out] mem   : volatile void*
- * @param [in/out] xchg   : int
- * @param [in/out] cmp   : int
- * @return  inline int
- * @author yanshiguang02
- * @date 2012/09/09 13:54:54
-**/
-static inline int atomic_comp_swap(volatile void *mem, int xchg, int cmp)
-{
-    asm volatile(
-            "lock cmpxchg %1, (%2)"
-            :"=a"(cmp)
-            :"d"(xchg), "r"(mem), "a"(cmp)
-    );
-    return cmp;
-}
-
-/**
- * @brief 64位 if set
- *
- * @param [in/out] mem   : volatile void*
- * @param [in/out] xchg   : long long
- * @param [in/out] cmp   : long long
- * @return  inline int
- * @author yanshiguang02
- * @date 2012/09/09 13:54:15
-**/
-static inline long atomic_comp_swap64(volatile void *mem, long long xchg, long long cmp)
-{
-    asm volatile(
-            "lock cmpxchg %1, (%2)"
-            :"=a"(cmp)
-            :"d"(xchg), "r"(mem), "a"(cmp)
-    );
-    return cmp;
-}  
-  
-} // namespace bdcommon
   
 namespace base {
 

@@ -96,6 +96,12 @@ bool NewStub(RpcClient* rpc_client, const std::string server, T** stub) {
   *stub = new T(channel);
   return true;
 }
+
+template <class T>
+void FreeStub(T** stub) {
+  delete (*stub);
+  *stub = nullptr;
+}
   
 class SofaPbrpcClient : public RpcClient {
  public:

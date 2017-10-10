@@ -21,8 +21,8 @@
 
 // baidu/common/include/cache.h
 
-#ifndef BUBBLEFS_UTILS_CACHE_SIMPLE_H_
-#define BUBBLEFS_UTILS_CACHE_SIMPLE_H_
+#ifndef BUBBLEFS_UTILS_BDCOMMON_CACHE_H_
+#define BUBBLEFS_UTILS_BDCOMMON_CACHE_H_
 
 #include <assert.h>
 #include <stdint.h>
@@ -110,4 +110,4 @@ private:
 } // namespace bdcommon  
 } // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_CACHE_SIMPLE_H_
+#endif // BUBBLEFS_UTILS_BDCOMMON_CACHE_H_

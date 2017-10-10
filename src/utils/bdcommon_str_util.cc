@@ -5,7 +5,7 @@
 // tera/src/common/base/string_number.cc
 // tera/src/common/base/string_ext.cc
 
-#include "utils/string_util.h"
+#include "utils/bdcommon_str_util.h"
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
@@ -1157,6 +1157,37 @@ int EditDistance(const std::string& a, const std::string& b) {
         }
     }
     return matrix.At(m-1, n-1);
+}
+
+std::string GetLocalHostName() {
+    char str[255 + 1];
+    if (0 != gethostname(str, 255 + 1)) {
+        return "";
+    }
+    std::string hostname(str);
+    return hostname;
+}
+
+bool SplitPath(const std::string& path,
+               std::vector<std::string>* element,
+               bool* isdir) {
+    if (path.empty() || path[0] != '/' || path.size() > 4096) { // MAX_PATH 4096
+        return false;
+    }
+    element->clear();
+    size_t last_pos = 0;
+    for (size_t i = 1; i <= path.size(); i++) {
+        if (i == path.size() || path[i] == '/') {
+            if (last_pos + 1 < i) {
+                element->push_back(path.substr(last_pos + 1, i - last_pos - 1));
+            }
+            last_pos = i;
+        }
+    }
+    if (isdir) {
+        *isdir = (path[path.size() - 1] == '/');
+    }
+    return true;
 }
 
 } // namespace bdcommon

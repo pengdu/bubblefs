@@ -4,7 +4,7 @@
 namespace bubblefs {
 namespace bfs {  
 
-int32_t GetErrorCode(StatusCode stat) {
+int32_t GetErrorCode(ErrorCode stat) {
     if (stat < 100) {
         if (stat == 0) {
             return OK;

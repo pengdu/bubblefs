@@ -12,7 +12,7 @@
 
 namespace bubblefs {
 namespace bfs {
-
+  
 enum class WriteMode {
   kWriteDefault,      // use write strategy specified by flag file by default
   kWriteChains,
@@ -42,6 +42,8 @@ struct FSOptions {
   const char* passwd;
   FSOptions() : username(nullptr), passwd(nullptr) {}
 };
+
+const char* StrError(ErrorCode error_code); 
 
 /// Bfs File interface
 class File {

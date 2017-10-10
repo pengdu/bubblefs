@@ -27,6 +27,9 @@
  *  3) 对于暴露给用户的接口，返回错误应该是最根本错误原因，避免返回中间错误信息
  */
 
+// '\n'
+#define CHAR_NEW_LINE 010
+
 /// @brief 格式化输出log信息到buff
 #define LOG_MESSAGE(buff, buff_len, fmt, ...) \
     snprintf((buff), (buff_len), "[%s:%d](%s)" fmt, \
@@ -40,9 +43,46 @@
     fprintf(stdout, "INFO [%s:%d](%s)" fmt, \
     __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)    
     
-#define FPRINTF_ERR(fmt, ...) \
+#define FPRINTF_ERROR(fmt, ...) \
     fprintf(stderr, "ERROR [%s:%d](%s)" fmt, \
     __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+    
+#define PANIC(fmt, ...) \
+    FPRINTF_ERROR(fmt, ##__VA_ARGS__); \
+    abort()
+
+#define FPRINTF_CHECK(condition, msg) \
+    if (!condition) { \
+      std::string str_msg = msg; \
+      FPRINTF_ERROR("%s%c", str_msg.c_str(), CHAR_NEW_LINE); \
+    }
+    
+#define FPRINTF_CHECK_EQ(condition, val) \
+    if (val != condition) { \
+      FPRINTF_ERROR("%s is not EQ %s%c", #condition, #val, CHAR_NEW_LINE); \
+    }
+    
+#define FPRINTF_CHECK_GT(condition, val) \
+    if (val >= condition) { \
+      FPRINTF_ERROR("%s is not GT %s%c", #condition, #val, CHAR_NEW_LINE); \
+    } 
+  
+#define PANIC_ENFORCE(condition, msg) \
+    if (!condition) { \
+      std::string str_msg = msg; \
+      PANIC("%s%c", str_msg.c_str(), CHAR_NEW_LINE); \
+    }
+    
+#define PANIC_ENFORCE_EQ(condition, val) \
+    if (val != condition) { \
+      PANIC("%s is not EQ %s%c", #condition, #val, CHAR_NEW_LINE); \
+    }
+    
+#define PANIC_ENFORCE_GT(condition, val) \
+    if (val >= condition) { \
+      PANIC("%s is not GT %s%c", #condition, #val, CHAR_NEW_LINE); \
+    }    
+
     
 namespace bubblefs {
  

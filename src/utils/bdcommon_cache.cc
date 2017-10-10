@@ -8,7 +8,7 @@
 
 // baidu/common/src/cache.cc
 
-#include "utils/cache_simple.h"
+#include "utils/bdcommon_cache.h"
 #include <assert.h>
 #include <malloc.h>
 #include <stdio.h>

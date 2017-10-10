@@ -1,6 +1,6 @@
 
 #include "client/nameserver_client.h"
-#include "utils/string_util.h"
+#include "utils/bdcommon_str_util.h"
 #include "rpc/rpc_client.h"
 
 namespace bubblefs {

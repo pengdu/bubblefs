@@ -5,7 +5,7 @@
 namespace bubblefs {
 namespace bfs {
   
-enum StatusCode {
+enum ErrorCode {
   OK = 0,
   BAD_PARAMETER = -1,
   PERMISSION_DENIED = -2,
