@@ -6,8 +6,8 @@
 
 // dmlc-core/include/dmlc/registry.h
 
-#ifndef BUBBLEFS_UTILS_REGISTRY_H_
-#define BUBBLEFS_UTILS_REGISTRY_H_
+#ifndef BUBBLEFS_UTILS_DMLC_REGISTRY_H_
+#define BUBBLEFS_UTILS_DMLC_REGISTRY_H_
 
 #include <iostream>
 #include <map>
@@ -15,8 +15,6 @@
 #include <vector>
 #include "platform/macros.h"
 
-namespace bubblefs { 
-  
 /*
 /// \brief A registry for file system implementations.
 ///
@@ -203,8 +201,10 @@ Device* DeviceFactory::NewDevice(const string& type,
   CHECK_EQ(devices.size(), size_t{1});
   return devices[0];
 }
-*/  
-  
+*/ 
+
+namespace bubblefs {  
+namespace dmlc {
 /*!
  * \brief Registry class.
  *  Registry can be used to register global singletons.
@@ -253,10 +253,9 @@ class Registry {
                        const std::string& alias) {
     EntryType* e = fmap_.at(key_name);
     if (fmap_.count(alias)) {
-      std::cerr
+      CHECK_EQ(e, fmap_.at(alias))
           << "Trying to register alias " << alias << " for key " << key_name
-          << " but " << alias << " is already taken" << std::endl;
-      abort();
+          << " but " << alias << " is already taken";
     } else {
       fmap_[alias] = e;
     }
@@ -325,11 +324,11 @@ class Registry {
  *  };
  *
  *  // in a independent cc file
- *  namespace bubblefs {
- *  COMMON_REGISTRY_ENABLE(TreeFactory);
+ *  namespace dmlc {
+ *  DMLC_REGISTRY_ENABLE(TreeFactory);
  *  }
  *  // register binary tree constructor into the registry.
- *  COMMON_REGISTRY_REGISTER(TreeFactory, TreeFactory, BinaryTree)
+ *  DMLC_REGISTRY_REGISTER(TreeFactory, TreeFactory, BinaryTree)
  *      .describe("Constructor of BinaryTree")
  *      .set_body([]() { return new BinaryTree(); });
  * 
@@ -446,12 +445,12 @@ class FunctionRegEntryBase {
 };
 
 /*!
- * \def COMMON_REGISTRY_ENABLE
+ * \def DMLC_REGISTRY_ENABLE
  * \brief Macro to enable the registry of EntryType.
  * This macro must be used under namespace dmlc, and only used once in cc file.
  * \param EntryType Type of registry entry
  */
-#define COMMON_REGISTRY_ENABLE(EntryType)                                 \
+#define DMLC_REGISTRY_ENABLE(EntryType)                                 \
   template<>                                                            \
   Registry<EntryType > *Registry<EntryType >::Get() {                   \
     static Registry<EntryType > inst;                                   \
@@ -467,10 +466,67 @@ class FunctionRegEntryBase {
  * \param Name The name to be registered.
  * \sa FactoryRegistryEntryBase
  */
-#define COMMON_REGISTRY_REGISTER(EntryType, EntryTypeName, Name)          \
+#define DMLC_REGISTRY_REGISTER(EntryType, EntryTypeName, Name)          \
   static ATTRIBUTE_UNUSED EntryType & __make_ ## EntryTypeName ## _ ## Name ## __ = \
-      ::bubblefs::Registry<EntryType>::Get()->__REGISTER__(#Name)           \
-  
+      ::bubblefs::dmlc::Registry<EntryType>::Get()->__REGISTER__(#Name)           \
+
+/*!
+ * \brief (Optional) Declare a file tag to current file that contains object registrations.
+ *
+ *  This will declare a dummy function that will be called by register file to
+ *  incur a link dependency.
+ *
+ * \param UniqueTag The unique tag used to represent.
+ * \sa DMLC_REGISTRY_LINK_TAG
+ */
+#define DMLC_REGISTRY_FILE_TAG(UniqueTag)                                \
+  int __dmlc_registry_file_tag_ ## UniqueTag ## __() { return 0; }
+
+/*!
+ * \brief (Optional) Force link to all the objects registered in file tag.
+ *
+ *  This macro must be used in the same file as DMLC_REGISTRY_ENABLE and
+ *  in the same namespace as DMLC_REGISTRY_FILE_TAG
+ *
+ *  DMLC_REGISTRY_FILE_TAG and DMLC_REGISTRY_LINK_TAG are optional macros for registration.
+ *  They are used to encforce link of certain file into during static linking.
+ *
+ *  This is mainly used to solve problem during statically link a library which contains backward registration.
+ *  Specifically, this avoids the objects in these file tags to be ignored by compiler.
+ *
+ *  For dynamic linking, this problem won't occur as everything is loaded by default.
+ *
+ *  Use of this is optional as it will create an error when a file tag do not exist.
+ *  An alternative solution is always ask user to enable --whole-archieve during static link.
+ *
+ * \begincode
+ * // in file objective_registry.cc
+ * DMLC_REGISTRY_ENABLE(MyObjective);
+ * DMLC_REGISTRY_LINK_TAG(regression_op);
+ * DMLC_REGISTRY_LINK_TAG(rank_op);
+ *
+ * // in file regression_op.cc
+ * // declare tag of this file.
+ * DMLC_REGISTRY_FILE_TAG(regression_op);
+ * DMLC_REGISTRY_REGISTER(MyObjective, logistic_reg, logistic_reg);
+ * // ...
+ *
+ * // in file rank_op.cc
+ * // declare tag of this file.
+ * DMLC_REGISTRY_FILE_TAG(rank_op);
+ * DMLC_REGISTRY_REGISTER(MyObjective, pairwiserank, pairwiserank);
+ *
+ * \endcode
+ *
+ * \param UniqueTag The unique tag used to represent.
+ * \sa DMLC_REGISTRY_ENABLE, DMLC_REGISTRY_FILE_TAG
+ */
+#define DMLC_REGISTRY_LINK_TAG(UniqueTag)                                \
+  int __dmlc_registry_file_tag_ ## UniqueTag ## __();                   \
+  static int ATTRIBUTE_UNUSED __reg_file_tag_ ## UniqueTag ## __ = \
+      __dmlc_registry_file_tag_ ## UniqueTag ## __();
+      
+}  // namespace dmlc   
 } // namesapce bubblefs  
 
-#endif  // BUBBLEFS_UTILS_REGISTRY_H_
+#endif  // BUBBLEFS_UTILS_DMLC_REGISTRY_H_

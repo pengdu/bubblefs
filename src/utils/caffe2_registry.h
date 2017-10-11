@@ -16,8 +16,8 @@
 
 // caffe2/caffe2/core/registry.h
 
-#ifndef BUBBLEFS_UTILS_REGISTRY_H_
-#define BUBBLEFS_UTILS_REGISTRY_H_
+#ifndef BUBBLEFS_UTILS_CAFFE2_REGISTRY_H_
+#define BUBBLEFS_UTILS_CAFFE2_REGISTRY_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,10 +28,9 @@
 #include <mutex>
 #include "platform/macros.h"
 #include "platform/types.h"
-#include "utils/typeid.h"
+#include "utils/caffe2_typeid.h"
 
 namespace bubblefs {
-namespace caffe2 {
 
 /**
  * Simple registry implementation in Caffe2 that uses static variables to
@@ -214,7 +213,6 @@ class Registerer {
 #define CAFFE_REGISTER_CLASS(RegistryName, key, ...) \
   CAFFE_REGISTER_TYPED_CLASS(RegistryName, #key, __VA_ARGS__)
   
-} // namespae caffe2
 } // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_REGISTRY_H_
+#endif // BUBBLEFS_UTILS_CAFFE2_REGISTRY_H_

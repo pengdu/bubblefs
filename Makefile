@@ -48,6 +48,8 @@ CFLAGS = -Wall -W -fPIC $(DFLAGS) $(OPT)
 # Files
 
 SRCEXTS = .c .cc .cpp .proto
+
+#ALL_DIRS = $(PROJECT_DIR)/src/platform $(PROJECT_DIR)/src/utils
 ALL_DIRS = $(PROJECT_DIR)/src/*
 ALL_SRCS = $(foreach d, $(ALL_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS))))
 ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS)))
@@ -103,7 +105,10 @@ $(PROTO_OBJS): $(PROTO_HDRS)
 # Targets
 
 # Tests	
-registry_test: $(PROJECT_DIR)/src/utils/registry_test.o
+dmlc_registry_test: $(PROJECT_DIR)/src/utils/dmlc_registry_test.o
+	$(CXX) $^ -o $@ $(LDFLAGS)
+
+caffe2_registry_test: $(PROJECT_DIR)/src/utils/caffe2_registry_test.o $(PROJECT_DIR)/src/utils/caffe2_typeid.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 %.pb.cc %.pb.h: %.proto

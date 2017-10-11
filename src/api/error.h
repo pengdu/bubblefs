@@ -5,18 +5,16 @@
 namespace bubblefs {
 namespace bfs {
   
-enum ErrorCode {
-  OK = 0,
-  BAD_PARAMETER = -1,
-  PERMISSION_DENIED = -2,
-  NOT_ENOUGH_QUOTA = -3,
-  NETWORK_UNAVAILABLE = -4,
-  TIMEOUT = -5,
-  NOT_ENOUGH_SPACE = -6,
-  OVERLOAD = -7,
-  META_NOT_AVAILABLE = -8,
-  UNKNOWN_ERROR = -9
-};
+const int OK = 0;
+const int BAD_PARAMETER = -1;
+const int PERMISSION_DENIED = -2;
+const int NOT_ENOUGH_QUOTA = -3;
+const int NETWORK_UNAVAILABLE = -4;
+const int TIMEOUT = -5;
+const int NOT_ENOUGH_SPACE = -6;
+const int OVERLOAD = -7;
+const int META_NOT_AVAILABLE = -8;
+const int UNKNOWN_ERROR = -9;
 
 const char* StrError(int error_code);
 

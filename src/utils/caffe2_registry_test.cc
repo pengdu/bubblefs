@@ -17,16 +17,14 @@
 #include <iostream>
 #include <memory>
 #include "gtest/gtest.h"
-#include "platform/logging.h"
-#include "utils/caffe_registry.h"
+#include "utils/caffe2_registry.h"
 
 namespace bubblefs {
-namespace caffe2 {
 namespace {
 
 class Foo {
  public:
-  explicit Foo(int x) { LOG(INFO) << "Foo " << x; }
+  explicit Foo(int x) { printf("Foo %d\n", x); }
 };
 
 CAFFE_DECLARE_REGISTRY(FooRegistry, Foo, int);
@@ -36,14 +34,14 @@ CAFFE_DEFINE_REGISTRY(FooRegistry, Foo, int);
 
 class Bar : public Foo {
  public:
-  explicit Bar(int x) : Foo(x) { LOG(INFO) << "Bar " << x; }
+  explicit Bar(int x) : Foo(x) { printf("Bar %d\n", x); }
 };
 REGISTER_FOO(Bar);
 
 class AnotherBar : public Foo {
  public:
   explicit AnotherBar(int x) : Foo(x) {
-    LOG(INFO) << "AnotherBar " << x;
+    printf("AnotherBar %d\n", x);
   }
 };
 REGISTER_FOO(AnotherBar);
@@ -60,5 +58,9 @@ TEST(RegistryTest, ReturnNullOnNonExistingCreator) {
 }
 
 }  // namespace
-}  // namespace caffe2
 }  // namespace bubblefs
+
+int main(int argc, char* argv[]) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

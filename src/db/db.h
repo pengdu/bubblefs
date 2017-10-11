@@ -21,6 +21,7 @@
 
 #include "platform/macros.h"
 #include "platform/types.h"
+#include "utils/caffe_registry.h"
 
 namespace bubblefs {
 namespace db {
@@ -121,20 +122,28 @@ class DB {
   DISALLOW_COPY_AND_ASSIGN(DB);
 };
 
+DB* CreateDB(DBClass backend);
+
+void FreeDB(DB** db);
+
+// Database classes are registered by their names so we can do optional
+// dependencies.
+CAFFE_DECLARE_REGISTRY(Caffe2DBRegistry, DB, const string&, Mode);
+#define REGISTER_CAFFE2_DB(name, ...) \
+  CAFFE_REGISTER_CLASS(Caffe2DBRegistry, name, __VA_ARGS__)
+
 /**
  * Returns a database object of the given database type, source and mode. The
  * caller takes the ownership of the pointer. If the database type is not
  * supported, a nullptr is returned. The caller is responsible for examining the
  * validity of the pointer.
  */
-/*inline unique_ptr<DB> CreateDB(
+inline unique_ptr<DB> CreateDB(
     const string& db_type, const string& source, Mode mode) {
   auto result = Caffe2DBRegistry()->Create(db_type, source, mode);
   VLOG(1) << ((!result) ? "not found db " : "found db ") << db_type;
   return result;
-}*/
-
-DB* GetDB(DBClass backend);
+}
   
 } // namespace db  
 } // namespace bubblefs

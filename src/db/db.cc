@@ -184,12 +184,17 @@ class MiniDB : public DB {
   std::mutex file_access_mutex_;
 };
 
-DB* GetDB(const DBClass backend) {
+DB* CreateDB(const DBClass backend) {
   if (backend == DBClass::LEVELDB) { // USE_LEVELDB
     return new LevelDB();
   }
   PANIC("Unknown database backend");
   return nullptr;
+}
+
+void FreeDB(DB** db) {
+  free(*db);
+  *db = nullptr;
 }
   
 } // namespace db  

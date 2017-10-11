@@ -18,10 +18,9 @@
 
 #include "gtest/gtest.h"
 #include "platform/types.h"
-#include "utils/typeid.h"
+#include "utils/caffe2_typeid.h"
 
 namespace bubblefs {
-namespace caffe2 {
 namespace {
 
 class TypeMetaTestFoo {};
@@ -148,5 +147,4 @@ TEST(TypeMetaTest, CtorDtorAndCopy) {
 }
 
 }  // namespace
-}  // namespace caffe2
 }  // namespace bubblefs

@@ -16,8 +16,8 @@
 
 // caffe2/caffe2/core/typeid.h
 
-#ifndef BUBBLEFS_UTILS_TYPEID_H_
-#define BUBBLEFS_UTILS_TYPEID_H_
+#ifndef BUBBLEFS_UTILS_CAFFE2_TYPEID_H_
+#define BUBBLEFS_UTILS_CAFFE2_TYPEID_H_
 
 #include <assert.h>
 #include <stdlib.h>
@@ -34,7 +34,6 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-namespace caffe2 {
   
 typedef intptr_t CaffeTypeId;
 std::map<CaffeTypeId, string>& gTypeNames();
@@ -319,7 +318,6 @@ class TypeMeta {
     return reinterpret_cast<CaffeTypeId>(type_id_bit); \
   }
 
-} // namespace caffe2
 } // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_TYPEID_H_
+#endif // BUBBLEFS_UTILS_CAFFE2_TYPEID_H_
