@@ -57,6 +57,9 @@ ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS)))
 CLIENT_SRCS = $(wildcard $(PROJECT_DIR)/src/client/*.cc)
 CLIENT_OBJS = $(addsuffix .o, $(basename $(CLIENT_SRCS)))
 
+DB_SRCS = $(wildcard $(PROJECT_DIR)/src/db/*.cc)
+DB_OBJS = $(addsuffix .o, $(basename $(DB_SRCS)))
+
 PLATFORM_SRCS = \
 		$(PROJECT_DIR)/src/platform/bdcommon_logging.cc \
         $(PROJECT_DIR)/src/platform/mutex.cc
@@ -78,7 +81,7 @@ UTILS_SRCS = \
         $(PROJECT_DIR)/src/utils/stringpiece.cc
 UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS)))
 
-OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(CLIENT_OBJS)
+OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(DB_OBJS) $(CLIENT_OBJS)
 
 LIBS =
  

@@ -19,14 +19,15 @@
 #ifndef BUBBLEFS_DB_DB_H_
 #define BUBBLEFS_DB_DB_H_
 
+#include "platform/base_error.h"
 #include "platform/macros.h"
 #include "platform/types.h"
-#include "utils/caffe_registry.h"
+#include "utils/caffe2_registry.h"
 
 namespace bubblefs {
 namespace db {
   
-enum class DBClass { LEVELDB };  
+enum class DBClass { MINIDB, LEVELDB };  
   
 /**
  * The mode of the database, whether we are doing a read, write, or creating
@@ -83,11 +84,11 @@ class Transaction {
   /**
    * Puts the key value pair to the database.
    */
-  virtual void Put(const string& key, const string& value) = 0;
+  virtual bool Put(const string& key, const string& value) = 0;
   /**
    * Commits the current writes.
    */
-  virtual void Commit() = 0;
+  virtual bool Commit() = 0;
 
   DISALLOW_COPY_AND_ASSIGN(Transaction);
 };
@@ -100,11 +101,11 @@ class DB {
   DB() { }
   virtual ~DB() { }
   
-  virtual void Open(const string& source, Mode mode) = 0;
+  virtual bool Open(const string& source, Mode mode) = 0;
   /**
    * Closes the database.
    */
-  virtual void Close() = 0;
+  virtual bool Close() = 0;
   /**
    * Returns a cursor to read the database. The caller takes the ownership of
    * the pointer.
@@ -122,13 +123,13 @@ class DB {
   DISALLOW_COPY_AND_ASSIGN(DB);
 };
 
-DB* CreateDB(DBClass backend);
+DB* NewDB(DBClass backend);
 
 void FreeDB(DB** db);
 
 // Database classes are registered by their names so we can do optional
 // dependencies.
-CAFFE_DECLARE_REGISTRY(Caffe2DBRegistry, DB, const string&, Mode);
+CAFFE_DECLARE_REGISTRY(Caffe2DBRegistry, DB);
 #define REGISTER_CAFFE2_DB(name, ...) \
   CAFFE_REGISTER_CLASS(Caffe2DBRegistry, name, __VA_ARGS__)
 
@@ -138,15 +139,15 @@ CAFFE_DECLARE_REGISTRY(Caffe2DBRegistry, DB, const string&, Mode);
  * supported, a nullptr is returned. The caller is responsible for examining the
  * validity of the pointer.
  */
-inline unique_ptr<DB> CreateDB(
-    const string& db_type, const string& source, Mode mode) {
-  auto result = Caffe2DBRegistry()->Create(db_type, source, mode);
-  VLOG(1) << ((!result) ? "not found db " : "found db ") << db_type;
+inline unique_ptr<DB> CreateDB(const string& db_type) {
+  auto result = Caffe2DBRegistry()->Create(db_type);
+  if (!result) {
+    FPRINTF_ERROR("Not found DB %s\n", db_type.c_str());
+  }
   return result;
 }
   
 } // namespace db  
 } // namespace bubblefs
-
 
 #endif // BUBBLEFS_API_DB_H_

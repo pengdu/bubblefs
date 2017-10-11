@@ -58,15 +58,19 @@ class LevelDBTransaction : public Transaction {
     batch_.reset(new leveldb::WriteBatch());
   }
   ~LevelDBTransaction() { Commit(); }
-  void Put(const string& key, const string& value) override {
+  bool Put(const string& key, const string& value) override {
     batch_->Put(key, value);
+    return true;
   }
-  void Commit() override {
+  bool Commit() override {
     leveldb::Status status = db_->Write(leveldb::WriteOptions(), batch_.get());
     batch_.reset(new leveldb::WriteBatch());
-    FPRINTF_CHECK(
-        status.ok(),
-        "Failed to write batch to leveldb. ", status.ToString());
+    if (!status.ok()) {
+      FPRINTF_ERROR("Failed to write batch to leveldb. %s\n", 
+                    status.ToString().c_str());
+      return false;
+    }
+    return true;
   }
 
  private:
@@ -80,7 +84,7 @@ class LevelDB : public DB {
  public:
   LevelDB() { }
   
-  void Open(const string& source, Mode mode) override {
+  bool Open(const string& source, Mode mode) override {
     mode_ = mode;
     leveldb::Options options;
     options.block_size = 65536;
@@ -90,14 +94,17 @@ class LevelDB : public DB {
     options.create_if_missing = mode != READ;
     leveldb::DB* db_temp;
     leveldb::Status status = leveldb::DB::Open(options, source, &db_temp);
-    FPRINTF_CHECK(
-        status.ok(),
-        "Failed to open leveldb ", source, ". ", status.ToString());
+    if (!status.ok()) {
+      FPRINTF_ERROR("Failed to open leveldb %s. %s\n", 
+                    source.c_str(), status.ToString().c_str());
+      return false;
+    }
     db_.reset(db_temp);
     FPRINTF_INFO("Opened leveldb %s\n", source.c_str());
+    return true;
   }
 
-  void Close() override { db_.reset(); }
+  bool Close() override { db_.reset(); return true; }
   std::unique_ptr<Cursor> NewCursor() override {
     return make_unique<LevelDBCursor>(db_.get());
   }

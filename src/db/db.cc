@@ -98,9 +98,9 @@ class MiniDBCursor : public Cursor {
   FILE* file_;
   std::lock_guard<std::mutex> lock_;
   bool valid_;
-  int key_len_;
+  unsigned key_len_;
   vector<char> key_;
-  int value_len_;
+  unsigned value_len_;
   vector<char> value_;
 }; 
 
@@ -112,22 +112,25 @@ class MiniDBTransaction : public Transaction {
     Commit();
   }
 
-  void Put(const string& key, const string& value) override {
-    int key_len = key.size();
-    int value_len = value.size();
+  bool Put(const string& key, const string& value) override {
+    unsigned key_len = key.size();
+    unsigned value_len = value.size();
     PANIC_ENFORCE_EQ(fwrite(&key_len, sizeof(int), 1, file_), 1);
     PANIC_ENFORCE_EQ(fwrite(&value_len, sizeof(int), 1, file_), 1);
     PANIC_ENFORCE_EQ(
         fwrite(key.c_str(), sizeof(char), key_len, file_), key_len);
     PANIC_ENFORCE_EQ(
         fwrite(value.c_str(), sizeof(char), value_len, file_), value_len);
+    return true;
   }
 
-  void Commit() override {
+  bool Commit() override {
     if (file_ != nullptr) {
       PANIC_ENFORCE_EQ(fflush(file_), 0);
       file_ = nullptr;
+      return true;
     }
+    return false;
   }
 
  private:
@@ -142,7 +145,7 @@ class MiniDB : public DB {
   MiniDB() : file_(nullptr) { }
   ~MiniDB() { Close(); }
   
-  void Open(const string& source, Mode mode) override {
+  bool Open(const string& source, Mode mode) override {
     mode_ = mode;
     switch (mode) {
       case NEW:
@@ -156,15 +159,20 @@ class MiniDB : public DB {
         file_ = fopen(source.c_str(), "rb");
         break;
     }
-    PANIC_ENFORCE(file_, "Cannot open file: " + source);
-    FPRINTF_INFO("Opened MiniDB %s\n", source);
+    if (!file_) {
+      PANIC("Cannot open file: %s\n", source.c_str());
+      return false;
+    }
+    FPRINTF_INFO("Opened MiniDB %s\n", source.c_str());
+    return true;
   }
 
-  void Close() override {
+  bool Close() override {
     if (file_) {
       fclose(file_);
     }
     file_ = nullptr;
+    return true;
   }
 
   unique_ptr<Cursor> NewCursor() override {
@@ -184,7 +192,11 @@ class MiniDB : public DB {
   std::mutex file_access_mutex_;
 };
 
-DB* CreateDB(const DBClass backend) {
+REGISTER_CAFFE2_DB(MiniDB, MiniDB);
+// For lazy-minded, one can also call with lower-case name.
+REGISTER_CAFFE2_DB(minidb, MiniDB);
+
+DB* NewDB(const DBClass backend) {
   if (backend == DBClass::LEVELDB) { // USE_LEVELDB
     return new LevelDB();
   }
@@ -193,7 +205,7 @@ DB* CreateDB(const DBClass backend) {
 }
 
 void FreeDB(DB** db) {
-  free(*db);
+  delete (*db);
   *db = nullptr;
 }
   
