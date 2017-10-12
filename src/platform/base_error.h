@@ -19,6 +19,7 @@
 #include <error.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /**
  * 错误输出原则:
@@ -46,10 +47,6 @@
 #define FPRINTF_ERROR(fmt, ...) \
     fprintf(stderr, "ERROR [%s:%d](%s)" fmt, \
     __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
-    
-#define PANIC(fmt, ...) \
-    FPRINTF_ERROR(fmt, ##__VA_ARGS__); \
-    abort()
 
 #define FPRINTF_CHECK(condition, msg) \
     if (!condition) { \
@@ -66,6 +63,11 @@
     if (val >= condition) { \
       FPRINTF_ERROR("%s is not GT %s%c", #condition, #val, CHAR_NEW_LINE); \
     } 
+    
+#define PANIC(fmt, ...) \
+    FPRINTF_ERROR(fmt, ##__VA_ARGS__); \
+    FPRINTF_ERROR("%cPanic%c", CHAR_NEW_LINE, CHAR_NEW_LINE); \
+    abort()
   
 #define PANIC_ENFORCE(condition, msg) \
     if (!condition) { \
@@ -83,6 +85,10 @@
       PANIC("%s is not GT %s%c", #condition, #val, CHAR_NEW_LINE); \
     }    
 
+#define EXIT_FAIL(fmt, ...) \
+    FPRINTF_ERROR(fmt, ##__VA_ARGS__); \
+    FPRINTF_ERROR("%cExit%c", CHAR_NEW_LINE, CHAR_NEW_LINE); \
+    exit(EXIT_FAILURE)
     
 namespace bubblefs {
  

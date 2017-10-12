@@ -17,9 +17,12 @@
 #include "platform/port.h"
 #include "utils/cache.h"
 #include "utils/hash.h"
+#include "utils/stringpiece.h"
 
 namespace bubblefs {
 namespace core {
+  
+using Slice = StringPiece;  
   
 // Single cache shard interface.
 class CacheShard {
@@ -27,14 +30,14 @@ class CacheShard {
   CacheShard() = default;
   virtual ~CacheShard() = default;
 
-  virtual Status Insert(const StringPiece& key, uint32_t hash, void* value,
+  virtual Status Insert(const Slice& key, uint32_t hash, void* value,
                         size_t charge,
-                        void (*deleter)(const StringPiece& key, void* value),
+                        void (*deleter)(const Slice& key, void* value),
                         Cache::Handle** handle, Cache::Priority priority) = 0;
-  virtual Cache::Handle* Lookup(const StringPiece& key, uint32_t hash) = 0;
+  virtual Cache::Handle* Lookup(const Slice& key, uint32_t hash) = 0;
   virtual bool Ref(Cache::Handle* handle) = 0;
   virtual bool Release(Cache::Handle* handle, bool force_erase = false) = 0;
-  virtual void Erase(const StringPiece& key, uint32_t hash) = 0;
+  virtual void Erase(const Slice& key, uint32_t hash) = 0;
   virtual void SetCapacity(size_t capacity) = 0;
   virtual void SetStrictCapacityLimit(bool strict_capacity_limit) = 0;
   virtual size_t GetUsage() const = 0;
@@ -63,13 +66,13 @@ class ShardedCache : public Cache {
   virtual void SetCapacity(size_t capacity) override;
   virtual void SetStrictCapacityLimit(bool strict_capacity_limit) override;
 
-  virtual Status Insert(const StringPiece& key, void* value, size_t charge,
-                        void (*deleter)(const StringPiece& key, void* value),
+  virtual Status Insert(const Slice& key, void* value, size_t charge,
+                        void (*deleter)(const Slice& key, void* value),
                         Handle** handle, Priority priority) override;
-  virtual Handle* Lookup(const StringPiece& key) override;
+  virtual Handle* Lookup(const Slice& key, Statistics* stats) override;
   virtual bool Ref(Handle* handle) override;
   virtual bool Release(Handle* handle, bool force_erase = false) override;
-  virtual void Erase(const StringPiece& key) override;
+  virtual void Erase(const Slice& key) override;
   virtual uint64_t NewId() override;
   virtual size_t GetCapacity() const override;
   virtual bool HasStrictCapacityLimit() const override;
@@ -84,8 +87,8 @@ class ShardedCache : public Cache {
   int GetNumShardBits() const { return num_shard_bits_; }
 
  private:
-  static inline uint32_t HashSlice(const StringPiece& s) {
-    return Hash32(s.data(), s.size(), 0);
+  static inline uint32_t HashSlice(const Slice& s) {
+    return Hash(s.data(), s.size(), 0);
   }
 
   uint32_t Shard(uint32_t hash) {

@@ -16,7 +16,6 @@ limitations under the License.
 #include <algorithm>
 #include <iostream>
 #include "utils/hash.h"
-#include "utils/str_util.h"
 
 namespace bubblefs {
   
@@ -41,6 +40,31 @@ inline void BuildLookupTable(const StringPiece& characters_wanted,
 
 }  // namespace
 
+// 2 small internal utility functions, for efficient hex conversions
+// and no need for snprintf, toupper etc...
+// Originally from wdt/util/EncryptionUtils.cpp - for ToString(true)/DecodeHex:
+static char toHex(unsigned char v) {
+  if (v <= 9) {
+    return '0' + v;
+  }
+  return 'A' + v - 10;
+}
+// most of the code is for validation/error check
+static int fromHex(char c) {
+  // toupper:
+  if (c >= 'a' && c <= 'f') {
+    c -= ('a' - 'A');  // aka 0x20
+  }
+  // validation
+  if (c < '0' || (c > '9' && (c < 'A' || c > 'F'))) {
+    return -1;  // invalid not 0-9A-F hex char
+  }
+  if (c <= '9') {
+    return c - '0';
+  }
+  return c - 'A' + 10;
+}
+
 StringPiece::StringPiece(const StringPieceParts& parts, string* buf) {
   size_t length = 0;
   for (int i = 0; i < parts.num_parts; ++i) {
@@ -62,8 +86,8 @@ string StringPiece::ToString(bool hex) const {
     result.reserve(2 * size_);
     for (size_t i = 0; i < size_; ++i) {
       unsigned char c = data_[i];
-      result.push_back(str_util::ToHex(c >> 4));
-      result.push_back(str_util::ToHex(c & 0xf));
+      result.push_back(toHex(c >> 4));
+      result.push_back(toHex(c & 0xf));
     }
     return result;
   } else {
@@ -85,11 +109,11 @@ bool StringPiece::DecodeHex(string* result) const {
   result->reserve(len / 2);
 
   for (size_t i = 0; i < len;) {
-    int h1 = str_util::FromHex(data_[i++]);
+    int h1 = fromHex(data_[i++]);
     if (h1 < 0) {
       return false;
     }
-    int h2 = str_util::FromHex(data_[i++]);
+    int h2 = fromHex(data_[i++]);
     if (h2 < 0) {
       return false;
     }

@@ -13,24 +13,39 @@
 #include <forward_list>
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include "platform/test.h"
+#include "platform/types.h"
 #include "utils/clock_cache.h"
 #include "utils/lru_cache.h"
 #include "utils/coding.h"
-#include "utils/str_util.h"
 
 namespace bubblefs {
 namespace core {
 
+// stringfy
+template <typename T>
+inline string ToString(T value) {
+#if !(defined OS_ANDROID) && !(defined CYGWIN) && !(defined OS_FREEBSD)
+  return std::to_string(value);
+#else
+  // Andorid or cygwin doesn't support all of C++11, std::to_string() being
+  // one of the not supported features.
+  std::ostringstream os;
+  os << value;
+  return os.str();
+#endif
+}  
+  
 // Conversions between numeric keys/values and the types expected by Cache.
 static std::string EncodeKey(int k) {
   std::string result;
   PutFixed32(&result, k);
   return result;
 }
-static int DecodeKey(const StringPiece& k) {
+static int DecodeKey(const Slice& k) {
   assert(k.size() == 4);
   return DecodeFixed32(k.data());
 }
@@ -42,18 +57,18 @@ static int DecodeValue(void* v) {
 const std::string kLRU = "lru";
 const std::string kClock = "clock";
 
-void dumbDeleter(const StringPiece& key, void* value) {}
+void dumbDeleter(const Slice& key, void* value) {}
 
-void eraseDeleter(const StringPiece& key, void* value) {
+void eraseDeleter(const Slice& key, void* value) {
   Cache* cache = reinterpret_cast<Cache*>(value);
   cache->Erase("foo");
 }
- 
+
 class CacheTest : public ::testing::TestWithParam<std::string> {
  public:
   static CacheTest* current_;
 
-  static void Deleter(const StringPiece& key, void* v) {
+  static void Deleter(const Slice& key, void* v) {
     current_->deleted_keys_.push_back(DecodeKey(key));
     current_->deleted_values_.push_back(DecodeValue(v));
   }
@@ -66,8 +81,8 @@ class CacheTest : public ::testing::TestWithParam<std::string> {
 
   std::vector<int> deleted_keys_;
   std::vector<int> deleted_values_;
-  std::shared_ptr<Cache> cache_;
-  std::shared_ptr<Cache> cache2_;
+  shared_ptr<Cache> cache_;
+  shared_ptr<Cache> cache2_;
 
   CacheTest()
       : cache_(NewCache(kCacheSize, kNumShardBits, false)),
@@ -101,7 +116,7 @@ class CacheTest : public ::testing::TestWithParam<std::string> {
     return nullptr;
   }
 
-  int Lookup(std::shared_ptr<Cache> cache, int key) {
+  int Lookup(shared_ptr<Cache> cache, int key) {
     Cache::Handle* handle = cache->Lookup(EncodeKey(key));
     const int r = (handle == nullptr) ? -1 : DecodeValue(cache->Value(handle));
     if (handle != nullptr) {
@@ -110,12 +125,12 @@ class CacheTest : public ::testing::TestWithParam<std::string> {
     return r;
   }
 
-  void Insert(std::shared_ptr<Cache> cache, int key, int value, int charge = 1) {
+  void Insert(shared_ptr<Cache> cache, int key, int value, int charge = 1) {
     cache->Insert(EncodeKey(key), EncodeValue(value), charge,
                   &CacheTest::Deleter);
   }
 
-  void Erase(std::shared_ptr<Cache> cache, int key) {
+  void Erase(shared_ptr<Cache> cache, int key) {
     cache->Erase(EncodeKey(key));
   }
 
@@ -164,7 +179,7 @@ TEST_P(CacheTest, UsageTest) {
 
   // make sure the cache will be overloaded
   for (uint64_t i = 1; i < kCapacity; ++i) {
-    auto key = str_util::ToString(i);
+    auto key = ToString(i);
     cache->Insert(key, reinterpret_cast<void*>(value), key.size() + 5,
                   dumbDeleter);
   }
@@ -214,7 +229,7 @@ TEST_P(CacheTest, PinnedUsageTest) {
 
   // check that overloading the cache does not change the pinned usage
   for (uint64_t i = 1; i < 2 * kCapacity; ++i) {
-    auto key = str_util::ToString(i);
+    auto key = ToString(i);
     cache->Insert(key, reinterpret_cast<void*>(value), key.size() + 5,
                   dumbDeleter);
   }
@@ -472,7 +487,7 @@ class Value {
 };
 
 namespace {
-void deleter(const StringPiece& key, void* value) {
+void deleter(const Slice& key, void* value) {
   delete static_cast<Value *>(value);
 }
 }  // namespace
@@ -517,7 +532,7 @@ TEST_P(CacheTest, SetCapacity) {
   std::vector<Cache::Handle*> handles(10);
   // Insert 5 entries, but not releasing.
   for (size_t i = 0; i < 5; i++) {
-    std::string key = str_util::ToString(i+1);
+    std::string key = ToString(i+1);
     Status s = cache->Insert(key, new Value(i + 1), 1, &deleter, &handles[i]);
     ASSERT_TRUE(s.ok());
   }
@@ -532,7 +547,7 @@ TEST_P(CacheTest, SetCapacity) {
   // then decrease capacity to 7, final capacity should be 7
   // and usage should be 7
   for (size_t i = 5; i < 10; i++) {
-    std::string key = str_util::ToString(i+1);
+    std::string key = ToString(i+1);
     Status s = cache->Insert(key, new Value(i + 1), 1, &deleter, &handles[i]);
     ASSERT_TRUE(s.ok());
   }
@@ -560,7 +575,7 @@ TEST_P(CacheTest, SetStrictCapacityLimit) {
   std::vector<Cache::Handle*> handles(10);
   Status s;
   for (size_t i = 0; i < 10; i++) {
-    std::string key = str_util::ToString(i + 1);
+    std::string key = ToString(i + 1);
     s = cache->Insert(key, new Value(i + 1), 1, &deleter, &handles[i]);
     ASSERT_TRUE(s.ok());
     ASSERT_NE(nullptr, handles[i]);
@@ -582,7 +597,7 @@ TEST_P(CacheTest, SetStrictCapacityLimit) {
   // test3: init with flag being true.
   std::shared_ptr<Cache> cache2 = NewLRUCache(5, 0, true);
   for (size_t i = 0; i < 5; i++) {
-    std::string key = str_util::ToString(i + 1);
+    std::string key = ToString(i + 1);
     s = cache2->Insert(key, new Value(i + 1), 1, &deleter, &handles[i]);
     ASSERT_TRUE(s.ok());
     ASSERT_NE(nullptr, handles[i]);
@@ -612,14 +627,14 @@ TEST_P(CacheTest, OverCapacity) {
 
   // Insert n+1 entries, but not releasing.
   for (size_t i = 0; i < n + 1; i++) {
-    std::string key = str_util::ToString(i+1);
+    std::string key = ToString(i+1);
     Status s = cache->Insert(key, new Value(i + 1), 1, &deleter, &handles[i]);
     ASSERT_TRUE(s.ok());
   }
 
   // Guess what's in the cache now?
   for (size_t i = 0; i < n + 1; i++) {
-    std::string key = str_util::ToString(i+1);
+    std::string key = ToString(i+1);
     auto h = cache->Lookup(key);
     ASSERT_TRUE(h != nullptr);
     if (h) cache->Release(h);
@@ -640,7 +655,7 @@ TEST_P(CacheTest, OverCapacity) {
   // This is consistent with the LRU policy since the element 0
   // was released first
   for (size_t i = 0; i < n + 1; i++) {
-    std::string key = str_util::ToString(i+1);
+    std::string key = ToString(i+1);
     auto h = cache->Lookup(key);
     if (h) {
       ASSERT_NE(i, 0U);

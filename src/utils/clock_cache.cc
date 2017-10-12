@@ -10,7 +10,6 @@
 // rocksdb/cache/clock_cache.cc
 
 #include "utils/clock_cache.h"
-
 #include <assert.h>
 #include <atomic>
 #include <deque>
@@ -24,6 +23,8 @@
 namespace bubblefs {
 namespace core {
 
+using Slice = StringPiece;  
+  
 namespace {
 
 // An implementation of the Cache interface based on CLOCK algorithm, with
@@ -156,11 +157,11 @@ namespace {
 
 // Cache entry meta data.
 struct CacheHandle {
-  StringPiece key;
+  Slice key;
   uint32_t hash;
   void* value;
   size_t charge;
-  void (*deleter)(const StringPiece&, void* value);
+  void (*deleter)(const Slice&, void* value);
 
   // Flags and counters associated with the cache handle:
   //   lowest bit: n-cache bit
@@ -174,8 +175,8 @@ struct CacheHandle {
 
   CacheHandle(const CacheHandle& a) { *this = a; }
 
-  CacheHandle(const StringPiece& k, void* v,
-              void (*del)(const StringPiece& key, void* value))
+  CacheHandle(const Slice& k, void* v,
+              void (*del)(const Slice& key, void* value))
       : key(k), value(v), deleter(del) {}
 
   CacheHandle& operator=(const CacheHandle& a) {
@@ -189,12 +190,12 @@ struct CacheHandle {
 
 // Key of hash map. We store hash value with the key for convenience.
 struct CacheKey {
-  StringPiece key;
+  Slice key;
   uint32_t hash_value;
 
   CacheKey() = default;
 
-  CacheKey(const StringPiece& k, uint32_t h) {
+  CacheKey(const Slice& k, uint32_t h) {
     key = k;
     hash_value = h;
   }
@@ -228,12 +229,12 @@ class ClockCacheShard : public CacheShard {
   // Interfaces
   virtual void SetCapacity(size_t capacity) override;
   virtual void SetStrictCapacityLimit(bool strict_capacity_limit) override;
-  virtual Status Insert(const StringPiece& key, uint32_t hash, void* value,
+  virtual Status Insert(const Slice& key, uint32_t hash, void* value,
                         size_t charge,
-                        void (*deleter)(const StringPiece& key, void* value),
+                        void (*deleter)(const Slice& key, void* value),
                         Cache::Handle** handle,
                         Cache::Priority priority) override;
-  virtual Cache::Handle* Lookup(const StringPiece& key, uint32_t hash) override;
+  virtual Cache::Handle* Lookup(const Slice& key, uint32_t hash) override;
   // If the entry in in cache, increase reference count and return true.
   // Return false otherwise.
   //
@@ -241,8 +242,8 @@ class ClockCacheShard : public CacheShard {
   virtual bool Ref(Cache::Handle* handle) override;
   virtual bool Release(Cache::Handle* handle,
                        bool force_erase = false) override;
-  virtual void Erase(const StringPiece& key, uint32_t hash) override;
-  bool EraseAndConfirm(const StringPiece& key, uint32_t hash,
+  virtual void Erase(const Slice& key, uint32_t hash) override;
+  bool EraseAndConfirm(const Slice& key, uint32_t hash,
                        CleanupContext* context);
   virtual size_t GetUsage() const override;
   virtual size_t GetPinnedUsage() const override;
@@ -301,9 +302,9 @@ class ClockCacheShard : public CacheShard {
   // Has to hold mutex_ before being called.
   bool EvictFromCache(size_t charge, CleanupContext* context);
 
-  CacheHandle* Insert(const StringPiece& key, uint32_t hash, void* value,
+  CacheHandle* Insert(const Slice& key, uint32_t hash, void* value,
                       size_t change,
-                      void (*deleter)(const StringPiece& key, void* value),
+                      void (*deleter)(const Slice& key, void* value),
                       bool hold_reference, CleanupContext* context);
 
   // Guards list_, head_, and recycle_. In addition, updating table_ also has
@@ -520,8 +521,8 @@ void ClockCacheShard::SetStrictCapacityLimit(bool strict_capacity_limit) {
 }
 
 CacheHandle* ClockCacheShard::Insert(
-    const StringPiece& key, uint32_t hash, void* value, size_t charge,
-    void (*deleter)(const StringPiece& key, void* value), bool hold_reference,
+    const Slice& key, uint32_t hash, void* value, size_t charge,
+    void (*deleter)(const Slice& key, void* value), bool hold_reference,
     CleanupContext* context) {
   MutexLock l(&mutex_);
   bool success = EvictFromCache(charge, context);
@@ -565,16 +566,16 @@ CacheHandle* ClockCacheShard::Insert(
   return handle;
 }
 
-Status ClockCacheShard::Insert(const StringPiece& key, uint32_t hash, void* value,
+Status ClockCacheShard::Insert(const Slice& key, uint32_t hash, void* value,
                                size_t charge,
-                               void (*deleter)(const StringPiece& key, void* value),
+                               void (*deleter)(const Slice& key, void* value),
                                Cache::Handle** out_handle,
                                Cache::Priority priority) {
   CleanupContext context;
   HashTable::accessor accessor;
   char* key_data = new char[key.size()];
   memcpy(key_data, key.data(), key.size());
-  StringPiece key_copy(key_data, key.size());
+  Slice key_copy(key_data, key.size());
   CacheHandle* handle = Insert(key_copy, hash, value, charge, deleter,
                                out_handle != nullptr, &context);
   Status s;
@@ -589,7 +590,7 @@ Status ClockCacheShard::Insert(const StringPiece& key, uint32_t hash, void* valu
   return s;
 }
 
-Cache::Handle* ClockCacheShard::Lookup(const StringPiece& key, uint32_t hash) {
+Cache::Handle* ClockCacheShard::Lookup(const Slice& key, uint32_t hash) {
   HashTable::const_accessor accessor;
   if (!table_.find(accessor, CacheKey(key, hash))) {
     return nullptr;
@@ -625,13 +626,13 @@ bool ClockCacheShard::Release(Cache::Handle* h, bool force_erase) {
   return erased;
 }
 
-void ClockCacheShard::Erase(const StringPiece& key, uint32_t hash) {
+void ClockCacheShard::Erase(const Slice& key, uint32_t hash) {
   CleanupContext context;
   EraseAndConfirm(key, hash, &context);
   Cleanup(context);
 }
 
-bool ClockCacheShard::EraseAndConfirm(const StringPiece& key, uint32_t hash,
+bool ClockCacheShard::EraseAndConfirm(const Slice& key, uint32_t hash,
                                       CleanupContext* context) {
   MutexLock l(&mutex_);
   HashTable::accessor accessor;

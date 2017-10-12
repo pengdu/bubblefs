@@ -114,6 +114,7 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////////////
   
+extern uint32_t Hash(const char* data, size_t n, uint32_t seed);
 extern uint32 Hash32(const char* data, size_t n, uint32 seed);
 extern uint64 Hash64(const char* data, size_t n, uint64 seed);
 

@@ -46,15 +46,15 @@ void ShardedCache::SetStrictCapacityLimit(bool strict_capacity_limit) {
   strict_capacity_limit_ = strict_capacity_limit;
 }
 
-Status ShardedCache::Insert(const StringPiece& key, void* value, size_t charge,
-                            void (*deleter)(const StringPiece& key, void* value),
+Status ShardedCache::Insert(const Slice& key, void* value, size_t charge,
+                            void (*deleter)(const Slice& key, void* value),
                             Handle** handle, Priority priority) {
   uint32_t hash = HashSlice(key);
   return GetShard(Shard(hash))
       ->Insert(key, hash, value, charge, deleter, handle, priority);
 }
 
-Cache::Handle* ShardedCache::Lookup(const StringPiece& key) {
+Cache::Handle* ShardedCache::Lookup(const Slice& key, Statistics* stats) {
   uint32_t hash = HashSlice(key);
   return GetShard(Shard(hash))->Lookup(key, hash);
 }
@@ -69,7 +69,7 @@ bool ShardedCache::Release(Handle* handle, bool force_erase) {
   return GetShard(Shard(hash))->Release(handle, force_erase);
 }
 
-void ShardedCache::Erase(const StringPiece& key) {
+void ShardedCache::Erase(const Slice& key) {
   uint32_t hash = HashSlice(key);
   GetShard(Shard(hash))->Erase(key, hash);
 }
@@ -134,8 +134,8 @@ std::string ShardedCache::GetPrintableOptions() const {
   char buffer[kBufferSize];
   {
     MutexLock l(&capacity_mutex_);
-    snprintf(buffer, kBufferSize, "    capacity : %ld\n",
-             (long)capacity_);
+    snprintf(buffer, kBufferSize, "    capacity : %lu\n",
+             capacity_);
     ret.append(buffer);
     snprintf(buffer, kBufferSize, "    num_shard_bits : %d\n", num_shard_bits_);
     ret.append(buffer);

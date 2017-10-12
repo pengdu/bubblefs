@@ -36,7 +36,7 @@ LRUHandleTable::~LRUHandleTable() {
   delete[] list_;
 }
 
-LRUHandle* LRUHandleTable::Lookup(const StringPiece& key, uint32_t hash) {
+LRUHandle* LRUHandleTable::Lookup(const Slice& key, uint32_t hash) {
   return *FindPointer(key, hash);
 }
 
@@ -56,7 +56,7 @@ LRUHandle* LRUHandleTable::Insert(LRUHandle* h) {
   return old;
 }
 
-LRUHandle* LRUHandleTable::Remove(const StringPiece& key, uint32_t hash) {
+LRUHandle* LRUHandleTable::Remove(const Slice& key, uint32_t hash) {
   LRUHandle** ptr = FindPointer(key, hash);
   LRUHandle* result = *ptr;
   if (result != nullptr) {
@@ -66,7 +66,7 @@ LRUHandle* LRUHandleTable::Remove(const StringPiece& key, uint32_t hash) {
   return result;
 }
 
-LRUHandle** LRUHandleTable::FindPointer(const StringPiece& key, uint32_t hash) {
+LRUHandle** LRUHandleTable::FindPointer(const Slice& key, uint32_t hash) {
   LRUHandle** ptr = &list_[hash & (length_ - 1)];
   while (*ptr != nullptr && ((*ptr)->hash != hash || key != (*ptr)->key())) {
     ptr = &(*ptr)->next_hash;
@@ -270,7 +270,7 @@ void LRUCacheShard::SetStrictCapacityLimit(bool strict_capacity_limit) {
   strict_capacity_limit_ = strict_capacity_limit;
 }
 
-Cache::Handle* LRUCacheShard::Lookup(const StringPiece& key, uint32_t hash) {
+Cache::Handle* LRUCacheShard::Lookup(const Slice& key, uint32_t hash) {
   MutexLock l(&mutex_);
   LRUHandle* e = table_.Lookup(key, hash);
   if (e != nullptr) {
@@ -338,9 +338,9 @@ bool LRUCacheShard::Release(Cache::Handle* handle, bool force_erase) {
   return last_reference;
 }
 
-Status LRUCacheShard::Insert(const StringPiece& key, uint32_t hash, void* value,
+Status LRUCacheShard::Insert(const Slice& key, uint32_t hash, void* value,
                              size_t charge,
-                             void (*deleter)(const StringPiece& key, void* value),
+                             void (*deleter)(const Slice& key, void* value),
                              Cache::Handle** handle, Cache::Priority priority) {
   // Allocate the memory here outside of the mutex
   // If the cache is full, we'll have to release it
@@ -415,7 +415,7 @@ Status LRUCacheShard::Insert(const StringPiece& key, uint32_t hash, void* value,
   return s;
 }
 
-void LRUCacheShard::Erase(const StringPiece& key, uint32_t hash) {
+void LRUCacheShard::Erase(const Slice& key, uint32_t hash) {
   LRUHandle* e;
   bool last_reference = false;
   {

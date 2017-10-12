@@ -13,13 +13,16 @@
 #define BUBBLEFS_UTILS_LRU_CACHE_H_
 
 #include <string>
+#include "platform/macros.h"
 #include "platform/port.h"
 #include "utils/autovector.h"
 #include "utils/sharded_cache.h"
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace core {
+namespace core {  
+ 
+using Slice = StringPiece;  
   
 // LRU cache implementation
 
@@ -49,7 +52,7 @@ namespace core {
 
 struct LRUHandle {
   void* value;
-  void (*deleter)(const StringPiece&, void* value);
+  void (*deleter)(const Slice&, void* value);
   LRUHandle* next_hash;
   LRUHandle* next;
   LRUHandle* prev;
@@ -68,13 +71,13 @@ struct LRUHandle {
 
   char key_data[1];  // Beginning of key
 
-  StringPiece key() const {
+  Slice key() const {
     // For cheaper lookups, we allow a temporary Handle object
     // to store a pointer to a key in "value".
     if (next == this) {
-      return *(reinterpret_cast<StringPiece*>(value));
+      return *(reinterpret_cast<Slice*>(value));
     } else {
-      return StringPiece(key_data, key_length);
+      return Slice(key_data, key_length);
     }
   }
 
@@ -125,9 +128,9 @@ class LRUHandleTable {
   LRUHandleTable();
   ~LRUHandleTable();
 
-  LRUHandle* Lookup(const StringPiece& key, uint32_t hash);
+  LRUHandle* Lookup(const Slice& key, uint32_t hash);
   LRUHandle* Insert(LRUHandle* h);
-  LRUHandle* Remove(const StringPiece& key, uint32_t hash);
+  LRUHandle* Remove(const Slice& key, uint32_t hash);
 
   template <typename T>
   void ApplyToAllCacheEntries(T func) {
@@ -146,7 +149,7 @@ class LRUHandleTable {
   // Return a pointer to slot that points to a cache entry that
   // matches key/hash.  If there is no such cache entry, return a
   // pointer to the trailing slot in the corresponding linked list.
-  LRUHandle** FindPointer(const StringPiece& key, uint32_t hash);
+  LRUHandle** FindPointer(const Slice& key, uint32_t hash);
 
   void Resize();
 
@@ -158,8 +161,7 @@ class LRUHandleTable {
 };
 
 // A single shard of sharded cache.
-// class TF_ALIGN_AS(CACHE_LINE_SIZE) LRUCacheShard : public CacheShard {
-class LRUCacheShard : public CacheShard {
+class ALIGNAS(CACHE_LINE_SIZE) LRUCacheShard : public CacheShard {
  public:
   LRUCacheShard();
   virtual ~LRUCacheShard();
@@ -176,16 +178,16 @@ class LRUCacheShard : public CacheShard {
   void SetHighPriorityPoolRatio(double high_pri_pool_ratio);
 
   // Like Cache methods, but with an extra "hash" parameter.
-  virtual Status Insert(const StringPiece& key, uint32_t hash, void* value,
+  virtual Status Insert(const Slice& key, uint32_t hash, void* value,
                         size_t charge,
-                        void (*deleter)(const StringPiece& key, void* value),
+                        void (*deleter)(const Slice& key, void* value),
                         Cache::Handle** handle,
                         Cache::Priority priority) override;
-  virtual Cache::Handle* Lookup(const StringPiece& key, uint32_t hash) override;
+  virtual Cache::Handle* Lookup(const Slice& key, uint32_t hash) override;
   virtual bool Ref(Cache::Handle* handle) override;
   virtual bool Release(Cache::Handle* handle,
                        bool force_erase = false) override;
-  virtual void Erase(const StringPiece& key, uint32_t hash) override;
+  virtual void Erase(const Slice& key, uint32_t hash) override;
 
   // Although in some platforms the update of size_t is atomic, to make sure
   // GetUsage() and GetPinnedUsage() work correctly under any platform, we'll
@@ -305,6 +307,6 @@ class LRUCache : public ShardedCache {
 };
 
 }  // namespace core
-}  // namespace rocksdb
+}  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_LRU_CACHE_H_

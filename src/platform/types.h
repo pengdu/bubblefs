@@ -67,6 +67,7 @@ namespace bubblefs {
 // polluted.
 /* using override */
 using std::set;
+using std::shared_ptr;
 using std::string;
 using std::unique_ptr;
 using std::vector;
@@ -102,5 +103,9 @@ using CaffeMap = std::map<Key, Value>;
 
 }  // namespace bubblefs
 
+// KB, MB, GB to bytes
+#define KBYTES (1024L)
+#define MBYTES (1024L*1024L)
+#define GBYTES (1024L*1024L*1024)
 
 #endif // BUBBLEFS_PLATFORM_TYPES_H_

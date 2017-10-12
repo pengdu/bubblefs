@@ -34,12 +34,15 @@
 #include <mutex>
 #include <unordered_map>
 #include "platform/macros.h"
+#include "utils/statistics.h"
 #include "utils/status.h"
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
 namespace core {
 
+using Slice = StringPiece;  
+  
 class Cache;
 
 // Create a new cache with a fixed size capacity. The cache is sharded
@@ -99,8 +102,8 @@ class Cache {
   //
   // When the inserted entry is no longer needed, the key and
   // value will be passed to "deleter".
-  virtual Status Insert(const StringPiece& key, void* value, size_t charge,
-                        void (*deleter)(const StringPiece& key, void* value),
+  virtual Status Insert(const Slice& key, void* value, size_t charge,
+                        void (*deleter)(const Slice& key, void* value),
                         Handle** handle = nullptr,
                         Priority priority = Priority::LOW) = 0;
 
@@ -111,7 +114,7 @@ class Cache {
   // longer needed.
   // If stats is not nullptr, relative tickers could be used inside the
   // function.
-  virtual Handle* Lookup(const StringPiece& key) = 0;
+  virtual Handle* Lookup(const Slice& key, Statistics* stats = nullptr) = 0;
 
   // Increments the reference count for the handle if it refers to an entry in
   // the cache. Returns true if refcount was incremented; otherwise, returns
@@ -142,7 +145,7 @@ class Cache {
   // If the cache contains entry for key, erase it.  Note that the
   // underlying entry will be kept around until all existing handles
   // to it have been released.
-  virtual void Erase(const StringPiece& key) = 0;
+  virtual void Erase(const Slice& key) = 0;
   // Return a new numeric id.  May be used by multiple clients who are
   // sharding the same cache to partition the key space.  Typically the
   // client will allocate a new id at startup and prepend the id to
@@ -198,11 +201,12 @@ class Cache {
 
   // Mark the last inserted object as being a raw data block. This will be used
   // in tests. The default implementation does nothing.
-  virtual void TEST_mark_as_data_block(const StringPiece& key, size_t charge) {}
+  virtual void TEST_mark_as_data_block(const Slice& key, size_t charge) {}
 
  private:
   // No copying allowed
-  DISALLOW_COPY_AND_ASSIGN(Cache);
+  Cache(const Cache&);
+  Cache& operator=(const Cache&);
 };
 
 } // namespace core

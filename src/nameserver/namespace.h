@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <string>
 #include <functional>
-#include "db/db.h"
+#include "db/leveldb.h"
 #include "platform/macros.h"
 #include "platform/mutexlock.h"
 
@@ -16,7 +16,7 @@
 namespace bubblefs {
 namespace bfs {
   
-class Namespace {
+class NameSpace {
  public:
   NameSpace(bool standalone = true);
   ~NameSpace();
