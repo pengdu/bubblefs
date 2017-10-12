@@ -103,6 +103,12 @@ static const int64_t kMicrosPerWeek = kMicrosPerDay * 7;
 static const int64_t kNanosPerMicrosecond = 1000;
 static const int64_t kNanosPerMillisecond = 1000000;
 static const int64_t kNanosPerSecond = 1000000000;
+
+using ChronoTime = decltype(std::chrono::high_resolution_clock::now());
+
+ChronoTime chrono_now();
+
+double chrono_time_diff(ChronoTime t1, ChronoTime t2);
   
 typedef int64_t nsecs_t;       // nano-seconds
 

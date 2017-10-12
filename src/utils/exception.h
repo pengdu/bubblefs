@@ -19,6 +19,9 @@
 #ifndef BUBBLEFS_UTILS_EXCEPTION_H_
 #define BUBBLEFS_UTILS_EXCEPTION_H_
 
+#include <exception>
+#include <exception>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -27,10 +30,18 @@ namespace bubblefs {
 class FatalException : public std::exception {
  public:
   FatalException(const char* filename, int line, const std::string& message)
-      : filename_(filename), line_(line), message_(message) {}
+    : filename_(filename), line_(line) { 
+    std::stringstream ss;
+    ss << "FatalException ";
+    ss << "[" << filename_ << ":" << line_ << "] ";
+    ss << message;
+    message_ = ss.str();    
+  }
   virtual ~FatalException() throw();
 
-  virtual const char* what() const throw();
+  virtual const char* what() const throw() {
+    return message_.c_str();
+  }
 
   const char* filename() const { return filename_; }
   int line() const { return line_; }
@@ -41,6 +52,9 @@ class FatalException : public std::exception {
   const int line_;
   const std::string message_;
 };
+
+#define throw_fatal_exception(...) { char buffer[1000]; sprintf(buffer, __VA_ARGS__); std::string detail{buffer}; \
+  throw FatalException(detail.c_str(), __FILE__, __LINE__, "Default FatalException"); }
 
 } // namespace bubblefs
 

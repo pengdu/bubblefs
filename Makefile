@@ -85,7 +85,7 @@ OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(DB_OBJS) $(CLI
 
 LIBS =
  
-BIN = $(OBJS)
+BIN = $(ALL_OBJS)
 
 .PHONY:all
 all: $(BIN)

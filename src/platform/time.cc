@@ -32,8 +32,8 @@
 #include "platform/threadlocal.h"
 
 namespace bubblefs {
-namespace timeutil {
-
+namespace timeutil {  
+  
 // linux
 nsecs_t systemTime(int clock)
 {
@@ -48,6 +48,17 @@ nsecs_t systemTime(int clock)
     t.tv_sec = t.tv_nsec = 0;
     clock_gettime(clocks[clock], &t);
     return nsecs_t(t.tv_sec)*1000000000LL + t.tv_nsec;
+}
+
+ChronoTime chrono_now() {
+  return std::chrono::high_resolution_clock::now();
+}
+
+double chrono_time_diff(ChronoTime t1, ChronoTime t2) {
+  typedef std::chrono::microseconds ms;
+  auto diff = t2 - t1;
+  ms counter = std::chrono::duration_cast<ms>(diff);
+  return counter.count() / 1000.0;
 }
 
 int toMillisecondTimeoutDelay(nsecs_t referenceTime, nsecs_t timeoutTime)

@@ -101,6 +101,14 @@ inline int Mod(int a, int b) {
   return r >= 0 ? r : r + b;
 }
 
+inline bool FloatEqual(float a, float b) {
+  const float EPSILON = 1e-5;
+  if (fabs(a - b) < EPSILON) {
+    return true;
+  }
+  return false;
+}
+
 /**
  * split array by index.
  * used by sync multi thread task,
