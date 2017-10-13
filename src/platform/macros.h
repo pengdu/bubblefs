@@ -436,5 +436,10 @@ namespace {  /*anonymous namespace */                           \
 
 # define VOID_TEMP_FAILURE_RETRY(expression) \
     static_cast<void>(TEMP_FAILURE_RETRY(expression))
+    
+// in linux/limits.h PATH_MAX    
+#ifndef PATH_MAX_LEN
+#define PATH_MAX_LEN 4096
+#endif
 
 #endif // BUBBLEFS_PLATFORM_MACROS_H_

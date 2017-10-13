@@ -49,8 +49,8 @@ CFLAGS = -Wall -W -fPIC $(DFLAGS) $(OPT)
 
 SRCEXTS = .c .cc .cpp .proto
 
-#ALL_DIRS = $(PROJECT_DIR)/src/platform $(PROJECT_DIR)/src/utils
-ALL_DIRS = $(PROJECT_DIR)/src/*
+ALL_DIRS = $(PROJECT_DIR)/src/platform $(PROJECT_DIR)/src/utils
+#ALL_DIRS = $(PROJECT_DIR)/src/*
 ALL_SRCS = $(foreach d, $(ALL_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS))))
 ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS)))
 
@@ -85,7 +85,7 @@ OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(DB_OBJS) $(CLI
 
 LIBS =
  
-BIN = $(OBJS)
+BIN = $(ALL_OBJS)
 
 .PHONY:all
 all: $(BIN)
