@@ -25,6 +25,7 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_MACROS_H_
 #define BUBBLEFS_PLATFORM_MACROS_H_
 
+#include <inttypes.h> // PRId64
 #include <stddef.h>  // For size_t.
 #include <string.h>  // For memcpy.
 #include <unistd.h>
