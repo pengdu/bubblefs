@@ -163,7 +163,7 @@ bool CondVar::TimedWait(uint64_t abs_time_us, const char* msg) {
   return false;
 }
 
-bool CondVar::IntervalWait(uint64_t timeout_interval, const char* msg) {
+bool CondVar::TimedIntervalWait(uint64_t timeout_interval, const char* msg) {
   timespec ts;
   struct timeval tv;
   gettimeofday(&tv, nullptr);

@@ -157,6 +157,7 @@ enum Code {
   DO_NOT_USE_RESERVED_FOR_FUTURE_EXPANSION_USE_DEFAULT_IN_SWITCH_INSTEAD_ = 30
 }; // enum Code
 
+// Expand Custom SubCode
 enum SubCode {
   NONE = 0,
   MUTEX_TIMEOUT = 1,

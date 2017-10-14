@@ -27,10 +27,10 @@ public:
         }
         signaled_ = false;
     }
-    bool IntervalWait(int64_t timeout) {
+    bool TimedIntervalWait(int64_t timeout) {
         MutexLock lock(&mutex_);
         if (!signaled_) {
-            cv_.IntervalWait(timeout);
+            cv_.TimedIntervalWait(timeout);
         }
         bool ret = signaled_;
         signaled_ = false;

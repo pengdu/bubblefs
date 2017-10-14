@@ -220,7 +220,7 @@ private:
                     }
                     continue;
                 } else if (queue_.empty() && !stop_) {
-                    work_cv_.IntervalWait(wait_time, "ThreadProcTimeWait");
+                    work_cv_.TimedIntervalWait(wait_time, "ThreadProcTimeWait");
                     continue;
                 }
             }

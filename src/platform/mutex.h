@@ -108,7 +108,7 @@ class CondVar {
   // Timed condition wait.  Returns true if timeout occurred.
   bool TimedWait(uint64_t abs_time_us, const char* msg = nullptr);
   // Time wait in timeout ms, return true if signalled
-  bool IntervalWait(uint64_t timeout_interval, const char* msg = nullptr);
+  bool TimedIntervalWait(uint64_t timeout_interval, const char* msg = nullptr);
   void Signal();
   void SignalAll();
   void Broadcast();
