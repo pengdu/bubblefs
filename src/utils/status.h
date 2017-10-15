@@ -37,7 +37,7 @@ class WARN_UNUSED_RESULT Status;
 class Status {
  public:
   /// Create a success status.
-  Status() {}
+  Status() : state_(nullptr) {}
 
   /// \brief Create a status with the specified error code and msg as a
   /// human-readable string containing more detailed information.

@@ -38,11 +38,21 @@ class MiniDBCursor : public Cursor {
  public:
   explicit MiniDBCursor(FILE* f, std::mutex* mutex)
     : file_(f), lock_(*mutex), valid_(true) {
-    // We call Next() to read in the first entry.
-    Next();
   }
   ~MiniDBCursor() {}
 
+  Status GetStatus() override {
+    if (valid_)
+      return Status::OK();
+    return Status(error::USER_ERROR, "Cursor is not valid");
+  }
+  
+  Status StartSeek() override {
+    // We call Next() to read in the first entry.
+    Next();
+    return Status::OK();
+  }
+  
   void Seek(const string& /*key*/) override {
     PANIC("MiniDB does not support seeking to a specific key.\n");
   }
@@ -124,13 +134,13 @@ class MiniDBTransaction : public Transaction {
     return true;
   }
 
-  bool Commit() override {
+  Status Commit() override {
     if (file_ != nullptr) {
       PANIC_ENFORCE_EQ(fflush(file_), 0);
       file_ = nullptr;
-      return true;
+      return Status::OK();
     }
-    return false;
+    return Status(error::USER_ERROR, "MiniDB Commit fail as file_ is nullptr");
   }
 
  private:
@@ -145,7 +155,7 @@ class MiniDB : public DB {
   MiniDB() : file_(nullptr) { }
   ~MiniDB() { Close(); }
   
-  bool Open(const string& source, Mode mode) override {
+  Status Open(const string& source, Mode mode) override {
     mode_ = mode;
     switch (mode) {
       case NEW:
@@ -161,18 +171,22 @@ class MiniDB : public DB {
     }
     if (!file_) {
       PANIC("Cannot open file: %s\n", source.c_str());
-      return false;
+      return Status(error::USER_ERROR, "Cannot open MiniDB file");
     }
     FPRINTF_INFO("Opened MiniDB %s\n", source.c_str());
-    return true;
+    return Status::OK();
+  }
+  
+  Status Open(const string& source, Mode mode, int64_t db_cache_size) override {
+    return Status::NotSupported();
   }
 
-  bool Close() override {
+  Status Close() override {
     if (file_) {
       fclose(file_);
     }
     file_ = nullptr;
-    return true;
+    return Status::OK();
   }
 
   unique_ptr<Cursor> NewCursor() override {
@@ -192,12 +206,8 @@ class MiniDB : public DB {
   std::mutex file_access_mutex_;
 };
 
-REGISTER_CAFFE2_DB(MiniDB, MiniDB);
-// For lazy-minded, one can also call with lower-case name.
-REGISTER_CAFFE2_DB(minidb, MiniDB);
-
-DB* NewDB(const DBClass backend) {
-  if (backend == DBClass::LEVELDB) { // USE_LEVELDB
+DB* NewDB(DBType backend) {
+  if (backend == DBType::kLevelDB) { // USE_LEVELDB
     return new LevelDB();
   }
   PANIC("Unknown database backend");
@@ -208,6 +218,9 @@ void DeleteDB(DB** db) {
   delete (*db);
   *db = nullptr;
 }
+
+// For lazy-minded, one can also call with lower-case name.
+//REGISTER_CAFFE2_DB(minidb, MiniDB);
   
 } // namespace db  
 } // namespace bubblefs

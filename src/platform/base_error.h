@@ -50,7 +50,7 @@
 
 #define FPRINTF_CHECK(condition, msg) \
     if (!condition) { \
-      std::string str_msg = msg; \
+      std::string str_msg(msg); \
       FPRINTF_ERROR("%s%c", str_msg.c_str(), CHAR_NEW_LINE); \
     }
     
@@ -71,7 +71,7 @@
   
 #define PANIC_ENFORCE(condition, msg) \
     if (!condition) { \
-      std::string str_msg = msg; \
+      std::string str_msg(msg); \
       PANIC("%s%c", str_msg.c_str(), CHAR_NEW_LINE); \
     }
     

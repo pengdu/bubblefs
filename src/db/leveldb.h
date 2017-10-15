@@ -32,11 +32,11 @@ namespace db {
 class LevelDBCursor : public Cursor {
  public:
   explicit LevelDBCursor(leveldb::DB* db)
-      : iter_(db->NewIterator(leveldb::ReadOptions())) {
-    SeekToFirst();
-    FPRINTF_CHECK(iter_->status().ok(), iter_->status().ToString());
-  }
+      : iter_(db->NewIterator(leveldb::ReadOptions())) { }
   ~LevelDBCursor() {}
+  
+  Status GetStatus() override;
+  Status StartSeek() override;
   void Seek(const string& key) override { iter_->Seek(key); }
   bool SupportsSeek() override { return true; }
   void SeekToFirst() override { iter_->SeekToFirst(); }
@@ -52,24 +52,15 @@ class LevelDBCursor : public Cursor {
 class LevelDBTransaction : public Transaction {
  public:
   explicit LevelDBTransaction(leveldb::DB* db) : db_(db) {
-    FPRINTF_CHECK(db_, "db_ is NULL");
+    PANIC_ENFORCE(db_, "db_ is NULL");
     batch_.reset(new leveldb::WriteBatch());
   }
-  ~LevelDBTransaction() { Commit(); }
+  ~LevelDBTransaction() { }
   bool Put(const string& key, const string& value) override {
     batch_->Put(key, value);
     return true;
   }
-  bool Commit() override {
-    leveldb::Status status = db_->Write(leveldb::WriteOptions(), batch_.get());
-    batch_.reset(new leveldb::WriteBatch());
-    if (!status.ok()) {
-      FPRINTF_ERROR("Failed to write batch to leveldb. %s\n", 
-                    status.ToString().c_str());
-      return false;
-    }
-    return true;
-  }
+  Status Commit() override;
 
  private:
   leveldb::DB* db_;
@@ -80,29 +71,13 @@ class LevelDBTransaction : public Transaction {
 
 class LevelDB : public DB {
  public:
-  LevelDB() { }
+  LevelDB() : db_(nullptr), db_cache_(nullptr) { }
   
-  bool Open(const string& source, Mode mode) override {
-    mode_ = mode;
-    leveldb::Options options;
-    options.block_size = 65536;
-    options.write_buffer_size = 268435456;
-    options.max_open_files = 100;
-    options.error_if_exists = mode == NEW;
-    options.create_if_missing = mode != READ;
-    leveldb::DB* db_temp;
-    leveldb::Status status = leveldb::DB::Open(options, source, &db_temp);
-    if (!status.ok()) {
-      FPRINTF_ERROR("Failed to open leveldb %s. %s\n", 
-                    source.c_str(), status.ToString().c_str());
-      return false;
-    }
-    db_.reset(db_temp);
-    FPRINTF_INFO("Opened leveldb %s\n", source.c_str());
-    return true;
-  }
+  Status Open(const string& source, Mode mode) override;
+  
+  Status Open(const string& source, Mode mode, int64_t db_cache_size) override;
 
-  bool Close() override { db_.reset(); return true; }
+  Status Close() override { db_.reset(); return Status::OK(); }
   std::unique_ptr<Cursor> NewCursor() override {
     return make_unique<LevelDBCursor>(db_.get());
   }
@@ -112,6 +87,7 @@ class LevelDB : public DB {
 
  private:
   std::unique_ptr<leveldb::DB> db_;
+  std::unique_ptr<leveldb::Cache> db_cache_;
 };
   
 } // namespace db  

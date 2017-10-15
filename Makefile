@@ -77,6 +77,7 @@ UTILS_SRCS = \
         $(PROJECT_DIR)/src/utils/bdcommon_str_util.cc \
 		$(PROJECT_DIR)/src/utils/bdcommon_thread.cc \
         $(PROJECT_DIR)/src/utils/hash.cc \
+        $(PROJECT_DIR)/src/utils/status.cc \
         $(PROJECT_DIR)/src/utils/string_format.cc \
         $(PROJECT_DIR)/src/utils/stringpiece.cc
 UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS)))

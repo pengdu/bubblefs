@@ -152,12 +152,14 @@ enum Code {
   // if you write C++ code that switches on this enumeration, add a default:
   // case instead of a case that mentions this enumeration entry.
   //
-  // Nobody should rely on the value (currently 20) listed here.  It
+  // Nobody should rely on the value (currently 30) listed here.  It
   // may change in the future.
-  DO_NOT_USE_RESERVED_FOR_FUTURE_EXPANSION_USE_DEFAULT_IN_SWITCH_INSTEAD_ = 30
+  USER_ERROR = 30, // MAX
+  
+  DO_NOT_USE_RESERVED_FOR_FUTURE_EXPANSION_USE_DEFAULT_IN_SWITCH_INSTEAD_ = 31
 }; // enum Code
 
-// Expand Custom SubCode
+// Custom SubCode Expansions
 enum SubCode {
   NONE = 0,
   MUTEX_TIMEOUT = 1,
