@@ -43,8 +43,8 @@ namespace bubblefs {
 namespace port {
 
 // 基础库不输出log到文件
-#define DBG(fmt, ...) FPRINTF_INFO(fmt, ##__VA_ARGS__)
-#define INFO(fmt, ...) FPRINTF_INFO(fmt, ##__VA_ARGS__)
+#define DBG(fmt, ...) PRINTF_INFO(fmt, ##__VA_ARGS__)
+#define INFO(fmt, ...) PRINTF_INFO(fmt, ##__VA_ARGS__)
 #define ERR(fmt, ...) LOG_MESSAGE((m_last_error), (sizeof(m_last_error)), fmt, ##__VA_ARGS__)
   
 int unix_socket_listen(const char* sockname, bool remove_previous_file) {
@@ -54,18 +54,18 @@ int unix_socket_listen(const char* sockname, bool remove_previous_file) {
 
     base::fd_guard fd(socket(AF_LOCAL, SOCK_STREAM, 0));
     if (fd < 0) {
-        FPRINTF_ERROR("Fail to create unix socket\n");
+        PRINTF_ERROR("Fail to create unix socket\n");
         return -1;
     }
     if (remove_previous_file) {
         remove(sockname);
     }
     if (bind(fd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
-        FPRINTF_ERROR("Fail to bind sockfd=%d as unix socket=%s\n", fd.getfd(), sockname);
+        PRINTF_ERROR("Fail to bind sockfd=%d as unix socket=%s\n", fd.getfd(), sockname);
         return -1;
     }
     if (listen(fd, SOMAXCONN) != 0) {
-        FPRINTF_ERROR("Fail to listen to sockfd=%d\n", fd.getfd());
+        PRINTF_ERROR("Fail to listen to sockfd=%d\n", fd.getfd());
         return -1;
     }
     return fd.release();
@@ -82,11 +82,11 @@ int unix_socket_connect(const char* sockname) {
 
     base::fd_guard fd(socket(AF_LOCAL, SOCK_STREAM, 0));
     if (fd < 0) {
-        FPRINTF_ERROR("Fail to create unix socket\n");
+        PRINTF_ERROR("Fail to create unix socket\n");
         return -1;
     }
     if (connect(fd, (struct sockaddr*)&addr, sizeof(addr)) != 0) {
-        FPRINTF_ERROR("Fail to connect to sockfd=%d as unix socket=%s\n", fd.getfd(), sockname);
+        PRINTF_ERROR("Fail to connect to sockfd=%d as unix socket=%s\n", fd.getfd(), sockname);
         return -1;
     }
     return fd.release();

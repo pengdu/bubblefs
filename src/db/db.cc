@@ -69,7 +69,7 @@ class MiniDBCursor : public Cursor {
     // First, read in the key and value length.
     if (fread(&key_len_, sizeof(int), 1, file_) == 0) {
       // Reaching EOF.
-      FPRINTF_INFO("EOF reached, setting valid to false\n");
+      PRINTF_INFO("EOF reached, setting valid to false\n");
       valid_ = false;
       return;
     }
@@ -173,7 +173,7 @@ class MiniDB : public DB {
       PANIC("Cannot open file: %s\n", source.c_str());
       return Status(error::USER_ERROR, "Cannot open MiniDB file");
     }
-    FPRINTF_INFO("Opened MiniDB %s\n", source.c_str());
+    PRINTF_INFO("Opened MiniDB %s\n", source.c_str());
     return Status::OK();
   }
   

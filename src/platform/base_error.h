@@ -40,33 +40,33 @@
 #define _LOG_LAST_ERROR(fmt, ...) \
     LOG_MESSAGE((m_last_error), (sizeof(m_last_error)), fmt, ##__VA_ARGS__)
     
-#define FPRINTF_INFO(fmt, ...) \
+#define PRINTF_INFO(fmt, ...) \
     fprintf(stdout, "INFO [%s:%d](%s)" fmt, \
     __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)    
     
-#define FPRINTF_ERROR(fmt, ...) \
+#define PRINTF_ERROR(fmt, ...) \
     fprintf(stderr, "ERROR [%s:%d](%s)" fmt, \
     __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
-#define FPRINTF_CHECK(condition, msg) \
+#define PRINTF_CHECK(condition, msg) \
     if (!condition) { \
       std::string str_msg(msg); \
-      FPRINTF_ERROR("%s%c", str_msg.c_str(), CHAR_NEW_LINE); \
+      PRINTF_ERROR("%s%c", str_msg.c_str(), CHAR_NEW_LINE); \
     }
     
-#define FPRINTF_CHECK_EQ(condition, val) \
+#define PRINTF_CHECK_EQ(condition, val) \
     if (val != condition) { \
-      FPRINTF_ERROR("%s is not EQ %s%c", #condition, #val, CHAR_NEW_LINE); \
+      PRINTF_ERROR("%s is not EQ %s%c", #condition, #val, CHAR_NEW_LINE); \
     }
     
-#define FPRINTF_CHECK_GT(condition, val) \
+#define PRINTF_CHECK_GT(condition, val) \
     if (val >= condition) { \
-      FPRINTF_ERROR("%s is not GT %s%c", #condition, #val, CHAR_NEW_LINE); \
+      PRINTF_ERROR("%s is not GT %s%c", #condition, #val, CHAR_NEW_LINE); \
     } 
     
 #define PANIC(fmt, ...) \
-    FPRINTF_ERROR(fmt, ##__VA_ARGS__); \
-    FPRINTF_ERROR("%cPanic%c", CHAR_NEW_LINE, CHAR_NEW_LINE); \
+    PRINTF_ERROR(fmt, ##__VA_ARGS__); \
+    PRINTF_ERROR("%cPanic%c", CHAR_NEW_LINE, CHAR_NEW_LINE); \
     abort()
   
 #define PANIC_ENFORCE(condition, msg) \
@@ -86,8 +86,8 @@
     }    
 
 #define EXIT_FAIL(fmt, ...) \
-    FPRINTF_ERROR(fmt, ##__VA_ARGS__); \
-    FPRINTF_ERROR("%cExit%c", CHAR_NEW_LINE, CHAR_NEW_LINE); \
+    PRINTF_ERROR(fmt, ##__VA_ARGS__); \
+    PRINTF_ERROR("%cExit%c", CHAR_NEW_LINE, CHAR_NEW_LINE); \
     exit(EXIT_FAILURE)
     
 namespace bubblefs {

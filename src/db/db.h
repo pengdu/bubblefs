@@ -151,7 +151,7 @@ CAFFE_DECLARE_REGISTRY(Caffe2DBRegistry, DB);
 inline unique_ptr<DB> CreateDB(const string& db_type) {
   auto result = Caffe2DBRegistry()->Create(db_type);
   if (!result) {
-    FPRINTF_ERROR("Not found DB %s\n", db_type.c_str());
+    PRINTF_ERROR("Not found DB %s\n", db_type.c_str());
   }
   return result;
 }
