@@ -131,7 +131,7 @@ int32_t SequenceTimer::StopTimer(int64_t timer_id) {
     std::unordered_map<int64_t, std::shared_ptr<TimerItem> >::iterator it =
         m_id_2_timer.find(timer_id);
     if (m_id_2_timer.end() == it) {
-        _LOG_LAST_ERROR("timer id %ld not exist", timer_id);
+        _LOG_LAST_ERROR("timer id " PRId64_FORMAT " not exist", timer_id);
         return kTIMER_UNEXISTED;
     }
 

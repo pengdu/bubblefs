@@ -406,7 +406,7 @@ string HumanReadableNum(int64 value) {
     value = -value;
   }
   if (value < 1000) {
-    Appendf(&s, "%ld", value);
+    Appendf(&s, PRId64_FORMAT, value);
   } else if (value >= static_cast<int64>(1e15)) {
     // Number bigger than 1E15; use that notation.
     Appendf(&s, "%0.3G", static_cast<double>(value));
@@ -438,7 +438,7 @@ string HumanReadableNumBytes(int64 num_bytes) {
   if (num_bytes < 1024) {
     // No fractions for bytes.
     char buf[8];  // Longest possible string is '-XXXXB'
-    snprintf(buf, sizeof(buf), "%s%ldB", neg_str,
+    snprintf(buf, sizeof(buf), "%s" PRId64_FORMAT "B", neg_str,
              static_cast<int64>(num_bytes));
     return string(buf);
   }

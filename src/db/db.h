@@ -125,7 +125,7 @@ class DB {
 
 DB* NewDB(DBClass backend);
 
-void FreeDB(DB** db);
+void DeleteDB(DB** db);
 
 // Database classes are registered by their names so we can do optional
 // dependencies.

@@ -37,14 +37,14 @@ Status::Status(error::Code code, StringPiece msg) {
   state_->msg = msg.ToString();
 }
 
-Status::Status(error::Code code, int subcode) {
+Status::Status(error::Code code, int64_t subcode) {
   assert(code != error::OK);
   state_ = std::unique_ptr<State>(new State);
   state_->code = code;
   state_->subcode = subcode;
 }
 
-Status::Status(error::Code code, int subcode, StringPiece msg) {
+Status::Status(error::Code code, int64_t subcode, StringPiece msg) {
   assert(code != error::OK);
   state_ = std::unique_ptr<State>(new State);
   state_->code = code;
@@ -52,9 +52,9 @@ Status::Status(error::Code code, int subcode, StringPiece msg) {
   state_->msg = msg.ToString();
 }
 
-Status::Status(error::Code code, int subcode, StringPiece msg, StringPiece msg2) {
+Status::Status(error::Code code, int64_t subcode, StringPiece msg, StringPiece msg2) {
   assert(code != error::OK);
-  assert(subcode != error::MAX_SUB_CODE);
+  assert(subcode != error::MAX_INTERNAL_SUB_CODE);
   state_ = std::unique_ptr<State>(new State);
   state_->code = code;
   state_->subcode = subcode;
@@ -178,10 +178,10 @@ string Status::ToString() const {
     }
     string result(type);
     result += ": ";
-    int sub = subcode();
+    int64_t sub = subcode();
     if (sub != error::NONE) {
       memset(tmp, 0, sizeof(tmp));
-      snprintf(tmp, sizeof(tmp), "Subode(%d), ", sub);
+      snprintf(tmp, sizeof(tmp), "Subode(" PRId64_FORMAT ")", sub);
       result.append(tmp);
     }
     result += state_->msg;

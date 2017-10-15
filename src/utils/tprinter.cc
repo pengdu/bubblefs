@@ -10,13 +10,14 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include "platform/macros.h"
 
 namespace bubblefs {
 namespace bdcommon {
 
 static inline std::string NumToString(int64_t num) {
     char buf[32];
-    snprintf(buf, sizeof(buf), "%ld", num);
+    snprintf(buf, sizeof(buf), PRId64_FORMAT, num);
     return buf;
 }
 

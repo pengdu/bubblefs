@@ -202,7 +202,7 @@ void AppendNumberTo(string* str, uint64_t num) {
 
 string NumberToString(int64_t num) {
     char buf[32];
-    snprintf(buf, sizeof(buf), "%ld", num);
+    snprintf(buf, sizeof(buf), PRId64_FORMAT, num);
     return string(buf);
 }
 

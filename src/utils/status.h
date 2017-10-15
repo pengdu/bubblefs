@@ -42,11 +42,11 @@ class Status {
   /// \brief Create a status with the specified error code and msg as a
   /// human-readable string containing more detailed information.
   Status(error::Code code, StringPiece msg);
-  Status(error::Code code, int subcode = error::NONE);
-  Status(error::Code code, int subcode, StringPiece msg);
-  Status(error::Code code, int subcode, StringPiece msg, StringPiece msg2);
+  Status(error::Code code, int64_t subcode = error::NONE);
+  Status(error::Code code, int64_t subcode, StringPiece msg);
+  Status(error::Code code, int64_t subcode, StringPiece msg, StringPiece msg2);
   
-  Status(error::Code code, const StringPiece& msg, const StringPiece& msg2)
+  Status(error::Code code, const StringPiece msg, const StringPiece msg2)
       : Status(code, error::NONE, msg, msg2) {}
 
   /// Copy the specified status.
@@ -69,16 +69,16 @@ class Status {
     return Status(error::NOT_FOUND, msg, msg2);
   }
   // Fast path for not found without malloc;
-  static Status NotFound(int subcode = error::NONE) { return Status(error::NOT_FOUND, subcode); }
+  static Status NotFound(int64_t subcode = error::NONE) { return Status(error::NOT_FOUND, subcode); }
   
   static Status InvalidArgument(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::INVALID_ARGUMENT, msg, msg2);
   }
-  static Status InvalidArgument(int subcode = error::NONE) {
+  static Status InvalidArgument(int64_t subcode = error::NONE) {
     return Status(error::INVALID_ARGUMENT, subcode);
   }
   
-  static Status Aborted(int subcode = error::NONE) { return Status(error::ABORTED, subcode); }
+  static Status Aborted(int64_t subcode = error::NONE) { return Status(error::ABORTED, subcode); }
   static Status Aborted(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::ABORTED, msg, msg2);
   }
@@ -86,19 +86,19 @@ class Status {
   static Status IOError(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::IOERROR, msg, msg2);
   }
-  static Status IOError(int subcode = error::NONE) { return Status(error::IOERROR, subcode); }
+  static Status IOError(int64_t subcode = error::NONE) { return Status(error::IOERROR, subcode); }
   
   static Status NotSupported(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::NOT_SUPPORTED, msg, msg2);
   }
-  static Status NotSupported(int subcode = error::NONE) {
+  static Status NotSupported(int64_t subcode = error::NONE) {
     return Status(error::NOT_SUPPORTED, subcode);
   }
   
   static Status Incomplete(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::INCOMPLETE, msg, msg2);
   }
-  static Status Incomplete(int subcode = error::NONE) {
+  static Status Incomplete(int64_t subcode = error::NONE) {
     return Status(error::INCOMPLETE, subcode);
   }
 
@@ -131,7 +131,7 @@ class Status {
     return ok() ? empty_string() : state_->msg;
   }
   
-  int subcode() const {
+  int64_t subcode() const {
     return ok() ? error::NONE : state_->subcode;
   }
 
@@ -162,14 +162,14 @@ class Status {
   static const string& empty_string();
   struct State {
     error::Code code;
-    int subcode;
+    int64_t subcode;
     string msg;
   };
   // OK status has a `NULL` state_.  Otherwise, `state_` points to
   // a `State` structure containing the error code and message(s)
   std::unique_ptr<State> state_;
   
-  static const char* msgs[static_cast<int>(error::SubCode::MAX_SUB_CODE)];
+  static const char* msgs[static_cast<int64_t>(error::MAX_INTERNAL_SUB_CODE)];
 
   void SlowCopyFrom(const State* src);
 };

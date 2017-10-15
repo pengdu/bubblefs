@@ -263,7 +263,7 @@ int DirUtil::MakeDirP(const std::string& path) {
         return -1;
     }
     if (path.size() > PATH_MAX) {
-        _LOG_LAST_ERROR("path length %ld > PATH_MAX(%d)", path.size(), PATH_MAX);
+        _LOG_LAST_ERROR("path length %zu > PATH_MAX(%d)", path.size(), PATH_MAX);
         return -1;
     }
 

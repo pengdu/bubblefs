@@ -63,6 +63,24 @@ void LogString(const char* fname, int line, int severity,
                const std::string& message);
 }  // namespace internal
 
+// indexfs/common/logging.h
+struct Logger {
+
+  // Ensure all buffered log entries get
+  // flushed to the underlying storage system.
+  //
+  static void FlushLogFiles();
+
+  // Shutdown the log sub-system.
+  //
+  static void Shutdown();
+
+  // Open the log sub-system. Use the specified
+  // file name to create the underlying log file.
+  //
+  static void Initialize(const char* log_fname);
+};
+
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_LOGGING_H_

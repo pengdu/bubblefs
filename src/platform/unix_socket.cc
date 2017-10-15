@@ -317,7 +317,7 @@ NetAddr NetIO::Accept(NetAddr listen_addr)
         || 0 == (socket_info->_state & LISTEN_ADDR)
         || 0 == (socket_info->_state & TCP_PROTOCOL))
     {
-        ERR("accept an addr[%lu] not be listened", listen_addr);
+        ERR("accept an addr[" PRIu64_FORMAT "] not be listened", listen_addr);
         return INVAILD_NETADDR;
     }
     // 如果监听的fd关闭了，尝试重新打开监听

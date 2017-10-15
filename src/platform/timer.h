@@ -131,7 +131,7 @@ public:
         if (timeout == -1 || interval > timeout) {
             char buf[30];
             now_time_str(buf, 30);
-            fprintf(stderr, "[TimeChecker] %s %s use %ld us\n", buf, msg.c_str(), interval);
+            fprintf(stderr, "[TimeChecker] %s %s use " PRId64_FORMAT " us\n", buf, msg.c_str(), interval);
         }
         start_ = get_micros();
     }

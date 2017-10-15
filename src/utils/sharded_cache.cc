@@ -134,7 +134,7 @@ std::string ShardedCache::GetPrintableOptions() const {
   char buffer[kBufferSize];
   {
     MutexLock l(&capacity_mutex_);
-    snprintf(buffer, kBufferSize, "    capacity : %lu\n",
+    snprintf(buffer, kBufferSize, "    capacity : %zu\n",
              capacity_);
     ret.append(buffer);
     snprintf(buffer, kBufferSize, "    num_shard_bits : %d\n", num_shard_bits_);

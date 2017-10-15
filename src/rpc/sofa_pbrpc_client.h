@@ -98,7 +98,7 @@ bool NewStub(RpcClient* rpc_client, const std::string server, T** stub) {
 }
 
 template <class T>
-void FreeStub(T** stub) {
+void DeleteStub(T** stub) {
   delete (*stub);
   *stub = nullptr;
 }

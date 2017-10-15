@@ -21,10 +21,8 @@
 
 #include <string>
 #include "db/db.h"
+#include "db/leveldb_common.h"
 #include "gflags/gflags.h"
-#include "leveldb/db.h"
-#include "leveldb/cache.h"
-#include "leveldb/write_batch.h"
 #include "platform/base_error.h"
 #include "utils/unique_ptr.h"
 

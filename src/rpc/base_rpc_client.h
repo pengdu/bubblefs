@@ -8,6 +8,8 @@
 namespace bubblefs {
 namespace rpc {
 
+enum RpcType { kSofaPbrpc, kThriftRpc };  
+  
 struct RpcOptions {
   int32_t rpc_timeout;
   int retry_times;

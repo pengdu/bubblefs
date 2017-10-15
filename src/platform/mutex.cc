@@ -111,8 +111,8 @@ void Mutex::AssertHeld() {
   assert(locked_);
 #endif
   if (0 == pthread_equal(owner_, pthread_self())) {
-    fprintf(stderr, "mutex is held by two calling threads %lu:%lu\n",
-            (unsigned long)owner_, (unsigned long)pthread_self());
+    fprintf(stderr, "mutex is held by two calling threads " PRIu64_FORMAT ":" PRIu64_FORMAT "\n",
+            (uint64_t)owner_, (uint64_t)pthread_self());
     abort();
   }
 }

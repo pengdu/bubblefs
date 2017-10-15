@@ -168,7 +168,7 @@ enum SubCode {
   STALE_FILE = 6,
   MEMORY_LIMIT = 7,
   
-  MAX_SUB_CODE
+  MAX_INTERNAL_SUB_CODE
 }; // enum SubCode
 
 } // namespace error

@@ -296,6 +296,9 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 #define LL_FORMAT "ll"  // As in "%lld". Note that "q" is poor form also.
 #endif
 
+#define PRId64_FORMAT "%" PRId64
+#define PRIu64_FORMAT "%" PRIu64
+
 // This is not very useful as it does not expand defined symbols if
 // called directly. Use its counterpart without the _NO_EXPANSION
 // suffix, below.

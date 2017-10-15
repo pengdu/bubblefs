@@ -284,7 +284,7 @@ void ThreadPoolImpl::Impl::StartBGThreads() {
 #if __GLIBC_PREREQ(2, 12)
     auto th_handle = p_t.native_handle();
     char name_buf[16];
-    snprintf(name_buf, sizeof name_buf, "rocksdb:bg%lu",
+    snprintf(name_buf, sizeof name_buf, "bubblefs:bg%zu",
              bgthreads_.size());
     name_buf[sizeof name_buf - 1] = '\0';
     pthread_setname_np(th_handle, name_buf);

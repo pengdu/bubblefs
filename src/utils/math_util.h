@@ -72,6 +72,11 @@ namespace mathutil {
 #define MATH_EPSILON                0.000001f
 /**@}*/
 
+// Bit constants for fast bitwise calculation.
+static unsigned char kBits[] = {
+  1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, 1 << 6, 1 << 7
+};
+
 template <typename Float>
 inline bool IsFinite(const Float& number) {
 #if defined(OS_POSIX)
@@ -99,14 +104,6 @@ inline bool IsNaN(const Float& number) {
 inline int Mod(int a, int b) {
   int r = a % b;
   return r >= 0 ? r : r + b;
-}
-
-inline bool FloatEqual(float a, float b) {
-  const float EPSILON = 1e-5;
-  if (fabs(a - b) < EPSILON) {
-    return true;
-  }
-  return false;
 }
 
 /**
@@ -226,6 +223,34 @@ IntegralType MathUtil::CeilOrFloorOfRatio(IntegralType numerator,
     const IntegralType floor_of_ratio = rounded_toward_zero - adjustment;
     return floor_of_ratio;
   }
+}
+
+inline bool FloatEqual(float a, float b) {
+  const float EPSILON = 1e-5;
+  if (fabs(a - b) < EPSILON) {
+    return true;
+  }
+  return false;
+}
+
+static inline int ToLog2(int value) {
+  return static_cast<int>(floor(log2(value)));
+}
+
+// The number of bits necessary to hold the given index.
+//
+// ------------------------
+//   sample input/output
+// ------------------------
+//   0           -->  0
+//   1           -->  1
+//   2,3         -->  2
+//   4,5,6,7     -->  3
+//   128,129,255 -->  8
+// ------------------------
+static inline int ToRadix(int index) {
+  assert(index >= 0);
+  return index == 0 ? 0 : 1 + ToLog2(index);
 }
 
 } // namespace mathutil 

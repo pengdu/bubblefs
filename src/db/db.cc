@@ -204,7 +204,7 @@ DB* NewDB(const DBClass backend) {
   return nullptr;
 }
 
-void FreeDB(DB** db) {
+void DeleteDB(DB** db) {
   delete (*db);
   *db = nullptr;
 }
