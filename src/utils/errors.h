@@ -60,12 +60,11 @@ void AppendToMessage(Status* status, Args... args) {
 
 #define DECLARE_ERROR(FUNC, CONST)                                       \
   template <typename... Args>                                            \
-  ::bubblefs::Status FUNC(Args... args) {                              \
-    return ::bubblefs::Status(::bubblefs::error::CONST,              \
-                              ::bubblefs::strings::StrCat(args...)); \
+  Status FUNC(Args... args) {                              \
+    return Status(error::CONST, strings::StrCat(args...)); \
   }                                                                      \
-  inline bool Is##FUNC(const ::bubblefs::Status& status) {             \
-    return status.code() == ::bubblefs::error::CONST;                  \
+  inline bool Is##FUNC(const Status& status) {             \
+    return status.code() == error::CONST;                  \
   }
 
 DECLARE_ERROR(Cancelled, CANCELLED)
@@ -98,7 +97,7 @@ DECLARE_ERROR(UserError, USER_ERROR)
 #undef DECLARE_ERROR
 
 // The CanonicalCode() for non-errors.
-using ::bubblefs::error::OK;
+using error::OK;
 
 }  // namespace errors
 }  // namespace bubblefs
