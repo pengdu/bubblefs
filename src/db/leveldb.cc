@@ -27,6 +27,7 @@ Status LevelDBTransaction::Commit() {
 }
 
 Status LevelDB::Open(const string& source, Mode mode) {
+  source_ = source;
   mode_ = mode;
   leveldb::Options options;
   options.block_size = DEFAULT_LEVELDB_BLOCK_SIZE;
@@ -42,11 +43,12 @@ Status LevelDB::Open(const string& source, Mode mode) {
     return Status(error::USER_ERROR, ss.str());
   }
   db_.reset(db_temp);
-  PRINTF_INFO("Opened leveldb %s\n", source.c_str());
   return Status::OK(); 
 }
 
 Status LevelDB::Open(const string& source, Mode mode, int64_t db_cache_size) {
+  source_ = source;
+  mode_ = mode;
   leveldb::Cache* db_cache_temp = leveldb::NewLRUCache(db_cache_size * MBYTES);
   if (!db_cache_temp) {
     return Status(error::USER_ERROR, "Failed to new leveldb lru cache");
@@ -64,12 +66,28 @@ Status LevelDB::Open(const string& source, Mode mode, int64_t db_cache_size) {
     return Status(error::USER_ERROR, ss.str());
   }
   db_.reset(db_temp);
-  PRINTF_INFO("Opened leveldb %s\n", source.c_str());
+  return Status::OK();
+}
+
+Status LevelDB::Close() { 
+  db_.reset();
+  db_cache_.reset(); 
   return Status::OK();
 }
 
 bool LevelDB::Valid() {
   return (nullptr != db_);
+}
+
+Status LevelDB::DestroyDB() {
+  Close();
+  leveldb::Options options;
+  leveldb::Status s = leveldb::DestroyDB(source_, options);
+  if (s.ok())
+    return Status::OK();
+  std::stringstream ss;
+  ss << "Leveldb failed to DestroyDB source: " << source_ << ". " << s.ToString();
+  return Status(error::USER_ERROR, ss.str());
 }
 
 Status LevelDB::Get(const string& key, string* value) {
@@ -98,8 +116,6 @@ Status LevelDB::Delete(const string& key) {
   ss << "Leveldb failed to Delete key: " << key << ". " << s.ToString();
   return Status(error::USER_ERROR, ss.str());
 }
-
-
 
 } // namespace db
 } // namespace bubblefs

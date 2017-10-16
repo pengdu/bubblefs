@@ -125,6 +125,8 @@ class DB {
   
   virtual bool Valid() = 0;
   
+  virtual Status DestroyDB() = 0;
+  
   virtual Status Get(const string& key, string* value) = 0;
   
   virtual Status Put(const string& key, const string& value) = 0;
@@ -132,6 +134,7 @@ class DB {
   virtual Status Delete(const string& key) = 0;
 
  protected:
+  string source_;
   Mode mode_;
 
   DISALLOW_COPY_AND_ASSIGN(DB);
@@ -164,7 +167,6 @@ inline unique_ptr<DB> CreateDB(const string& db_type) {
   return result;
 }
 */
-
   
 } // namespace db  
 } // namespace bubblefs

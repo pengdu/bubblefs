@@ -94,7 +94,8 @@ class LevelDB : public DB {
   
   Status Open(const string& source, Mode mode, int64_t db_cache_size) override;
 
-  Status Close() override { db_.reset(); return Status::OK(); }
+  Status Close() override;
+  
   std::unique_ptr<Cursor> NewCursor() override {
     return make_unique<LevelDBCursor>(db_.get());
   }
@@ -103,6 +104,8 @@ class LevelDB : public DB {
   }
   
   bool Valid() override;
+  
+  Status DestroyDB() override;
   
   Status Get(const string& key, string* value) override;
   

@@ -156,6 +156,7 @@ class MiniDB : public DB {
   ~MiniDB() { Close(); }
   
   Status Open(const string& source, Mode mode) override {
+    source_ = source;
     mode_ = mode;
     switch (mode) {
       case NEW:
@@ -201,6 +202,10 @@ class MiniDB : public DB {
   
   bool Valid() override {
     return (nullptr != file_);
+  }
+  
+  Status DestroyDB() override {
+    return Status::NotSupported();
   }
   
   Status Get(const string& key, string* value) override {
