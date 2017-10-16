@@ -36,7 +36,7 @@ namespace core {
 #ifndef _MSC_VER
 const size_t Arena::kInlineSize;
 #endif
-const size_t Arena::kMinBlockSize = 4096;
+const size_t Arena::kMinBlockSize = 1024;
 const size_t Arena::kMaxBlockSize = 2u << 30;
 static const int kAlignUnit = sizeof(void*);
 

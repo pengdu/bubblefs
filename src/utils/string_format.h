@@ -10,6 +10,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <iomanip>
+#include <sstream>
 #include <string>
 
 namespace bubblefs {
@@ -22,6 +24,13 @@ size_t StringFormatAppend(std::string* dst, const char* format, ...);
 size_t StringFormatTo(std::string* dst, const char* format, ...);
 
 std::string StringFormat(const char* format, ...);
+
+// caffe/include/caffe/util/format.hpp
+inline std::string format_int(int n, int numberOfLeadingZeros = 0 ) {
+  std::ostringstream s;
+  s << std::setw(numberOfLeadingZeros) << std::setfill('0') << n;
+  return s.str();
+}
 
 } // namespace bdcommon
 } // namespace bubblefs

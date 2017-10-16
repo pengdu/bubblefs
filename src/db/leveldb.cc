@@ -64,7 +64,7 @@ Status LevelDB::Open(const string& source, Mode mode, int64_t db_cache_size) {
     return Status(error::USER_ERROR, ss.str());
   }
   db_.reset(db_temp);
-  FPRINTF_INFO("Opened leveldb %s\n", source.c_str());
+  PRINTF_INFO("Opened leveldb %s\n", source.c_str());
   return Status::OK();
 }
 

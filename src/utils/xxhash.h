@@ -54,10 +54,7 @@ It depends on successfully passing SMHasher test set.
 #ifndef BUBBLEFS_UTILS_XXHASH_H_
 #define BUBBLEFS_UTILS_XXHASH_H_
 
-#if defined (__cplusplus)
 namespace bubblefs {
-#endif
-
 
 //****************************
 // Type
@@ -147,10 +144,6 @@ To free memory context, use XXH32_digest(), or free().
 #define XXH32_result XXH32_digest
 #define XXH32_getIntermediateResult XXH32_intermediateDigest
 
-
-
-#if defined (__cplusplus)
 }  // namespace bubblefs
-#endif
 
 #endif // BUBBLEFS_UTILS_XXHASH_H_
