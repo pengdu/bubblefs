@@ -198,6 +198,22 @@ class MiniDB : public DB {
     PANIC_ENFORCE(this->mode_ == NEW || this->mode_ == WRITE, "mode is not NEW or WRITE");
     return make_unique<MiniDBTransaction>(file_, &file_access_mutex_);
   }
+  
+  bool Valid() override {
+    return (nullptr != file_);
+  }
+  
+  Status Get(const string& key, string* value) override {
+    return Status::NotSupported();
+  }
+  
+  Status Put(const string& key, const string& value) override {
+    return Status::NotSupported();
+  }
+  
+  Status Delete(const string& key) override {
+    return Status::NotSupported();
+  }
 
  private:
   FILE* file_;
@@ -206,11 +222,12 @@ class MiniDB : public DB {
   std::mutex file_access_mutex_;
 };
 
-DB* NewDB(DBType backend) {
-  if (backend == DBType::kLevelDB) { // USE_LEVELDB
+// std::unique_ptr<DB> db(CreateDB(db_type, name, NEW));
+DB* NewDB(DBType db_type) {
+  if (db_type == DBType::kLevelDB) { // USE_LEVELDB
     return new LevelDB();
   }
-  PANIC("Unknown database backend");
+  PANIC("Unknown database %d\n", db_type);
   return nullptr;
 }
 

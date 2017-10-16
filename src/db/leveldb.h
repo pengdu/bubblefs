@@ -29,6 +29,9 @@
 namespace bubblefs {
 namespace db {
   
+// std::unique_ptr<DB> db(CreateDB(db_type, name, READ));
+// std::unique_ptr<Cursor> cursor(db->NewCursor());
+// TestCursor(cursor.get());
 class LevelDBCursor : public Cursor {
  public:
   explicit LevelDBCursor(leveldb::DB* db)
@@ -49,6 +52,20 @@ class LevelDBCursor : public Cursor {
   std::unique_ptr<leveldb::Iterator> iter_; // leveldb::Iterator* iter_;
 };
 
+// std::unique_ptr<DB> db(CreateDB(db_type, name, NEW));
+//  if (!db.get()) {
+//    LOG(ERROR) << "Cannot create db of type " << db_type;
+//    return false;
+//  }
+//  std::unique_ptr<Transaction> trans(db->NewTransaction());
+//  for (int i = 0; i < kMaxItems; ++i) {
+//    std::stringstream ss;
+//    ss << std::setw(2) << std::setfill('0') << i;
+//    trans->Put(ss.str(), ss.str());
+//  }
+//  trans->Commit();
+//  trans.reset();
+//  db.reset();
 class LevelDBTransaction : public Transaction {
  public:
   explicit LevelDBTransaction(leveldb::DB* db) : db_(db) {
@@ -84,6 +101,14 @@ class LevelDB : public DB {
   std::unique_ptr<Transaction> NewTransaction() override {
     return make_unique<LevelDBTransaction>(db_.get());
   }
+  
+  bool Valid() override;
+  
+  Status Get(const string& key, string* value) override;
+  
+  Status Put(const string& key, const string& value) override;
+  
+  Status Delete(const string& key) override;
 
  private:
   std::unique_ptr<leveldb::DB> db_;

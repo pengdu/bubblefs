@@ -35,10 +35,10 @@ Status LevelDB::Open(const string& source, Mode mode) {
   options.error_if_exists = mode == NEW;
   options.create_if_missing = mode != READ;
   leveldb::DB* db_temp;
-  leveldb::Status status = leveldb::DB::Open(options, source, &db_temp);
-  if (!status.ok()) {
+  leveldb::Status s = leveldb::DB::Open(options, source, &db_temp);
+  if (!s.ok()) {
     std::stringstream ss;
-    ss << "Failed to open leveldb " << source << ". " << status.ToString();
+    ss << "Failed to open leveldb " << source << ". " << s.ToString();
     return Status(error::USER_ERROR, ss.str());
   }
   db_.reset(db_temp);
@@ -57,16 +57,49 @@ Status LevelDB::Open(const string& source, Mode mode, int64_t db_cache_size) {
   options.create_if_missing = mode != READ;
   options.block_cache = db_cache_.get();
   leveldb::DB* db_temp;
-  leveldb::Status status = leveldb::DB::Open(options, source, &db_temp);
-  if (!status.ok()) {
+  leveldb::Status s = leveldb::DB::Open(options, source, &db_temp);
+  if (!s.ok()) {
     std::stringstream ss;
-    ss << "Failed to open leveldb " << source << ". " << status.ToString();
+    ss << "Failed to open leveldb " << source << ". " << s.ToString();
     return Status(error::USER_ERROR, ss.str());
   }
   db_.reset(db_temp);
   PRINTF_INFO("Opened leveldb %s\n", source.c_str());
   return Status::OK();
 }
+
+bool LevelDB::Valid() {
+  return (nullptr != db_);
+}
+
+Status LevelDB::Get(const string& key, string* value) {
+  leveldb::Status s = db_->Get(leveldb::ReadOptions(), key, value);
+  if (s.ok())
+    return Status::OK();
+  std::stringstream ss;
+  ss << "Leveldb failed to Get key: " << key << ". " << s.ToString();
+  return Status(error::USER_ERROR, ss.str());
+}
+
+Status LevelDB::Put(const string& key, const string& value) {
+  leveldb::Status s = db_->Put(leveldb::WriteOptions(), key, value);
+  if (s.ok())
+    return Status::OK();
+  std::stringstream ss;
+  ss << "Leveldb failed to Put key: " << key << ". " << s.ToString();
+  return Status(error::USER_ERROR, ss.str());
+}
+
+Status LevelDB::Delete(const string& key) {
+  leveldb::Status s = db_->Delete(leveldb::WriteOptions(), key);
+  if (s.ok())
+    return Status::OK();
+  std::stringstream ss;
+  ss << "Leveldb failed to Delete key: " << key << ". " << s.ToString();
+  return Status(error::USER_ERROR, ss.str());
+}
+
+
 
 } // namespace db
 } // namespace bubblefs

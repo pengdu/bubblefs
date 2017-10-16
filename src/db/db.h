@@ -122,6 +122,14 @@ class DB {
    * ownership of the pointer.
    */
   virtual std::unique_ptr<Transaction> NewTransaction() = 0;
+  
+  virtual bool Valid() = 0;
+  
+  virtual Status Get(const string& key, string* value) = 0;
+  
+  virtual Status Put(const string& key, const string& value) = 0;
+  
+  virtual Status Delete(const string& key) = 0;
 
  protected:
   Mode mode_;
@@ -129,7 +137,7 @@ class DB {
   DISALLOW_COPY_AND_ASSIGN(DB);
 };
 
-DB* NewDB(DBType backend);
+DB* NewDB(DBType db_type);
 
 void DeleteDB(DB** db);
 
