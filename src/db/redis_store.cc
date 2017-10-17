@@ -22,7 +22,6 @@
 #include <sstream>
 #include <thread>
 #include <vector>
-#include "utils/stl_stream.h"
 
 namespace bubblefs {
 namespace db {
@@ -201,6 +200,17 @@ bool RedisStore::Exist(const std::vector<std::string>& names) {
   return static_cast<size_t>(reply->integer) == names.size();
 }
 
+template<class A, class Alloc>
+inline std::ostream& operator<<(std::ostream& out, const std::vector<A,Alloc>& v) {
+  out << "vector[";
+  for (auto p = v.begin(); p != v.end(); ++p) {
+    if (p != v.begin()) out << ", ";
+    out << *p;
+  }
+  out << "]";
+  return out;
+}
+
 Status RedisStore::WaitExist(
     const std::vector<std::string>& names,
     const std::chrono::milliseconds& timeout) {
@@ -215,7 +225,7 @@ Status RedisStore::WaitExist(
     if (timeout != kNoTimeout && elapsed > timeout) {
       std::stringstream ss;
       ss << "Redis WaitExist timeout, timeout: " << timeout.count();
-      ss << ", names: " << JoinToString(", ", names);
+      ss << ", names: " << names;
       return Status(error::USER_ERROR, ss.str());
     }
     /* sleep override */

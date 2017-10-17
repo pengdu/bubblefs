@@ -42,7 +42,7 @@ SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ld
 # 3. Removed -Werror: Not block compilation for non-vital warnings, especially when the
 #    code is tested on newer systems. If the code is used in production, add -Werror back
 DFLAGS = -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE
-CXXFLAGS = -pthread -std=c++11 -fmax-errors=2 -Wall -fPIC $(DFLAGS) $(OPT)
+CXXFLAGS = -fmax-errors=2 -Wall -fPIC -std=c++11 -pthread $(DFLAGS) $(OPT)
 CFLAGS = -Wall -W -fPIC $(DFLAGS) $(OPT)
 
 # Files

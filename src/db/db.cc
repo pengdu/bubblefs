@@ -103,9 +103,9 @@ class MiniDBCursor : public Cursor {
   std::lock_guard<std::mutex> lock_;
   bool valid_;
   unsigned key_len_;
-  vector<char> key_;
+  std::vector<char> key_;
   unsigned value_len_;
-  vector<char> value_;
+  std::vector<char> value_;
 }; 
 
 class MiniDBTransaction : public Transaction {
