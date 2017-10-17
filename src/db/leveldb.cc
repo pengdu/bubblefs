@@ -9,13 +9,6 @@ Status LevelDBCursor::GetStatus() {
   if (iter_->status().ok())
     return Status::OK();
   return Status(error::USER_ERROR, iter_->status().ToString());
-}  
-  
-Status LevelDBCursor::StartSeek() {
-  SeekToFirst();
-  if (iter_->status().ok())
-    return Status::OK();
-  return Status(error::USER_ERROR, iter_->status().ToString());
 }
 
 void LevelDBTransaction::Put(const string& key, const string& value) {
@@ -79,7 +72,8 @@ Status LevelDB::Open(const string& source, Mode mode, int64_t db_cache_size) {
 
 Status LevelDB::Close() { 
   db_.reset();
-  db_cache_.reset(); 
+  db_cache_.reset();
+  DB::Close();
   return Status::OK();
 }
 

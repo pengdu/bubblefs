@@ -373,7 +373,7 @@ if [ ! -f "${FLAG_DIR}/hiredis_0_13_3" ] \
     cd hiredis
     make
     mkdir ${DEPS_PREFIX}/include/hiredis
-    cp -a hiredis.h ${DEPS_PREFIX}/include/hiredis
+    cp -a hiredis.h read.h sds.h ${DEPS_PREFIX}/include/hiredis
     cp -a libhiredis.a ${DEPS_PREFIX}/lib
     touch "${FLAG_DIR}/hiredis_0_13_3"
 fi

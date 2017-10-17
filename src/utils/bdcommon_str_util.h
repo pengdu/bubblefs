@@ -266,6 +266,8 @@ bool SplitPath(const std::string& path,
                std::vector<std::string>* element,
                bool* isdir = nullptr);
 
+// Obtains the base name from a full path.
+std::string StripBasename(const std::string& full_path);
 
 } // namespace bdcommon
 } // namespace bubblefs

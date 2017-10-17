@@ -34,7 +34,7 @@ enum class DBType { kMiniDB, kLevelDB };
  * The mode of the database, whether we are doing a read, write, or creating
  * a new database.
  */
-enum Mode { READ, WRITE, NEW };
+enum Mode { NONE, READ, WRITE, NEW };
 
 /**
  * An abstract class for the cursor of the database while reading.
@@ -45,7 +45,6 @@ class Cursor {
   virtual ~Cursor() { }
   
   virtual Status GetStatus() = 0;
-  virtual Status StartSeek() = 0;
   /**
    * Seek to a specific key (or if the key does not exist, seek to the
    * immediate next). This is optional for dbs, and in default, SupportsSeek()
@@ -105,7 +104,7 @@ class Transaction {
  */
 class DB {
  public:
-  DB() { }
+  DB() : mode_(Mode::NONE) { }
   virtual ~DB() { }
   
   virtual Status Open(const string& source, Mode mode) = 0;
@@ -114,7 +113,11 @@ class DB {
   /**
    * Closes the database.
    */
-  virtual Status Close() = 0;
+  virtual Status Close() { 
+    source_ = "";
+    mode_ = Mode::NONE;
+    return Status::OK();
+  }
   /**
    * Returns a cursor to read the database. The caller takes the ownership of
    * the pointer.

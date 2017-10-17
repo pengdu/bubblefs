@@ -19,7 +19,6 @@ limitations under the License.
 #include <iosfwd>
 #include <memory>
 #include <string>
-#include "platform/logging.h"
 #include "platform/macros.h"
 #include "utils/error_codes.h"
 #include "utils/stringpiece.h"

@@ -1190,5 +1190,15 @@ bool SplitPath(const std::string& path,
     return true;
 }
 
+std::string StripBasename(const std::string &full_path) {
+  const char kSeparator = '/';
+  size_t pos = full_path.rfind(kSeparator);
+  if (pos != std::string::npos) {
+    return full_path.substr(pos + 1, std::string::npos);
+  } else {
+    return full_path;
+  }
+}
+
 } // namespace bdcommon
 } // namespace bubblefs

@@ -47,12 +47,6 @@ class MiniDBCursor : public Cursor {
     return Status(error::USER_ERROR, "Cursor is not valid");
   }
   
-  Status StartSeek() override {
-    // We call Next() to read in the first entry.
-    Next();
-    return Status::OK();
-  }
-  
   void Seek(const string& /*key*/) override {
     PANIC("MiniDB does not support seeking to a specific key.\n");
   }
@@ -170,6 +164,9 @@ class MiniDB : public DB {
       case READ:
         file_ = fopen(source.c_str(), "rb");
         break;
+      default:
+        PANIC("Cannot open file: %s, as mode: %d is invalid\n", 
+              source.c_str(), static_cast<int>(mode));
     }
     if (!file_) {
       PANIC("Cannot open file: %s\n", source.c_str());
@@ -188,16 +185,17 @@ class MiniDB : public DB {
       fclose(file_);
     }
     file_ = nullptr;
+    DB::Close();
     return Status::OK();
   }
 
   unique_ptr<Cursor> NewCursor() override {
-    PANIC_ENFORCE_EQ(this->mode_, READ);
+    PANIC_ENFORCE_EQ(this->mode_, Mode::READ);
     return make_unique<MiniDBCursor>(file_, &file_access_mutex_);
   }
 
   unique_ptr<Transaction> NewTransaction() override {
-    PANIC_ENFORCE(this->mode_ == NEW || this->mode_ == WRITE, "mode is not NEW or WRITE");
+    PANIC_ENFORCE(this->mode_ == Mode::NEW || this->mode_ ==Mode::WRITE, "mode is not NEW or WRITE");
     return make_unique<MiniDBTransaction>(file_, &file_access_mutex_);
   }
   

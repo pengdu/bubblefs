@@ -39,7 +39,6 @@ class LevelDBCursor : public Cursor {
   ~LevelDBCursor() {}
   
   Status GetStatus() override;
-  Status StartSeek() override;
   void Seek(const string& key) override { iter_->Seek(key); }
   bool SupportsSeek() override { return true; }
   void SeekToFirst() override { iter_->SeekToFirst(); }

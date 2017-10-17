@@ -32,6 +32,15 @@
 
 namespace bubblefs {
 
+// Note(Yangqing): NVCC does not play well with unordered_map on some platforms,
+// forcing us to use std::map instead of unordered_map. This may affect speed
+// in some cases, but in most of the computation code we do not access map very
+// often, so it should be fine for us. I am putting a CaffeMap alias so we can
+// change it more easily if things work out for unordered_map down the road.
+template <typename Key, typename Value>
+using CaffeMap = std::map<Key, Value>;
+// using CaffeMap = std::unordered_map;  
+  
 /**
  * Simple registry implementation in Caffe2 that uses static variables to
  * register object creators during program initialization time.

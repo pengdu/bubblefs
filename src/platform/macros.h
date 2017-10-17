@@ -410,34 +410,6 @@ private:
 #endif // !defined(__clang__)
 #endif  // __cplusplus
 
-// Put following code somewhere global to run it before main():
-// 
-//   BASE_GLOBAL_INIT()
-//   {
-//       ... your code ...
-//   }
-//
-// Your can:
-//   * Write any code and access global variables.
-//   * Use ASSERT_*.
-//   * Have multiple BASE_GLOBAL_INIT() in one scope.
-// 
-// Since the code run in global scope, quit with exit() or similar functions.
-#if defined(__cplusplus)
-# define BASE_GLOBAL_INIT                                      \
-namespace {  /*anonymous namespace */                           \
-    struct BASE_CONCAT(BaseGlobalInit, __LINE__) {            \
-        BASE_CONCAT(BaseGlobalInit, __LINE__)() { init(); }   \
-        void init();                                            \
-    } BASE_CONCAT(base_global_init_dummy_, __LINE__);         \
-}  /* anonymous namespace */                                    \
-    void BASE_CONCAT(BaseGlobalInit, __LINE__)::init              
-#else
-# define BASE_GLOBAL_INIT                      \
-    static void __attribute__((constructor))    \
-    BASE_CONCAT(base_global_init_, __LINE__)   
-#endif  // __cplusplus
-
 # define VOID_TEMP_FAILURE_RETRY(expression) \
     static_cast<void>(TEMP_FAILURE_RETRY(expression))
     

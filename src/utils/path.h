@@ -15,6 +15,7 @@ limitations under the License.
 #ifndef BUBBLEFS_UTILS_PATH_H_
 #define BUBBLEFS_UTILS_PATH_H_
 
+#include <vector>
 #include "utils/status.h"
 #include "utils/stringpiece.h"
 
