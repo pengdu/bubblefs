@@ -61,7 +61,7 @@ class Singleton
 {
 public:
     static TYPE& getInstance() {
-        MutexLock _l(sLock);
+        MutexLock _l(&sLock);
         TYPE* instance = sInstance;
         if (instance == 0) {
             instance = new TYPE();
@@ -71,7 +71,7 @@ public:
     }
 
     static bool hasInstance() {
-        MutexLock _l(sLock);
+        MutexLock _l(&sLock);
         return sInstance != 0;
     }
     

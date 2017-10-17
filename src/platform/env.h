@@ -52,7 +52,7 @@ namespace bubblefs {
 class Thread;
 struct ThreadOptions;
 class FileLock;
-class FileStatistics;
+struct FileStatistics;
 class Directory;
 class SequentialFile;
 class RandomAccessFile;

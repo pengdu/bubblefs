@@ -69,14 +69,22 @@ limitations under the License.
 #define ACQUIRED_BEFORE(...) \
   THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
 
+#if defined(__clang__)
+#define ACQUIRE(...) // no-op
+#else
 #define ACQUIRE(...) \
   THREAD_ANNOTATION_ATTRIBUTE__(acquire_capability(__VA_ARGS__))
+#endif
 
 #define ACQUIRE_SHARED(...) \
   THREAD_ANNOTATION_ATTRIBUTE__(acquire_shared_capability(__VA_ARGS__))
 
+#if defined(__clang__)
+#define RELEASE(...) // no-op
+#else
 #define RELEASE(...) \
   THREAD_ANNOTATION_ATTRIBUTE__(release_capability(__VA_ARGS__))
+#endif
 
 // Document a function that expects a mutex to be held prior to entry.
 // The mutex is expected to be held both on entry to and exit from the

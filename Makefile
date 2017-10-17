@@ -46,7 +46,7 @@ CXX = g++
 # 3. Removed -Werror: Not block compilation for non-vital warnings, especially when the
 #    code is tested on newer systems. If the code is used in production, add -Werror back
 DFLAGS = -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE
-CXXFLAGS =  -Wall -fPIC -std=c++11 -pthread $(DFLAGS) $(OPT)
+CXXFLAGS = -Wall -fPIC -std=c++11 -pthread $(DFLAGS) $(OPT) -fmax-errors=3
 CFLAGS = -Wall -W -fPIC $(DFLAGS) $(OPT)
 
 # Files
@@ -93,7 +93,7 @@ OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(DB_OBJS) $(CLI
 
 LIBS =
  
-BIN = $(PROJECT_DIR)/src/db/redis_store.o
+BIN = $(PLATFORM_UTILS_OBJS) #$(PROJECT_DIR)/src/db/redis_store.o
 
 .PHONY:all
 all: $(BIN)

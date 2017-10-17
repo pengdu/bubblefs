@@ -21,7 +21,8 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
-#include <vector> 
+#include <vector>
+#include "utils/stl_sstream.h"
 
 namespace bubblefs {
 namespace db {
@@ -199,18 +200,6 @@ bool RedisStore::Exist(const std::vector<std::string>& names) {
     return false;
   return static_cast<size_t>(reply->integer) == names.size();
 }
-
-// Note: the template cannot be used in global namespace, why?
-template<class A, class Alloc>
-std::ostream& operator<<(std::ostream& out, const std::vector<A, Alloc>& v) {
-  out << "vector[";
-  for (auto p = v.begin(); p != v.end(); ++p) {
-    if (p != v.begin()) out << ", ";
-    out << *p;
-  }
-  out << "]";
-  return out;
-} 
 
 Status RedisStore::WaitExist(
     const std::vector<std::string>& names,

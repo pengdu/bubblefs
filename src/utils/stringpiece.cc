@@ -29,6 +29,7 @@ namespace {
 // the possible values of an unsigned char.  Thus it should be be declared
 // as follows:
 //   bool table[UCHAR_MAX + 1]
+/*
 inline void BuildLookupTable(const StringPiece& characters_wanted,
                              bool* table) {
   const size_t length = characters_wanted.length();
@@ -37,6 +38,7 @@ inline void BuildLookupTable(const StringPiece& characters_wanted,
     table[static_cast<unsigned char>(data[i])] = true;
   }
 }
+*/
 
 }  // namespace
 
