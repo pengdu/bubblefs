@@ -21,11 +21,11 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
-#include <vector>
+#include <vector> 
 
 namespace bubblefs {
 namespace db {
-  
+
 #define THROW_TIMEOUT_EXCEPTION(...)              \
   throw ::bubblefs::db::RedisStoreTimeoutException( \
       ::bubblefs::MakeString("[", __FILE__, ":", __LINE__, "] ", __VA_ARGS__));
@@ -200,8 +200,9 @@ bool RedisStore::Exist(const std::vector<std::string>& names) {
   return static_cast<size_t>(reply->integer) == names.size();
 }
 
+// Note: the template cannot be used in global namespace, why?
 template<class A, class Alloc>
-inline std::ostream& operator<<(std::ostream& out, const std::vector<A,Alloc>& v) {
+std::ostream& operator<<(std::ostream& out, const std::vector<A, Alloc>& v) {
   out << "vector[";
   for (auto p = v.begin(); p != v.end(); ++p) {
     if (p != v.begin()) out << ", ";
@@ -209,7 +210,7 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<A,Alloc>& v
   }
   out << "]";
   return out;
-}
+} 
 
 Status RedisStore::WaitExist(
     const std::vector<std::string>& names,

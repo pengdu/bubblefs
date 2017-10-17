@@ -45,7 +45,7 @@ limitations under the License.
 
 namespace bubblefs {
 
-class StringPieceParts;
+struct StringPieceParts;
   
 // also known as Slice
 class StringPiece {

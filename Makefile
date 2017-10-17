@@ -36,23 +36,30 @@ LDFLAGS = -L$(TBB_PATH)/lib -ltbb -Wl,-rpath=$(TBB_PATH)/lib \
 SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ldl \
               -shared -Wl,--version-script,so-version-script # hide symbol of third_party libs
 
+# Compiler
+CXX = g++
+#CXX = clang
+
 # Notes on the flags:
 # 1. Added -fno-omit-frame-pointer: perf/tcmalloc-profiler use frame pointers by default
 # 2. Added -D__const__= : Avoid over-optimizations of TLS variables by GCC>=4.8, like -D__const__= -D_GNU_SOURCE
 # 3. Removed -Werror: Not block compilation for non-vital warnings, especially when the
 #    code is tested on newer systems. If the code is used in production, add -Werror back
 DFLAGS = -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE
-CXXFLAGS = -fmax-errors=2 -Wall -fPIC -std=c++11 -pthread $(DFLAGS) $(OPT)
+CXXFLAGS =  -Wall -fPIC -std=c++11 -pthread $(DFLAGS) $(OPT)
 CFLAGS = -Wall -W -fPIC $(DFLAGS) $(OPT)
 
 # Files
 
 SRCEXTS = .c .cc .cpp .proto
 
-ALL_DIRS = $(PROJECT_DIR)/src/platform $(PROJECT_DIR)/src/utils
-#ALL_DIRS = $(PROJECT_DIR)/src/*
+ALL_DIRS = $(PROJECT_DIR)/src/*
 ALL_SRCS = $(foreach d, $(ALL_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS))))
 ALL_OBJS = $(addsuffix .o, $(basename $(ALL_SRCS)))
+
+PLATFORM_UTILS_DIRS = $(PROJECT_DIR)/src/platform $(PROJECT_DIR)/src/utils
+PLATFORM_UTILS_SRCS = $(foreach d, $(PLATFORM_UTILS_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS))))
+PLATFORM_UTILS_OBJS = $(addsuffix .o, $(basename $(PLATFORM_UTILS_SRCS)))
 
 CLIENT_SRCS = $(wildcard $(PROJECT_DIR)/src/client/*.cc)
 CLIENT_OBJS = $(addsuffix .o, $(basename $(CLIENT_SRCS)))
@@ -86,7 +93,7 @@ OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(DB_OBJS) $(CLI
 
 LIBS =
  
-BIN = $(ALL_OBJS)
+BIN = $(PROJECT_DIR)/src/db/redis_store.o
 
 .PHONY:all
 all: $(BIN)
