@@ -18,6 +18,14 @@ Status LevelDBCursor::StartSeek() {
   return Status(error::USER_ERROR, iter_->status().ToString());
 }
 
+void LevelDBTransaction::Put(const string& key, const string& value) {
+  batch_->Put(key, value);
+}
+
+void LevelDBTransaction::Delete(const string& key) {
+  batch_->Delete(key);
+}
+
 Status LevelDBTransaction::Commit() {
   leveldb::Status status = db_->Write(leveldb::WriteOptions(), batch_.get());
   batch_.reset(new leveldb::WriteBatch());

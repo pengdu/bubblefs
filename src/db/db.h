@@ -88,7 +88,10 @@ class Transaction {
   /**
    * Puts the key value pair to the database.
    */
-  virtual bool Put(const string& key, const string& value) = 0;
+  virtual void Put(const string& key, const string& value) = 0;
+  
+  // If the database contains a mapping for "key", erase it.  Else do nothing.
+  virtual void Delete(const string& key) = 0;
   /**
    * Commits the current writes.
    */

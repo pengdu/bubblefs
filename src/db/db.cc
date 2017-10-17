@@ -122,7 +122,7 @@ class MiniDBTransaction : public Transaction {
     Commit();
   }
 
-  bool Put(const string& key, const string& value) override {
+  void Put(const string& key, const string& value) override {
     unsigned key_len = key.size();
     unsigned value_len = value.size();
     PANIC_ENFORCE_EQ(fwrite(&key_len, sizeof(int), 1, file_), 1);
@@ -131,8 +131,9 @@ class MiniDBTransaction : public Transaction {
         fwrite(key.c_str(), sizeof(char), key_len, file_), key_len);
     PANIC_ENFORCE_EQ(
         fwrite(value.c_str(), sizeof(char), value_len, file_), value_len);
-    return true;
   }
+  
+  void Delete(const string& key) override { }
 
   Status Commit() override {
     if (file_ != nullptr) {

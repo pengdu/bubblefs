@@ -73,10 +73,11 @@ class LevelDBTransaction : public Transaction {
     batch_.reset(new leveldb::WriteBatch());
   }
   ~LevelDBTransaction() { }
-  bool Put(const string& key, const string& value) override {
-    batch_->Put(key, value);
-    return true;
-  }
+  
+  void Put(const string& key, const string& value) override;
+  
+  void Delete(const string& key) override;
+  
   Status Commit() override;
 
  private:
