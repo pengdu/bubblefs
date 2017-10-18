@@ -339,6 +339,16 @@ enum LinkerInitialized { LINKER_INITIALIZED };
             (type *)( (char *)__mptr - offsetof(type,member) );})
 #endif
 
+// common macros and data structures
+#ifndef FIELD_OFFSET
+#define FIELD_OFFSET(s, field) (((size_t) & ((s *)(10))->field) - 10)
+#endif
+
+#ifndef CONTAINING_RECORD
+#define CONTAINING_RECORD(address, type, field)                                                    \
+    ((type *)((char *)(address)-FIELD_OFFSET(type, field)))
+#endif
+
 # define VOID_TEMP_FAILURE_RETRY(expression) \
     static_cast<void>(TEMP_FAILURE_RETRY(expression))
     

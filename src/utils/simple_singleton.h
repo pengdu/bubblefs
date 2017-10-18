@@ -107,7 +107,8 @@ private:
 }  // namespace android
 
 namespace rdsn {
-
+namespace utils {
+  
 template <typename T>
 class Singleton
 {
@@ -156,6 +157,7 @@ T *Singleton<T>::_instance = 0;
 template <typename T>
 std::atomic<int> Singleton<T>::_l(0);
   
+} // namespace utils
 } // namespace rdsn
 
 } // namespace bubblefs
