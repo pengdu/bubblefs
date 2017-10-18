@@ -37,8 +37,11 @@ SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ld
               -shared -Wl,--version-script,so-version-script # hide symbol of third_party libs
 
 # Compiler
-CXX = g++
-#CXX = clang
+#CXX = g++
+CXX = clang
+
+# Compiler opts
+GCC_OPTS = -fmax-errors=3
 
 # Notes on the flags:
 # 1. Added -fno-omit-frame-pointer: perf/tcmalloc-profiler use frame pointers by default
@@ -46,7 +49,7 @@ CXX = g++
 # 3. Removed -Werror: Not block compilation for non-vital warnings, especially when the
 #    code is tested on newer systems. If the code is used in production, add -Werror back
 DFLAGS = -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE
-CXXFLAGS = -Wall -fPIC -std=c++11 -pthread $(DFLAGS) $(OPT) -fmax-errors=3
+CXXFLAGS = -Wall -fPIC -std=c++11 -pthread $(DFLAGS) $(OPT) # $(GCC_OPTS)
 CFLAGS = -Wall -W -fPIC $(DFLAGS) $(OPT)
 
 # Files
