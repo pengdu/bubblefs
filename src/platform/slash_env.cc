@@ -519,7 +519,7 @@ Status GetTestDirectory(std::string* result) {
   const char* env = getenv("TEST_TMPDIR");
   if (env == NULL || env[0] == '\0') {
     char buf[100];
-    snprintf(buf, sizeof(buf), "/tmp/pdlfs-test-%d",
+    snprintf(buf, sizeof(buf), "/tmp/slashtest-%d",
              static_cast<int>(geteuid()));
     *result = buf;
   } else {
@@ -528,6 +528,23 @@ Status GetTestDirectory(std::string* result) {
   // Ignore error since directory may exist
   CreateDir((*result).c_str());
   return Status::OK();
+}
+
+std::string RandomString(const int len) {
+  char buf[len];
+  for (int i = 0; i < len; i++) {
+    buf[i] = random::RandomOnce::Uniform('z' - 'a') + 'a';
+  }
+  return std::string(buf, len);
+}
+
+int RandomSeed() {
+  const char* env = getenv("TEST_RANDOM_SEED");
+  int result = (env != NULL ? atoi(env) : 301);
+  if (result <= 0) {
+    result = 301;
+  }
+  return result;
 }
 
 Status FetchHostname(std::string* hostname) {

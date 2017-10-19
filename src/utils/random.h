@@ -267,6 +267,20 @@ class Random64 {
   }
 };
 
+class RandomString {
+public:
+    static std::string Rand(size_t len = 128) {
+        std::string s;
+        s.resize(len);
+        static Random r(uint32_t(time(NULL)));
+        const char* end = &s[0] + s.size();
+        for (char* p = &s[0]; p < end; ++p) {
+            *p = r.Next() % 255;
+        }
+        return s;
+    }
+};
+
 class TrueRandom {
 public:
     TrueRandom();

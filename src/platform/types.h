@@ -65,6 +65,7 @@ namespace bubblefs {
 /* using override */
 using std::shared_ptr;
 using std::string;
+using std::wstring;
 using std::unique_ptr;
 
 static const uint8 kuint8max = ((uint8)0xFF);

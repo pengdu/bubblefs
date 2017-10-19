@@ -19,6 +19,7 @@
 #include <vector>
 #include "platform/mutexlock.h"
 #include "utils/pdlfs_hash_map.h"
+#include "utils/random.h"
 #include "utils/status.h"
 
 namespace bubblefs {
@@ -173,6 +174,9 @@ void SleepForMicroseconds(int micros);
 // between runs of the same process, but subsequent calls will return the
 // same directory.
 Status GetTestDirectory(std::string* path);
+
+std::string RandomString(const int len);
+int RandomSeed();
 
 // Obtain the network name of the local machine.
 Status FetchHostname(std::string* hostname);
