@@ -1474,8 +1474,8 @@ void Schedule(ThreadPool& pool, void (*function)(void*), void* arg) {
   pool.Schedule(function, arg);
 }
 
-void StartThread(ThreadPool& pool, void (*function)(void*), void* arg) {
-  pool.StartThread(function, arg);
+void StartThread(void* (*function)(void*), void* arg) {
+  Pthread(function, arg, NULL);
 }
 
 } // namespace slash

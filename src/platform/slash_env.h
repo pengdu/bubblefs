@@ -211,7 +211,7 @@ void Schedule(ThreadPool& pool, void (*function)(void*), void* arg);
 
 // Start a new thread, invoking "function(arg)" within the new thread.
 // When "function(arg)" returns, the thread will be destroyed.
-void StartThread(ThreadPool& pool, void (*function)(void*), void* arg);
+void StartThread(void* (*function)(void*), void* arg);
 
 // A file abstraction for randomly reading the contents of a file.
 class RandomAccessFile {
