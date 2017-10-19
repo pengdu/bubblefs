@@ -57,9 +57,11 @@ THE SOFTWARE.
 #ifndef BUBBLEFS_UTILS_RANDOM_H_
 #define BUBBLEFS_UTILS_RANDOM_H_
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <time.h>
 #include <random>
 #include <string>
 #include <vector>
@@ -280,6 +282,20 @@ private:
     DISALLOW_COPY_AND_ASSIGN(TrueRandom);
     int32_t m_fd;
 }; // class TrueRandom
+
+// slash/slash/include/random.h
+class RandomOnce {
+ public:
+  RandomOnce() {
+    srand(time(NULL));
+  }
+  /*
+   * return OnceRandom number in [1...n]
+   */
+  static uint32_t Uniform(int n) {
+    return (random() % n) + 1;
+  }
+};
 
 class Distribution {
   std::vector<float> p;

@@ -9,17 +9,26 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+// Copyright (c) 2015-present, Qihoo, Inc.  All rights reserved.
+// This source code is licensed under the BSD-style license found in the
+// LICENSE file in the root directory of this source tree. An additional grant
+// of patent rights can be found in the PATENTS file in the same directory.
+//
 
 // tensorflow/tensorflow/core/platform/mutex.h
 // tensorflow/tensorflow/core/platform/default/mutex.h
+// slash/slash/include/slash_mutex.h
+// slash/slash/include/cond_lock.h
 
 #ifndef BUBBLEFS_PLATFORM_MUTEX_H_
 #define BUBBLEFS_PLATFORM_MUTEX_H_
 
 #include <pthread.h>
+#include <unistd.h>
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
+#include <unordered_map>
 #include "platform/platform.h"
 #include "platform/thread_annotations.h"
 #include "platform/types.h"
@@ -61,6 +70,9 @@ class SCOPED_LOCKABLE mutex_lock : public std::unique_lock<std::mutex> {
 
 namespace port { 
 
+typedef pthread_once_t OnceType;
+extern void InitOnce(OnceType* once, void (*initializer)());  
+  
 class CondVar;
 
 // A Mutex represents an exclusive lock.
@@ -106,9 +118,9 @@ class CondVar {
   ~CondVar();
   void Wait(const char* msg = nullptr);
   // Timed condition wait.  Returns true if timeout occurred.
-  bool TimedWait(uint64_t abs_time_us, const char* msg = nullptr);
+  bool AbsTimedWait(uint64_t abs_time_us, const char* msg = nullptr);
   // Time wait in timeout ms, return true if signalled
-  bool TimedIntervalWait(uint64_t timeout_interval, const char* msg = nullptr);
+  bool TimedWait(uint64_t timeout, const char* msg = nullptr);
   void Signal();
   void SignalAll();
   void Broadcast();
@@ -131,6 +143,88 @@ class RWMutex {
  private:
   pthread_rwlock_t mu_; // the underlying platform mutex
   DISALLOW_COPY_AND_ASSIGN(RWMutex);
+};
+
+class RefMutex {
+ public:
+  RefMutex();
+  ~RefMutex();
+
+  // Lock and Unlock will increase and decrease refs_,
+  // should check refs before Unlock
+  void Lock();
+  void Unlock();
+
+  void Ref();
+  void Unref();
+  bool IsLastRef() {
+    return refs_ == 1;
+  }
+
+ private:
+  pthread_mutex_t mu_;
+  int refs_;
+  DISALLOW_COPY_AND_ASSIGN(RefMutex);
+};
+
+class RecordMutex {
+public:
+  RecordMutex() {};
+  ~RecordMutex();
+
+  void Lock(const std::string &key);
+  void Unlock(const std::string &key);
+
+private:
+
+  Mutex mutex_;
+  std::unordered_map<std::string, RefMutex *> records_;
+  
+  DISALLOW_COPY_AND_ASSIGN(RecordMutex);
+};
+
+class RecordLock {
+ public:
+  RecordLock(RecordMutex *mu, const std::string &key)
+      : mu_(mu), key_(key) {
+        mu_->Lock(key_);
+      }
+  ~RecordLock() { mu_->Unlock(key_); }
+
+ private:
+  RecordMutex *const mu_;
+  std::string key_;
+
+  DISALLOW_COPY_AND_ASSIGN(RecordLock);
+};
+
+/*
+ * CondLock is a wrapper for condition variable.
+ * It contain a mutex in it's class, so we don't need other to protect the 
+ * condition variable.
+ */
+class CondLock {
+ public:
+  CondLock();
+  ~CondLock();
+
+  void Lock();
+  void Unlock();
+
+  void Wait();
+  
+  /*
+   * timeout is millisecond
+   */
+  void TimedWait(uint64_t timeout);
+  void Signal();
+  void Broadcast();
+
+ private:
+  pthread_mutex_t mutex_;
+  pthread_cond_t cond_;
+
+  DISALLOW_COPY_AND_ASSIGN(CondLock);
 };
   
 } // namespace port

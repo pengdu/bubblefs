@@ -9,6 +9,7 @@
 //
 
 // rocksdb/port/port_posix.cc
+// slash/slash/src/slash_mutex.cc
 
 #include "platform/mutex.h"
 #include <sys/time.h>
@@ -39,6 +40,22 @@ static int PthreadCall(const char* label, int result) {
   }
   return result;
 }
+
+// Return false if timeout
+static bool PthreadTimeoutCall(const char* label, int result) {
+  if (result != 0) {
+    if (result == ETIMEDOUT) {
+      return false;
+    }
+    fprintf(stderr, "pthreadtimeoutcall %s: %s\n", label, strerror(result));
+    abort();
+  }
+  return true;
+}
+
+void InitOnce(OnceType* once, void (*initializer)()) {
+  PthreadCall("once", pthread_once(once, initializer));
+}  
 
 Mutex::Mutex() : owner_(0) {
   pthread_mutexattr_t attr;
@@ -146,7 +163,7 @@ void CondVar::Wait(const char* msg) {
   mu_->AfterLock();
 }
 
-bool CondVar::TimedWait(uint64_t abs_time_us, const char* msg) {
+bool CondVar::AbsTimedWait(uint64_t abs_time_us, const char* msg) {
   struct timespec ts;
   ts.tv_sec = static_cast<time_t>(abs_time_us / 1000000);
   ts.tv_nsec = static_cast<suseconds_t>((abs_time_us % 1000000) * 1000);
@@ -163,17 +180,22 @@ bool CondVar::TimedWait(uint64_t abs_time_us, const char* msg) {
   return false;
 }
 
-bool CondVar::TimedIntervalWait(uint64_t timeout_interval, const char* msg) {
-  timespec ts;
-  struct timeval tv;
-  gettimeofday(&tv, nullptr);
-  int64_t usec = tv.tv_usec + timeout_interval * 1000LL;
-  ts.tv_sec = tv.tv_sec + usec / 1000000;
+bool CondVar::TimedWait(uint64_t timeout, const char* msg) {
+  /*
+   * pthread_cond_timedwait api use absolute API
+   * so we need gettimeofday + timeout
+   */
+  struct timespec ts;
+  struct timeval now;
+  gettimeofday(&now, nullptr);
+  int64_t usec = now.tv_usec + timeout * 1000LL;
+  ts.tv_sec = now.tv_sec + usec / 1000000;
   ts.tv_nsec = (usec % 1000000) * 1000;
   mu_->BeforeUnlock();
-  int ret = pthread_cond_timedwait(&cv_, &mu_->mu_, &ts);
+  bool ret = PthreadTimeoutCall("timewait",
+      pthread_cond_timedwait(&cv_, &mu_->mu_, &ts));
   mu_->AfterLock(msg);
-  return (ret == 0);
+  return ret;
 }
 
 void CondVar::Signal() {
@@ -201,6 +223,126 @@ void RWMutex::WriteLock() { PthreadCall("write lock", pthread_rwlock_wrlock(&mu_
 void RWMutex::ReadUnlock() { PthreadCall("read unlock", pthread_rwlock_unlock(&mu_)); }
 
 void RWMutex::WriteUnlock() { PthreadCall("write unlock", pthread_rwlock_unlock(&mu_)); }
+  
+RefMutex::RefMutex() {
+  refs_ = 0;
+  PthreadCall("init refmutex", pthread_mutex_init(&mu_, nullptr));
+}
+
+RefMutex::~RefMutex() {
+  PthreadCall("destroy refmutex", pthread_mutex_destroy(&mu_));
+}
+
+void RefMutex::Ref() {
+  refs_++;
+}
+void RefMutex::Unref() {
+  --refs_;
+  if (refs_ == 0) {
+    delete this;
+  }
+}
+
+void RefMutex::Lock() {
+  PthreadCall("lock refmutex", pthread_mutex_lock(&mu_));
+}
+
+void RefMutex::Unlock() {
+  PthreadCall("unlock refmutex", pthread_mutex_unlock(&mu_));
+}
+
+RecordMutex::~RecordMutex() {
+  mutex_.Lock();
+  
+  std::unordered_map<std::string, RefMutex *>::const_iterator it = records_.begin();
+  for (; it != records_.end(); it++) {
+    delete it->second;
+  }
+  mutex_.Unlock();
+}
+
+
+void RecordMutex::Lock(const std::string &key) {
+  mutex_.Lock();
+  std::unordered_map<std::string, RefMutex *>::const_iterator it = records_.find(key);
+
+  if (it != records_.end()) {
+    RefMutex *ref_mutex = it->second;
+    ref_mutex->Ref();
+    mutex_.Unlock();
+
+    ref_mutex->Lock();
+  } else {
+    RefMutex *ref_mutex = new RefMutex();
+
+    records_.insert(std::make_pair(key, ref_mutex));
+    ref_mutex->Ref();
+    mutex_.Unlock();
+
+    ref_mutex->Lock();
+  }
+}
+
+void RecordMutex::Unlock(const std::string &key) {
+  mutex_.Lock();
+  std::unordered_map<std::string, RefMutex *>::const_iterator it = records_.find(key);
+  
+  if (it != records_.end()) {
+    RefMutex *ref_mutex = it->second;
+
+    if (ref_mutex->IsLastRef()) {
+      records_.erase(it);
+    }
+    ref_mutex->Unlock();
+    ref_mutex->Unref();
+  }
+
+  mutex_.Unlock();
+}
+
+CondLock::CondLock() {
+  PthreadCall("init condlock", pthread_mutex_init(&mutex_, NULL));
+}
+
+CondLock::~CondLock() {
+  PthreadCall("destroy condlock", pthread_mutex_unlock(&mutex_));
+}
+
+void CondLock::Lock() {
+  PthreadCall("lock condlock", pthread_mutex_lock(&mutex_));
+}
+
+void CondLock::Unlock() {
+  PthreadCall("unlock condlock", pthread_mutex_unlock(&mutex_));
+}
+
+void CondLock::Wait() {
+  PthreadCall("condlock wait", pthread_cond_wait(&cond_, &mutex_));
+}
+
+void CondLock::TimedWait(uint64_t timeout) {
+  /*
+   * pthread_cond_timedwait api use absolute API
+   * so we need gettimeofday + timeout
+   */
+  struct timeval now;
+  gettimeofday(&now, NULL);
+  struct timespec tsp;
+
+  int64_t usec = now.tv_usec + timeout * 1000LL;
+  tsp.tv_sec = now.tv_sec + usec / 1000000;
+  tsp.tv_nsec = (usec % 1000000) * 1000;
+
+  pthread_cond_timedwait(&cond_, &mutex_, &tsp);
+}
+
+void CondLock::Signal() {
+  PthreadCall("condlock signal", pthread_cond_signal(&cond_));
+}
+
+void CondLock::Broadcast() {
+  PthreadCall("condlock broadcast", pthread_cond_broadcast(&cond_));
+}
   
 } // namespace port 
   

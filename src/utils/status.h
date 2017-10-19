@@ -55,43 +55,30 @@ class Status {
   // Return a success status.
   static Status OK() { return Status(); }
   
-  static Status UnimplementedError(StringPiece message = StringPiece()) {
-    return Status(error::UNIMPLEMENTED, message);
-  }
-  
-  static Status InternalError(StringPiece message = StringPiece()) {
-    return Status(error::INTERNAL, message);
-  }
-  
-  // Return error status of an appropriate type.
-  static Status NotFound(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::NOT_FOUND, msg, msg2);
-  }
-  // Fast path for not found without malloc;
-  static Status NotFound(int64_t subcode = error::NONE) { return Status(error::NOT_FOUND, subcode); }
-  
-  static Status InvalidArgument(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::INVALID_ARGUMENT, msg, msg2);
-  }
-  static Status InvalidArgument(int64_t subcode = error::NONE) {
-    return Status(error::INVALID_ARGUMENT, subcode);
-  }
-  
   static Status Aborted(int64_t subcode = error::NONE) { return Status(error::ABORTED, subcode); }
   static Status Aborted(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::ABORTED, msg, msg2);
   }
-
-  static Status IOError(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::IOERROR, msg, msg2);
-  }
-  static Status IOError(int64_t subcode = error::NONE) { return Status(error::IOERROR, subcode); }
   
-  static Status NotSupported(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
-    return Status(error::NOT_SUPPORTED, msg, msg2);
+  static Status Complete(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::COMPLETE, msg, msg2);
   }
-  static Status NotSupported(int64_t subcode = error::NONE) {
-    return Status(error::NOT_SUPPORTED, subcode);
+  static Status Complete(int64_t subcode = error::NONE) {
+    return Status(error::COMPLETE, subcode);
+  }
+  
+  static Status Corruption(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::CORRUPTION, msg, msg2);
+  }
+  static Status Corruption(int64_t subcode = error::NONE) {
+    return Status(error::CORRUPTION, subcode);
+  }
+  
+  static Status EndFile(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::ENDFILE, msg, msg2);
+  }
+  static Status EndFile(int64_t subcode = error::NONE) {
+    return Status(error::ENDFILE, subcode);
   }
   
   static Status Incomplete(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
@@ -100,9 +87,75 @@ class Status {
   static Status Incomplete(int64_t subcode = error::NONE) {
     return Status(error::INCOMPLETE, subcode);
   }
-
+  
+  static Status InternalError(StringPiece message = StringPiece()) {
+    return Status(error::INTERNAL, message);
+  }
+  
+  static Status InvalidArgument(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::INVALID_ARGUMENT, msg, msg2);
+  }
+  static Status InvalidArgument(int64_t subcode = error::NONE) {
+    return Status(error::INVALID_ARGUMENT, subcode);
+  }
+  
+  static Status IOError(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::IOERROR, msg, msg2);
+  }
+  static Status IOError(int64_t subcode = error::NONE) { return Status(error::IOERROR, subcode); }
+  
+  static Status NotFound(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::NOT_FOUND, msg, msg2);
+  }
+  // Fast path for not found without malloc;
+  static Status NotFound(int64_t subcode = error::NONE) { return Status(error::NOT_FOUND, subcode); }
+  
+  static Status NotSupported(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::NOT_SUPPORTED, msg, msg2);
+  }
+  static Status NotSupported(int64_t subcode = error::NONE) {
+    return Status(error::NOT_SUPPORTED, subcode);
+  }
+  
+  static Status Timeout(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::TIMEDOUT, msg, msg2);
+  }
+  static Status Timeout(int64_t subcode = error::NONE) {
+    return Status(error::TIMEDOUT, subcode);
+  }
+  
+  static Status Uuauthenticated(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::UNAUTHENTICATED, msg, msg2);
+  }
+  static Status Uuauthenticated(int64_t subcode = error::NONE) {
+    return Status(error::UNAUTHENTICATED, subcode);
+  }
+  
+  // Return error status of an appropriate type.
+  static Status UnimplementedError(StringPiece message = StringPiece()) {
+    return Status(error::UNIMPLEMENTED, message);
+  }  
+  
   /// Returns true iff the status indicates success.
   bool ok() const { return (state_ == nullptr); }
+  
+  // Returns true if the status is complete.
+  bool IsComplete() const { return code() == error::COMPLETE; }
+  
+  // Returns true if the status indicates a Corruption error.
+  bool IsCorruption() const { return code() == error::CORRUPTION; }
+  
+  // Returns true if the status indicates an EOF.
+  bool IsEndFile() const { return code() == error::ENDFILE; }
+  
+  // Returns true iff the status indicates Incomplete
+  bool IsIncomplete() const { return code() == error::INCOMPLETE; }
+  
+  // Returns true iff the status indicates an InvalidArgument error.
+  bool IsInvalidArgument() const { return code() == error::INVALID_ARGUMENT; }
+  
+  // Returns true iff the status indicates an IOError.
+  bool IsIOError() const { return code() == error::IOERROR; }
   
   // Returns true iff the status indicates a NotFound error.
   bool IsNotFound() const { return code() == error::NOT_FOUND; }
@@ -110,17 +163,14 @@ class Status {
   // Returns true iff the status indicates a NotSupported error.
   bool IsNotSupported() const { return code() == error::NOT_SUPPORTED; }
 
-  // Returns true iff the status indicates an InvalidArgument error.
-  bool IsInvalidArgument() const { return code() == error::INVALID_ARGUMENT; }
-  
-  // Returns true iff the status indicates an IOError.
-  bool IsIOError() const { return code() == error::IOERROR; }
-  
-  // Returns true iff the status indicates Incomplete
-  bool IsIncomplete() const { return code() == error::INCOMPLETE; }
-
   // Returns true iff the status indicates Shutdown In progress
   bool IsShutdownInProgress() const { return code() == error::SHUTDOWN_IN_PROGRESS; }
+  
+  // Returns true if the status is Timeout
+  bool IsTimeout() const { return code() == error::TIMEDOUT; }
+  
+  // Returns true if the status is AuthFailed
+  bool IsUnauthenticated() const { return code() == error::UNAUTHENTICATED; }
 
   error::Code code() const {
     return ok() ? error::OK : state_->code;

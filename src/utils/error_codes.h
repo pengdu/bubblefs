@@ -144,7 +144,11 @@ enum Code {
   // The request does not have valid authentication credentials for the
   // operation.
   UNAUTHENTICATED = 25,
-
+  
+  ENDFILE = 26,
+  
+  COMPLETE = 27, // complete
+  
   // An extra enum entry to prevent people from writing code that
   // fails to compile when a new code is added.
   //

@@ -27,7 +27,6 @@ limitations under the License.
 #include <thread>
 #include <type_traits>
 #include <utility>
-#include "platform/logging.h"
 #include "platform/macros.h"
 #include "platform/mutex.h"
 #include "platform/types.h"
@@ -69,13 +68,15 @@ double BitsToOpenEndedUnitInterval(uint64_t bits) {
   static const int kBits = std::numeric_limits<double>::digits;
   uint64_t random_bits = bits & ((UINT64_C(1) << kBits) - 1);
   double result = ldexp(static_cast<double>(random_bits), -1 * kBits);
-  DCHECK_GE(result, 0.0);
-  DCHECK_LT(result, 1.0);
+  if (result <= 0.0)
+    return 0.0;
+  if (result >= 1.0)
+    return 1.0;
   return result;
 }
 
 uint64_t RandGenerator(uint64_t range) {
-  DCHECK_GT(range, 0u);
+  assert(range > 0);
   // We must discard random results above this number, as they would
   // make the random generator non-uniform (consider e.g. if
   // MAX_UINT64 was 7 and |range| was 5, then a result of 1 would be twice
@@ -92,16 +93,16 @@ uint64_t RandGenerator(uint64_t range) {
 }
 
 int RandInt(int min, int max) {
-  DCHECK_LE(min, max);
+  assert(min < max);
 
   uint64_t range = static_cast<uint64_t>(max) - min + 1;
   // |range| is at most UINT_MAX + 1, so the result of RandGenerator(range)
   // is at most UINT_MAX.  Hence it's safe to cast it from uint64_t to int64_t.
   int result =
       static_cast<int>(min + static_cast<int64_t>(RandGenerator(range)));
-  DCHECK_GE(result, min);
-  DCHECK_LE(result, max);
-  return result;
+  if (min <= result && result <= max)
+    return result;
+  return 0; // invalid
 }
 
 double RandDouble() {

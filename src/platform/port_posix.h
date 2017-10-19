@@ -91,9 +91,6 @@ int interrupt_pthread(pthread_t th);
 // Returns -1 if not available on this platform
 extern int PhysicalCoreID();
 
-typedef pthread_once_t OnceType;
-extern void InitOnce(OnceType* once, void (*initializer)());
-
 extern void *cacheline_aligned_alloc(size_t size);
 
 extern void cacheline_aligned_free(void *memblock);

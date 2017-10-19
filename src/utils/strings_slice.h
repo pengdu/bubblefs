@@ -10,8 +10,8 @@
 
 // pdlfs-common/include/pdlfs-common/slice.h
 
-#ifndef BUBBLEFS_UTILS_SLICE_H_
-#define BUBBLEFS_UTILS_SLICE_H_
+#ifndef BUBBLEFS_UTILS_STRINGS_SLICE_H_
+#define BUBBLEFS_UTILS_STRINGS_SLICE_H_
 
 #include <assert.h>
 #include <stddef.h>
@@ -153,7 +153,19 @@ inline void AppendSliceTo(std::string* str, const Slice& value) {
   str->append(value.data(), value.size());
 }
 
+inline int Slice::compare(const Slice& b) const {
+  const int min_len = (size_ < b.size_) ? size_ : b.size_;
+  int r = memcmp(data_, b.data_, min_len);
+  if (r == 0) {
+    if (size_ < b.size_)
+      r = -1;
+    else if (size_ > b.size_)
+      r = +1;
+  }
+  return r;
+}
+
 }  // namespace strings
 }  // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_SLICE_H_
+#endif // BUBBLEFS_UTILS_STRINGS_SLICE_H_

@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /**
  * 错误输出原则:
@@ -31,6 +32,8 @@
 // '\n'
 #define CHAR_NEW_LINE 010
 
+#define STR_ERRORNO() (errno == 0 ? "None" : strerror(errno)) 
+
 /// @brief 格式化输出log信息到buff
 #define LOG_MESSAGE(buff, buff_len, fmt, ...) \
     snprintf((buff), (buff_len), "[%s:%d](%s)" fmt, \
@@ -38,15 +41,19 @@
     
 /// @brief 记录最后错误信息，内部使用，要求buff名字为m_last_error
 #define _LOG_LAST_ERROR(fmt, ...) \
-    LOG_MESSAGE((m_last_error), (sizeof(m_last_error)), fmt, ##__VA_ARGS__)
+    LOG_MESSAGE((m_last_error), (sizeof(m_last_error)), fmt, ##__VA_ARGS__)   
     
 #define PRINTF_INFO(fmt, ...) \
-    fprintf(stdout, "INFO [%s:%d](%s)" fmt, \
-    __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)    
+    fprintf(stderr, "INFO [%s:%d](%s) " fmt, \
+    __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+    
+#define PRINTF_WARN(fmt, ...) \
+    fprintf(stderr, "WARN [%s:%d](%s) errno: %s," fmt, \
+    __FILE__, __LINE__, __FUNCTION__, STR_ERRORNO(), ##__VA_ARGS__)
     
 #define PRINTF_ERROR(fmt, ...) \
-    fprintf(stderr, "ERROR [%s:%d](%s)" fmt, \
-    __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+    fprintf(stderr, "ERROR [%s:%d](%s) errno: %s," fmt, \
+    __FILE__, __LINE__, __FUNCTION__, STR_ERRORNO(), ##__VA_ARGS__)
 
 #define PRINTF_CHECK(condition, msg) \
     if (!condition) { \

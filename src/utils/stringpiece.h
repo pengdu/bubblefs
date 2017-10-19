@@ -131,6 +131,12 @@ class StringPiece {
   }
 
   StringPiece substr(size_t pos, size_t n = npos) const;
+  
+  // Return a string that contains the copy of a suffix of the referenced data.
+  std::string substr_copy(size_t start) const {
+    assert(start <= size());
+    return std::string(data_ + start, size_ - start);
+  }
 
   struct Hasher {
     size_t operator()(StringPiece arg) const;
@@ -143,6 +149,11 @@ class StringPiece {
   string as_string() const {
     // std::string doesn't like to take a NULL pointer even with a 0 size.
     return empty() ? string() : string(data(), size());
+  }
+  
+  const char* c_str() const {
+    assert(data_[size_] == 0);
+    return data_;
   }
   
   // Decodes the current slice interpreted as an hexadecimal string into result,
@@ -225,6 +236,10 @@ inline size_t StringPiece::difference_offset(const StringPiece b) const {
     if (data_[off] != b.data_[off]) break;
   }
   return off;
+}
+
+inline void AppendSliceTo(std::string* str, const StringPiece& value) {
+  str->append(value.data(), value.size());
 }
 
 // allow StringPiece to be logged

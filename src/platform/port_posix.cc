@@ -159,14 +159,6 @@ namespace port {
 unsigned page_size = sysconf(_SC_PAGESIZE);
 unsigned long page_mask = ~(unsigned long)(page_size - 1);
 unsigned page_shift = GetBitsOf(page_size - 1); 
-  
-static int PthreadCall(const char* label, int result) {
-  if (result != 0 && result != ETIMEDOUT) {
-    fprintf(stderr, "pthread %s: %s\n", label, strerror(result));
-    abort();
-  }
-  return result;
-}
 
 // TODO: Make sure SIGURG is not used by user.
 // This empty handler is simply for triggering EINTR in blocking syscalls.
@@ -203,10 +195,6 @@ int PhysicalCoreID() {
   // give up, the caller can generate a random number or something.
   return -1;
 #endif
-}
-
-void InitOnce(OnceType* once, void (*initializer)()) {
-  PthreadCall("once", pthread_once(once, initializer));
 }
 
 void *cacheline_aligned_alloc(size_t size) {
