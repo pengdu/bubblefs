@@ -18,6 +18,41 @@
 namespace bubblefs {
 namespace pink {
 
+// Usage like:
+// class MyConn: public PbConn {
+//  public:
+//   MyConn(int fd, const std::string& ip_port, ServerThread *thread,
+//          void* worker_specific_data) : PbConn(fd, ip_port, thread) { };
+//   virtual ~MyConn() { };
+//  protected:
+//   virtual int DealMessage() {
+//     ping_.ParseFromArray(rbuf_ + cur_pos_ - header_len_, header_len_);
+//     ping_res_.Clear(); ping_res_.set_res(11234); ping_res_.set_mess("heiheidfdfdf");
+//     res_ = &ping_res_;
+//     set_is_reply(true);
+//   };
+//  private:
+//   myproto::Ping ping_;
+//   myproto::PingRes ping_res_;
+// };  
+//
+// class MyConnFactory : public ConnFactory {
+//  public:
+//   virtual PinkConn *NewPinkConn(int connfd, const std::string &ip_port,
+//                                 ServerThread *thread,
+//                                 void* worker_specific_data) const {
+//     return new MyConn(connfd, ip_port, thread, worker_specific_data);
+//   }
+// };
+//
+// SignalSetup();
+// MyConnFactory conn_factory;
+// ServerThread *st = NewDispatchThread(9211, 10, &conn_factory, 1000);
+// st->StartThread();
+// while (running.load()) { sleep(1); }
+// st->StopThread();
+// DeleteServerThread(&st);  
+  
 class PinkItem;
 struct PinkFiredEvent;
 class WorkerThread;

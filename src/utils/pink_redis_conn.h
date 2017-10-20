@@ -18,6 +18,46 @@
 namespace bubblefs {
 namespace pink {
 
+// Usage like:
+// class MyHTTPConn : public pink::SimpleHTTPConn {
+//  public:
+//   MyHTTPConn(const int fd, const std::string& ip_port, ServerThread* worker) :
+//    SimpleHTTPConn(fd, ip_port, worker) {
+//   }
+//   virtual void DealMessage(const pink::Request* req, pink::Response* res) {
+//     for (auto& h : req->headers) {
+//       std::cout << "   + " << h.first << ":" << h.second << std::endl;
+//     }
+//     std::cout << " + query_params: " << std::endl;
+//     for (auto& q : req->query_params) {
+//       std::cout << "   + " << q.first << ":" << q.second << std::endl;
+//     }
+//     std::cout << " + post_params: " << std::endl;
+//     for (auto& q : req->post_params) {
+//       std::cout << "   + " << q.first << ":" << q.second << std::endl;
+//     }
+//     res->SetStatusCode(200);
+//     res->SetBody("china");
+//    }
+// };
+//
+// class MyConnFactory : public ConnFactory {
+//  public:
+//   virtual PinkConn *NewPinkConn(int connfd, const std::string &ip_port,
+//                                 ServerThread *thread,
+//                                 void* worker_specific_data) const {
+//     return new MyHTTPConn(connfd, ip_port, thread);
+//   }
+// };
+//
+// SignalSetup();
+// MyConnFactory conn_factory;
+// ServerThread *st = NewDispatchThread(port, 4, &conn_factory, 1000);
+// st->StartThread();
+// while (running.load()) { sleep(1); }
+// st->StopThread();
+// DeleteServerThread(&st);  
+  
 typedef std::vector<std::string> RedisCmdArgsType;
 
 class RedisConn: public PinkConn {

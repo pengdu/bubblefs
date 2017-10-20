@@ -22,7 +22,7 @@ namespace pink {
 // myproto::PingRes req;
 // s = cli->Recv((void *)&req);
 // cli->Close();
-// DeletePinkCli(&cli);
+// DeletePinkCli(&cli);  
   
 class PinkCli {
  public:

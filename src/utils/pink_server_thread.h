@@ -233,6 +233,8 @@ extern ServerThread *NewDispatchThread(
     int cron_interval = 0, int queue_limit = 1000,
     const ServerHandle* handle = nullptr);
 
+void DeleteServerThread(ServerThread** st);
+
 }  // namespace pink
 }  // namespace bubblefs
 

@@ -342,5 +342,10 @@ int ServerThread::EnableSecurity(const std::string& cert_file,
 }
 #endif
 
+void void DeleteServerThread(ServerThread** st) {
+  delete (*st);
+  *st = nullptr;
+}
+  
 }  // namespace pink
 }  // namespace bubblefs
