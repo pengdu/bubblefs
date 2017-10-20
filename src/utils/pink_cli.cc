@@ -275,5 +275,10 @@ int PinkCli::set_tcp_nodelay() {
   return ret;
 }
 
+void DeletePinkCli(PinkCli** cli) {
+  delete (*cli);
+  *cli = nullptr;
+}  
+
 }  // namespace pink
 }  // namespace bubblefs

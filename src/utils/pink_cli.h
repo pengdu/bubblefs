@@ -14,6 +14,16 @@
 namespace bubblefs {
 namespace pink {
 
+// Usage like:
+// PinkCli* cli = NewPbCli();
+// Status s = cli->Connect(ip, port);
+// myproto::Ping msg; msg.set_address("127.00000"); msg.set_port(2222);
+// s = cli->Send((void *)&msg);
+// myproto::PingRes req;
+// s = cli->Recv((void *)&req);
+// cli->Close();
+// DeletePinkCli(&cli);
+  
 class PinkCli {
  public:
   explicit PinkCli(const std::string& ip = "", const int port = 0);
@@ -59,6 +69,8 @@ extern PinkCli *NewPbCli(
 
 extern PinkCli *NewRedisCli();
 
+void DeletePinkCli(PinkCli** cli);
+  
 }  // namespace pink
 }  // namespace bubblefs
 
