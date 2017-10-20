@@ -35,7 +35,7 @@ namespace bdcommon {
  * @author yanshiguang02
  * @date 2012/09/09 13:55:38
 **/
-static inline int atomic_add(volatile int *mem, int add)
+inline int atomic_add(volatile int *mem, int add)
 {
     asm volatile(
             "lock xadd %0, (%1);"
@@ -45,7 +45,8 @@ static inline int atomic_add(volatile int *mem, int add)
     );
     return add;
 }
-static inline long atomic_add64(volatile long* mem, long add)
+
+inline long atomic_add64(volatile long* mem, long add)
 {
     asm volatile (
             "lock xaddq %0, (%1)"
@@ -64,7 +65,7 @@ static inline long atomic_add64(volatile long* mem, long add)
  * @author yanshiguang02
  * @date 2012/09/09 13:56:46
 **/
-static inline void atomic_inc(volatile int *mem)
+inline void atomic_inc(volatile int *mem)
 {
     asm volatile(
             "lock incl %0;"
@@ -72,7 +73,8 @@ static inline void atomic_inc(volatile int *mem)
             : "m"(*mem)
     );
 }
-static inline void atomic_inc64(volatile long *mem)
+
+inline void atomic_inc64(volatile long *mem)
 {
     asm volatile(
             "lock incq %0;"
@@ -89,7 +91,7 @@ static inline void atomic_inc64(volatile long *mem)
  * @author yanshiguang02
  * @date 2012/09/09 13:57:54
 **/
-static inline void atomic_dec(volatile int *mem)
+inline void atomic_dec(volatile int *mem)
 {
     asm volatile(
             "lock decl %0;"
@@ -97,7 +99,8 @@ static inline void atomic_dec(volatile int *mem)
             : "m"(*mem)
     );
 }
-static inline void atomic_dec64(volatile long *mem)
+
+inline void atomic_dec64(volatile long *mem)
 {
     asm volatile(
             "lock decq %0;"
@@ -115,7 +118,7 @@ static inline void atomic_dec64(volatile long *mem)
  * @author yanshiguang02
  * @date 2012/09/09 13:55:25
 **/
-static inline int atomic_swap(volatile void *lockword, int value)
+inline int atomic_swap(volatile void *lockword, int value)
 {
     asm volatile(
             "lock xchg %0, (%1);"
@@ -125,7 +128,8 @@ static inline int atomic_swap(volatile void *lockword, int value)
     );
     return value;
 }
-static inline long atomic_swap64(volatile void *lockword, long value)
+
+inline long atomic_swap64(volatile void *lockword, long value)
 {
     asm volatile(
             "lock xchg %0, (%1);"
@@ -152,7 +156,7 @@ static inline long atomic_swap64(volatile void *lockword, long value)
  * @author yanshiguang02
  * @date 2012/09/09 13:54:54
 **/
-static inline int atomic_comp_swap(volatile void *mem, int xchg, int cmp)
+inline int atomic_comp_swap(volatile void *mem, int xchg, int cmp)
 {
     asm volatile(
             "lock cmpxchg %1, (%2)"
@@ -172,7 +176,7 @@ static inline int atomic_comp_swap(volatile void *mem, int xchg, int cmp)
  * @author yanshiguang02
  * @date 2012/09/09 13:54:15
 **/
-static inline long atomic_comp_swap64(volatile void *mem, long long xchg, long long cmp)
+inline long atomic_comp_swap64(volatile void *mem, long long xchg, long long cmp)
 {
     asm volatile(
             "lock cmpxchg %1, (%2)"

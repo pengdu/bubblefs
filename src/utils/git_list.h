@@ -54,7 +54,7 @@ struct list_head {
 #define LIST_HEAD_INIT(name) { &(name), &(name) }
 
 /* Add new element at the head of the list. */
-static inline void list_add(struct list_head *newp, struct list_head *head)
+inline void list_add(struct list_head *newp, struct list_head *head)
 {
         head->next->prev = newp;
         newp->next = head->next;
@@ -63,7 +63,7 @@ static inline void list_add(struct list_head *newp, struct list_head *head)
 }
 
 /* Add new element at the tail of the list. */
-static inline void list_add_tail(struct list_head *newp, struct list_head *head)
+inline void list_add_tail(struct list_head *newp, struct list_head *head)
 {
         head->prev->next = newp;
         newp->next = head;
@@ -72,34 +72,34 @@ static inline void list_add_tail(struct list_head *newp, struct list_head *head)
 }
 
 /* Remove element from list. */
-static inline void __list_del(struct list_head *prev, struct list_head *next)
+inline void __list_del(struct list_head *prev, struct list_head *next)
 {
         next->prev = prev;
         prev->next = next;
 }
 
 /* Remove element from list. */
-static inline void list_del(struct list_head *elem)
+inline void list_del(struct list_head *elem)
 {
         __list_del(elem->prev, elem->next);
 }
 
 /* Remove element from list, initializing the element's list pointers. */
-static inline void list_del_init(struct list_head *elem)
+inline void list_del_init(struct list_head *elem)
 {
         list_del(elem);
         INIT_LIST_HEAD(elem);
 }
 
 /* Delete from list, add to another list as head. */
-static inline void list_move(struct list_head *elem, struct list_head *head)
+inline void list_move(struct list_head *elem, struct list_head *head)
 {
         __list_del(elem->prev, elem->next);
         list_add(elem, head);
 }
 
 /* Replace an old entry. */
-static inline void list_replace(struct list_head *old, struct list_head *newp)
+inline void list_replace(struct list_head *old, struct list_head *newp)
 {
         newp->next = old->next;
         newp->prev = old->prev;
@@ -108,7 +108,7 @@ static inline void list_replace(struct list_head *old, struct list_head *newp)
 }
 
 /* Join two lists. */
-static inline void list_splice(struct list_head *add, struct list_head *head)
+inline void list_splice(struct list_head *add, struct list_head *head)
 {
         /* Do nothing if the list which gets added is empty. */
         if (add != add->next) {
@@ -153,12 +153,12 @@ static inline void list_splice(struct list_head *add, struct list_head *head)
                 pos != (head); \
                 pos = p, p = pos->prev)
 
-static inline int list_empty(struct list_head *head)
+inline int list_empty(struct list_head *head)
 {
         return head == head->next;
 }
 
-static inline void list_replace_init(struct list_head *old,
+inline void list_replace_init(struct list_head *old,
                                      struct list_head *newp)
 {
         struct list_head *head = old->next;
@@ -180,24 +180,24 @@ struct volatile_list_head {
 #define VOLATILE_LIST_HEAD(name) \
         volatile struct volatile_list_head name = { &(name), &(name) }
 
-static inline void __volatile_list_del(volatile struct volatile_list_head *prev,
+inline void __volatile_list_del(volatile struct volatile_list_head *prev,
                                        volatile struct volatile_list_head *next)
 {
         next->prev = prev;
         prev->next = next;
 }
 
-static inline void volatile_list_del(volatile struct volatile_list_head *elem)
+inline void volatile_list_del(volatile struct volatile_list_head *elem)
 {
         __volatile_list_del(elem->prev, elem->next);
 }
 
-static inline int volatile_list_empty(volatile struct volatile_list_head *head)
+inline int volatile_list_empty(volatile struct volatile_list_head *head)
 {
         return head == head->next;
 }
 
-static inline void volatile_list_add(volatile struct volatile_list_head *newp,
+inline void volatile_list_add(volatile struct volatile_list_head *newp,
                                      volatile struct volatile_list_head *head)
 {
         head->next->prev = newp;

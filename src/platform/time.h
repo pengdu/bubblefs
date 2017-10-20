@@ -71,38 +71,38 @@ namespace bubblefs {
 namespace timeutil {
 
 // The range of timestamp values we support.
-static const int64 kMinTime = -62135596800LL;  // 0001-01-01T00:00:00
-static const int64 kMaxTime = 253402300799LL;  // 9999-12-31T23:59:59
+constexpr int64 kMinTime = -62135596800LL;  // 0001-01-01T00:00:00
+constexpr int64 kMaxTime = 253402300799LL;  // 9999-12-31T23:59:59
 
 // The min/max Timestamp/Duration values we support.
 //
 // For "0001-01-01T00:00:00Z".
-static const int64 kTimestampMinSeconds = -62135596800LL;
+constexpr int64 kTimestampMinSeconds = -62135596800LL;
 // For "9999-12-31T23:59:59.999999999Z".
-static const int64 kTimestampMaxSeconds = 253402300799LL;
-static const int64 kDurationMinSeconds = -315576000000LL;
-static const int64 kDurationMaxSeconds = 315576000000LL;
+constexpr int64 kTimestampMaxSeconds = 253402300799LL;
+constexpr int64 kDurationMinSeconds = -315576000000LL;
+constexpr int64 kDurationMaxSeconds = 315576000000LL;
 
-static const char kTimestampFormat[] = "%E4Y-%m-%dT%H:%M:%S";
+constexpr char kTimestampFormat[] = "%E4Y-%m-%dT%H:%M:%S";
   
-static const int64 kSecondsPerMinute = 60;
-static const int64 kSecondsPerHour = 3600;
-static const int64 kSecondsPerDay = kSecondsPerHour * 24;
-static const int64 kSecondsPer400Years =
+constexpr int64 kSecondsPerMinute = 60;
+constexpr int64 kSecondsPerHour = 3600;
+constexpr int64 kSecondsPerDay = kSecondsPerHour * 24;
+constexpr int64 kSecondsPer400Years =
     kSecondsPerDay * (400 * 365 + 400 / 4 - 3);
 // Seconds from 0001-01-01T00:00:00 to 1970-01-01T:00:00:00
-static const int64 kSecondsFromEraToEpoch = 62135596800LL;
+constexpr int64 kSecondsFromEraToEpoch = 62135596800LL;
 
-static const int64_t kMillisPerSecond = 1000;
-static const int64_t kMicrosPerMillisecond = 1000;
-static const int64_t kMicrosPerSecond = 1000000;
-static const int64_t kMicrosPerMinute = kMicrosPerSecond * 60;
-static const int64_t kMicrosPerHour = kMicrosPerMinute * 60;
-static const int64_t kMicrosPerDay = kMicrosPerHour * 24;
-static const int64_t kMicrosPerWeek = kMicrosPerDay * 7;
-static const int64_t kNanosPerMicrosecond = 1000;
-static const int64_t kNanosPerMillisecond = 1000000;
-static const int64_t kNanosPerSecond = 1000000000;
+constexpr int64_t kMillisPerSecond = 1000;
+constexpr int64_t kMicrosPerMillisecond = 1000;
+constexpr int64_t kMicrosPerSecond = 1000000;
+constexpr int64_t kMicrosPerMinute = kMicrosPerSecond * 60;
+constexpr int64_t kMicrosPerHour = kMicrosPerMinute * 60;
+constexpr int64_t kMicrosPerDay = kMicrosPerHour * 24;
+constexpr int64_t kMicrosPerWeek = kMicrosPerDay * 7;
+constexpr int64_t kNanosPerMicrosecond = 1000;
+constexpr int64_t kNanosPerMillisecond = 1000000;
+constexpr int64_t kNanosPerSecond = 1000000000;
 
 using ChronoTime = decltype(std::chrono::high_resolution_clock::now());
 
@@ -112,46 +112,46 @@ double chrono_time_diff(ChronoTime t1, ChronoTime t2);
   
 typedef int64_t nsecs_t;       // nano-seconds
 
-static constexpr inline nsecs_t seconds_to_nanoseconds(nsecs_t secs)
+constexpr inline nsecs_t seconds_to_nanoseconds(nsecs_t secs)
 {
     return secs*1000000000;
 }
 
-static constexpr inline nsecs_t milliseconds_to_nanoseconds(nsecs_t secs)
+constexpr inline nsecs_t milliseconds_to_nanoseconds(nsecs_t secs)
 {
     return secs*1000000;
 }
 
-static constexpr inline nsecs_t microseconds_to_nanoseconds(nsecs_t secs)
+constexpr inline nsecs_t microseconds_to_nanoseconds(nsecs_t secs)
 {
     return secs*1000;
 }
 
-static constexpr inline nsecs_t nanoseconds_to_seconds(nsecs_t secs)
+constexpr inline nsecs_t nanoseconds_to_seconds(nsecs_t secs)
 {
     return secs/1000000000;
 }
 
-static constexpr inline nsecs_t nanoseconds_to_milliseconds(nsecs_t secs)
+constexpr inline nsecs_t nanoseconds_to_milliseconds(nsecs_t secs)
 {
     return secs/1000000;
 }
 
-static constexpr inline nsecs_t nanoseconds_to_microseconds(nsecs_t secs)
+constexpr inline nsecs_t nanoseconds_to_microseconds(nsecs_t secs)
 {
     return secs/1000;
 }
 
-static constexpr inline nsecs_t s2ns(nsecs_t v)  {return seconds_to_nanoseconds(v);}
-static constexpr inline nsecs_t ms2ns(nsecs_t v) {return milliseconds_to_nanoseconds(v);}
-static constexpr inline nsecs_t us2ns(nsecs_t v) {return microseconds_to_nanoseconds(v);}
-static constexpr inline nsecs_t ns2s(nsecs_t v)  {return nanoseconds_to_seconds(v);}
-static constexpr inline nsecs_t ns2ms(nsecs_t v) {return nanoseconds_to_milliseconds(v);}
-static constexpr inline nsecs_t ns2us(nsecs_t v) {return nanoseconds_to_microseconds(v);}
+constexpr inline nsecs_t s2ns(nsecs_t v)  {return seconds_to_nanoseconds(v);}
+constexpr inline nsecs_t ms2ns(nsecs_t v) {return milliseconds_to_nanoseconds(v);}
+constexpr inline nsecs_t us2ns(nsecs_t v) {return microseconds_to_nanoseconds(v);}
+constexpr inline nsecs_t ns2s(nsecs_t v)  {return nanoseconds_to_seconds(v);}
+constexpr inline nsecs_t ns2ms(nsecs_t v) {return nanoseconds_to_milliseconds(v);}
+constexpr inline nsecs_t ns2us(nsecs_t v) {return nanoseconds_to_microseconds(v);}
 
-static constexpr inline nsecs_t seconds(nsecs_t v)      { return s2ns(v); }
-static constexpr inline nsecs_t milliseconds(nsecs_t v) { return ms2ns(v); }
-static constexpr inline nsecs_t microseconds(nsecs_t v) { return us2ns(v); }
+constexpr inline nsecs_t seconds(nsecs_t v)      { return s2ns(v); }
+constexpr inline nsecs_t milliseconds(nsecs_t v) { return ms2ns(v); }
+constexpr inline nsecs_t microseconds(nsecs_t v) { return us2ns(v); }
 
 // return the system-time according to the specified clock
 nsecs_t systemTime(int clock = CLOCK_MONOTONIC);
@@ -192,21 +192,21 @@ enum Precision {
     kUsec,
 };
 
-static inline int64_t get_micros() {
+inline int64_t get_micros() {
     struct timeval tv;
     gettimeofday(&tv, nullptr);
     return static_cast<int64_t>(tv.tv_sec) * 1000000 + tv.tv_usec; // us
 }
 
-static inline int64_t get_millis() {
+inline int64_t get_millis() {
    return static_cast<int64_t>(get_micros() / 1000); // ms
 }
 
-static inline int64_t now_time() {
+inline int64_t now_time() {
     return static_cast<int64_t>(get_micros() / 1000000); // s
 }
 
-static inline int32_t now_time_str(char* buf, int32_t len, Precision p = kUsec) {
+inline int32_t now_time_str(char* buf, int32_t len, Precision p = kUsec) {
     struct timeval tv;
     gettimeofday(&tv, nullptr);
     const time_t seconds = tv.tv_sec;
@@ -235,7 +235,7 @@ static inline int32_t now_time_str(char* buf, int32_t len, Precision p = kUsec) 
     return ret;
 }
 
-static inline time_t gettimestamp(const std::string &time) {
+inline time_t gettimestamp(const std::string &time) {
     tm tm_;
     char buf[128] = { 0 };
     strncpy(buf, time.c_str(), sizeof(buf)-1);
@@ -245,14 +245,14 @@ static inline time_t gettimestamp(const std::string &time) {
     return mktime(&tm_);
 }
 
-static inline time_t gettimediff(const std::string &t1, const std::string &t2) {
+inline time_t gettimediff(const std::string &t1, const std::string &t2) {
     time_t time1 = gettimestamp(t1);
     time_t time2 = gettimestamp(t2);
     time_t time = time1 - time2;
     return time;
 }
 
-static inline void make_timeout(struct timespec* pts, long millisecond) {
+inline void make_timeout(struct timespec* pts, long millisecond) {
     struct timeval tv;
     gettimeofday(&tv, nullptr);
     pts->tv_sec = millisecond / 1000 + tv.tv_sec;
@@ -262,7 +262,7 @@ static inline void make_timeout(struct timespec* pts, long millisecond) {
     pts->tv_nsec = pts->tv_nsec % 1000000000;
 }
 
-static inline std::string get_curtime_str() {
+inline std::string get_curtime_str() {
     struct tm tt;
     char buf[20];
     time_t t = time(nullptr);
@@ -270,7 +270,7 @@ static inline std::string get_curtime_str() {
     return std::string(buf, 17);
 }
 
-static inline std::string get_curtime_str_plain() {
+inline std::string get_curtime_str_plain() {
     struct tm tt;
     char buf[20];
     time_t t = time(NULL);
@@ -278,7 +278,7 @@ static inline std::string get_curtime_str_plain() {
     return std::string(buf);
 }
 
-static inline int64_t get_unique_micros(int64_t ref) {
+inline int64_t get_unique_micros(int64_t ref) {
     int64_t now;
     do {
         now = get_micros();
@@ -286,11 +286,11 @@ static inline int64_t get_unique_micros(int64_t ref) {
     return now;
 }
 
-static inline int64_t GetTimeStampInUs() {
+inline int64_t GetTimeStampInUs() {
     return get_micros();
 }
 
-static inline int64_t GetTimeStampInMs() {
+inline int64_t GetTimeStampInMs() {
     return get_millis();
 }
 

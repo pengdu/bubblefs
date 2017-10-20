@@ -34,8 +34,8 @@ namespace netutil {
 // Type of an IP address
 typedef struct in_addr ip_t;
 
-static const ip_t IP_ANY = { INADDR_ANY };
-static const ip_t IP_NONE = { INADDR_NONE };
+constexpr ip_t IP_ANY = { INADDR_ANY };
+constexpr ip_t IP_NONE = { INADDR_NONE };
 
 // Convert |ip| to an integral
 inline in_addr_t ip2int(ip_t ip) { return ip.s_addr; }

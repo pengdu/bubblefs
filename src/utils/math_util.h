@@ -233,7 +233,7 @@ inline bool FloatEqual(float a, float b) {
   return false;
 }
 
-static inline int ToLog2(int value) {
+inline int ToLog2(int value) {
   return static_cast<int>(floor(log2(value)));
 }
 
@@ -248,7 +248,7 @@ static inline int ToLog2(int value) {
 //   4,5,6,7     -->  3
 //   128,129,255 -->  8
 // ------------------------
-static inline int ToRadix(int index) {
+inline int ToRadix(int index) {
   assert(index >= 0);
   return index == 0 ? 0 : 1 + ToLog2(index);
 }

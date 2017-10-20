@@ -63,7 +63,7 @@ extern unsigned page_shift;
 
 using Thread = std::thread;
 
-static inline void AsmVolatilePause() {
+inline void AsmVolatilePause() {
 #if defined(__i386__) || defined(__x86_64__)
   asm volatile("pause");
 #elif defined(__aarch64__)
@@ -75,12 +75,12 @@ static inline void AsmVolatilePause() {
 }
 
 // Pause instruction to prevent excess processor bus usage, only works in GCC
-static inline void AsmVolatileCpuRelax() {
+inline void AsmVolatileCpuRelax() {
   asm volatile("pause\n": : :"memory");
 }
 
 // Compile read-write barrier
-static inline void AsmVolatileBarrier() {
+inline void AsmVolatileBarrier() {
   asm volatile("": : :"memory");
 }
 
@@ -118,7 +118,7 @@ extern int64_t AmountOfVirtualMemory();
 
 // Return the number of megabytes of available virtual memory, or zero if it
 // is unlimited.
-static inline int AmountOfVirtualMemoryMB() {
+inline int AmountOfVirtualMemoryMB() {
   return static_cast<int>(AmountOfVirtualMemory() / 1024 / 1024);
 }
 

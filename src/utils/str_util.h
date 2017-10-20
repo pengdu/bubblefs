@@ -181,8 +181,8 @@ inline typename string_type::value_type* WriteInto(string_type* str,
   return &((*str)[0]);
 }
   
-static inline bool IsVisible(char c) {
-    return (c >= 0x20 && c <= 0x7E);
+inline bool IsVisible(char c) {
+  return (c >= 0x20 && c <= 0x7E);
 }
 
 // 2 small internal utility functions, for efficient hex conversions

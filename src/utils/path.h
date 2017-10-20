@@ -28,9 +28,9 @@ namespace internal {
 string JoinPathImpl(std::initializer_list<StringPiece> paths);
 } // namespace internal
 
-static inline bool SplitPath(const std::string& path,
-               std::vector<std::string>* element,
-               bool* isdir = nullptr) {
+inline bool SplitPath(const std::string& path,
+                      std::vector<std::string>* element,
+                      bool* isdir = nullptr) {
     if (path.empty() || path[0] != '/' || path.size() > io::MAX_PATH_LENGTH) {
         return false;
     }

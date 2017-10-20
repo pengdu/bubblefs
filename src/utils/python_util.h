@@ -264,7 +264,7 @@ private:
   PyObject* dict_;
 };
 
-inline static bool isCallable(const PyObjectPtr& obj) {
+inline bool isCallable(const PyObjectPtr& obj) {
   return PyCallable_Check(obj.get());
 }
 
@@ -304,7 +304,7 @@ private:
   PyObjectPtr kwargs;
 };
 
-inline static PyObject* iterNext(const PyObjectPtr& context, bool* atEnd) {
+inline PyObject* iterNext(const PyObjectPtr& context, bool* atEnd) {
   PyGuard g;
   PyObject* data = PyIter_Next(context.get());
   if (data == nullptr) {

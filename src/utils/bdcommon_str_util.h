@@ -241,11 +241,11 @@ bool StringStartWith(const std::string& str,
 
 char* StringAsArray(std::string* str);
 
-static inline bool IsVisible(char c) {
+inline bool IsVisible(char c) {
     return (c >= 0x20 && c <= 0x7E);
 }
 
-static inline char ToHex(uint8_t i) {
+inline char ToHex(uint8_t i) {
     char j = 0;
     if (i < 10) {
         j = i + '0';
