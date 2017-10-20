@@ -58,6 +58,8 @@ void InitOnce(OnceType* once, void (*initializer)()) {
 }  
 
 Mutex::Mutex() : owner_(0) {
+  // PthreadCall("init mutex", pthread_mutex_init(&mu_, NULL));
+  // prevent called by the same thread.
   pthread_mutexattr_t attr;
   PthreadCall("init mutexattr", pthread_mutexattr_init(&attr));
   PthreadCall("set mutexattr errorcheck", pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK));

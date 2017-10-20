@@ -42,4 +42,8 @@
 #define TF_SUPPORT_THREAD_LOCAL 1
 #endif
 
+#ifndef TF_USE_SSL
+#define TF_USE_SSL 1
+#endif
+
 #endif // BUBBLEFS_PLATFORM_BUILD_CONFIG_H_

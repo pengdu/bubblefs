@@ -23,6 +23,12 @@ constexpr int kProtoMaxMessage = 64 * 1024 * 1024;  // 64MB
 constexpr int kCommandHeaderLength = 4;
 
 /*
+ * The pb head and code length
+ */
+#define PINK_COMMAND_HEADER_LENGTH 4
+#define PINK_COMMAND_CODE_LENGTH 4
+
+/*
  * The socket block type
  */
 enum BlockType {
@@ -94,9 +100,9 @@ constexpr int REDIS_REQ_MULTIBULK = 2;
 /*
  * define common character
  */
-#define SPACE ' '
-#define COLON ':'
-#define SHARP '#'
+//#define SPACE ' '
+//#define COLON ':'
+//#define SHARP '#'
 
 }  // namespace pink
 }  // namespace bubblefs
