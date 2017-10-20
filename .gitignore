@@ -33,7 +33,7 @@
 *.pb.cc
 *.pb.h
 
-#depends
+# Depends
 #depends.mk
 #*_test
 output
@@ -43,5 +43,9 @@ flag_build
 third_party
 third_src
 
-#tmp
+# examples
+
+# tests
+
+# Tmp
 *.kate-swp

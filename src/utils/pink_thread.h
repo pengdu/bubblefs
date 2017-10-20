@@ -11,7 +11,7 @@
 #include <pthread.h>
 #include <atomic>
 #include <string>
-#include "platform/mutex.h"
+#include "platform/mutexlock.h"
 
 namespace bubblefs {
 namespace pink {
