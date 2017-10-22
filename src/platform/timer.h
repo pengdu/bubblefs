@@ -56,13 +56,17 @@
 #ifndef BUBBLEFS_PLATFORM_TIMER_H_
 #define BUBBLEFS_PLATFORM_TIMER_H_
 
+#include <chrono>
 #include <functional>
 #include <list>
 #include <memory>
+#include <ratio>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include "platform/base_error.h"
 #include "platform/time.h"
+#include "utils/printable.h"
 
 namespace bubblefs {
 namespace timeutil {
@@ -221,33 +225,70 @@ private:
  * This is a minimal class around a std::chrono::high_resolution_clock that
  * serves as a utility class for testing code.
  */
-class ChronoTimer {
+template<typename ResolutionRatio = std::ratio<1> >
+class ChronoTimer : public Printable {
  public:
   typedef std::chrono::high_resolution_clock clock;
   typedef std::chrono::nanoseconds ns;
-  ChronoTimer() { Start(); }
+  typedef std::chrono::time_point<clock> time_point;
+  ChronoTimer() : elapsed_(0), invocations_(0) { Start(); }
   /**
    * @brief Starts a timer.
    */
-  inline void Start() { start_time_ = clock::now(); }
-  inline float NanoSeconds() {
-    return std::chrono::duration_cast<ns>(clock::now() - start_time_).count();
+  inline void Start() { begin_ = clock::now(); }
+  inline double NanoSeconds() {
+    return std::chrono::duration_cast<ns>(clock::now() - begin_).count();
   }
   /**
    * @brief Returns the elapsed time in milliseconds.
    */
-  inline float MilliSeconds() { return NanoSeconds() / 1000000.f; }
+  inline double MilliSeconds() { return NanoSeconds() / 1000000.f; }
   /**
    * @brief Returns the elapsed time in microseconds.
    */
-  inline float MicroSeconds() { return NanoSeconds() / 1000.f; }
+  inline double MicroSeconds() { return NanoSeconds() / 1000.f; }
   /**
    * @brief Returns the elapsed time in seconds.
    */
-  inline float Seconds() { return NanoSeconds() / 1000000000.f; }
+  inline double Seconds() { return NanoSeconds() / 1000000000.f; }
+  
+  inline void Stop() {
+    end_ = clock::now();
+
+    double duration =
+        std::chrono::duration_cast<
+            std::chrono::duration<double, ResolutionRatio> >(end_ - begin_)
+            .count();
+
+    elapsed_ += duration;
+    ++invocations_;
+  }
+  
+  inline void Reset() { elapsed_ = 0; }
+  
+  // Get Elapsed duration
+  inline double GetDuration() const { return elapsed_; }
+
+  // Get Number of invocations
+  inline int GetInvocations() const { return invocations_; }
+
+  // Get a string representation for debugging
+  inline const std::string GetInfo() const {
+    std::ostringstream os;
+    os << "ChronoTimer["
+       << "elapsed=" << elapsed_ << ", "
+       << "invocations=" << invocations_ << "]";
+    return (os.str());
+  }
 
  protected:
-  std::chrono::time_point<clock> start_time_;
+  time_point begin_;
+  time_point end_;
+  // Elapsed time (with desired resolution)
+  double elapsed_;
+  // Number of invocations
+  int invocations_;
+  
   DISALLOW_COPY_AND_ASSIGN(ChronoTimer);
 };
 

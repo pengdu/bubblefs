@@ -714,16 +714,6 @@ class PdlfsSequentialFile : public SequentialFile {
       return Status::OK();
     }
   }
-  
-  virtual char *ReadLine(char* buf, int n) override {
-    // not implemented
-    return nullptr;
-  }
-
-  virtual Status Close() {
-    // // not implemented
-    return Status::OK();
-  }
 };
 
 
@@ -758,11 +748,6 @@ class PosixBufferedSequentialFile : public SequentialFile {
       return IOError(filename_, errno);
     }
     return Status::OK();
-  }
-  
-  virtual char *ReadLine(char* buf, int n) {
-    // not implemented
-    return NULL;
   }
 };
 
@@ -1045,16 +1030,6 @@ class PosixBufferedWritableFile : public WritableFile {
     }
     return s;
   }
-  
-  virtual Status Trim(uint64_t offset) {
-    // not implemented
-    return Status::NotSupported("PosixBufferedWritableFile does not support Trim");
-  }
-  
-  virtual uint64_t Filesize() {
-    // not implemented
-    return 0;
-  }
 };
 
 class PosixWritableFile : public WritableFile {
@@ -1131,16 +1106,6 @@ class PosixWritableFile : public WritableFile {
     }
 
     return s;
-  }
-  
-  virtual Status Trim(uint64_t offset) {
-    // not implemented
-    return Status::NotSupported("PosixWritableFile does not support Trim");
-  }
-  
-  virtual uint64_t Filesize() {
-    // not implemented
-    return 0;
   }
 };
 

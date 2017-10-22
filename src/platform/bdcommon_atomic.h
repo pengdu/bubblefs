@@ -184,7 +184,15 @@ inline long atomic_comp_swap64(volatile void *mem, long long xchg, long long cmp
             :"d"(xchg), "r"(mem), "a"(cmp)
     );
     return cmp;
-}  
+}
+
+// gcc intrinsic
+#if defined(__GNUC__)
+template <typename T>
+inline bool atomic_cas(T *object, T old_value, T new_value) {
+  return __sync_bool_compare_and_swap(object, old_value, new_value);
+}
+#endif
   
 } // namespace bdcommon
 } // namespace bubblefs

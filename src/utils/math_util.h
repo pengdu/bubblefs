@@ -253,6 +253,36 @@ inline int ToRadix(int index) {
   return index == 0 ? 0 : 1 + ToLog2(index);
 }
 
+
+//===--------------------------------------------------------------------===//
+// Count the number of leading zeroes in a given 64-bit unsigned number
+//===--------------------------------------------------------------------===//
+inline uint64_t CountLeadingZeroes(uint64_t i) {
+#if defined __GNUC__ || defined __clang__
+  return __builtin_clzl(i);
+#else
+#error get a better compiler to CountLeadingZeroes
+#endif
+}
+
+//===--------------------------------------------------------------------===//
+// Find the next power of two higher than the provided value
+//===--------------------------------------------------------------------===//
+inline uint64_t NextPowerOf2(uint64_t n) {
+#if defined __GNUC__ || defined __clang__
+  assert(n > 0);
+  return 1ul << (64 - CountLeadingZeroes(n - 1));
+#else
+  n--;
+  n |= n >> 1;
+  n |= n >> 2;
+  n |= n >> 4;
+  n |= n >> 8;
+  n |= n >> 16;
+  return ++n;
+#endif
+}
+
 } // namespace mathutil 
 } // namespace bubblefs
 

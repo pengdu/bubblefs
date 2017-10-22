@@ -165,7 +165,7 @@ void CondVar::Wait(const char* msg) {
   mu_->AfterLock();
 }
 
-bool CondVar::AbsTimedWait(uint64_t abs_time_us, const char* msg) {
+bool CondVar::TimedWaitAbsolute(uint64_t abs_time_us, const char* msg) {
   struct timespec ts;
   ts.tv_sec = static_cast<time_t>(abs_time_us / 1000000);
   ts.tv_nsec = static_cast<suseconds_t>((abs_time_us % 1000000) * 1000);

@@ -249,8 +249,8 @@ class WritableFile {
   virtual Status Close() = 0;
   virtual Status Flush() = 0;
   virtual Status Sync() = 0;
-  virtual Status Trim(uint64_t offset) = 0;
-  virtual uint64_t Filesize() = 0;
+  virtual Status Trim(uint64_t offset) { return Status::UnimplementedError(); };
+  virtual uint64_t Filesize() { return 0; };
 
  private:
   // No copying allowed
@@ -267,7 +267,7 @@ class SequentialFile {
   virtual Status Read(size_t n, Slice* result, char* scratch) = 0;
   virtual Status Skip(uint64_t n) = 0;
   //virtual Status Close() = 0;
-  virtual char *ReadLine(char *buf, int n) = 0;
+  virtual char *ReadLine(char *buf, int n) { return nullptr; };
 };
 
 class RWFile {
