@@ -75,7 +75,7 @@ void InstallFailureWriter(void (*callback)(const char*, int)) {
 
 }  // namespace logging
 
-void Logger::FlushLogFiles() { google::FlushLogFiles(google::INFO); }
+void LoggerUtil::FlushLogFiles() { google::FlushLogFiles(google::INFO); }
 
 namespace {
 static const char* NULL_LOG_FILE = "/dev/null";
@@ -97,11 +97,11 @@ void InternalLogOpen(
 }
 }
 
-void Logger::Initialize(const char* log_fname) {
+void LoggerUtil::Initialize(const char* log_fname) {
   InternalLogOpen(log_fname);
   google::InstallFailureSignalHandler();
 }
 
-void Logger::Shutdown() { google::ShutdownGoogleLogging(); }
+void LoggerUtil::Shutdown() { google::ShutdownGoogleLogging(); }
 
 }  // namespace bubblefs

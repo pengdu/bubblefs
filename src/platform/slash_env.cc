@@ -667,6 +667,66 @@ class PosixSequentialFile: public SequentialFile {
   }
 };
 
+class PdlfsSequentialFile : public SequentialFile {
+ private:
+  std::string filename_;
+  int fd_;
+
+ public:
+  PdlfsSequentialFile(const char* fname, int fd) : filename_(fname), fd_(fd) {}
+
+  virtual ~PdlfsSequentialFile() { close(fd_); }
+
+  // Read up to "n" bytes from the file.  "scratch[0..n-1]" may be
+  // written by this routine.  Sets "*result" to the data that was
+  // read (including if fewer than "n" bytes were successfully read).
+  // May set "*result" to point at data in "scratch[0..n-1]", so
+  // "scratch[0..n-1]" must be live when "*result" is used.
+  // If an error was encountered, returns a non-OK status.
+  //
+  // REQUIRES: External synchronization
+  virtual Status Read(size_t n, Slice* result, char* scratch) {
+    Status s;
+    ssize_t nr = read(fd_, scratch, n);
+    if (nr == -1) {
+      s = IOError(filename_, errno);
+    } else if (nr != 0) {
+      *result = Slice(scratch, static_cast<size_t>(nr));
+    } else {  // EOF
+      *result = Slice(scratch, 0);
+    }
+
+    return s;
+  }
+
+  // Skip "n" bytes from the file. This is guaranteed to be no
+  // slower that reading the same data, but may be faster.
+  //
+  // If end of file is reached, skipping will stop at the end of the
+  // file, and Skip will return OK.
+  //
+  // REQUIRES: External synchronization
+  virtual Status Skip(uint64_t n) {
+    off_t r = lseek(fd_, n, SEEK_CUR);
+    if (r == -1) {
+      return IOError(filename_, errno);
+    } else {
+      return Status::OK();
+    }
+  }
+  
+  virtual char *ReadLine(char* buf, int n) override {
+    // not implemented
+    return nullptr;
+  }
+
+  virtual Status Close() {
+    // // not implemented
+    return Status::OK();
+  }
+};
+
+
 class PosixBufferedSequentialFile : public SequentialFile {
  private:
   std::string filename_;

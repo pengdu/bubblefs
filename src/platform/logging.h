@@ -64,7 +64,7 @@ void LogString(const char* fname, int line, int severity,
 }  // namespace internal
 
 // indexfs/common/logging.h
-struct Logger {
+struct LoggerUtil {
 
   // Ensure all buffered log entries get
   // flushed to the underlying storage system.
