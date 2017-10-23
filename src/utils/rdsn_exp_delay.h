@@ -31,7 +31,7 @@
 
 #include <assert.h>
 #include <vector>
-#include "utils/simple_singleton.h"
+#include "utils/rdsn_singleton.h"
 
 namespace bubblefs {
 namespace rdsn {

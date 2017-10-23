@@ -24,19 +24,10 @@
  * THE SOFTWARE.
  */
 
-/*
- * Description:
- *     What is this file about?
- *
- * Revision history:
- *     xxxx-xx-xx, author, first version
- *     xxxx-xx-xx, author, fix bug about xxx
- */
-
 #ifndef BUBBLEFS_UTILS_RDSN_SINGLETON_STORE_H_
 #define BUBBLEFS_UTILS_RDSN_SINGLETON_STORE_H_
 
-#include "utils/simple_singleton.h"
+#include "utils/rdsn_singleton.h"
 #include "utils/rdsn_synchronize.h"
 #include <map>
 #include <vector>
@@ -46,7 +37,7 @@ namespace rdsn {
 namespace utils {
 
 template <typename TKey, typename TValue, typename TCompare = std::less<TKey>>
-class singleton_store : public singleton<singleton_store<TKey, TValue, TCompare>>
+class singleton_store : public rdsn::utils::singleton<singleton_store<TKey, TValue, TCompare>>
 {
 public:
     bool put(TKey key, TValue val)

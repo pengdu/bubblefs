@@ -42,8 +42,8 @@
 // android/platform_system_core/libutils/include/utils/Singleton.h
 // rdsn/include/dsn/utility/singleton.h
 
-#ifndef BUBBLEFS_UTILS_SIMPLE_SINGLETON_H_
-#define BUBBLEFS_UTILS_SIMPLE_SINGLETON_H_
+#ifndef BUBBLEFS_UTILS_RDSN_SINGLETON_H_
+#define BUBBLEFS_UTILS_RDSN_SINGLETON_H_
 
 #include <mutex>
 #include <atomic>
@@ -162,4 +162,4 @@ std::atomic<int> Singleton<T>::_l(0);
 
 } // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_SIMPLE_SINGLETON_H_
+#endif // BUBBLEFS_UTILS_RDSN_SINGLETON_H_
