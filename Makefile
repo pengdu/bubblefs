@@ -77,6 +77,9 @@ CLIENT_OBJS = $(addsuffix .o, $(basename $(CLIENT_SRCS)))
 DB_SRCS = $(wildcard $(PROJECT_DIR)/src/db/*.cc)
 DB_OBJS = $(addsuffix .o, $(basename $(DB_SRCS)))
 
+HTTP_SRCS = $(wildcard $(PROJECT_DIR)/src/http/*.cc)
+HTTP_OBJS = $(addsuffix .o, $(basename $(HTTP_SRCS)))
+
 PLATFORM_SRCS = \
 		$(PROJECT_DIR)/src/platform/bdcommon_logging.cc \
         $(PROJECT_DIR)/src/platform/mutex.cc
@@ -103,7 +106,7 @@ OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(DB_OBJS) $(CLI
 
 LIBS =
  
-BIN = $(PLATFORM_UTILS_OBJS) #$(PROJECT_DIR)/src/db/redis_store.o
+BIN = $(HTTP_OBJS) #$(PLATFORM_UTILS_OBJS) #$(PROJECT_DIR)/src/db/redis_store.o
 
 .PHONY:all
 all: $(BIN)

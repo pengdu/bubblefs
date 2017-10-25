@@ -104,10 +104,10 @@ class Status {
   }
   static Status IOError(int64_t subcode = error::NONE) { return Status(error::IOERROR, subcode); }
   
-  static Status NetWorkError(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+  static Status NetworkError(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::NETWORK_ERROR, msg, msg2);
   }
-  static Status NetWorkError(int64_t subcode = error::NONE) { return Status(error::NETWORK_ERROR, subcode); }
+  static Status NetworkError(int64_t subcode = error::NONE) { return Status(error::NETWORK_ERROR, subcode); }
   
   static Status NotFound(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::NOT_FOUND, msg, msg2);
