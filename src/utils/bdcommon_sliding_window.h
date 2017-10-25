@@ -6,8 +6,8 @@
 
 // baidu/common/include/sliding_window.h
 
-#ifndef  BUBBLEFS_UTILS_SLIDING_WINDOW_H_
-#define  BUBBLEFS_UTILS_SLIDING_WINDOW_H_
+#ifndef  BUBBLEFS_UTILS_BDCOMMON_SLIDING_WINDOW_H_
+#define  BUBBLEFS_UTILS_BDCOMMON_SLIDING_WINDOW_H_
 
 #include <stdint.h>
 #include <string.h>
@@ -121,4 +121,4 @@ private:
 } // namespace bdcommon
 } // namespace bubblefs
 
-#endif  // BUBBLEFS_UTILS_SLIDING_WINDOW_H_
+#endif  // BUBBLEFS_UTILS_BDCOMMON_SLIDING_WINDOW_H_

@@ -36,7 +36,6 @@
 #ifndef BUBBLEFS_UTILS_UTF8_H_
 #define BUBBLEFS_UTILS_UTF8_H_
 
-#include <bits/codecvt.h>
 #include <locale>
 #include <string>
 #include <sstream>

@@ -41,7 +41,8 @@ SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ld
 CXX = clang
 
 # Compiler opts
-GCC_OPTS = -fmax-errors=3
+GCC_OPTS = -fmax-errors=2
+CLANG_OPTS = -ferror-limit=2
 
 # Notes on the flags:
 # 1. Added -fno-omit-frame-pointer: perf/tcmalloc-profiler use frame pointers by default
@@ -49,8 +50,14 @@ GCC_OPTS = -fmax-errors=3
 # 3. Removed -Werror: Not block compilation for non-vital warnings, especially when the
 #    code is tested on newer systems. If the code is used in production, add -Werror back
 DFLAGS = -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE
-CXXFLAGS = -Wall -fPIC -std=c++11 -pthread $(DFLAGS) $(OPT) # $(GCC_OPTS)
+CXXFLAGS = -Wall -fPIC -std=c++11 -pthread $(DFLAGS) $(OPT)
 CFLAGS = -Wall -W -fPIC $(DFLAGS) $(OPT)
+
+ifeq ($(CXX), g++)
+CXXFLAGS += $(GCC_OPTS)
+else ifeq ($(CXX), clang)
+CXXFLAGS += $(CLANG_OPTS)
+endif
 
 # Files
 

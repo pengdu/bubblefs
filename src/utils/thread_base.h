@@ -12,8 +12,8 @@
 
 // ceph/src/common/Thread.h
 
-#ifndef BUBBLEFS_UTILS_THREAD_H_
-#define BUBBLEFS_UTILS_THREAD_H_
+#ifndef BUBBLEFS_UTILS_THREAD_BASE_H_
+#define BUBBLEFS_UTILS_THREAD_BASE_H_
 
 #include <sys/types.h>
 #include <pthread.h>
@@ -61,4 +61,4 @@ class ThreadBase {
 } // namespace base
 } // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_THREAD_H_
+#endif // BUBBLEFS_UTILS_THREAD_BASE_H_

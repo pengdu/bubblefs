@@ -10,7 +10,7 @@
  *
  */
 
-#include "utils/thread.h"
+#include "utils/thread_base.h"
 #include <assert.h>
 #include <errno.h>
 #include <sched.h>

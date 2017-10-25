@@ -145,9 +145,11 @@ enum Code {
   // operation.
   UNAUTHENTICATED = 25,
   
-  ENDFILE = 26,
+  NETWORK_ERROR = 26,
   
-  COMPLETE = 27, // complete
+  ENDFILE = 27,
+  
+  COMPLETE = 28, // complete
   
   // An extra enum entry to prevent people from writing code that
   // fails to compile when a new code is added.
