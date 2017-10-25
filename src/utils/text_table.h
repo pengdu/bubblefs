@@ -18,7 +18,6 @@
 #include <assert.h>
 #include <sstream>
 #include <vector>
-#include <boost/concept_check.hpp>
 
 namespace bubblefs {
 namespace core {

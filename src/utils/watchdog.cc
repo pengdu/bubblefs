@@ -9,7 +9,6 @@
 #include "platform/logging.h"
 #include "platform/time.h"
 #include "utils/lazy_instance.h"
-#include <boost/concept_check.hpp>
 
 namespace bubblefs {
 namespace core {

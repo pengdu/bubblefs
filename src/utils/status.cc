@@ -161,7 +161,7 @@ string Status::ToString() const {
       case error::EXPIRED:
         type = "Expired";
         break;
-      case error::TRY_AGAIN:
+      case error::OP_TRY_AGAIN:
         type = "Operation try again";
         break;
       case error::NOT_SUPPORTED:

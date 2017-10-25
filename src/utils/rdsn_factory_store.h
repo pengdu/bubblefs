@@ -37,7 +37,6 @@
 #define BUBBLEFS_UTILS_RDSN_FACTORY_STORE_H_
 
 #include "utils/rdsn_singleton_store.h"
-#include "boost/boost/concept_check.hpp"
 
 namespace bubblefs {
 namespace rdsn {
