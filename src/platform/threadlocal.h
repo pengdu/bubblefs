@@ -39,7 +39,6 @@
 #include "platform/logging.h"
 #include "platform/macros.h"
 #include "platform/port.h"
-#include "utils/autovector.h"
 
 // Try to come up with a portable implementation of thread local variables
 // Provide thread_local keyword (for primitive types) before C++11

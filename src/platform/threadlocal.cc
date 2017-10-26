@@ -47,9 +47,20 @@ limitations under the License. */
 #include "platform/port.h"
 #include "gflags/gflags.h"
 
+// Make sure each thread can have different values.
+// #include <boost/thread.hpp>
+// static boost::thread_specific_ptr<Caffe> thread_instance_;
+// Caffe& Caffe::Get() {
+// if (!thread_instance_.get()) {
+//   thread_instance_.reset(new Caffe());
+// }
+// return *(thread_instance_.get());
+// }
+
 DEFINE_bool(thread_local_rand_use_global_seed,
             false,
             "Whether to use global seed in thread local rand.");
+
 
 namespace bubblefs {
 
