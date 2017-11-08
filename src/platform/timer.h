@@ -66,7 +66,7 @@
 #include <unordered_map>
 #include "platform/base_error.h"
 #include "platform/time.h"
-#include "utils/printable.h"
+#include "utils/peloton_printable.h"
 
 namespace bubblefs {
 namespace timeutil {
@@ -226,7 +226,7 @@ private:
  * serves as a utility class for testing code.
  */
 template<typename ResolutionRatio = std::ratio<1> >
-class ChronoTimer : public Printable {
+class ChronoTimer : public peloton::Printable {
  public:
   typedef std::chrono::high_resolution_clock clock;
   typedef std::chrono::nanoseconds ns;

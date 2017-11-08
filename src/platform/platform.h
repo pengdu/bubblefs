@@ -16,7 +16,7 @@ limitations under the License.
 #ifndef PLATFORM_PLATFORM_DEFINE_H_
 #define PLATFORM_PLATFORM_DEFINE_H_
 
-#include "platform/build_config.h"
+#include "build_config.h"
 
 // This file adds defines about the platform we're currently building on.
 //  Operating System:

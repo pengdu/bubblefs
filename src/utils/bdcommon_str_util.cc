@@ -17,7 +17,7 @@
 #include <limits>
 #include <sstream>
 #include <string>
-#include "utils/string_format.h"
+#include "utils/bdcommon_string_format.h"
 
 // GLOBAL_NOLINT(runtime/int)
 

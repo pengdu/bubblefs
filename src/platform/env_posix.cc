@@ -43,7 +43,7 @@ limitations under the License.
 #include <limits>
 #include <thread>
 #include <vector>
-#include "platform/eintr_wrapper.h"
+#include "platform/brpc_eintr_wrapper.h"
 #include "platform/env.h"
 #include "platform/error.h"
 #include "platform/io_posix.h"

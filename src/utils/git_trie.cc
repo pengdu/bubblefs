@@ -1,9 +1,9 @@
 
 // git/path.c
 
+#include "utils/git_trie.h"
 #include <stdlib.h>
 #include <string.h>
-#include "utils/git_trie.h"
 
 namespace bubblefs {
 namespace git {

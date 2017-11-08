@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include <string>
 #include <vector>
-#include "utils/ascii.h"
+#include "utils/bdcommon_ascii.h"
 
 namespace bubblefs {
 namespace bdcommon {

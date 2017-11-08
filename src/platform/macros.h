@@ -30,7 +30,6 @@ limitations under the License.
 #include <string.h>  // For memcpy.
 #include <unistd.h>
 #include "platform/base_export.h"
-#include "platform/build_config.h"
 #include "platform/compiler_specific.h"
 #include "platform/dynamic_annotations.h"
 #include "platform/platform.h"

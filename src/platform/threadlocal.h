@@ -40,6 +40,14 @@
 #include "platform/macros.h"
 #include "platform/port.h"
 
+#ifdef TF_SUPPORT_THREAD_LOCAL
+#define STATIC_THREAD_LOCAL static __thread
+#define THREAD_LOCAL __thread
+#else
+#define STATIC_THREAD_LOCAL static thread_local
+#define THREAD_LOCAL thread_local
+#endif
+
 // Try to come up with a portable implementation of thread local variables
 // Provide thread_local keyword (for primitive types) before C++11
 // DEPRECATED: define this keyword before C++11 might make the variable ABI
@@ -56,14 +64,6 @@
 #define thread_local __thread
 #endif  // _MSC_VER
 #endif  // thread_local
-
-#ifdef TF_SUPPORT_THREAD_LOCAL
-#define STATIC_THREAD_LOCAL static __thread
-#define THREAD_LOCAL __thread
-#else
-#define STATIC_THREAD_LOCAL static thread_local
-#define THREAD_LOCAL thread_local
-#endif
 
 namespace bubblefs { 
   
