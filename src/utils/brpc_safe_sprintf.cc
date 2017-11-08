@@ -4,13 +4,13 @@
 
 // brpc/src/butil/strings/safe_sprintf.cc
 
-#include "utils/safe_sprintf.h"
+#include "utils/brpc_safe_sprintf.h"
 #include <limits>
 
 #define DEBUG_CHECK(x, msg) do { if (x) { } } while (0)
 
 namespace bubblefs {
-namespace strings {
+namespace brpc {
 
 // The code in this file is extremely careful to be async-signal-safe.
 //
@@ -653,5 +653,5 @@ ssize_t SafeSNPrintf(char* buf, size_t sz, const char* fmt) {
   return buffer.GetCount();
 }
 
-}  // namespace strings
+}  // namespace brpc
 }  // namespace bubblefs

@@ -1,0 +1,121 @@
+// Copyright (c) 2017 Mirants Lu. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// saber/saber/util/runloop.cc
+
+#include "utils/saber_runloop.h"
+#include <algorithm>
+#include <utility>
+#include "platform/mutexlock.h"
+#include "platform/saber_logging.h"
+#include "utils/saber_thread.h"
+#include "utils/saber_timerlist.h"
+
+namespace bubblefs {
+namespace saber {
+
+RunLoop::RunLoop()
+    : exit_(false),
+      tid_(CurrentThread::Tid()),
+      mutex_(),
+      cond_(&mutex_),
+      timers_(new TimerList(this)) {}
+
+RunLoop::~RunLoop() {}
+
+void RunLoop::Loop() {
+  AssertInMyLoop();
+  exit_ = false;
+  std::vector<Func> funcs;
+  while (!exit_) {
+    uint64_t timeout = timers_->TimeoutMicros();
+    {
+      MutexLock lock(&mutex_);
+      if (funcs_.empty()) {
+        cond_.TimedWait(timeout);
+      }
+      funcs.swap(funcs_);
+    }
+    timers_->RunTimerProcs();
+    for (auto& f : funcs) {
+      f();
+    }
+    funcs.clear();
+  }
+}
+
+void RunLoop::Exit() {
+  exit_ = true;
+  if (!IsInMyLoop()) {
+    cond_.Signal();
+  }
+}
+
+bool RunLoop::IsInMyLoop() const { return tid_ == CurrentThread::Tid(); }
+
+void RunLoop::AssertInMyLoop() {
+  if (!IsInMyLoop()) {
+    LOG_FATAL("runloop tid=%llu, but current thread tid=%llu",
+              static_cast<unsigned long long>(tid_),
+              static_cast<unsigned long long>(CurrentThread::Tid()));
+  }
+}
+
+void RunLoop::RunInLoop(const Func& func) {
+  if (IsInMyLoop()) {
+    func();
+  } else {
+    QueueInLoop(func);
+  }
+}
+
+void RunLoop::RunInLoop(Func&& func) {
+  if (IsInMyLoop()) {
+    func();
+  } else {
+    QueueInLoop(std::move(func));
+  }
+}
+
+void RunLoop::QueueInLoop(const Func& func) {
+  MutexLock lock(&mutex_);
+  funcs_.push_back(func);
+  cond_.Signal();
+}
+
+void RunLoop::QueueInLoop(Func&& func) {
+  MutexLock lock(&mutex_);
+  funcs_.push_back(std::move(func));
+  cond_.Signal();
+}
+
+TimerId RunLoop::RunAt(uint64_t micros_value, const TimerProcCallback& cb) {
+  return timers_->RunAt(micros_value, cb);
+}
+
+TimerId RunLoop::RunAfter(uint64_t micros_delay, const TimerProcCallback& cb) {
+  return timers_->RunAfter(micros_delay, cb);
+}
+
+TimerId RunLoop::RunEvery(uint64_t micros_interval,
+                          const TimerProcCallback& cb) {
+  return timers_->RunEvery(micros_interval, cb);
+}
+
+TimerId RunLoop::RunAt(uint64_t micros_value, TimerProcCallback&& cb) {
+  return timers_->RunAt(micros_value, std::move(cb));
+}
+
+TimerId RunLoop::RunAfter(uint64_t micros_delay, TimerProcCallback&& cb) {
+  return timers_->RunAfter(micros_delay, std::move(cb));
+}
+
+TimerId RunLoop::RunEvery(uint64_t micros_interval, TimerProcCallback&& cb) {
+  return timers_->RunEvery(micros_interval, std::move(cb));
+}
+
+void RunLoop::Remove(TimerId t) { timers_->Remove(t); }
+
+}  // namespace saber
+}  // namespace bubblefs

@@ -4,8 +4,8 @@
 
 // brpc/src/butil/strings/safe_sprintf.h
 
-#ifndef BUBBLEFS_UTILS_SAFE_SPRINTF_H_
-#define BUBBLEFS_UTILS_SAFE_SPRINTF_H_
+#ifndef BUBBLEFS_UTILS_BRPC_SAFE_SPRINTF_H_
+#define BUBBLEFS_UTILS_BRPC_SAFE_SPRINTF_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -19,7 +19,7 @@
 #endif
 
 namespace bubblefs {
-namespace strings {
+namespace brpc {
 
 #if defined(_MSC_VER)
 // Define ssize_t inside of our namespace.
@@ -410,7 +410,7 @@ inline ssize_t SafeSPrintf(char (&buf)[N], const char* fmt) {
   return SafeSNPrintf(buf, N, fmt);
 }
 
-}  // namespace strings
+}  // namespace brpc
 }  // namespace bubblefs
 
-#endif  // BUBBLEFS_UTILS_SAFE_SPRINTF_H_
+#endif  // BUBBLEFS_UTILS_BRPC_SAFE_SPRINTF_H_

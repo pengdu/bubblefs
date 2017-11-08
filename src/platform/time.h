@@ -608,6 +608,14 @@ inline int fast_realtime(timespec* ts) {
     return clock_gettime(CLOCK_REALTIME, ts);
 }
 
+// saber/saber/util/timeops.cc
+
+extern uint64_t NowMillis();
+
+extern uint64_t NowMicros();
+
+extern void SleepForMicroseconds(int micros);
+
 } // namespace timeutil
 } // namespace bubblefs
 

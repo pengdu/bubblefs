@@ -357,5 +357,20 @@ extern const uint64_t invariant_cpu_freq = read_invariant_cpu_frequency();
 __thread int64_t tls_realtime_ns = 0;
 __thread int64_t tls_cpuwidetime_ns = 0;
 
+uint64_t NowMillis() {
+  struct timeval tv;
+  gettimeofday(&tv, nullptr);
+  return static_cast<uint64_t>(tv.tv_sec) * 1000 +
+         static_cast<uint64_t>(tv.tv_usec) / 1000;
+}
+
+uint64_t NowMicros() {
+  struct timeval tv;
+  gettimeofday(&tv, nullptr);
+  return static_cast<uint64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
+}
+
+void SleepForMicroseconds(int micros) { usleep(micros); }
+
 }  // namespace timeutil
 }  // namespace bubblefs
