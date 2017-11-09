@@ -1,0 +1,46 @@
+
+// bitcoin/src/reverse_iterator.h
+
+#ifndef BUBBLEFS_UTILS_BITCOIN_REVERSE_ITERATOR_H_
+#define BUBBLEFS_UTILS_BITCOIN_REVERSE_ITERATOR_H_
+
+namespace bubblefs {
+namespace bitcoin {
+  
+/**
+ * Template used for reverse iteration in C++11 range-based for loops.
+ * 
+ *   std::vector<int> v = {1, 2, 3, 4, 5};
+ *   for (auto x : reverse_iterate(v))
+ *       std::cout << x << " ";
+ */
+
+template <typename T>
+class reverse_range
+{
+    T &m_x;
+    
+public:
+    explicit reverse_range(T &x) : m_x(x) {}
+    
+    auto begin() const -> decltype(this->m_x.rbegin())
+    {
+        return m_x.rbegin();
+    }
+    
+    auto end() const -> decltype(this->m_x.rend())
+    {
+        return m_x.rend();
+    }
+};
+ 
+template <typename T>
+reverse_range<T> reverse_iterate(T &x)
+{
+    return reverse_range<T>(x);
+}
+
+} // namespace bitcoin
+} // namespace bubblefs
+
+#endif // BUBBLEFS_UTILS_BITCOIN_REVERSE_ITERATOR_H_
