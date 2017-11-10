@@ -98,6 +98,9 @@ class Mutex {
   // this will assert if the mutex is not locked
   // it does NOT verify that mutex is held by a calling thread
   void AssertHeld();
+  pthread_mutex_t* GetMutex() {
+    return &mu_;
+  }
 
  private:
   void AfterLock(const char* msg = nullptr, int64_t msg_threshold = 5000);
@@ -127,6 +130,24 @@ class CondVar {
  private:
   pthread_cond_t cv_;
   Mutex* mu_;
+};
+
+class ConditionVariable
+{
+public:
+    ConditionVariable();
+    ~ConditionVariable();
+
+    void Signal();
+    void Broadcast();
+    void Wait(Mutex* mutex);
+    // If timeout_in_ms < 0, it means infinite waiting until condition is signaled
+    // by another thread
+    int TimedWait(Mutex* mutex, int timeout_in_ms = -1);
+private:
+    void CheckValid() const;
+private:
+    pthread_cond_t m_hCondition;
 };
 
 class RWMutex {

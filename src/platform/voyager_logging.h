@@ -78,7 +78,7 @@ T* CheckNotNull(const char* /* filename */, int /* line */,
   return ptr;
 }
 
-#define CHECK_NOTNULL(value)                  \
+#define VOYAGER_CHECK_NOTNULL(value)                  \
   ::bubblefs::voyager::CheckNotNull(__FILE__, __LINE__, \
                                     "'" #value "' Must not be nullptr", (value))
 

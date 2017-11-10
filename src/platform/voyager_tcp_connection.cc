@@ -18,7 +18,7 @@ namespace voyager {
 TcpConnection::TcpConnection(const std::string& name, EventLoop* ev, int fd,
                              const SockAddr& local, const SockAddr& peer)
     : name_(name),
-      eventloop_(CHECK_NOTNULL(ev)),
+      eventloop_(VOYAGER_CHECK_NOTNULL(ev)),
       socket_(fd),
       local_addr_(local),
       peer_addr_(peer),
@@ -194,7 +194,7 @@ void TcpConnection::SendMessage(const Slice& message) {
 }
 
 void TcpConnection::SendMessage(Buffer* message) {
-  CHECK_NOTNULL(message);
+  VOYAGER_CHECK_NOTNULL(message);
   if (state_ == kConnected) {
     if (eventloop_->IsInMyLoop()) {
       SendInLoop(message->Peek(), message->ReadableSize());

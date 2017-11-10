@@ -8,17 +8,9 @@
 #include "utils/slash_base_conf.h"
 #include <sys/stat.h>
 #include <algorithm>
-#include "platform/base_error.h"
 #include "platform/slash_env.h"
+#include "platform/slash_xdebug.h"
 #include "utils/slash_string.h"
-
-#define log_err(M, ...) \
-{ \
-    PRINTF_ERROR(M, ##__VA_ARGS__); \
-    exit(-1); \
-}
-#define log_warn(M, ...) PRINTF_WARN(M, ##__VA_ARGS__)
-#define log_info(M, ...) PRINTF_INFO(M, ##__VA_ARGS__)
 
 namespace bubblefs {
 namespace slash {

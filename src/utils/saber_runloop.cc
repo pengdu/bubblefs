@@ -56,9 +56,9 @@ bool RunLoop::IsInMyLoop() const { return tid_ == CurrentThread::Tid(); }
 
 void RunLoop::AssertInMyLoop() {
   if (!IsInMyLoop()) {
-    LOG_FATAL("runloop tid=%llu, but current thread tid=%llu",
-              static_cast<unsigned long long>(tid_),
-              static_cast<unsigned long long>(CurrentThread::Tid()));
+    SABER_LOG_FATAL("runloop tid=%llu, but current thread tid=%llu",
+                    static_cast<unsigned long long>(tid_),
+                    static_cast<unsigned long long>(CurrentThread::Tid()));
   }
 }
 

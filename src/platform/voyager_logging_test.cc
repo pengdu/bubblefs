@@ -41,8 +41,8 @@ TEST(LoggingTest, Simple) {
 
   char* p = v1;
   char* q = nullptr;
-  CHECK_NOTNULL(p);
-  CHECK_NOTNULL(q);
+  VOYAGER_CHECK_NOTNULL(p);
+  VOYAGER_CHECK_NOTNULL(q);
 }
 
 }  // namespace voyager

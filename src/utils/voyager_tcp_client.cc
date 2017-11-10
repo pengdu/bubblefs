@@ -15,7 +15,7 @@ std::atomic<int> TcpClient::conn_id_(0);
 
 TcpClient::TcpClient(EventLoop* ev, const SockAddr& addr,
                      const std::string& name)
-    : ev_(CHECK_NOTNULL(ev)),
+    : ev_(VOYAGER_CHECK_NOTNULL(ev)),
       addr_(addr),
       name_(name),
       connector_(new TcpConnector(ev, addr)),

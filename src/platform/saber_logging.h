@@ -28,23 +28,23 @@ extern void Log(LogLevel level, const char* filename, int line,
 #endif
     ;
 
-#define LOG_DEBUG(format, ...)                                      \
+#define SABER_LOG_DEBUG(format, ...)                                      \
   ::bubblefs::saber::Log(::bubblefs::saber::LOGLEVEL_DEBUG, __FILE__, __LINE__, format, \
                          ##__VA_ARGS__)
 
-#define LOG_INFO(format, ...)                                      \
+#define SABER_LOG_INFO(format, ...)                                      \
   ::bubblefs::saber::Log(::bubblefs::saber::LOGLEVEL_INFO, __FILE__, __LINE__, format, \
                          ##__VA_ARGS__)
 
-#define LOG_WARN(format, ...)                                      \
+#define SABER_LOG_WARN(format, ...)                                      \
   ::bubblefs::saber::Log(::bubblefs::saber::LOGLEVEL_WARN, __FILE__, __LINE__, format, \
                          ##__VA_ARGS__)
 
-#define LOG_ERROR(format, ...)                                      \
+#define SABER_LOG_ERROR(format, ...)                                      \
   ::bubblefs::saber::Log(::bubblefs::saber::LOGLEVEL_ERROR, __FILE__, __LINE__, format, \
                          ##__VA_ARGS__)
 
-#define LOG_FATAL(format, ...)                                      \
+#define SABER_LOG_FATAL(format, ...)                                      \
   ::bubblefs::saber::Log(::bubblefs::saber::LOGLEVEL_FATAL, __FILE__, __LINE__, format, \
                          ##__VA_ARGS__)
 

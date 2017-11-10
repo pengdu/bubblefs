@@ -29,7 +29,7 @@ class NameServerClient {
        ret = rpc::SendRequest(stubs_[ns_id], func, 
                               request, response, rpc_options);
        if (ret && response->status() != kIsFollower) {
-         Log(DEBUG, "Send rpc to %d %s return %s", 
+         BDCOMMON_LOG(DEBUG, "Send rpc to %d %s return %s", 
              leader_id_, nameserver_nodes_[leader_id_].c_str(),
              StatusCode_Name(response->status()).c_str());
          return true;
@@ -38,7 +38,7 @@ class NameServerClient {
        if (ns_id == leader_id_) {
          leader_id_ = (leader_id_ + 1) % stubs_.size();
        }
-       Log(INFO, "Try next nameserver %d %s",
+       BDCOMMON_LOG(INFO, "Try next nameserver %d %s",
            leader_id_, nameserver_nodes_[leader_id_].c_str());
      }
    }

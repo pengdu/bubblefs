@@ -11,12 +11,10 @@ limitations under the License. */
 
 // Paddle/paddle/utils/PythonUtil.cpp
 
-#include "utils/paddle_python2_util.h"
+#include "utils/paddle_python_util.h"
 #include <signal.h>
 #include <sstream>
 #include <vector>
-
-#if TF_USE_PYTHON2 == 1
 
 namespace bubblefs {
 namespace paddle {
@@ -156,5 +154,3 @@ void initPython(int argc, char** argv) {
 
 }  // namespace paddle
 }  // namespace bubblefs
-
-#endif // TF_USE_PYTHON2

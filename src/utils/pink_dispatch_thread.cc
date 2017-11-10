@@ -6,19 +6,11 @@
 // pink/pink/src/dispatch_thread.cc
 
 #include <vector>
-#include "platform/base_error.h"
 #include "platform/pink_epoll.h"
+#include "platform/slash_xdebug.h"
 #include "utils/pink_dispatch_thread.h"
 #include "utils/pink_item.h"
 #include "utils/pink_worker_thread.h"
-
-#define log_err(M, ...) \
-{ \
-    PRINTF_ERROR(M, ##__VA_ARGS__); \
-    exit(-1); \
-}
-#define log_warn(M, ...) PRINTF_WARN(M, ##__VA_ARGS__)
-#define log_info(M, ...) PRINTF_INFO(M, ##__VA_ARGS__)
 
 namespace bubblefs {
 namespace pink {

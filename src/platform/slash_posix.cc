@@ -1,8 +1,8 @@
 
 // slash/slash/src/posix.cc
 
-#include "platform/base_error.h"
 #include "platform/slash_posix.h"
+#include "platform/slash_xdebug.h"
  
 namespace bubblefs { 
 namespace slash { 
@@ -10,14 +10,6 @@ namespace slash {
 /*********************************************
  * Wrappers for Unix process control functions
  ********************************************/
-
-#define log_err(M, ...) \
-{ \
-    PRINTF_ERROR(M, ##__VA_ARGS__); \
-    exit(-1); \
-}
-#define log_warn(M, ...) PRINTF_WARN(M, ##__VA_ARGS__)
-#define log_info(M, ...) PRINTF_INFO(M, ##__VA_ARGS__)
 
 /* $begin forkwrapper */
 pid_t Fork(void) 

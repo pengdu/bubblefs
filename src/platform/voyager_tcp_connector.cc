@@ -16,7 +16,7 @@ namespace bubblefs {
 namespace voyager {
 
 TcpConnector::TcpConnector(EventLoop* ev, const SockAddr& addr)
-    : ev_(CHECK_NOTNULL(ev)),
+    : ev_(VOYAGER_CHECK_NOTNULL(ev)),
       addr_(addr),
       state_(kDisConnected),
       connect_(false),

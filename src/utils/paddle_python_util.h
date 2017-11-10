@@ -13,16 +13,15 @@ limitations under the License. */
 
 //#pragma once
 
-#ifndef BUBBLEFS_UTILS_PADDLE_PYTHON2_UTIL_H_
-#define BUBBLEFS_UTILS_PADDLE_PYTHON2_UTIL_H_
+#ifndef BUBBLEFS_UTILS_PADDLE_PYTHON_UTIL_H_
+#define BUBBLEFS_UTILS_PADDLE_PYTHON_UTIL_H_
 
 #include "platform/macros.h"
-
-#if TF_USE_PYTHON2 == 1
 
 #include <python2.7/Python.h>
 #include <python2.7/frameobject.h>
 #include <stdarg.h>
+#include <memory>
 #include <map>
 #include <mutex>
 #include "platform/logging.h"
@@ -67,7 +66,7 @@ PyObjectPtr createPythonClass(const std::string& moduleName,
                               const std::vector<std::string>& args,
                               const std::map<std::string, std::string>& kwargs);
 
-#define CHECK_PY(x) CHECK((x) != nullptr) << ::mblobstore::py::getPyCallStack()
+#define CHECK_PY(x) CHECK((x) != nullptr) << py::getPyCallStack()
 
 namespace py {
 PyObjectPtr import(const std::string& moduleName);
@@ -336,6 +335,4 @@ void initPython(int argc, char** argv);
 }  // namespace paddle
 }  // namespace bubblefs
 
-#endif // TF_USE_PYTHON2
-
-#endif // BUBBLEFS_UTILS_PADDLE_PYTHON2_UTIL_H_
+#endif // BUBBLEFS_UTILS_PADDLE_PYTHON_UTIL_H_

@@ -33,7 +33,7 @@ NameSpace::NameSpace(bool standalone)
   leveldb::Status s = leveldb::DB::Open(db_opts, FLAGS_namedb_path, &db_);
   if (!s.ok()) {
     db_ = nullptr;
-    Log(ERROR, "Open leveldb fail: %s", s.ToString().c_str());
+    BDCOMMON_LOG(ERROR, "Open leveldb fail: %s", s.ToString().c_str());
     EXIT_FAIL("Open leveldb fail\n");
   }
   if (standalone) {

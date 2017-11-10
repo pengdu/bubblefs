@@ -353,10 +353,5 @@ enum LinkerInitialized { LINKER_INITIALIZED };
     
 // remove 'unused parameter' warning    
 #define EXPR_UNUSED(expr) do { (void)(expr); } while (0)
-    
-// in linux/limits.h PATH_MAX    
-#ifndef PATH_MAX_LEN
-#define PATH_MAX_LEN 4096
-#endif
 
 #endif // BUBBLEFS_PLATFORM_MACROS_H_

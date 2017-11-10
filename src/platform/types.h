@@ -19,6 +19,7 @@ limitations under the License.
 #include <limits.h>  // So we can set the bounds of our types.
 #include <stddef.h>  // For size_t.
 #include <stdint.h>  // For intptr_t.
+#include <functional>
 #include <limits>
 #include <memory>
 #include <numeric>
@@ -26,9 +27,52 @@ limitations under the License.
 #include <type_traits>
 #include "platform/macros.h"
 
+// <stdint.h>
+#ifndef  INT8_MAX
+#define  INT8_MAX   0x7f
+#endif
+#ifndef  INT8_MIN
+#define  INT8_MIN   (-INT8_MAX - 1)
+#endif
+#ifndef  UINT8_MAX
+#define  UINT8_MAX   (INT8_MAX * 2 + 1)
+#endif
+#ifndef  INT16_MAX
+#define  INT16_MAX   0x7fff
+#endif
+#ifndef  INT16_MIN
+#define  INT16_MIN   (-INT16_MAX - 1)
+#endif
+#ifndef  UINT16_MAX
+#define  UINT16_MAX  0xffff
+#endif
+#ifndef  INT32_MAX
+#define  INT32_MAX   0x7fffffffL
+#endif
+#ifndef  INT32_MIN
+#define  INT32_MIN   (-INT32_MAX - 1L)
+#endif
+#ifndef  UINT32_MAX
+#define  UINT32_MAX  0xffffffffUL
+#endif
+#ifndef  INT64_MAX
+#define  INT64_MAX   0x7fffffffffffffffLL
+#endif
+#ifndef  INT64_MIN
+#define  INT64_MIN   (-INT64_MAX - 1LL)
+#endif
+#ifndef  UINT64_MAX
+#define  UINT64_MAX  0xffffffffffffffffULL
+#endif
+
+// KB, MB, GB to bytes
+#define KBYTES (1024L)
+#define MBYTES (1024L*1024L)
+#define GBYTES (1024L*1024L*1024)
+
 // Include appropriate platform-dependent implementations
 #if defined(PLATFORM_POSIX) || defined(PLATFORM_POSIX_ANDROID) || \
-    defined(PLATFORM_GOOGLE_ANDROID) || defined(PLATFORM_WINDOWS)
+    defined(PLATFORM_GOOGLE_ANDROID) || defined(PLATFORM_WINDOWS) 
 namespace bubblefs {
 /*
 typedef signed char int8;
@@ -52,6 +96,9 @@ typedef uint16_t uint16;
 typedef uint32_t uint32;
 typedef uint64_t uint64;
 
+// in linux/limits.h PATH_MAX    
+constexpr int PATH_MAX_LEN = 4096;
+
 }  // namespace bubblefs
 #else
 #error Define the appropriate PLATFORM_<foo> macro for this platform
@@ -63,10 +110,12 @@ namespace bubblefs {
 // Note that we only place it inside caffe2 so the global namespace is not
 // polluted.
 /* using override */
-using std::shared_ptr;
-using std::string;
-using std::wstring;
-using std::unique_ptr;
+using ::std::dynamic_pointer_cast;
+using ::std::shared_ptr;
+using ::std::string;
+using ::std::weak_ptr;
+using ::std::wstring;
+using ::std::unique_ptr;
 
 static const uint8 kuint8max = ((uint8)0xFF);
 static const uint16 kuint16max = ((uint16)0xFFFF);
@@ -89,10 +138,5 @@ typedef uint64 Fprint;
 typedef int64_t TIndex;
 
 }  // namespace bubblefs
-
-// KB, MB, GB to bytes
-#define KBYTES (1024L)
-#define MBYTES (1024L*1024L)
-#define GBYTES (1024L*1024L*1024)
 
 #endif // BUBBLEFS_PLATFORM_TYPES_H_

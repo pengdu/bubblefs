@@ -18,7 +18,7 @@ std::atomic<int> TcpServer::conn_id_(0);
 TcpServer::TcpServer(EventLoop* ev, const SockAddr& addr,
                      const std::string& name, int thread_size, int backlog,
                      bool reuseport)
-    : eventloop_(CHECK_NOTNULL(ev)),
+    : eventloop_(VOYAGER_CHECK_NOTNULL(ev)),
       addr_(addr),
       name_(name),
       started_(false),

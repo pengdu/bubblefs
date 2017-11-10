@@ -8,17 +8,9 @@
 #include "utils/pink_conn.h"
 #include <stdio.h>
 #include <unistd.h>
-#include "platform/base_error.h"
 #include "platform/pink_server_socket.h"
+#include "platform/slash_xdebug.h"
 #include "utils/pink_thread.h"
-
-#define log_err(M, ...) \
-{ \
-    PRINTF_ERROR(M, ##__VA_ARGS__); \
-    exit(-1); \
-}
-#define log_warn(M, ...) PRINTF_WARN(M, ##__VA_ARGS__)
-#define log_info(M, ...) PRINTF_INFO(M, ##__VA_ARGS__)
 
 namespace bubblefs {
 namespace pink {

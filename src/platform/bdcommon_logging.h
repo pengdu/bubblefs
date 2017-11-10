@@ -53,8 +53,8 @@ using bdcommon::WARNING;
 using bdcommon::ERROR;
 using bdcommon::FATAL;
 
-#define Log(level, fmt, args...) ::bubblefs::bdcommon::LogC(level, "[%s:%d] " fmt, __FILE__, __LINE__, ##args)
-#define LogS(level) ::bubblefs::bdcommon::LogStream(level)
+#define BDCOMMON_LOG(level, fmt, args...) ::bubblefs::bdcommon::LogC(level, "[%s:%d] " fmt, __FILE__, __LINE__, ##args)
+#define BDCOMMON_LOGS(level) ::bubblefs::bdcommon::LogStream(level)
 
 } // namespace bubblefs
 

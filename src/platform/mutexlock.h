@@ -201,6 +201,28 @@ private:
   std::atomic<bool> locked_;
 };
 
+class AutoSpinLock
+{
+public:
+    explicit AutoSpinLock(SpinLock* spin_lock)
+        :   _spin_lock(spin_lock)
+    {
+        if (NULL != _spin_lock)
+        {
+            _spin_lock->Lock();
+        }
+    }
+    ~AutoSpinLock()
+    {
+        if (NULL != _spin_lock)
+        {
+            _spin_lock->Unlock();
+        }
+    }
+private:
+    SpinLock*   _spin_lock;
+};
+
 /**
  * A simple wrapper of thread barrier.
  * The ThreadBarrier disable copy.

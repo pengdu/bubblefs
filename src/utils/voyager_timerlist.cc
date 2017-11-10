@@ -31,7 +31,7 @@ class Timer {
 };
 
 TimerList::TimerList(EventLoop* ev)
-    : last_time_out_(timeops::NowMicros()), eventloop_(CHECK_NOTNULL(ev)) {}
+    : last_time_out_(timeops::NowMicros()), eventloop_(VOYAGER_CHECK_NOTNULL(ev)) {}
 
 TimerList::~TimerList() {
   for (auto& t : timer_ptrs_) {
