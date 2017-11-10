@@ -1,3 +1,4 @@
+
 /*
  * Tencent is pleased to support the open source community by making Pebble available.
  * Copyright (C) 2016 THL A29 Limited, a Tencent company. All rights reserved.
@@ -11,14 +12,14 @@
  *
  */
 
+// Pebble/src/common/error.h
 
-#ifndef _PEBBLE_COMMON_ERROR_H_
-#define _PEBBLE_COMMON_ERROR_H_
+#ifndef BUBBLEFS_PLATFORM_PEBBLE_ERROR_H_
+#define BUBBLEFS_PLATFORM_PEBBLE_ERROR_H_
 
 #include <stdio.h>
 #include <string>
-
-#include "common/platform.h"
+#include "platform/types.h"
 
 /**
  * 错误输出原则:
@@ -28,15 +29,16 @@
  */
 
 /// @brief 格式化输出log信息到buff
-#define LOG_MESSAGE(buff, buff_len, fmt, ...) \
+#define PEBBLE_LOG_MESSAGE(buff, buff_len, fmt, ...) \
     snprintf((buff), (buff_len), "(%s:%d)(%s)" fmt, \
     __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
 
 /// @brief 记录最后错误信息，内部使用，要求buff名字为m_last_error
-#define _LOG_LAST_ERROR(fmt, ...) \
-    LOG_MESSAGE((m_last_error), (sizeof(m_last_error)), fmt, ##__VA_ARGS__)
+#define _PEBBLE_LOG_LAST_ERROR(fmt, ...) \
+    PEBBLE_LOG_MESSAGE((m_last_error), (sizeof(m_last_error)), fmt, ##__VA_ARGS__)
 
+namespace bubblefs {
 namespace pebble {
 
 /// @brief 每个模块错误码BASE定义，模块错误码取值为XXX_BASE - N
@@ -62,5 +64,6 @@ const char* GetErrorString(int32_t error_code);
 void SetErrorString(int32_t error_code, const char* error_string);
 
 } // namespace pebble
+} // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_PEBBLE_ERROR_H_
+#endif // BUBBLEFS_PLATFORM_PEBBLE_ERROR_H_

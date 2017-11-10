@@ -25,6 +25,7 @@ limitations under the License.
 #include <numeric>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include "platform/macros.h"
 
 // <stdint.h>

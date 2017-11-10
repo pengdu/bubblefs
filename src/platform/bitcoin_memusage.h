@@ -14,7 +14,6 @@
 #include <unordered_set>
 #include <vector>
 #include "utils/bitcoin_indirectmap.h"
-#include <boost/concept_check.hpp>
 
 namespace bubblefs {
 namespace bitcoin {

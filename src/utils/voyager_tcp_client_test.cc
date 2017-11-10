@@ -10,7 +10,6 @@
 #include "utils/voyager_callback.h"
 #include "utils/voyager_eventloop.h"
 #include "utils/stringpiece.h"
-#include <boost/concept_check.hpp>
 
 bubblefs::voyager::TcpClient* g_client = nullptr;
 

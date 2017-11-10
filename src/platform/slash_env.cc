@@ -26,17 +26,9 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include "platform/base_error.h"
 #include "platform/mutexlock.h"
 #include "platform/platform.h"
-
-#define log_err(M, ...) \
-{ \
-    PRINTF_ERROR(M, ##__VA_ARGS__); \
-    exit(-1); \
-}
-#define log_warn(M, ...) PRINTF_WARN(M, ##__VA_ARGS__)
-#define log_info(M, ...) PRINTF_INFO(M, ##__VA_ARGS__)
+#include "platform/slash_xdebug.h"
 
 namespace bubblefs {
 namespace slash {
