@@ -5,7 +5,6 @@
 #define BUBBLEFS_UTILS_SLASH_STATUS_H_
 
 #include <string>
-#include "utils/strings_slice.h"
 
 namespace bubblefs {
 namespace slash {

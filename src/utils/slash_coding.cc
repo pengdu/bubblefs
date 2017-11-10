@@ -5,7 +5,6 @@
 // slash/slash/src/slash_coding.cc
 
 #include "utils/slash_coding.h"
-#include "utils/strings_slice.h"
 
 namespace bubblefs {
 namespace slash {

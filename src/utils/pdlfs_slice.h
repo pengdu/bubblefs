@@ -10,8 +10,8 @@
 
 // pdlfs-common/include/pdlfs-common/slice.h
 
-#ifndef BUBBLEFS_UTILS_STRINGS_SLICE_H_
-#define BUBBLEFS_UTILS_STRINGS_SLICE_H_
+#ifndef BUBBLEFS_UTILS_PDLFS_SLICE_H_
+#define BUBBLEFS_UTILS_PDLFS_SLICE_H_
 
 #include <assert.h>
 #include <stddef.h>
@@ -20,7 +20,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace strings {
+namespace pdlfs {
 // Slice is a simple structure containing a pointer into some external
 // storage and a size.  The user of a Slice must ensure that the slice
 // is not used after the corresponding external storage has been
@@ -165,7 +165,7 @@ inline int Slice::compare(const Slice& b) const {
   return r;
 }
 
-}  // namespace strings
+}  // namespace pdlfs
 }  // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_STRINGS_SLICE_H_
+#endif // BUBBLEFS_UTILS_PDLFS_SLICE_H_
