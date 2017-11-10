@@ -36,20 +36,11 @@
 
 //#include <linux/types.h>
 #include <stddef.h>
+#include "utils/linux_bitops.h"
+#include "utils/linux_math64.h"
 
 namespace bubblefs {
 namespace linux {
-  
-constexpr int NBBY = 8; /* number of bits in a byte */
-/* Bit map related macros. */
-#define linux_setbit(a,i)     (((unsigned char *)(a))[(i)/NBBY] |= 1<<((i)%NBBY))
-#define linux_clrbit(a,i)     (((unsigned char *)(a))[(i)/NBBY] &= ~(1<<((i)%NBBY)))
-#define linux_isset(a,i)                                                      \
-        (((const unsigned char *)(a))[(i)/NBBY] & (1<<((i)%NBBY)))
-#define linux_isclr(a,i)                                                      \
-        ((((const unsigned char *)(a))[(i)/NBBY] & (1<<((i)%NBBY))) == 0)
-        
-#define DIV_ROUND_UP(x, y) (((x)+((y)-1)) / (y))
   
 #define RADIX_TREE_MAP_SHIFT    6
 #define RADIX_TREE_MAP_SIZE     (1 << RADIX_TREE_MAP_SHIFT)

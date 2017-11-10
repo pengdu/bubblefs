@@ -37,7 +37,9 @@
 namespace bubblefs {
 namespace linux {
   
-#define do_div(n, base) ({                      \
+constexpr int DIV_ROUND_UP(int x, int y) { return (((x)+((y)-1)) / (y)); }  
+  
+#define linux_do_div(n, base) ({                      \
         uint32_t __base = (base);               \
         uint32_t __rem;                         \
         __rem = ((uint64_t)(n)) % __base;       \
