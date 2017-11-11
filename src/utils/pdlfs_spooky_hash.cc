@@ -1,15 +1,3 @@
-/*
- * Copyright (c) 2015-2017 Carnegie Mellon University.
- *
- * All rights reserved.
- *
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file. See the AUTHORS file for names of contributors.
- */
-
-// pdlfs-common/src/spooky_hash.cc
-// pdlfs-common/src/spooky.cc
-
 // Spooky Hash
 // A 128-bit noncryptographic hash, for checksums and table lookup
 // By Bob Jenkins.  Public domain.
@@ -22,11 +10,13 @@
 //   August 5 2012: SpookyV2: d = should be d += in short hash, and remove extra
 //   mix from long hash
 
-#include "utils/spooky_hash.h"
-#include <string.h>
+// pdlfs-common/src/spooky_hash.cc
+
+#include "utils/pdlfs_spooky_hash.h"
 #include <memory.h>
 
 namespace bubblefs {
+namespace pdlfs {
 
 #define ALLOW_UNALIGNED_READS 1
 
@@ -319,14 +309,5 @@ void SpookyHash::Final(uint64* hash1, uint64* hash2) {
   *hash2 = h1;
 }
 
-void Spooky128(const void* k, size_t n, const uint64_t seed1,
-               const uint64_t seed2, void* result) {
-  char* buf = static_cast<char*>(result);
-  uint64_t v1 = seed1;
-  uint64_t v2 = seed2;
-  SpookyHash::Hash128(k, n, &v1, &v2);
-  memcpy(buf + 8, &v2, 8);
-  memcpy(buf, &v1, 8);
-}
-
+}  // namespace pdlfs
 }  // namespace bubblefs

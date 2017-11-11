@@ -11,14 +11,15 @@
 // pdlfs-common/src/log_writer.cc
 
 #include "utils/pdlfs_log_writer.h"
-#include "utils/coding.h"
-#include "utils/crc32c.h"
+#include "platform/pdlfs_env.h"
+#include "utils/pdlfs_coding.h"
+#include "utils/pdlfs_crc32c.h"
 
 namespace bubblefs {
 namespace pdlfs {  
-  
 namespace log {
   
+
 static void InitTypeCrc(uint32_t* type_crc) {
   for (int i = 0; i <= kMaxRecordType; i++) {
     char t = static_cast<char>(i);
@@ -103,7 +104,7 @@ Status Writer::EmitPhysicalRecord(RecordType t, const char* ptr, size_t n) {
   // Compute the crc of the record type and the payload.
   uint32_t crc = crc32c::Extend(type_crc_[t], ptr, n);
   crc = crc32c::Mask(crc);  // Adjust for storage
-  core::EncodeFixed32(buf, crc);
+  EncodeFixed32(buf, crc);
 
   // Write the header and the payload
   Status s = dest_->Append(Slice(buf, kHeaderSize));
@@ -124,6 +125,5 @@ Status Writer::Sync() {
 }
 
 }  // namespace log
-
 }  // namespace pdlfs
 }  // namespace bubblefs

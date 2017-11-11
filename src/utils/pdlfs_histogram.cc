@@ -10,15 +10,16 @@
 
 // pdlfs-common/src/histogram.cc
 
-#include "utils/simple_histogram.h"
+#include "utils/pdlfs_histogram.h"
 #include <math.h>
 #include <stdio.h>
+#include "platform/pdlfs_port.h"
 
 namespace bubblefs {
-namespace histogram {
+namespace pdlfs {
 
 /* clang-format off */
-const double SimpleHistogram::kBucketLimit[kNumBuckets] = {
+const double Histogram::kBucketLimit[kNumBuckets] = {
   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30, 35, 40, 45,
   50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450,
   500, 600, 700, 800, 900, 1000, 1200, 1400, 1600, 1800, 2000, 2500, 3000,
@@ -40,7 +41,7 @@ const double SimpleHistogram::kBucketLimit[kNumBuckets] = {
 };
 /* clang-format on */
 
-void SimpleHistogram::Clear() {
+void Histogram::Clear() {
   min_ = kBucketLimit[kNumBuckets - 1];
   max_ = 0;
   num_ = 0;
@@ -51,7 +52,7 @@ void SimpleHistogram::Clear() {
   }
 }
 
-void SimpleHistogram::Add(double value) {
+void Histogram::Add(double value) {
   // Linear search is fast enough for our usage in db_bench
   int b = 0;
   while (b < kNumBuckets - 1 && kBucketLimit[b] <= value) {
@@ -65,7 +66,7 @@ void SimpleHistogram::Add(double value) {
   sum_squares_ += (value * value);
 }
 
-void SimpleHistogram::Merge(const SimpleHistogram& other) {
+void Histogram::Merge(const Histogram& other) {
   if (other.min_ < min_) min_ = other.min_;
   if (other.max_ > max_) max_ = other.max_;
   num_ += other.num_;
@@ -76,9 +77,9 @@ void SimpleHistogram::Merge(const SimpleHistogram& other) {
   }
 }
 
-double SimpleHistogram::Median() const { return Percentile(50.0); }
+double Histogram::Median() const { return Percentile(50.0); }
 
-double SimpleHistogram::Percentile(double p) const {
+double Histogram::Percentile(double p) const {
   double threshold = num_ * (p / 100.0);
   double sum = 0;
   for (int b = 0; b < kNumBuckets; b++) {
@@ -99,19 +100,19 @@ double SimpleHistogram::Percentile(double p) const {
   return max_;
 }
 
-double SimpleHistogram::Average() const {
+double Histogram::Average() const {
   if (num_ == 0.0) return 0;
   return sum_ / num_;
 }
 
-double SimpleHistogram::StandardDeviation() const {
+double Histogram::StandardDeviation() const {
   if (num_ == 0.0) return 0;
   double variance = (sum_squares_ * num_ - sum_ * sum_) / (num_ * num_);
   return sqrt(variance);
 }
 
 /* clang-format off */
-std::string SimpleHistogram::ToString() const {
+std::string Histogram::ToString() const {
   std::string r;
   char buf[200];
   snprintf(buf, sizeof(buf),
@@ -146,5 +147,5 @@ std::string SimpleHistogram::ToString() const {
 }
 /* clang-format on */
 
-}  // namespace histogram
+}  // namespace pdlfs
 }  // namespace bubblefs

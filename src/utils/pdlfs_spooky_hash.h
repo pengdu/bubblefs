@@ -1,24 +1,4 @@
-/*
- * Copyright (c) 2015-2017 Carnegie Mellon University.
- *
- * All rights reserved.
- *
- * Use of this source code is governed by a BSD-style license that can be
- * found in the LICENSE file. See the AUTHORS file for names of contributors.
- */
-
-// pdlfs-common/include/pdlfs-common/spooky.h
-// pdlfs-common/src/spooky_hash.h
-
-#ifndef BUBBLEFS_UTILS_SPOOKY_HASH_H_
-#define BUBBLEFS_UTILS_SPOOKY_HASH_H_
-
-#include <stddef.h>
-#include <stdint.h>
-#include "platform/types.h"
-
-namespace bubblefs {
-
+//
 // SpookyHash: a 128-bit noncryptographic hash function
 // By Bob Jenkins, public domain
 //   Oct 31 2010: alpha, framework + SpookyHash::Mix appears right
@@ -44,8 +24,30 @@ namespace bubblefs {
 // SpookyHash, they have nice math for combining the CRCs of pieces to form
 // the CRCs of wholes.  There are also cryptographic hashes, but those are even
 // slower than MD5.
-extern void Spooky128(const void* k, size_t n, const uint64_t seed1,
-                      const uint64_t seed2, void* result);
+//
+
+#ifndef BUBBLEFS_UTILS_PDLFS_SPOOK_HASH_H_
+#define BUBBLEFS_UTILS_PDLFS_SPOOK_HASH_H_
+
+#include <stddef.h>
+
+#ifdef _MSC_VER
+#define INLINE __forceinline
+typedef unsigned __int64 uint64;
+typedef unsigned __int32 uint32;
+typedef unsigned __int16 uint16;
+typedef unsigned __int8 uint8;
+#else
+#include <stdint.h>
+#define INLINE inline
+typedef uint64_t uint64;
+typedef uint32_t uint32;
+typedef uint16_t uint16;
+typedef uint8_t uint8;
+#endif
+
+namespace bubblefs {
+namespace pdlfs {
 
 class SpookyHash {
  public:
@@ -107,7 +109,7 @@ class SpookyHash {
   //
   // left rotate a 64-bit value by k bytes
   //
-  static inline uint64 Rot64(uint64 x, int k) {
+  static INLINE uint64 Rot64(uint64 x, int k) {
     return (x << k) | (x >> (64 - k));
   }
 
@@ -124,7 +126,7 @@ class SpookyHash {
   //   When run forward or backwards one Mix
   // I tried 3 pairs of each; they all differed by at least 212 bits.
   //
-  static inline void Mix(const uint64* data, uint64& s0, uint64& s1, uint64& s2,
+  static INLINE void Mix(const uint64* data, uint64& s0, uint64& s1, uint64& s2,
                          uint64& s3, uint64& s4, uint64& s5, uint64& s6,
                          uint64& s7, uint64& s8, uint64& s9, uint64& s10,
                          uint64& s11) {
@@ -206,7 +208,7 @@ class SpookyHash {
   // Two iterations was almost good enough for a 64-bit result, but a
   // 128-bit result is reported, so End() does three iterations.
   //
-  static inline void EndPartial(uint64& h0, uint64& h1, uint64& h2, uint64& h3,
+  static INLINE void EndPartial(uint64& h0, uint64& h1, uint64& h2, uint64& h3,
                                 uint64& h4, uint64& h5, uint64& h6, uint64& h7,
                                 uint64& h8, uint64& h9, uint64& h10,
                                 uint64& h11) {
@@ -248,7 +250,7 @@ class SpookyHash {
     h0 = Rot64(h0, 54);
   }
 
-  static inline void End(const uint64* data, uint64& h0, uint64& h1, uint64& h2,
+  static INLINE void End(const uint64* data, uint64& h0, uint64& h1, uint64& h2,
                          uint64& h3, uint64& h4, uint64& h5, uint64& h6,
                          uint64& h7, uint64& h8, uint64& h9, uint64& h10,
                          uint64& h11) {
@@ -284,7 +286,7 @@ class SpookyHash {
   // with diffs defined by either xor or subtraction
   // with a base of all zeros plus a counter, or plus another bit, or random
   //
-  static inline void ShortMix(uint64& h0, uint64& h1, uint64& h2, uint64& h3) {
+  static INLINE void ShortMix(uint64& h0, uint64& h1, uint64& h2, uint64& h3) {
     h2 = Rot64(h2, 50);
     h2 += h3;
     h0 ^= h2;
@@ -335,7 +337,7 @@ class SpookyHash {
   // For every pair of input bits,
   // with probability 50 +- .75% (the worst case is approximately that)
   //
-  static inline void ShortEnd(uint64& h0, uint64& h1, uint64& h2, uint64& h3) {
+  static INLINE void ShortEnd(uint64& h0, uint64& h1, uint64& h2, uint64& h3) {
     h3 ^= h2;
     h2 = Rot64(h2, 15);
     h3 += h2;
@@ -408,6 +410,7 @@ class SpookyHash {
   uint8 m_remainder;              // length of unhashed data stashed in m_data
 };
 
+}  // namespace pdlfs
 }  // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_SPOOKY_HASH_H_
+#endif // BUBBLEFS_UTILS_PDLFS_SPOOK_HASH_H_

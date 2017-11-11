@@ -16,8 +16,8 @@
 
 // caffe2/caffe2/utils/simple_queue.h
 
-#ifndef BUBBLEFS_UTILS_SIMPLE_QUEUE_H_
-#define BUBBLEFS_UTILS_SIMPLE_QUEUE_H_
+#ifndef BUBBLEFS_UTILS_CAFFE2_QUEUE_H_
+#define BUBBLEFS_UTILS_CAFFE2_QUEUE_H_
 
 #include <condition_variable>
 #include <mutex>
@@ -26,7 +26,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace core {
+namespace caffe2 {
   
 // This queue reduces the chance to allocate memory for deque
 template <typename T, int N>
@@ -162,7 +162,7 @@ class SimpleQueue {
   SimpleQueue(const SimpleQueue& /*src*/) {}
 };
 
-}  // namespace core
+}  // namespace caffe2
 }  // namespace bubblefs
 
-#endif  // BUBBLEFS_UTILS_SIMPLE_QUEUE_H_
+#endif  // BUBBLEFS_UTILS_CAFFE2_QUEUE_H_

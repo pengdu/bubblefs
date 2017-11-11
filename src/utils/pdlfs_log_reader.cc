@@ -9,8 +9,9 @@
  */
 
 #include <stdio.h>
-#include "utils/coding.h"
-#include "utils/crc32c.h"
+#include "platform/pdlfs_env.h"
+#include "utils/pdlfs_coding.h"
+#include "utils/pdlfs_crc32c.h"
 #include "utils/pdlfs_log_reader.h"
 
 namespace bubblefs {
@@ -256,7 +257,7 @@ unsigned int Reader::ReadPhysicalRecord(Slice* result) {
 
     // Check crc
     if (checksum_) {
-      uint32_t expected_crc = crc32c::Unmask(core::DecodeFixed32(header));
+      uint32_t expected_crc = crc32c::Unmask(DecodeFixed32(header));
       uint32_t actual_crc = crc32c::Value(header + 6, 1 + length);
       if (actual_crc != expected_crc) {
         // Drop the rest of the buffer since "length" itself may have

@@ -13,7 +13,7 @@
 #ifndef BUBBLEFS_PLATFORM_PDLFS_POSIX_LOGGER_H
 #define BUBBLEFS_PLATFORM_PDLFS_POSIX_LOGGER_H
 
-#include "platform/pdlfs_logger.h"
+#include "platform/pdlfs_env.h"
 #include <inttypes.h>
 #include <stdarg.h>
 #include <stdio.h>

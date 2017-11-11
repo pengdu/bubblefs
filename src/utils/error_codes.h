@@ -160,7 +160,9 @@ enum Code {
   //
   // Nobody should rely on the value (currently 30) listed here.  It
   // may change in the future.
-  USER_ERROR = 30, // MAX
+  USER_ERROR = 30,
+  
+  MAX_CODE = 32, // MAX
   
   DO_NOT_USE_RESERVED_FOR_FUTURE_EXPANSION_USE_DEFAULT_IN_SWITCH_INSTEAD_ = 31
 }; // enum Code

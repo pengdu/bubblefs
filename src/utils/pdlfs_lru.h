@@ -15,8 +15,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils/hash.h"
-#include "utils/pdlfs_hash_map.h"
+#include "utils/pdlfs_hash.h"
+#include "utils/pdlfs_map.h"
 
 namespace bubblefs {
 namespace pdlfs {

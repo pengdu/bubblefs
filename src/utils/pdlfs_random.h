@@ -8,10 +8,10 @@
  * found in the LICENSE file. See the AUTHORS file for names of contributors.
  */
 
+// pdlfs-common/include/pdlfs-common/random.h
+
 #ifndef BUBBLEFS_UTILS_PDLFS_RANDOM_H
 #define BUBBLEFS_UTILS_PDLFS_RANDOM_H
-
-// pdlfs-common/include/pdlfs-common/random.h
 
 #include <stdint.h>
 

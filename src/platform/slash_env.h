@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 #include "platform/mutexlock.h"
-#include "utils/pdlfs_hash_map.h"
+#include "utils/pdlfs_map.h"
 #include "utils/random.h"
 #include "utils/status.h"
 

@@ -136,6 +136,37 @@ void Mutex::AssertHeld() {
   }
 }
 
+/*
+void Mutex::AssertHeld() {
+  int r = pthread_mutex_trylock(&mu_);
+  switch (r) {
+    case EBUSY:
+      // The mutex could not be acquired because it was already locked.
+      return;  // OK
+    case EDEADLK:
+      // The current thread already owns the mutex.
+      return;  // OK
+    case EAGAIN:
+      // The mutex could not be acquired because the maximum number of recursive
+      // locks for mutex has been exceeded.
+      break;
+    case EPERM:
+      // The current thread does not own the mutex.
+      break;
+    case 0:
+      // Unexpectedly lock the mutex.
+      r = EINVAL;
+      break;
+    default:
+      // Other errors
+      break;
+  }
+
+  // Abort the call
+  PthreadCall("pthread_mutex_trylock", r);
+}
+*/
+
 void Mutex::AfterLock(const char* msg, int64_t msg_threshold) {
 #ifndef NDEBUG
   locked_ = true;

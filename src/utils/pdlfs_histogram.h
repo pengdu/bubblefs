@@ -10,22 +10,22 @@
 
 // pdlfs-common/include/pdlfs-common/histogram.h
 
-#ifndef BUBBLEFS_UTILS_SIMPLE_HISTOGRAM_H_
-#define BUBBLEFS_UTILS_SIMPLE_HISTOGRAM_H_
+#ifndef BUBBLEFS_UTILS_PDLFS_HISTOGRAM_H_
+#define BUBBLEFS_UTILS_PDLFS_HISTOGRAM_H_
 
 #include <string>
 
 namespace bubblefs {
-namespace histogram {
-  
-class SimpleHistogram {
+namespace pdlfs {
+
+class Histogram {
  public:
-  SimpleHistogram() {}
-  ~SimpleHistogram() {}
+  Histogram() {}
+  ~Histogram() {}
 
   void Clear();
   void Add(double value);
-  void Merge(const SimpleHistogram& other);
+  void Merge(const Histogram& other);
 
   std::string ToString() const;
 
@@ -46,7 +46,7 @@ class SimpleHistogram {
   double buckets_[kNumBuckets];
 };
 
-}  // namespace histogram
+}  // namespace pdlfs
 }  // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_SIMPLE_HISTOGRAM_H_
+#endif // BUBBLEFS_UTILS_PDLFS_HISTOGRAM_H_

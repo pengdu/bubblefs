@@ -10,14 +10,14 @@
 
 // pdlfs-common/include/pdlfs-common/map.h
 
-#ifndef BUBBLEFS_UTILS_PDLFS_HASH_MAP_H_
-#define BUBBLEFS_UTILS_PDLFS_HASH_MAP_H_
+#ifndef BUBBLEFS_UTILS_PDLFS_MAP_H_
+#define BUBBLEFS_UTILS_PDLFS_MAP_H_
 
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils/hash.h"
+#include "utils/pdlfs_hash.h"
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
@@ -307,4 +307,4 @@ class HashSet {
 }  // namespace pdlfs
 }  // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_PDLFS_HASH_MAP_H_
+#endif // BUBBLEFS_UTILS_PDLFS_MAP_H_

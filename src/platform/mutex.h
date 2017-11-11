@@ -130,6 +130,8 @@ class CondVar {
  private:
   pthread_cond_t cv_;
   Mutex* mu_;
+  
+  DISALLOW_COPY_AND_ASSIGN(CondVar);
 };
 
 class ConditionVariable

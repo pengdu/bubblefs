@@ -1,8 +1,8 @@
 
 // brpc/src/butil/macros.h
 
-#ifndef BUBBLEFS_UTILS_SMALL_ARRAY_H_
-#define BUBBLEFS_UTILS_SMALL_ARRAY_H_
+#ifndef BUBBLEFS_UTILS_BRPC_SMALL_ARRAY_H_
+#define BUBBLEFS_UTILS_BRPC_SMALL_ARRAY_H_
 
 #include "platform/macros.h"
 
@@ -77,4 +77,4 @@ private:
 #endif // !defined(__clang__)
 #endif  // __cplusplus
 
-#endif // BUBBLEFS_UTILS_SMALL_ARRAY_H_
+#endif // BUBBLEFS_UTILS_BRPC_SMALL_ARRAY_H_

@@ -60,6 +60,11 @@ class Status {
     return Status(error::ABORTED, msg, msg2);
   }
   
+  static Status AlreadyExists(int64_t subcode = error::NONE) { return Status(error::ALREADY_EXISTS, subcode); }
+  static Status AlreadyExists(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
+    return Status(error::ALREADY_EXISTS, msg, msg2);
+  }
+  
   static Status Complete(const StringPiece& msg, const StringPiece& msg2 = StringPiece()) {
     return Status(error::COMPLETE, msg, msg2);
   }
@@ -144,6 +149,10 @@ class Status {
   /// Returns true iff the status indicates success.
   bool ok() const { return (state_ == nullptr); }
   
+  // bool Is##Err() const { return code() == k##Err; }
+  
+  bool IsAlreadyExists() const { return code() == error::ALREADY_EXISTS; }
+  
   // Returns true if the status is complete.
   bool IsComplete() const { return code() == error::COMPLETE; }
   
@@ -189,6 +198,13 @@ class Status {
   
   int64_t subcode() const {
     return ok() ? error::NONE : state_->subcode;
+  }
+  
+  int err_code() const { return static_cast<int>(code()); }
+  
+  static Status FromCode(int err_code) {
+    assert(err_code > 0 && err_code <= error::MAX_CODE);
+    return Status(static_cast<error::Code>(err_code));
   }
 
   bool operator==(const Status& x) const;

@@ -12,14 +12,16 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "platform/slash_env.h"
 #include "utils/pdlfs_log_format.h"
 #include "utils/status.h"
+#include "utils/stringpiece.h"
 
 namespace bubblefs {
 namespace pdlfs {
 
-using SequentialFile = slash::SequentialFile;
+using Slice = StringPiece;
+  
+class SequentialFile;
 
 namespace log {
 

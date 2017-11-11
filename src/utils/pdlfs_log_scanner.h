@@ -9,14 +9,12 @@
 
 // pdlfs-common/include/pdlfs-common/log_scanner.h
 
-#include "platform/slash_env.h"
+#include "platform/pdlfs_env.h"
 #include "utils/pdlfs_log_reader.h"
 #include "utils/status.h"
 
 namespace bubblefs {
 namespace pdlfs {
-  
-using SequentialFile = slash::SequentialFile;
   
 namespace log {
 
