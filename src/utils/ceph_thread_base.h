@@ -19,7 +19,7 @@
 #include <pthread.h>
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
 
 class ThreadBase {
  private:
@@ -58,7 +58,7 @@ class ThreadBase {
   bool SetAffinity(int cpuid);
 };
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_CEPH_THREAD_BASE_H_

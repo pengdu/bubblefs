@@ -33,7 +33,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
 /*
  * Safe functions wrapping the raw read() and write() libc functions.
  * These retry on EINTR, and on error return -errno instead of returning
@@ -95,7 +95,7 @@ private:
     static char m_last_error[256];
 };
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PALTFORM_CEPH_UNIX_IO_

@@ -12,7 +12,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 #include <iostream>
 
 namespace bubblefs {
-namespace knv {
+namespace myknv {
 
 UcMem *UcMemPool::Alloc(bool &exceed_limit)
 {
@@ -318,5 +318,5 @@ UcMemManager *UcMemManager::GetInstance()
         return &g_mp_manager;
 }
 
-} // namespace knv
+} // namespace myknv
 } // namespace bubblefs

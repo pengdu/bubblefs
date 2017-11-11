@@ -18,10 +18,10 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
-#include "utils/interval_set.h"
+#include "utils/ceph_interval_set.h"
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
 
 template <typename K, typename V, typename S>
 /**
@@ -284,7 +284,7 @@ std::ostream &operator<<(std::ostream &out, const interval_map<K, V, S> &m) {
   return m.print(out);
 }
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_CEPH_INTERVAL_MAP_H_

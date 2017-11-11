@@ -19,7 +19,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
   
 // Usage like: 
 // sigset_t old_sigset;
@@ -55,7 +55,7 @@ extern void unblock_all_signals(sigset_t *old_sigset);
 void setPrintStackTracesOnFatalSignal(bool print);
 bool printStackTracesOnFatalSignal();
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_SIGNAL_H_

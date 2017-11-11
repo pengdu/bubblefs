@@ -22,7 +22,7 @@
 #include "platform/ceph_signal.h"
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
 
 static bool _set_affinity(int id)
 {
@@ -173,5 +173,5 @@ bool ThreadBase::SetAffinity(int id)
   return r;
 }
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs

@@ -42,7 +42,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
   
 /* Checks if a buffer is valid UTF-8.
  * Returns 0 if it is, and one plus the offset of the first invalid byte
@@ -112,7 +112,7 @@ bool isUnicodeSpace(char32_t ch);
  */
 bool isCJKUnicode(char32_t ch);
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_CEPH_UTF8_H_

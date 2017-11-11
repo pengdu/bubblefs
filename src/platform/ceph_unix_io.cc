@@ -32,7 +32,7 @@
 #endif
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
 
 ssize_t safe_read(int fd, void *buf, size_t count)
 {
@@ -286,5 +286,5 @@ int DirUtil::MakeDirP(const std::string& path) {
     return MakeDir(path);
 }
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs

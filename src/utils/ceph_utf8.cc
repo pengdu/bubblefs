@@ -39,7 +39,7 @@
 #include <string.h>
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
   
 #define MAX_UTF8_SZ 6 
 #define INVALID_UTF8_CHAR 0xfffffffful
@@ -345,5 +345,5 @@ void trimUTF32Vector(std::vector<char32_t>& str)
     }
 }
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs

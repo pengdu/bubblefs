@@ -12,7 +12,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 #define BUBBLEFS_UTILS_KNV_REPORT_ATTR_H_
 
 namespace bubblefs {
-namespace knv {
+namespace myknv {
   
 enum KnvAttrs
 {
@@ -43,13 +43,9 @@ enum KnvAttrs
         ATTR_PROTO_PKG_NUM_SMALLER_THAN_EVAL_NUM = 392289
 };
 
-#ifdef HAS_ATTR_API
-extern "C" int Attr_API(unsigned int attr, unsigned int val);
-#else
 #define Attr_API(attr, val)
-#endif
 
-} // namespace knv
+} // namespace myknv
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_KNV_REPORT_ATTR_H_

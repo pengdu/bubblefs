@@ -20,7 +20,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
 
 /**
  * TextTable:
@@ -170,7 +170,7 @@ public:
   void clear();
 };
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_CEPH_TEXT_TABLE_H_

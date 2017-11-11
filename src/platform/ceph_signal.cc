@@ -49,7 +49,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
   
 std::string signal_mask_to_str()
 {
@@ -432,5 +432,5 @@ bool printStackTracesOnFatalSignal() {
   return fatalSignalHandlersInstalled;
 }
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs

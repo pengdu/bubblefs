@@ -24,7 +24,7 @@
 #endif
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
   
 int fs_setxattr(const char *path, const char *name,
                 const void *value, size_t size);
@@ -39,7 +39,7 @@ ssize_t fs_flistxattr(int fd, char *list, size_t size);
 int fs_removexattr(const char *path, const char *name);
 int fs_fremovexattr(int fd, const char *name);
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_CEPH_XTATTR_H_

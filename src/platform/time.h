@@ -1,23 +1,3 @@
-// Copyright (c) 2014, Baidu.com, Inc. All Rights Reserved
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-//
-// Author: yanshiguang02@baidu.com
-/*
- * Copyright (C) 2005 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -186,55 +166,6 @@ bool DateTimeToSeconds(const DateTime& time, int64* seconds);
 
 void GetCurrentTime(int64* seconds, int32* nanos);
 
-enum Precision {
-    kDay,
-    kMin,
-    kUsec,
-};
-
-inline int64_t get_micros() {
-    struct timeval tv;
-    gettimeofday(&tv, nullptr);
-    return static_cast<int64_t>(tv.tv_sec) * 1000000 + tv.tv_usec; // us
-}
-
-inline int64_t get_millis() {
-   return static_cast<int64_t>(get_micros() / 1000); // ms
-}
-
-inline int64_t now_time() {
-    return static_cast<int64_t>(get_micros() / 1000000); // s
-}
-
-inline int32_t now_time_str(char* buf, int32_t len, Precision p = kUsec) {
-    struct timeval tv;
-    gettimeofday(&tv, nullptr);
-    const time_t seconds = tv.tv_sec;
-    struct tm t;
-    localtime_r(&seconds, &t);
-    int32_t ret = 0;
-    if (p == kDay) {
-        ret = snprintf(buf, len, "%02d/%02d",
-                t.tm_mon + 1,
-                t.tm_mday);
-    } else if (p == kMin) {
-        ret = snprintf(buf, len, "%02d/%02d %02d:%02d",
-                t.tm_mon + 1,
-                t.tm_mday,
-                t.tm_hour,
-                t.tm_min);
-    } else {
-        ret = snprintf(buf, len, "%02d/%02d %02d:%02d:%02d.%06d",
-            t.tm_mon + 1,
-            t.tm_mday,
-            t.tm_hour,
-            t.tm_min,
-            t.tm_sec,
-            static_cast<int>(tv.tv_usec));
-    }
-    return ret;
-}
-
 inline time_t gettimestamp(const std::string &time) {
     tm tm_;
     char buf[128] = { 0 };
@@ -276,6 +207,20 @@ inline std::string get_curtime_str_plain() {
     time_t t = time(NULL);
     strftime(buf, 20, "%Y%m%d%H%M%S", localtime_r(&t, &tt));
     return std::string(buf);
+}
+
+inline long get_micros() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return static_cast<long>(tv.tv_sec) * 1000000 + tv.tv_usec;
+}
+
+inline int64_t get_millis() {
+    return static_cast<int64_t>(get_micros() / 1000); // ms
+}
+
+inline int64_t get_seconds() {
+    return static_cast<int64_t>(get_micros() / 1000000); // s
 }
 
 inline int64_t get_unique_micros(int64_t ref) {

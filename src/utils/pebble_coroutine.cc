@@ -29,7 +29,7 @@
 #include <iostream>
 #include <set>
 #include "platform/pebble_logging.h"
-#include "utils/pebble_timer.h"
+#include "platform/pebble_timer.h"
 
 namespace bubblefs {
 namespace pebble {

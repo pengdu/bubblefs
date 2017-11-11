@@ -106,7 +106,7 @@ OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(DB_OBJS) $(CLI
 
 LIBS =
  
-BIN = $(PLATFORM_UTILS_OBJS) #$(HTTP_OBJS) #$(PROJECT_DIR)/src/db/redis_store.o
+BIN = $(PLATFORM_UTILS_OBJS) $(HTTP_OBJS) #$(PROJECT_DIR)/src/db/redis_store.o
 
 .PHONY:all
 all: $(BIN)

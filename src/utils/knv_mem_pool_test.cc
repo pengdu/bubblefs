@@ -13,7 +13,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 #include "utils/knv_obj_pool_r.h"
 
 namespace bubblefs {
-namespace knv {
+namespace myknv {
 
 using namespace std;
 
@@ -239,5 +239,5 @@ int main(int argc, char *argv[])
         return 0;
 }
 
-} // namespace knv
+} // namespace myknv
 } // namespace bubblefs

@@ -12,7 +12,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 #define BUBBLEFS_UTILS_KNV_OBJ_BASE_H_
 
 namespace bubblefs {
-namespace knv {
+namespace myknv {
 
 template<class obj_type> class ObjPool;
 template<class obj_type> class ObjPoolR;
@@ -31,7 +31,7 @@ public:
         virtual void ReleaseObject() = 0;
 };
 
-} // namespace knv
+} // namespace myknv
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_KNV_OBJ_BASE_H_

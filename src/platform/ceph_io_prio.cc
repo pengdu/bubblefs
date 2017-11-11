@@ -23,8 +23,8 @@
 #include <algorithm>
 
 namespace bubblefs {
-namespace ceph {
-
+namespace myceph {  
+  
 bool ioprio_set(int whence, int who, int ioprio)
 {
   int ret = syscall(SYS_ioprio_set, whence, who, ioprio);
@@ -45,5 +45,5 @@ int ioprio_string_to_class(const std::string& s)
   return IOPRIO_CLASS_NONE;
 }
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs

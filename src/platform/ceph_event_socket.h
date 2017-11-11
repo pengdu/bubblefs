@@ -19,11 +19,11 @@
 #include <unistd.h>
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
   
-#define EVENT_SOCKET_TYPE_NONE 0
-#define EVENT_SOCKET_TYPE_PIPE 1
-#define EVENT_SOCKET_TYPE_EVENTFD 2  
+constexpr int EVENT_SOCKET_TYPE_NONE = 0;
+constexpr int EVENT_SOCKET_TYPE_PIPE = 1;
+constexpr int EVENT_SOCKET_TYPE_EVENTFD = 2;  
   
 class EventSocket {
   int socket;
@@ -78,7 +78,7 @@ class EventSocket {
   }
 };
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_CEPH_EVENT_SOCKET_H_

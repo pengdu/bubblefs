@@ -13,6 +13,7 @@
 
 // Pebble/src/common/log.cpp
 
+#include "platform/pebble_logging.h"
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -26,10 +27,9 @@
 #include <unistd.h>
 #include <sstream>
 #include <string>
-#include "platform/pebble_logging.h"
+#include "platform/pebble_time_utility.h"
 #include "utils/pebble_file_util.h"
 #include "utils/pebble_string_utility.h"
-#include "utils/pebble_time_utility.h"
 
 namespace bubblefs {
 namespace pebble {

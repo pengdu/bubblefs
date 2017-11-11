@@ -20,7 +20,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 #include "utils/knv_report_attr.h"
 
 namespace bubblefs {
-namespace knv {
+namespace myknv {
 
 //
 // Object pool for managing dynamically allocated objects
@@ -273,7 +273,7 @@ template<class obj_type> inline int ObjPoolR<obj_type>::DeleteAll(obj_type *&fir
         return 0;
 }
 
-} // namespace knv
+} // namespace myknv
 } // namespace bubblefs
 
 #endif //  BUBBLEFS_UTILS_KNV_OBJ_POOL_R_H_

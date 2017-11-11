@@ -15,7 +15,7 @@
 #include "utils/ceph_text_table.h"
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
 
 using namespace std;
 
@@ -88,5 +88,5 @@ std::ostream &operator<<(std::ostream &out, const TextTable &t)
   return out;
 }
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs

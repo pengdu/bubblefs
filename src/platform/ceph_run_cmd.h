@@ -20,7 +20,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
   
 const uint32_t kMaxHostNameSize = 255;
 const std::string kUnknownIpAddr = "255.255.255.255:0000";
@@ -58,7 +58,7 @@ std::string GetLocalHostAddr();
 
 std::string GetLocalHostName();
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_CEPH_RUN_CMD_H_

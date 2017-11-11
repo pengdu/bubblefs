@@ -11,7 +11,7 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
   
 template <class T>
 class QueueRing {
@@ -65,7 +65,7 @@ public:
   }
 };  
   
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_CEPH_QUEUE_RING_H_

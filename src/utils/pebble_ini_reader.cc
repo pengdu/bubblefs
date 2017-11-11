@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <utility>
 #include "platform/base_error.h"
-#include "utils/bdcommon_string_utility.h"
+#include "utils/pebble_string_utility.h"
 
 namespace bubblefs {
 namespace pebble {
@@ -75,7 +75,7 @@ int32_t INIReader::ParseFile(FILE* file) {
         }
 
         // 2. 去掉首尾空格
-        bdcommon::StringUtility::Trim(line);
+        StringUtility::Trim(line);
         // 3. 去掉空行
         if (line.empty()) {
             continue;
@@ -84,7 +84,7 @@ int32_t INIReader::ParseFile(FILE* file) {
         // section
         if (line[0] == '[' && line[line.length() - 1] == ']') {
             std::string section(line.substr(1, line.length() - 2));
-            bdcommon::StringUtility::Trim(section);
+            StringUtility::Trim(section);
             if (section.empty()) {
                 return line_no;
             }
@@ -104,8 +104,8 @@ int32_t INIReader::ParseFile(FILE* file) {
         }
         std::string key = line.substr(0, pos);
         std::string value = line.substr(pos + 1);
-        bdcommon::StringUtility::Trim(key);
-        bdcommon::StringUtility::Trim(value);
+        StringUtility::Trim(key);
+        StringUtility::Trim(value);
         if (key.empty() || value.empty()) {
             continue;
         }

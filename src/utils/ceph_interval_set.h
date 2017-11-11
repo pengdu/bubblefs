@@ -16,12 +16,13 @@
 #define BUBBLEFS_UTILS_CEPH_INTERVAL_SET_H_
 
 #include <assert.h>
+#include <math.h>
 #include <iterator>
 #include <map>
 #include <ostream>
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
   
 #ifndef MIN
 # define MIN(a,b)  ((a)<=(b) ? (a):(b))
@@ -558,7 +559,7 @@ inline std::ostream& operator<<(std::ostream& out, const interval_set<T> &s) {
   return out;
 }
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_CEPH_INTERVAL_SET_H_

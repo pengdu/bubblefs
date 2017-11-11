@@ -12,7 +12,6 @@
 // ceph/src/common/xattr.c
 
 #include "platform/ceph_xattr.h"
-
 #if defined(__FreeBSD__)
 #include <errno.h>
 #include <stdint.h>
@@ -31,7 +30,7 @@
 #endif
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
   
 /*
  * Sets extended attribute on a file.
@@ -282,5 +281,5 @@ fs_fremovexattr(int fd, const char *name)
         return (error);
 }
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs

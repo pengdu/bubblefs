@@ -28,7 +28,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace ceph {
+namespace myceph {
 
 using std::ostringstream;
 
@@ -187,5 +187,5 @@ std::string GetLocalHostName() {
     return hostname;
 }
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs

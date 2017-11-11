@@ -26,7 +26,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 #include "utils/knv_obj_pool.h"
 
 namespace bubblefs {
-namespace knv {
+namespace myknv {
 
 using namespace std;
 
@@ -113,7 +113,7 @@ private:
         uint64_t sz_max;
 };
 
-} // namespace knv
+} // namespace myknv
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_KNV_MEM_POOL_H_

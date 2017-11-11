@@ -18,6 +18,9 @@
 
 #include <string>
 
+namespace bubblefs {
+namespace myceph {
+  
 /*
  * These are the io priority groups as implemented by CFQ. RT is the realtime
  * class, it always gets premium service. BE is the best-effort scheduling
@@ -34,7 +37,7 @@ enum {
 /*
  * 8 best effort priority levels are supported
  */
-#define IOPRIO_BE_NR    (8)
+constexpr int IOPRIO_BE_NR = 8;
  
 enum {
     IOPRIO_WHO_PROCESS = 1,
@@ -45,23 +48,20 @@ enum {
 /*
  * Gives us 8 prio classes with 13-bits of data for each class
  */
-#define IOPRIO_CLASS_SHIFT      (13)
-#define IOPRIO_PRIO_MASK        ((1UL << IOPRIO_CLASS_SHIFT) - 1)
+#define MYCEPH_IOPRIO_CLASS_SHIFT      (13)
+#define MYCEPH_IOPRIO_PRIO_MASK        ((1UL << MYCEPH_IOPRIO_CLASS_SHIFT) - 1)
  
-#define IOPRIO_PRIO_CLASS(mask) ((mask) >> IOPRIO_CLASS_SHIFT)
-#define IOPRIO_PRIO_DATA(mask)  ((mask) & IOPRIO_PRIO_MASK)
-#define IOPRIO_PRIO_VALUE(class, data)  (((class) << IOPRIO_CLASS_SHIFT) | data)
+#define MYCEPH_IOPRIO_PRIO_CLASS(mask) ((mask) >> MYCEPH_IOPRIO_CLASS_SHIFT)
+#define MYCEPH_IOPRIO_PRIO_DATA(mask)  ((mask) & MYCEPH_IOPRIO_PRIO_MASK)
+#define MYCEPH_IOPRIO_PRIO_VALUE(class, data)  (((class) << MYCEPH_IOPRIO_CLASS_SHIFT) | data)
  
-#define ioprio_valid(mask)      (IOPRIO_PRIO_CLASS((mask)) != IOPRIO_CLASS_NONE)
-
-namespace bubblefs {
-namespace ceph {
+constexpr bool ioprio_is_valid(int mask) { return (MYCEPH_IOPRIO_PRIO_CLASS((mask)) != IOPRIO_CLASS_NONE); }
   
 extern bool ioprio_set(int whence, int who, int ioprio);
 
 extern int ioprio_string_to_class(const std::string& s);
 
-} // namespace ceph
+} // namespace myceph
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_IO_PRIO_H_
