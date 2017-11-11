@@ -19,7 +19,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 using Slice = StringPiece;
 
@@ -62,7 +62,7 @@ extern bool ParsePrettyBool(const Slice& value, bool* val);
 // Convert a potentially large size number to a human-readable text.
 extern std::string PrettySize(uint64_t num);
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_STRUTIL_H_

@@ -15,7 +15,7 @@
 #include "utils/pdlfs_log_reader.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace log {
 
 Reader::Reporter::~Reporter() {}
@@ -286,5 +286,5 @@ unsigned int Reader::ReadPhysicalRecord(Slice* result) {
 }
 
 }  // namespace log
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

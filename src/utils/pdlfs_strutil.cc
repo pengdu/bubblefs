@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 void AppendSignedNumberTo(std::string* str, int64_t num) {
   char buf[30];
@@ -205,5 +205,5 @@ std::string PrettySize(uint64_t input) {
   return tmp;
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

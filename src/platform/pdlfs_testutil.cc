@@ -16,7 +16,7 @@
 #include "utils/pdlfs_random.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace test {
 
 bool StringEndWith(const std::string& str, const std::string& suffix) {
@@ -69,5 +69,5 @@ extern Slice CompressibleString(Random* rnd, double compressed_fraction,
 }
 
 }  // namespace test
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

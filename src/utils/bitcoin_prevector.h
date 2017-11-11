@@ -17,7 +17,7 @@
 #pragma pack(push, 1)
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 /** Implements a drop-in replacement for std::vector<T> which stores up to N
  *  elements directly (without heap allocation). The types Size and Diff are
  *  used to store element counts, and can be any unsigned + signed type.
@@ -517,7 +517,7 @@ public:
     }
 };
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #pragma pack(pop)

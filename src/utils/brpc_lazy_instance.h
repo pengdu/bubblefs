@@ -53,7 +53,7 @@
 #define LAZY_INSTANCE_INITIALIZER { 0 }
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 using namespace bubblefs::base;  
   
@@ -230,7 +230,7 @@ class LazyInstance {
   }
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_LAZY_INSTANCE_H_

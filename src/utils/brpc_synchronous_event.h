@@ -48,8 +48,7 @@
 //                                        // called *immediately*
 
 namespace bubblefs {
-namespace brpc {
-  
+namespace mybrpc {
 namespace detail {
   
 // NOTE: This is internal class. Inherit SynchronousEvent<..>::Observer instead.
@@ -231,8 +230,7 @@ public:
 };
 
 }  // namespace detail
-
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_SYNCHRONOUS_EVENT_H_

@@ -15,7 +15,7 @@
 #include "utils/pdlfs_gigaplus.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 void Key::SetName(const Slice& name) {
 #ifndef NDEBUG
@@ -287,5 +287,5 @@ void LookupStat::CopyFrom(const Stat& stat) {
   SetGroupId(stat.GroupId());
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

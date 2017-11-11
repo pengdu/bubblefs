@@ -11,7 +11,7 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 class AtomicSequenceNumber;
 
@@ -58,7 +58,7 @@ class AtomicSequenceNumber {
   DISALLOW_COPY_AND_ASSIGN(AtomicSequenceNumber);
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_ATOMIC_SEQUENCE_NUM_H_

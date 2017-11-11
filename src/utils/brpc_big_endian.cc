@@ -8,7 +8,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 BigEndianReader::BigEndianReader(const char* buf, size_t len)
     : ptr_(buf), end_(ptr_ + len) {}
@@ -96,5 +96,5 @@ bool BigEndianWriter::WriteU32(uint32_t value) {
   return Write(value);
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

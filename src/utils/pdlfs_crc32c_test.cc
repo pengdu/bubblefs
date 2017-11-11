@@ -15,7 +15,7 @@
 #include "utils/pdlfs_crc32c_internal.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace crc32c {
 
 class CRC {
@@ -102,9 +102,9 @@ TEST(CRC, Mask) {
   ASSERT_EQ(crc, Unmask(Unmask(Mask(Mask(crc)))));
 }
 }  // namespace crc32c
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

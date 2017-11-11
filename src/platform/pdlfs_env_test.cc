@@ -15,7 +15,7 @@
 #include "platform/pdlfs_testharness.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 static const int kDelayMicros = 100000;
 
@@ -105,9 +105,9 @@ TEST(EnvPosixTest, StartThread) {
   ASSERT_EQ(state.val, 3);
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

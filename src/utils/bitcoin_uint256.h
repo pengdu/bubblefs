@@ -17,7 +17,7 @@
 #include "platform/bitcoin_endian.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 /** Template base class for fixed-sized opaque blobs. */
 template<unsigned int BITS>
@@ -161,7 +161,7 @@ inline uint256 uint256S(const std::string& str)
     return rv;
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_UINT256_H_

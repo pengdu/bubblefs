@@ -5,7 +5,7 @@
 #define BUBBLEFS_UTILS_BITCOIN_REVERSE_ITERATOR_H_
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 /**
  * Template used for reverse iteration in C++11 range-based for loops.
@@ -40,7 +40,7 @@ reverse_range<T> reverse_iterate(T &x)
     return reverse_range<T>(x);
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_REVERSE_ITERATOR_H_

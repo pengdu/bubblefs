@@ -14,7 +14,7 @@
 #include "platform/thread_annotations.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 ////////////////////////////////////////////////
 //                                            //
@@ -286,7 +286,7 @@ public:
     }
 };
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_SYNC_H_

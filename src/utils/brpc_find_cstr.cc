@@ -20,9 +20,9 @@
 #include "utils/brpc_find_cstr.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 __thread StringMapThreadLocalTemp tls_stringmap_temp = { false, {} };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

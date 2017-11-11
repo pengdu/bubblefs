@@ -17,7 +17,7 @@
 #include "utils/pdlfs_lru.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 struct Lease;
 struct LeaseEntry;
@@ -124,7 +124,7 @@ class LeaseTable {
   LeaseTable(const LeaseTable&);
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_LEASE_H_

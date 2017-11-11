@@ -14,7 +14,7 @@
 #include "utils/pdlfs_gigaplus.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 std::string DirId::DebugString() const {
   char tmp[30];
@@ -255,5 +255,5 @@ bool MDB::Exists(const DirId& id, const Slice& hash, Tx* tx) {
 }
 */
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

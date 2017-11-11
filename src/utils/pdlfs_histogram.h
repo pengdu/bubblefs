@@ -16,7 +16,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class Histogram {
  public:
@@ -46,7 +46,7 @@ class Histogram {
   double buckets_[kNumBuckets];
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_HISTOGRAM_H_

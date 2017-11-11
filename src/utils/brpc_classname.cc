@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Mon. Nov 7 14:47:36 CST 2011
-
 // brpc/src/butil/class_name.cpp
 
 #include <cxxabi.h>                              // __cxa_demangle
@@ -22,7 +19,7 @@
 #include <string>                                // std::string
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // Try to convert mangled |name| to human-readable name.
 // Returns:
@@ -58,5 +55,5 @@ std::string demangle(const char* name) {
     return std::string(name);
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

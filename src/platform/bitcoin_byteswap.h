@@ -11,7 +11,7 @@
 #include <byteswap.h>
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 inline uint16_t raw_bswap_16(uint16_t x)
 {
@@ -36,7 +36,7 @@ inline uint64_t raw_bswap_64(uint64_t x)
           | ((x & 0x00000000000000ffull) << 56));
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_BITCOIN_BYTESWAP_H_

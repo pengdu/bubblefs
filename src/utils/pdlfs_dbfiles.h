@@ -18,7 +18,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 using Slice = StringPiece;  
   
@@ -94,7 +94,7 @@ extern bool ParseFileName(const Slice& filename, uint64_t* number,
 extern Status SetCurrentFile(Env* env, const std::string& dbname,
                              uint64_t descriptor_number);
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_DBFILES_H_

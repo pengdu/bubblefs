@@ -21,7 +21,7 @@
 #include <deque>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 #if defined(PDLFS_OS_LINUX) && defined(_GNU_SOURCE)
 static Status OSCopyFile(const char* src, const char* dst) {
@@ -748,5 +748,5 @@ Env* Env::Default() {
 #endif
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

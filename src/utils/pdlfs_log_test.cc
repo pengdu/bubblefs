@@ -19,7 +19,7 @@
 #include "utils/pdlfs_random.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace log {
 
 /* clang-format off */
@@ -595,11 +595,11 @@ TEST(LogTest, ReadPastEnd) {
 }
 
 }  // namespace log
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 /* clang-format on */
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Authors: Ge,Jun (gejun@baidu.com)
-
 // brpc/src/brpc/closure_guard.h
 
 #ifndef BUBBLEFS_UTILS_BRPC_CLOSURE_GUARD_H_
@@ -23,7 +21,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // RAII: Call Run() of the closure on destruction.
 class ClosureGuard {
@@ -68,7 +66,7 @@ private:
     google::protobuf::Closure* _done;
 };
 
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_CLOSURE_GUARD_H_

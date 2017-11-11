@@ -24,7 +24,7 @@
 #endif
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 Fio::~Fio() {}
 
@@ -207,5 +207,5 @@ std::string Fentry::DebugString() const {
   return result;
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

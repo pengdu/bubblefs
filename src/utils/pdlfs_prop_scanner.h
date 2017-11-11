@@ -11,7 +11,7 @@
 #include <fstream>
 
 namespace bubblefs {
-namespace pdlfs {  
+namespace mypdlfs {  
 
 class PropScanner {
 
@@ -49,7 +49,7 @@ class PropScanner {
   PropScanner& operator=(const PropScanner&);
 };
 
-} // namespace pdlfs
+} // namespace mypdlfs
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_PROP_SCANNER_H_

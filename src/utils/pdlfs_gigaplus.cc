@@ -19,7 +19,7 @@
 #include "utils/pdlfs_xxhash.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 DirIndexOptions::DirIndexOptions() : paranoid_checks(false) {}
 
@@ -626,5 +626,5 @@ std::pair<int, int> DirIndex::RandomServers(const Slice& dir, int seed) {
   return r;
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

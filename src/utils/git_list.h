@@ -28,7 +28,7 @@
 #define BUBBLEFS_UTILS_GIT_LIST_H_
 
 namespace bubblefs {
-namespace git {
+namespace mygit {
   
 /*
  * The definitions of this file are adopted from those which can be
@@ -206,7 +206,7 @@ inline void volatile_list_add(volatile struct volatile_list_head *newp,
         head->next = newp;
 }
 
-} // namespace git
+} // namespace mygit
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_GIT_LIST_H_

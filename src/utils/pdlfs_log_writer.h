@@ -20,7 +20,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 using Slice = StringPiece;
 
@@ -68,7 +68,7 @@ class Writer {
 };
 
 }  // namespace log
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_LOG_WRITER_H_

@@ -20,7 +20,7 @@
 #include "platform/byteorder.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // -------------------------------------------------------------------------
 // NOTE: RawPacker/RawUnpacker is used for packing/unpacking low-level and
@@ -90,7 +90,7 @@ private:
     const char* _stream;
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_RAW_PACK_H_

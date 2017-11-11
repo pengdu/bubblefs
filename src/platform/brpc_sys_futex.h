@@ -13,13 +13,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Tue Jul 10 17:40:58 CST 2012
-
 // brpc/src/bthread/sys_futex.h
 
-#ifndef BUBBLEFS_SYS_BRPC_FUTEX_H_
-#define BUBBLEFS_SYS_BRPC_FUTEX_H_
+#ifndef BUBBLEFS_PLATFORM_BRPC_SYS_FUTEX_H_
+#define BUBBLEFS_PLATFORM_BRPC_SYS_FUTEX_H_
 
 #include <linux/futex.h>                // FUTEX_WAIT, FUTEX_WAKE
 #include <syscall.h>                    // SYS_futex
@@ -27,7 +24,7 @@
 #include <unistd.h>                     // syscall
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 extern const int futex_private_flag;
 
@@ -47,7 +44,7 @@ inline int futex_requeue_private(void* addr1, int nwake, void* addr2) {
                    nwake, NULL, addr2, 0);
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
-#endif // BUBBLEFS_SYS_BRPC_FUTEX_H_
+#endif // BUBBLEFS_PLATFORM_BRPC_SYS_FUTEX_H_

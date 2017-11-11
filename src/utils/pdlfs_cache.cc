@@ -15,7 +15,7 @@
 #include "utils/pdlfs_lru.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 Cache::~Cache() {}
 
@@ -92,5 +92,5 @@ Cache* NewLRUCache(size_t capacity) {
   return new ShardedLRUCache(capacity);  // Statically partitioned
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

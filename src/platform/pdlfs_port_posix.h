@@ -85,7 +85,7 @@
 #endif
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 class Env;
 
 namespace port {
@@ -170,7 +170,7 @@ extern Env* PosixGetDefaultEnv();
 
 }  // namespace port
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PDLFS_PORT_POSIX_H_

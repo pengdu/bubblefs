@@ -15,7 +15,7 @@
 #include <stdint.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 // MurmurHash V3 - https://github.com/aappleby/smhasher/wiki/MurmurHash3
 //
@@ -53,7 +53,7 @@ void murmur_x86_128(const void* k, const int n, const uint32_t seed,
 void murmur_x64_128(const void* k, const int n, const uint32_t seed,
                     void* result);
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_MURMUR_H_

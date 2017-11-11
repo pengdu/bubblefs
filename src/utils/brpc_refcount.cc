@@ -7,7 +7,7 @@
 #include "utils/brpc_refcount.h"
 
 namespace bubblefs {
-namespace brpc {  
+namespace mybrpc {  
   
 bool RefCountedThreadSafeBase::HasOneRef() const {
   return AtomicRefCountIsOne(
@@ -48,5 +48,5 @@ bool RefCountedThreadSafeBase::Release() const {
   return false;
 }
   
-} // namespace brpc  
+} // namespace mybrpc  
 } // namespace bubblefs

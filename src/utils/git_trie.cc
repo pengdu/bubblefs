@@ -6,7 +6,7 @@
 #include <string.h>
 
 namespace bubblefs {
-namespace git {
+namespace mygit {
   
 struct trie *make_trie_node(const char *key, void *value)
 {
@@ -205,5 +205,5 @@ static void init_common_trie(void)
 }
 */
   
-} // namespace git
+} // namespace mygit
 } // namespace bubblefs

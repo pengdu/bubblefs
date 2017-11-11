@@ -16,7 +16,7 @@
 #include "platform/pdlfs_port.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 /* clang-format off */
 const double Histogram::kBucketLimit[kNumBuckets] = {
@@ -147,5 +147,5 @@ std::string Histogram::ToString() const {
 }
 /* clang-format on */
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

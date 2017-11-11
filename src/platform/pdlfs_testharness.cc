@@ -23,7 +23,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace test {
 
 struct Test {
@@ -127,5 +127,5 @@ std::string PrepareTmpDir(const char *subdir, Env *env) {
 }
 
 }  // namespace test
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

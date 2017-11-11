@@ -11,7 +11,7 @@
 #include <map>
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 /** STL-like map container that only keeps the N elements with the highest value. */
 template <typename K, typename V>
@@ -102,7 +102,7 @@ public:
     }
 };
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_LIMITEDMAP_H_

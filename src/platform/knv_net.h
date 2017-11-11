@@ -22,7 +22,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 #include <string.h>
 
 namespace bubblefs {
-namespace knv {
+namespace myknv {
 
 namespace KnvNet
 {
@@ -57,7 +57,7 @@ namespace KnvNet
         int CreateUdpListenSocket(int port, bool reuse = true, bool use_ipv6 = false, bool nblock = true);
 };
 
-} // namespace knv
+} // namespace myknv
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_KNV_NET_H_

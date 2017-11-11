@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Tue Jun 23 15:03:24 CST 2015
-
 // brpc/src/butil/find_cstr.h
 
 #ifndef BUBBLESF_UTILS_BRPC_FIND_CSTR_H_
@@ -42,7 +39,7 @@
 //   iterator       find_cstr(Map& map, const char* key, size_t length);
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 struct StringMapThreadLocalTemp {
     bool initialized;
@@ -150,7 +147,7 @@ find_lowered_cstr(std::map<std::string, T, C, A>& m,
     return m.find(*tls_stringmap_temp.get_lowered_string(key, length));
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLESF_UTILS_BRPC_FIND_CSTR_H_

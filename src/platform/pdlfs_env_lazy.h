@@ -16,7 +16,7 @@
 #include "platform/pdlfs_env.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 // Delay initialization until the first time an Env function
 // is called.  Implementation is thread safe.
@@ -256,7 +256,7 @@ class LazyInitEnv : public Env {
   Env* env_;
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PDLFS_ENV_LAZY_H_

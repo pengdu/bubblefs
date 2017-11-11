@@ -13,7 +13,7 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 namespace random {
 
 // Generate a 128-bit random GUID of the form: "%08X-%04X-%04X-%04X-%012llX".
@@ -31,7 +31,7 @@ BASE_EXPORT std::string RandomDataToGUIDString(const uint64_t bytes[2]);
 #endif
 
 }  // namespace random
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_BRPC_GUID_H_

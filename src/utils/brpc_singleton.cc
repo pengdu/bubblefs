@@ -7,7 +7,7 @@
 #include "utils/brpc_singleton.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 namespace internal {
 
 base::AtomicWord WaitForInstance(base::AtomicWord* instance) {
@@ -32,5 +32,5 @@ base::AtomicWord WaitForInstance(base::AtomicWord* instance) {
 }
 
 }  // namespace internal
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

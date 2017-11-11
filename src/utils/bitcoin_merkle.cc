@@ -9,7 +9,7 @@
 #include "utils/bitcoin_utilstrencodings.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 /*     WARNING! If you're reading this because you're learning about crypto
        and/or designing a new system that will use merkle trees, keep in mind
@@ -189,5 +189,5 @@ std::vector<uint256> BlockMerkleBranch(const CBlock& block, uint32_t position)
 }
 */
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

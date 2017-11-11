@@ -12,7 +12,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 /** A hasher class for SHA-256. */
 class CSHA256
@@ -36,7 +36,7 @@ public:
  */
 std::string SHA256AutoDetect();
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_SHA256_H_

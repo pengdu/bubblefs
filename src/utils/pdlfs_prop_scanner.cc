@@ -7,7 +7,7 @@
 #include "utils/pdlfs_prop_scanner.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 PropScanner::~PropScanner() {
   if (fs_.is_open()) {
@@ -42,5 +42,5 @@ bool PropScanner::NextServerAddress(std::string* ip, std::string* port) {
   return true;
 }
 
-} // namespace pdlfs
+} // namespace mypdlfs
 } // namespace bubblefs

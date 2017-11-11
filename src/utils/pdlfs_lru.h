@@ -19,7 +19,7 @@
 #include "utils/pdlfs_map.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 using Slice = StringPiece;  
   
@@ -204,7 +204,7 @@ void LRUValueDeleter(const Slice& key, T* value) {
   delete value;  // T is not of void type
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_LRU_H_

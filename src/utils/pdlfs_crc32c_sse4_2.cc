@@ -51,7 +51,7 @@
 #endif
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace crc32c {
 
 #ifdef PDLFS_PLATFORM_POSIX
@@ -295,5 +295,5 @@ uint32_t ExtendHW(uint32_t crc, const char* buf, size_t len) {
 }
 #endif
 }  // namespace crc32c
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

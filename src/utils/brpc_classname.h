@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Mon. Nov 7 14:47:36 CST 2011
-
 // brpc/src/butil/class_name.h
 
 // Get name of a class. For example, class_name<T>() returns the name of T
@@ -27,7 +24,7 @@
 #include <typeinfo>
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 std::string demangle(const char* name);
 
@@ -54,7 +51,7 @@ template <typename T> std::string class_name_str(T const& obj) {
     return demangle(typeid(obj).name());
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_CLASS_NAME_H_

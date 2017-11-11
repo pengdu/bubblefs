@@ -15,7 +15,7 @@
 #include "utils/pdlfs_dcntl.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 bool DirInfo::DecodeFrom(Slice* input) {
   uint64_t tmp64;
@@ -151,5 +151,5 @@ void DirTable::Erase(const DirId& id) {
   }
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

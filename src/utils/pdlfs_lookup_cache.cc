@@ -16,7 +16,7 @@
 #include "utils/pdlfs_coding.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 static void (*Deleter)(const Slice&, LookupStat*) = LRUValueDeleter<LookupStat>;
 
@@ -104,5 +104,5 @@ void LookupCache::Erase(const DirId& pid, const Slice& nhash) {
   }
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

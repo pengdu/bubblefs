@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Thu Dec 31 13:35:39 CST 2015
-
 // brpc/src/butil/fast_rand.cpp
 
 #include "utils/brpc_fast_rand.h"
@@ -25,7 +22,7 @@
 #include "platform/time.h"     // gettimeofday_us()
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // This state can be seeded with any value.
 typedef uint64_t SplitMix64Seed;
@@ -163,5 +160,5 @@ double fast_rand_double() {
     return fast_rand_double(&_tls_seed);
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

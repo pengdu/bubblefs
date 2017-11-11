@@ -16,7 +16,7 @@
 #include <stdio.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace port {
 
 void PthreadCall(const char* label, int result) {
@@ -38,5 +38,5 @@ uint64_t PthreadId() {
 }
 
 }  // namespace port
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

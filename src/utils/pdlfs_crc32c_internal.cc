@@ -12,7 +12,7 @@
 #include "utils/pdlfs_crc32c_internal.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace crc32c {
 
 // If hardware acceleration (via SSE4_2) is possible during runtime, crc32c
@@ -24,5 +24,5 @@ uint32_t Extend(uint32_t crc, const char* data, size_t n) {
 }
 
 }  // namespace crc32c
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

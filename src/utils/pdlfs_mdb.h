@@ -20,7 +20,7 @@
 //#include "pdlfs-common/leveldb/db/write_batch.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class DirIndex;  // GIGA index
 
@@ -156,7 +156,7 @@ class MDB {
 };
 */
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_MDB_H_

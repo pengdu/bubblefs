@@ -12,7 +12,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // Read an integer (signed or unsigned) from |buf| in Big Endian order.
 // Note: this loop is unrolled with -O1 and above.
@@ -100,7 +100,7 @@ class BASE_EXPORT BigEndianWriter {
   char* end_;
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_BIG_ENDIAN_H_

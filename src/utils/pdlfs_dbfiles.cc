@@ -18,7 +18,7 @@
 #include "utils/pdlfs_strutil.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 static std::string MakeFileName(const std::string& name, uint64_t number,
                                 const char* suffix) {
@@ -149,5 +149,5 @@ Status SetCurrentFile(Env* env, const std::string& dbname,
   return s;
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

@@ -18,7 +18,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 struct Ifr {
   // Interface name (such as eth0)
@@ -57,7 +57,7 @@ class PosixIf {
   int fd_;
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PDLFS_POSIX_NETDEV_H_

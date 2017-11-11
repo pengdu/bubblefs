@@ -19,7 +19,7 @@
 #include <stdio.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
   
 // Logger implementation that can be shared by all environments
 // where enough posix functionality is available.
@@ -42,7 +42,7 @@ class PosixLogger : public Logger {
   }
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PDLFS_POSIX_LOGGER_H

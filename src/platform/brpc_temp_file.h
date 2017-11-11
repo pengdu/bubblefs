@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Yan,Lin (yanlin@baidu.com)
-//         Ge,Jun (gejun@baidu.com)
-// Date: Thu Oct 28 15:23:09 2010
-
 // brpc/src/butil/files/temp_file.h
 
 #ifndef BUBBLEFS_PLATFORM_BRPC_TEMP_FILE_H_
@@ -24,7 +20,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // Create a temporary file in current directory, which will be deleted when 
 // corresponding TempFile object destructs, typically for unit testing.
@@ -74,7 +70,7 @@ private:
     char _fname[24];        // name of the file
 };
 
-} // namepsace brpc
+} // namepsace mybrpc
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_BRPC_TEMP_FILE_H_

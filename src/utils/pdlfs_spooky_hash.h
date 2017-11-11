@@ -47,7 +47,7 @@ typedef uint8_t uint8;
 #endif
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class SpookyHash {
  public:
@@ -410,7 +410,7 @@ class SpookyHash {
   uint8 m_remainder;              // length of unhashed data stashed in m_data
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_SPOOK_HASH_H_

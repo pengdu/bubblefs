@@ -10,7 +10,7 @@
 #define DEBUG_CHECK(x, msg) do { if (x) { } } while (0)
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // The code in this file is extremely careful to be async-signal-safe.
 //
@@ -653,5 +653,5 @@ ssize_t SafeSNPrintf(char* buf, size_t sz, const char* fmt) {
   return buffer.GetCount();
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

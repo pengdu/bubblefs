@@ -26,7 +26,7 @@
 #include "platform/logging.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 template <typename T>
 class WorkStealingQueue {
@@ -152,7 +152,7 @@ private:
     std::atomic<size_t> CACHE_LINE_ALIGNMENT _top;
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BPRC_WORK_STEALING_QUEUE_H_

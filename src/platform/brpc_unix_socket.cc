@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Jiang,Rujie(jiangrujie@baidu.com)  
-// Date: Mon. Jan 27  23:08:35 CST 2014
-
 // brpc/src/butil/unix_socket.cpp
 
 #include "platform/brpc_unix_socket.h"
@@ -39,7 +36,7 @@
 #include "utils/brpc_fd_guard.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // 基础库不输出log到文件
 #define DBG(fmt, ...) PRINTF_INFO(fmt, ##__VA_ARGS__)
@@ -91,5 +88,5 @@ int unix_socket_connect(const char* sockname) {
     return fd.release();
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

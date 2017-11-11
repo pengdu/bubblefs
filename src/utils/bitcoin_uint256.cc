@@ -11,7 +11,7 @@
 #include "utils/bitcoin_utilstrencodings.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 template <unsigned int BITS>
 base_blob<BITS>::base_blob(const std::vector<unsigned char>& vch)
@@ -81,5 +81,5 @@ template std::string base_blob<256>::ToString() const;
 template void base_blob<256>::SetHex(const char*);
 template void base_blob<256>::SetHex(const std::string&);
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

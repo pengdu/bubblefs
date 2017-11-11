@@ -11,7 +11,7 @@
 #include "platform/time.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 ConditionVariable::ConditionVariable(Mutex* user_lock)
     : user_mutex_(user_lock->native_handle()) {
@@ -68,5 +68,5 @@ void ConditionVariable::Signal() {
   DCHECK_EQ(0, rv);
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

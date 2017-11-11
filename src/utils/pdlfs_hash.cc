@@ -24,7 +24,7 @@
 #endif
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 uint32_t Hash(const char* data, size_t n, uint32_t seed) {
   // Similar to murmur hash
@@ -59,5 +59,5 @@ uint32_t Hash(const char* data, size_t n, uint32_t seed) {
   return h;
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

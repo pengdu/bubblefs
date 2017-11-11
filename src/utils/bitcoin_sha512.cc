@@ -9,7 +9,7 @@
 #include "platform/bitcoin_endian.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 // Internal implementation code.
 namespace
@@ -209,5 +209,5 @@ CSHA512& CSHA512::Reset()
     return *this;
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

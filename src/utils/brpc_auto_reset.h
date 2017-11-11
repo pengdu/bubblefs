@@ -19,7 +19,7 @@
 // writes when the butil::AutoReset<> object is destroyed.
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 template<typename T>
 class AutoReset {
@@ -39,7 +39,7 @@ class AutoReset {
   DISALLOW_COPY_AND_ASSIGN(AutoReset);
 };
 
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_AUTO_RESET_H_

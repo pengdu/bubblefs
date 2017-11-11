@@ -18,7 +18,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 LeaseOptions::LeaseOptions()
     : max_lease_duration(1000 * 1000), max_num_leases(4096) {}
@@ -137,5 +137,5 @@ void LeaseTable::Erase(const DirId& pid, const Slice& nhash) {
   }
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

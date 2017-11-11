@@ -17,7 +17,7 @@
 #include "platform/pdlfs_env.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 // An enhanced WritableFile abstraction with richer semantics
 // on durability control.
@@ -406,7 +406,7 @@ class WholeFileBufferedRandomAccessFile : public RandomAccessFile {
   char* buf_;
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_ENV_FILES_H_

@@ -11,7 +11,7 @@
 #include "utils/brpc_atomic_ref_count.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -203,7 +203,7 @@ class RefCountedData
   ~RefCountedData() {}
 };  
   
-} // namespace brpc
+} // namespace mybrpc
 
 //
 // A smart pointer class for reference counted objects.  Use this class instead

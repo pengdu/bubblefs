@@ -9,7 +9,7 @@
 #include "utils/bitcoin_hmac_sha512.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 inline uint32_t ROTL32(uint32_t x, int8_t r)
 {
@@ -250,5 +250,5 @@ uint64_t SipHashUint256Extra(uint64_t k0, uint64_t k1, const uint256& val, uint3
     return v0 ^ v1 ^ v2 ^ v3;
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

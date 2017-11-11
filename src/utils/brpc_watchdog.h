@@ -28,7 +28,7 @@
 #include "platform/time.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
   
 class BASE_EXPORT Watchdog {
  public:
@@ -90,7 +90,7 @@ class BASE_EXPORT Watchdog {
   DISALLOW_COPY_AND_ASSIGN(Watchdog);
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_WATCHDOG_H_

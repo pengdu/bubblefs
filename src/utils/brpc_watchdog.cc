@@ -11,7 +11,7 @@
 #include "utils/brpc_lazy_instance.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 namespace {
 
@@ -183,5 +183,5 @@ void Watchdog::ResetStaticData() {
   static_data->last_debugged_alarm_delay = timeutil::get_micros();
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

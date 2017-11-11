@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Jiang,Rujie(jiangrujie@baidu.com)
-// Date: Mon. Jan 27  23:08:35 CST 2014
-
 // brpc/src/butil/unix_socket.h
 
 #ifndef BUBBLEFS_PLATFORM_BRPC_UNIX_SOCKET_H_
@@ -25,7 +22,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // Wrappers of unix domain sockets, mainly for unit-test of network stuff.  
   
@@ -41,7 +38,7 @@ int unix_socket_listen(const char* sockname);
 // Returns the file descriptor on success, -1 otherwise and errno is set.
 int unix_socket_connect(const char* sockname);
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_BRPC_UNIX_SOCKET_H_

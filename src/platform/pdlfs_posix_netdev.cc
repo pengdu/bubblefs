@@ -15,7 +15,7 @@
 #include "platform/pdlfs_posix_env.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 Status PosixIf::IfConf(std::vector<Ifr>* results) {
   Ifr ifr;
@@ -57,5 +57,5 @@ Status PosixIf::Open() {
   return s;
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

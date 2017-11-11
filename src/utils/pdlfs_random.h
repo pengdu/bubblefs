@@ -16,7 +16,7 @@
 #include <stdint.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 // A very simple random number generator.  Not especially good at
 // generating truly random bits, but good enough for our needs in this
@@ -74,7 +74,7 @@ class Random {
   uint32_t Skewed(int max_log) { return Uniform(1 << Uniform(max_log + 1)); }
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_RANDOM_H

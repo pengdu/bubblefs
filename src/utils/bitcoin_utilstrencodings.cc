@@ -13,7 +13,7 @@
 #include "utils/tinyformat.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 static const std::string CHARS_ALPHA_NUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -736,5 +736,5 @@ bool ParseFixedPoint(const std::string &val, int decimals, int64_t *amount_out)
     return true;
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

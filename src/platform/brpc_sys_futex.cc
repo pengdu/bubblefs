@@ -13,15 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Tue Jul 10 17:40:58 CST 2012
-
 // brpc/src/bthread/sys_futex.cpp
 
 #include "platform/brpc_sys_futex.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 const int SYS_FUTEX_PRIVATE_FLAG = 128;
 
@@ -36,5 +33,5 @@ static int get_futex_private_flag() {
 
 extern const int futex_private_flag = get_futex_private_flag();
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

@@ -7,7 +7,7 @@
 #include "platform/git_usage.h"
 
 namespace bubblefs {
-namespace git {
+namespace mygit {
 
 void vreportf(const char *prefix, const char *err, va_list params)
 {
@@ -243,5 +243,5 @@ NORETURN void BUG(const char *fmt, ...)
         va_end(ap);
 }
 
-}  // namespace git
+}  // namespace mygit
 }  // namespace bubblefs

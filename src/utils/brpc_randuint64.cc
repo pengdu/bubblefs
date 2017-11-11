@@ -20,7 +20,7 @@
 #include "utils/brpc_lazy_instance.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 namespace {
 
@@ -42,7 +42,7 @@ class URandomFd {
   const int fd_;
 };
 
-brpc::LazyInstance<URandomFd>::Leaky g_urandom_fd = LAZY_INSTANCE_INITIALIZER;
+LazyInstance<URandomFd>::Leaky g_urandom_fd = LAZY_INSTANCE_INITIALIZER;
 
 }  // namespace
 
@@ -76,5 +76,5 @@ int GetUrandomFD(void) {
   return g_urandom_fd.Pointer()->fd();
 }
 
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs

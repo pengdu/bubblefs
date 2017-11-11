@@ -23,7 +23,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // Valid values for SetThreadPriority()
 enum ThreadPriority{
@@ -201,7 +201,7 @@ class BASE_EXPORT PlatformThread {
   DISALLOW_IMPLICIT_CONSTRUCTORS(PlatformThread);
 };
 
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_BRPC_PLATFORM_THREAD_H_

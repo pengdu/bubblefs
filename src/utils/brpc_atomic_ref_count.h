@@ -17,7 +17,7 @@
 #include "platform/dynamic_annotations.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 typedef base::Atomic32 AtomicRefCount;
 
@@ -78,7 +78,7 @@ inline bool AtomicRefCountIsZero(volatile AtomicRefCount *ptr) {
   return res;
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_ATOMIC_REF_COUNT_H_

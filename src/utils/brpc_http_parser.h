@@ -64,7 +64,7 @@ typedef unsigned __int64 uint64_t;
 #endif
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 struct http_parser;
 
@@ -331,7 +331,7 @@ const char* http_parser_type_name(enum http_parser_type type);
 const char* http_parser_state_name(unsigned int state);
 const char* http_parser_header_state_name(unsigned int header_state);
 
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BRPC_HTTP_PARSER_H_

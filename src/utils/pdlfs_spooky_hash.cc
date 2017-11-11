@@ -16,7 +16,7 @@
 #include <memory.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 #define ALLOW_UNALIGNED_READS 1
 
@@ -309,5 +309,5 @@ void SpookyHash::Final(uint64* hash1, uint64* hash2) {
   *hash2 = h1;
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

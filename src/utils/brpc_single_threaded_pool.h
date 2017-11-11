@@ -25,7 +25,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // A single-threaded pool for very efficient allocations of same-sized items.
 // Example:
@@ -134,7 +134,7 @@ private:
     Block* _blocks;
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_SINGLE_THREADED_POOL_H_

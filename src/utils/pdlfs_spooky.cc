@@ -14,7 +14,7 @@
 #include "utils/pdlfs_spooky_hash.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 void Spooky128(const void* k, size_t n, const uint64_t seed1,
                const uint64_t seed2, void* result) {
@@ -26,5 +26,5 @@ void Spooky128(const void* k, size_t n, const uint64_t seed1,
   memcpy(buf, &v1, 8);
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

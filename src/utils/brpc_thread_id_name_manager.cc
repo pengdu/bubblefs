@@ -10,7 +10,7 @@
 #include "utils/str_util.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
   
 namespace {
 
@@ -110,5 +110,5 @@ void ThreadIdNameManager::RemoveName(PlatformThreadHandle::Handle handle,
   thread_id_to_handle_.erase(id_to_handle_iter);
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

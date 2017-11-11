@@ -16,7 +16,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class LookupStat;
 class Stat;
@@ -327,7 +327,7 @@ class LookupStat {
   void CopyFrom(const Stat& stat);
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_FSTYPES_H_

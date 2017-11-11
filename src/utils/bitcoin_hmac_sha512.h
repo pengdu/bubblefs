@@ -12,7 +12,7 @@
 #include "utils/bitcoin_sha512.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 /** A hasher class for HMAC-SHA-512. */
 class CHMAC_SHA512
@@ -33,7 +33,7 @@ public:
     void Finalize(unsigned char hash[OUTPUT_SIZE]);
 };
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_HMAC_SHA512_H_

@@ -16,7 +16,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 #define BEGIN(a)            ((char*)&(a))
 #define END(a)              ((char*)&((&(a))[1]))
@@ -178,7 +178,7 @@ bool ConvertBits(O& out, I it, I end) {
     return true;
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_UTILSTRENCODINGS_H_

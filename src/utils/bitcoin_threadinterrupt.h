@@ -13,7 +13,7 @@
 #include <mutex>
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 /*
     A helper class for interruptible sleeps. Calling operator() will interrupt
@@ -36,7 +36,7 @@ private:
     std::atomic<bool> flag;
 };
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_THREADINTERRUPT_H_

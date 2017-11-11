@@ -16,8 +16,9 @@
 #include "utils/pdlfs_mdb.h"
 
 namespace bubblefs {
-namespace pdlfs {
-#define DELTAFS_FENTRY_BUFSIZE 200 /* Buffer size for fentry encoding */
+namespace mypdlfs {
+
+constexpr int DELTAFS_FENTRY_BUFSIZE = 200; /* Buffer size for fentry encoding */
 
 // Path and metadata information on an open file.
 struct Fentry {
@@ -84,7 +85,7 @@ class Fio {
 inline Fio::Handle::~Handle() {}
 #endif
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_FIO_H_

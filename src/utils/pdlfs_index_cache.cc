@@ -15,7 +15,7 @@
 #include "utils/pdlfs_coding.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 static void (*Deleter)(const Slice&, DirIndex*) = LRUValueDeleter<DirIndex>;
 
@@ -101,5 +101,5 @@ void IndexCache::Erase(const DirId& id) {
   }
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

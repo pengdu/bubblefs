@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Yan,Lin (yanlin@baidu.com)
-//         Ge,Jun (gejun@baidu.com)
-// Date: Thu Oct 28 15:27:05 2010
-
 // brpc/src/butil/files/temp_file.cpp
 
 #include "platform/brpc_temp_file.h"
@@ -32,7 +28,7 @@
 #define BASE_FILES_TEMP_FILE_PATTERN "temp_file_XXXXXX";
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 TempFile::TempFile() : _ever_opened(0) {
     char temp_name[] = BASE_FILES_TEMP_FILE_PATTERN;
@@ -153,5 +149,5 @@ int TempFile::save_bin(const void *buf, size_t count) {
     return 0;        
 }
 
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs

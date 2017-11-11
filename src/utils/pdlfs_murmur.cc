@@ -12,7 +12,7 @@
 #include "utils/pdlfs_murmur.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 //-----------------------------------------------------------------------------
 // MurmurHash3 was written by Austin Appleby, and is placed in the public
@@ -405,5 +405,5 @@ void murmur_x64_128(const void* key, const int len, const uint32_t seed,
 
 //-----------------------------------------------------------------------------
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

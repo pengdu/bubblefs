@@ -13,7 +13,7 @@
 #include "platform/pdlfs_testharness.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class FioTest {};
 
@@ -44,9 +44,9 @@ TEST(FioTest, EncodeDecode) {
   ASSERT_EQ(encoding1.as_string(), encoding2.as_string());
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

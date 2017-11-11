@@ -12,7 +12,7 @@
 #include "platform/bitcoin_endian.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 constexpr static inline uint32_t rotl32(uint32_t v, int c) { return (v << c) | (v >> (32 - c)); }
 
@@ -183,5 +183,5 @@ void ChaCha20::Output(unsigned char* c, size_t bytes)
     }
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

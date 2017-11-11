@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Tue Feb 25 23:43:39 CST 2014
-
 // Provide functions to get/set bits of an integral array. These functions
 // are not threadsafe because operations on different bits may modify a same
 // integer.
@@ -27,7 +24,7 @@
 #include <stdint.h>
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // Note: use gcc  
   
@@ -101,7 +98,7 @@ inline size_t bit_array_first1(const uint64_t* array, size_t begin, size_t end)
     return end;
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_BIT_ARRAY_H_

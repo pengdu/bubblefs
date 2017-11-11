@@ -5,7 +5,7 @@
 #define BUBBLEFS_UTILS_GIT_TRIE_H_
 
 namespace bubblefs {
-namespace git {
+namespace mygit {
 
 /*
  * A compressed trie.  A trie node consists of zero or more characters that
@@ -43,7 +43,7 @@ typedef int (*match_fn)(const char *unmatched, void *data, void *baton);
 int trie_find(struct trie *root, const char *key, match_fn fn,
               void *baton);
   
-} // namespace git  
+} // namespace mygit  
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_GIT_TRIE_H_

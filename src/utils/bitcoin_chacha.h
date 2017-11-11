@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 /** A PRNG class for ChaCha20. */
 class ChaCha20
@@ -28,7 +28,7 @@ public:
     void Output(unsigned char* output, size_t bytes);
 };
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_CHACHA20_H_

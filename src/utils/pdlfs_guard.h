@@ -15,7 +15,7 @@
 #include <assert.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 template <typename T, typename Ref>
 class RefGuard {
@@ -35,7 +35,7 @@ class RefGuard {
   }
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_GUARD_H_

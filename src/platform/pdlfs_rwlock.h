@@ -16,7 +16,7 @@
 #include "platform/pdlfs_port.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class RWLock {
  public:
@@ -92,7 +92,7 @@ class ExclusiveLock {
   RWLock* lock_;
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_RWLOCK_H_

@@ -130,7 +130,7 @@ do {                                                                 \
 #define CLOSE "close"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 static const char *method_strings[] =
   {
@@ -2363,5 +2363,5 @@ http_parser_version(void) {
          HTTP_PARSER_VERSION_PATCH * 0x00001;
 }
 
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs

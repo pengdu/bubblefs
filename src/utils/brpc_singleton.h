@@ -29,7 +29,7 @@
 #include "utils/brpc_at_exit.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 using namespace bubblefs::base;  
   
@@ -301,7 +301,7 @@ class Singleton {
 template <typename Type, typename Traits, typename DifferentiatingType>
 AtomicWord Singleton<Type, Traits, DifferentiatingType>::instance_ = 0;
     
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BRPC_SINGLETON_H

@@ -16,7 +16,7 @@
 #include "utils/pdlfs_crc32c.h"
 
 namespace bubblefs {
-namespace pdlfs {  
+namespace mypdlfs {  
 namespace log {
   
 
@@ -125,5 +125,5 @@ Status Writer::Sync() {
 }
 
 }  // namespace log
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

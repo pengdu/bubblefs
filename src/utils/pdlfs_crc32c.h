@@ -15,7 +15,7 @@
 #include <stdint.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace crc32c {
 
 // Return the crc32c of concat(A, data[0,n-1]) where init_crc is the
@@ -49,7 +49,7 @@ inline uint32_t Unmask(uint32_t masked_crc) {
 }
 
 }  // namespace crc32c
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_CRC32C_H_

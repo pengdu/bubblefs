@@ -21,7 +21,7 @@
 #include <sstream>
 
 namespace bubblefs {
-namespace caffe2 {
+namespace mycaffe2 {
   
 void SetUsageMessage(const std::string& str) {
   if (UsageMessage() != nullptr) {
@@ -45,5 +45,5 @@ bool CommandLineFlagsHasBeenParsed() {
   return true;
 }
 
-} // namespace caffe2
+} // namespace mycaffe2
 } // namespace bubblefs

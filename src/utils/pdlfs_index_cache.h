@@ -18,7 +18,7 @@
 #include "utils/pdlfs_mdb.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 // An LRU-cache of directory indices.
 class IndexCache {
@@ -49,7 +49,7 @@ class IndexCache {
   IndexCache(const IndexCache&);
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_INDEX_CACHE_H_

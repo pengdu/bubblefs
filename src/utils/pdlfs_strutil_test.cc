@@ -15,7 +15,7 @@
 #include "platform/pdlfs_testutil.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class StrUtilTest {
  public:
@@ -99,9 +99,9 @@ TEST(StrUtilTest, SplitN) {
   ASSERT_EQ(v[0], "&&& a &");
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

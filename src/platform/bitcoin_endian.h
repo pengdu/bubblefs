@@ -13,7 +13,7 @@
 #include "platform/bitcoin_byteswap.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 uint16_t inline ReadLE16(const unsigned char* ptr)
 {
@@ -97,7 +97,7 @@ uint64_t inline CountBits(uint64_t x)
     return ret;
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_BITCOIN_ENDIAN_H

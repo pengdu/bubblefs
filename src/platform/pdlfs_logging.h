@@ -24,9 +24,9 @@
 // Otherwise these log entries will go to stderr.
 //
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
-#define __PDLFS_LOG_ARGS__ ::bubblefs::pdlfs::Logger::Default(), __FILE__, __LINE__
+#define __PDLFS_LOG_ARGS__ ::bubblefs::mypdlfs::Logger::Default(), __FILE__, __LINE__
 
 // Emit a verbose log entry to *info_log if info_log is non-NULL.
 extern void Verbose(Logger* info_log, const char* file, int line, int level,
@@ -60,7 +60,7 @@ extern void Error(Logger* info_log, const char* file, int line,
 #endif
     ;
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLFS_PLATFORM_PDLFS_LOGGING_H_

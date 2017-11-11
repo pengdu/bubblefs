@@ -15,7 +15,7 @@
 #include "utils/bitcoin_uint256.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 typedef uint256 ChainCode;
 
@@ -153,7 +153,7 @@ public:
 uint64_t SipHashUint256(uint64_t k0, uint64_t k1, const uint256& val);
 uint64_t SipHashUint256Extra(uint64_t k0, uint64_t k1, const uint256& val, uint32_t extra);
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_HASH_H_

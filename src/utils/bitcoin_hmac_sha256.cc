@@ -8,7 +8,7 @@
 #include <string.h>
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 CHMAC_SHA256::CHMAC_SHA256(const unsigned char* key, size_t keylen)
 {
@@ -37,5 +37,5 @@ void CHMAC_SHA256::Finalize(unsigned char hash[OUTPUT_SIZE])
     outer.Write(temp, 32).Finalize(hash);
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

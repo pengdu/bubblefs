@@ -22,7 +22,7 @@
 #include "utils/pdlfs_random.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 // Append a slice to a given output stream.
 //inline std::ostream& operator<<(std::ostream& stream, const Slice& slice) {
 //  return (stream << slice.ToString());
@@ -152,21 +152,21 @@ class Tester {
   }
 };
 
-#define ASSERT_TRUE(c) ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).Is((c), #c)
-#define ASSERT_FALSE(c) ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsNot((c), #c)
-#define ASSERT_OK(s) ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsOk((s))
-#define ASSERT_ERR(s) ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsErr((s))
+#define ASSERT_TRUE(c) ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).Is((c), #c)
+#define ASSERT_FALSE(c) ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsNot((c), #c)
+#define ASSERT_OK(s) ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsOk((s))
+#define ASSERT_ERR(s) ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsErr((s))
 #define ASSERT_NOTFOUND(s) \
-  ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsNotFound((s))
+  ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsNotFound((s))
 #define ASSERT_CONFLICT(s) \
-  ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsAlreadyExists((s))
+  ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsAlreadyExists((s))
 
-#define ASSERT_EQ(a, b) ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsEq((a), (b))
-#define ASSERT_NE(a, b) ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsNe((a), (b))
-#define ASSERT_GE(a, b) ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsGe((a), (b))
-#define ASSERT_GT(a, b) ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsGt((a), (b))
-#define ASSERT_LE(a, b) ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsLe((a), (b))
-#define ASSERT_LT(a, b) ::bubblefs::pdlfs::test::Tester(__FILE__, __LINE__).IsLt((a), (b))
+#define ASSERT_EQ(a, b) ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsEq((a), (b))
+#define ASSERT_NE(a, b) ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsNe((a), (b))
+#define ASSERT_GE(a, b) ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsGe((a), (b))
+#define ASSERT_GT(a, b) ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsGt((a), (b))
+#define ASSERT_LE(a, b) ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsLe((a), (b))
+#define ASSERT_LT(a, b) ::bubblefs::mypdlfs::test::Tester(__FILE__, __LINE__).IsLt((a), (b))
 
 inline bool Between(uint64_t val, uint64_t low, uint64_t high) {
   bool r = (val >= low) && (val <= high);
@@ -180,7 +180,7 @@ inline bool Between(uint64_t val, uint64_t low, uint64_t high) {
   return r;
 }
 
-#define BETWEEN(a, b, c) ::bubblefs::pdlfs::test::Between(a, b, c)
+#define BETWEEN(a, b, c) ::bubblefs::mypdlfs::test::Between(a, b, c)
 #define TCONCAT(a, b) TCONCAT1(a, b)
 #define TCONCAT1(a, b) a##b
 #define TEST(base, name)                                            \
@@ -192,7 +192,7 @@ inline bool Between(uint64_t val, uint64_t low, uint64_t high) {
       t._Run();                                                     \
     }                                                               \
   };                                                                \
-  bool TCONCAT(_Test_ignored_, name) = ::bubblefs::pdlfs::test::RegisterTest( \
+  bool TCONCAT(_Test_ignored_, name) = ::bubblefs::mypdlfs::test::RegisterTest( \
       #base, #name, &TCONCAT(_Test_, name)::_RunIt);                \
   void TCONCAT(_Test_, name)::_Run()
 
@@ -201,7 +201,7 @@ inline bool Between(uint64_t val, uint64_t low, uint64_t high) {
 extern bool RegisterTest(const char* base, const char* name, void (*func)());
 
 }  // namespace test
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PDLFS_TESTHARNESS_H_

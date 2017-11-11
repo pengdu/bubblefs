@@ -15,7 +15,7 @@
 #include "utils/pdlfs_crc32c.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace crc32c {
 
 // A software-based crc32c implementation. Used when hardware acceleration is
@@ -40,7 +40,7 @@ inline uint32_t ValueHW(const char* data, size_t n) {
 }
 
 }  // namespace crc32c
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_CRC32C_INTERNAL_H_

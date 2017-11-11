@@ -13,7 +13,7 @@
 #include "utils/pdlfs_coding.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 void EncodeFixed16(char* buf, uint16_t value) {
   if (port::kLittleEndian) {
@@ -214,5 +214,5 @@ bool GetLengthPrefixedSlice(Slice* input, Slice* result) {
   }
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

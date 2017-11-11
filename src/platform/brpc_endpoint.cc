@@ -27,7 +27,7 @@
 #include "utils/brpc_fd_guard.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 int str2ip(const char* ip_str, ip_t* ip) {
     // ip_str can be NULL when called by EndPoint(0, ...)
@@ -299,5 +299,5 @@ int tcp_listen(EndPoint point, bool reuse_addr) {
     return sockfd.release();
 }
   
-} // namespace brpc 
+} // namespace mybrpc 
 } // namespace bubblefs

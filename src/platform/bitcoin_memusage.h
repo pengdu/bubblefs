@@ -16,7 +16,7 @@
 #include "utils/bitcoin_indirectmap.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 namespace memusage
 {
 
@@ -166,7 +166,7 @@ static inline size_t DynamicUsage(const std::unordered_map<X, Y, Z>& m)
 }
 
 } // namespace memusage
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_BITCOIN_MEMUSAGE_H

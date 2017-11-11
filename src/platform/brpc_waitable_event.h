@@ -23,7 +23,7 @@
 #endif
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // This replaces INFINITE from Win32
 static const int kNoTimeout = -1;
@@ -179,7 +179,7 @@ class BASE_EXPORT WaitableEvent {
   DISALLOW_COPY_AND_ASSIGN(WaitableEvent);
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_BRPC_WAITABLE_EVENT_H_

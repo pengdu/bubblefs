@@ -21,7 +21,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
   
 using Slice = StringPiece;   
   
@@ -304,7 +304,7 @@ class HashSet {
   }
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_MAP_H_

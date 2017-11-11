@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 /** A hasher class for SHA1. */
 class CSHA1
@@ -30,7 +30,7 @@ public:
     CSHA1& Reset();
 };
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_SHA1_H_

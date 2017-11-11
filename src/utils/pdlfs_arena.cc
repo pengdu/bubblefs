@@ -13,7 +13,7 @@
 #include "utils/pdlfs_arena.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 static const int kBlockSize = 4096;
 
@@ -73,5 +73,5 @@ char* Arena::AllocateNewBlock(size_t block_bytes) {
   return result;
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

@@ -48,7 +48,7 @@
 // This code is based on atomicops-internals-* in Google's perftools:
 // http://code.google.com/p/google-perftools/source/browse/#svn%2Ftrunk%2Fsrc%2Fbase
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace port {
 
 // Define MemoryBarrier() if available
@@ -246,7 +246,7 @@ class AtomicPointer {
 #undef ARCH_CPU_PPC_FAMILY
 
 }  // namespace port
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PLATFORM_PDLFS_ATOMIC_POINTER_H_

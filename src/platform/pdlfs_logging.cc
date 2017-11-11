@@ -13,7 +13,7 @@
 #include "platform/pdlfs_logging.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 void Verbose(Logger* info_log, const char* file, int line, int level,
              const char* fmt, ...) {
@@ -52,5 +52,5 @@ void Error(Logger* info_log, const char* file, int line, const char* fmt, ...) {
   }
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

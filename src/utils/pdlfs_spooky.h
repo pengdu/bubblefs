@@ -16,7 +16,7 @@
 #include <stdint.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 // SpookyHash: a 128-bit noncryptographic hash function
 // By Bob Jenkins, public domain
@@ -46,7 +46,7 @@ namespace pdlfs {
 extern void Spooky128(const void* k, size_t n, const uint64_t seed1,
                       const uint64_t seed2, void* result);
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_SPOOKY_H_

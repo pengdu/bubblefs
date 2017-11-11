@@ -33,7 +33,7 @@
 // -----------------------------------------------------------------------------
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // -----------------------------------------------------------------------------
 // This is just an abstract base class for waking the two types of waiters
@@ -406,5 +406,5 @@ bool WaitableEvent::WaitableEventKernel::Dequeue(Waiter* waiter, void* tag) {
 
 // -----------------------------------------------------------------------------
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

@@ -14,7 +14,7 @@
 #define BUBBLEFS_UTILS_PDLFS_LOG_FORMAT_H_
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace log {
 
 enum RecordType {
@@ -36,7 +36,7 @@ static const int kBlockSize = 32768;
 static const int kHeaderSize = 4 + 2 + 1;
 
 }  // namespace log
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_LOG_FORMAT_H_

@@ -13,7 +13,7 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // This class provides a facility similar to the CRT atexit(), except that
 // we control when the callbacks are executed. Under Windows for a DLL they
@@ -73,7 +73,7 @@ class ShadowingAtExitManager : public AtExitManager {
 };
 #endif  // defined(UNIT_TEST)
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_AT_EXIT_H_

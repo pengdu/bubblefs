@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 /** A hasher class for RIPEMD-160. */
 class CRIPEMD160
@@ -30,7 +30,7 @@ public:
     CRIPEMD160& Reset();
 };
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_RIPEMD160_H_

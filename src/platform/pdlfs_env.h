@@ -21,7 +21,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 using Slice = StringPiece;  
   
@@ -462,7 +462,7 @@ class EnvWrapper : public Env {
   Env* target_;
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PDLFS_ENV_H_

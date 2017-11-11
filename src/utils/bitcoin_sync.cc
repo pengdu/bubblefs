@@ -17,7 +17,7 @@
 #include "boost/thread.hpp"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 #define LogPrintf(fmt, ...) printf(fmt, ##__VA_ARGS__)
 
@@ -189,5 +189,5 @@ void DeleteLock(void* cs)
 
 #endif /* DEBUG_LOCKORDER */
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

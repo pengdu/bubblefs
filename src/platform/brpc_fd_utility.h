@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Mon. Nov 7 14:47:36 CST 2011
-
 // brpc/src/butil/fd_utility.h
 
 // Utility functions on file descriptor.
@@ -23,7 +20,7 @@
 #define BUBBLEFS_PLATFORM_BRPC_FD_UTILITY_H_
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // Make file descriptor |fd| non-blocking
 // Returns 0 on success, -1 otherwise and errno is set (by fcntl)
@@ -41,7 +38,7 @@ int make_close_on_exec(int fd);
 // Returns 0 on success, -1 when error and errno is set (by setsockopt)
 int make_no_delay(int socket);
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_BRPC_FD_UTILITY_H_

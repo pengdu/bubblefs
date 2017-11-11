@@ -17,7 +17,7 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // --------------------------------------------------------------------------
 // NOTE(gejun): Functions in this header read from /dev/urandom in posix
@@ -28,7 +28,7 @@ namespace brpc {
 // Returns a random number in range [0, kuint64max]. Thread-safe.
 BASE_EXPORT uint64_t RandUint64();
 
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs
 
 #endif //BUBBLEFS_UTILS_BRPC_RANDUINT64_H_

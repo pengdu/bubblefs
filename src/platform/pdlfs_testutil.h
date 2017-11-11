@@ -17,7 +17,7 @@
 #include "utils/pdlfs_random.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 namespace test {
 // Return a file name containing a given unique identifier.
 extern std::string FileName(int i);
@@ -40,7 +40,7 @@ extern Slice CompressibleString(Random* rnd, double compressed_fraction,
                                 size_t len, std::string* dst);
 
 }  // namespace test
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_TESTUTIL_H_

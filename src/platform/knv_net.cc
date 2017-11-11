@@ -20,7 +20,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 #include "platform/knv_net.h"
 
 namespace bubblefs {
-namespace knv {
+namespace myknv {
 
 namespace KnvNet
 {
@@ -143,5 +143,5 @@ namespace KnvNet
 
 };
 
-} // namespace knv
+} // namespace myknv
 } // namespace bubblefs

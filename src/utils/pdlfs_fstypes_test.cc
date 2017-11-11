@@ -13,7 +13,7 @@
 #include "platform/pdlfs_testharness.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class KeyTest {};
 
@@ -126,9 +126,9 @@ TEST(LookupEntryTest, EntryEncoding) {
   ASSERT_EQ(encoding.as_string(), encoding2.as_string());
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

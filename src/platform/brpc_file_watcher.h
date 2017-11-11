@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: 2010/05/29
-
 // brpc/src/butil/files/file_watcher.h
 
 // Watch timestamp of a file
@@ -35,7 +32,7 @@
 //   }
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
   
 class FileWatcher {
 public:
@@ -82,7 +79,7 @@ private:
     Timestamp _last_ts;    
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_BRPC_FILE_WATCHER_H_

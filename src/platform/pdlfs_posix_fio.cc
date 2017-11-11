@@ -19,7 +19,7 @@
 #include <unistd.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 static std::string PosixName(const Fentry& fentry) {
   std::string key_prefix = fentry.UntypedKeyPrefix();
@@ -209,5 +209,5 @@ Status PosixFio::Drop(const Fentry& fentry) {
   return s;
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

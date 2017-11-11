@@ -19,7 +19,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 // An arena is a collection of allocated memory managed atop
 // the native system allocator.
@@ -74,7 +74,7 @@ inline char* Arena::Allocate(size_t bytes) {
   return AllocateFallback(bytes);
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_ARENA_H_

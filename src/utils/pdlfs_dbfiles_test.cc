@@ -15,7 +15,7 @@
 #include "utils/pdlfs_strutil.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class FileNameTest {};
 
@@ -124,9 +124,9 @@ TEST(FileNameTest, Construction) {
   ASSERT_EQ(kTempFile, type);
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

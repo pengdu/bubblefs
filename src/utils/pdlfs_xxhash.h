@@ -41,7 +41,7 @@ XXH64       13.8 GB/s            1.9 GB/s
 XXH32        6.8 GB/s            6.0 GB/s
 */
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 /*
  * Can be used to fast map variable-length string identifiers to
@@ -62,7 +62,7 @@ extern uint32_t xxhash32(const void* data, size_t n, uint32_t seed);
 // NOTE: xxhash64(NULL, 0, 0) != 0
 extern uint64_t xxhash64(const void* data, size_t n, uint64_t seed);
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_XXHASH_H_

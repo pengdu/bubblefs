@@ -16,7 +16,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 using Slice = StringPiece;  
   
@@ -96,7 +96,7 @@ class Cache {
   void operator=(const Cache&);
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_CACHE_H_

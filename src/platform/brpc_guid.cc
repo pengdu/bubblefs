@@ -9,7 +9,7 @@
 #include "utils/stringprintf.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 namespace random {  
   
 std::string GenerateGUID() {
@@ -49,5 +49,5 @@ std::string RandomDataToGUIDString(const uint64_t bytes[2]) {
 }
 
 }  // namespace random
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

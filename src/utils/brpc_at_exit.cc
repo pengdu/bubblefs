@@ -10,7 +10,7 @@
 #include "platform/logging.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // Keep a stack of registered AtExitManagers.  We always operate on the most
 // recent, and we should never have more than one outside of testing (for a
@@ -73,5 +73,5 @@ AtExitManager::AtExitManager(bool shadow) : next_manager_(g_top_manager) {
   g_top_manager = this;
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

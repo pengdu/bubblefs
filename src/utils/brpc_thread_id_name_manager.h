@@ -17,7 +17,7 @@
 template <typename T> struct DefaultSingletonTraits;
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 class BASE_EXPORT ThreadIdNameManager {
  public:
@@ -64,7 +64,7 @@ class BASE_EXPORT ThreadIdNameManager {
   DISALLOW_COPY_AND_ASSIGN(ThreadIdNameManager);
 };
 
-}  // namespace brpc
-}  // namespce bubblefs
+}  // namespace mybrpc
+}  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_THREAD_ID_NAME_MANAGER_H_

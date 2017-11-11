@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Mon. Nov 7 14:47:36 CST 2011
-
 // brpc/src/butil/endpoint.h
 
 #ifndef BUBBLEFS_PLATFORM_BRPC_ENDPOINT_H_
@@ -29,7 +26,7 @@
 
 namespace bubblefs {
  
-namespace brpc {
+namespace mybrpc {
 
 // Type of an IP address
 typedef struct in_addr ip_t;
@@ -187,12 +184,12 @@ inline std::ostream& operator<<(std::ostream& os, const EndPointStr& ep_str) {
     return os << ep_str.c_str();
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 
 template <>
-struct hash<brpc::EndPoint> {
-    std::size_t operator()(const brpc::EndPoint& ep) const {
-        return HashPair(brpc::ip2int(ep.ip), ep.port);
+struct hash<mybrpc::EndPoint> {
+    std::size_t operator()(const mybrpc::EndPoint& ep) const {
+        return HashPair(mybrpc::ip2int(ep.ip), ep.port);
     }
 };
 

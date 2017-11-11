@@ -15,7 +15,7 @@
 #include "utils/pdlfs_random.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class ArenaTest {};
 
@@ -70,9 +70,9 @@ TEST(ArenaTest, Simple) {
   }
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

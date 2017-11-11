@@ -22,7 +22,7 @@
 #include "utils/bitcoin_prevector.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 static const unsigned int MAX_SIZE = 0x02000000;
 
@@ -956,7 +956,7 @@ size_t GetSerializeSize(const S& s, const T& t)
     return (CSizeComputer(s.GetType(), s.GetVersion()) << t).size();
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_SERIALIZE_H_

@@ -9,7 +9,7 @@
 #include "platform/bitcoin_endian.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 // Internal implementation code.
 namespace
@@ -294,5 +294,5 @@ CRIPEMD160& CRIPEMD160::Reset()
     return *this;
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

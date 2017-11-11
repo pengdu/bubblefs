@@ -12,16 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: 2010/05/29
-
 // brpc/src/butil/files/file_watcher.cpp
 
 #include "platform/brpc_file_watcher.h"
 #include <sys/stat.h>
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 static const FileWatcher::Timestamp NON_EXIST_TS =
     static_cast<FileWatcher::Timestamp>(-1);
@@ -92,5 +89,5 @@ void FileWatcher::restore(Timestamp timestamp) {
     _last_ts = timestamp;
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

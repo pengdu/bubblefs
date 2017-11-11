@@ -11,7 +11,7 @@
 #include "utils/brpc_at_exit.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 namespace internal {
 
 using namespace bubblefs::base;  
@@ -59,5 +59,5 @@ void CompleteLazyInstance(AtomicWord* state,
 }
 
 }  // namespace internal
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

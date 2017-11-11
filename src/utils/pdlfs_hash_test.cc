@@ -14,7 +14,7 @@
 #include "platform/pdlfs_testharness.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class HASH {};
 
@@ -58,9 +58,9 @@ TEST(HASH, SignedUnsignedIssue) {
 }
 /* clang-format on */
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

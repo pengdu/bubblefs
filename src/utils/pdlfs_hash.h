@@ -17,7 +17,7 @@
 #include <stdint.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 /*
  * Simple hash function used by many of our internal data structures
@@ -28,7 +28,7 @@ namespace pdlfs {
  */
 extern uint32_t Hash(const char* data, size_t n, uint32_t seed);
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_HASH_H_

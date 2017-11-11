@@ -19,7 +19,7 @@
 #endif
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 #if defined(_MSC_VER)
 // Define ssize_t inside of our namespace.
@@ -410,7 +410,7 @@ inline ssize_t SafeSPrintf(char (&buf)[N], const char* fmt) {
   return SafeSNPrintf(buf, N, fmt);
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_SAFE_SPRINTF_H_

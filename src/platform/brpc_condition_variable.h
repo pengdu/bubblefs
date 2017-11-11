@@ -19,7 +19,7 @@
 #endif
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // A convenient wrapper for an OS specific critical section.  
 class BASE_EXPORT Mutex {
@@ -242,7 +242,7 @@ class BASE_EXPORT ConditionVariable {
   DISALLOW_COPY_AND_ASSIGN(ConditionVariable);
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_BRPC_CONDITION_VARIABLE_H_

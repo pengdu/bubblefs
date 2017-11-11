@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Mon. Nov 7 14:47:36 CST 2011
-
 // brpc/src/butil/fd_guard.h
 
 #ifndef BUBBLEFS_UTILS_BRPC_FD_GUARD_H_
@@ -24,7 +21,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // RAII file descriptor.
 //
@@ -79,7 +76,7 @@ private:
     int _fd;
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_FD_GUARD_H_

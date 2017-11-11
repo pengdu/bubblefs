@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Sat Dec  3 13:11:32 CST 2016
-
 // brpc/src/butil/containers/pooled_map.h
 
 #ifndef BUBBLEFS_UTILS_BRPC_POOLED_MAP_H_
@@ -25,7 +22,7 @@
 #include "utils/brpc_single_threaded_pool.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 namespace details {
 template <class T1, size_t BLOCK_SIZE> class PooledAllocator;
 }
@@ -163,7 +160,7 @@ public:
     void destroy(pointer p) { p->T1::~T1(); };
 
 private:
-    brpc::SingleThreadedPool<sizeof(T1), BLOCK_SIZE, 1> _pool;
+    SingleThreadedPool<sizeof(T1), BLOCK_SIZE, 1> _pool;
 };
 
 // Return true if b could be used to deallocate storage obtained through a
@@ -176,7 +173,7 @@ bool operator!=(const PooledAllocator<T1, S1>& a, const PooledAllocator<T2, S2>&
 { return !(a == b); };
 
 } // namespace details
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs
 
 // Since this allocator can't be exchanged(check impl. of operator==) nor

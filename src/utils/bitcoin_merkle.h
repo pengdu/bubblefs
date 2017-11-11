@@ -12,7 +12,7 @@
 #include "utils/bitcoin_uint256.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 uint256 ComputeMerkleRoot(const std::vector<uint256>& leaves, bool* mutated = nullptr);
 std::vector<uint256> ComputeMerkleBranch(const std::vector<uint256>& leaves, uint32_t position);
@@ -37,7 +37,7 @@ uint256 ComputeMerkleRootFromBranch(const uint256& leaf, const std::vector<uint2
  */
 //std::vector<uint256> BlockMerkleBranch(const CBlock& block, uint32_t position);
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_MERKLE_H_

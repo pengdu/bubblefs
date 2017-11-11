@@ -8,7 +8,7 @@
 #define BUBBLEFS_UTILS_BITCOIN_REVERSELOCK_H_
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 /**
  * An RAII-style reverse lock. Unlocks on construction and locks on destruction.
@@ -36,7 +36,7 @@ private:
     Lock templock;
 };
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_REVERSELOCK_H_

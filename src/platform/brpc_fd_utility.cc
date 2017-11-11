@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Mon. Nov 7 14:47:36 CST 2011
-
 // brpc/src/butil/fd_utility.cpp
               
 #include "platform/brpc_endpoint.h"
@@ -25,7 +22,7 @@
 #include <fcntl.h>  
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 int make_non_blocking(int fd) {
     const int flags = fcntl(fd, F_GETFL, 0);
@@ -58,5 +55,5 @@ int make_no_delay(int socket) {
     return setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs

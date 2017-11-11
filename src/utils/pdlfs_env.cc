@@ -30,7 +30,7 @@
 #endif
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 static const size_t kBufferSize = 8192;
 
@@ -261,5 +261,5 @@ Logger* Logger::Default() {
 #endif
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Mon Sep 22 22:23:13 CST 2014
-
 // brpc/src/butil/containers/doubly_buffered_data.h
 
 #ifndef BUBBLEFS_UTILS_BRPC_DOUBLY_BUFFERED_DATA_H_
@@ -31,7 +28,7 @@
 #include "utils/scoped_lock.h"
 
 namespace bubblefs{
-namespace brpc {
+namespace mybrpc {
 
 // This data structure makes Read() almost lock-free by making Modify()
 // *much* slower. It's very suitable for implementing LoadBalancers which
@@ -409,7 +406,7 @@ size_t DoublyBufferedData<T, TLS>::ModifyWithForeground(
     return Modify(c);
 }
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_DOUBLY_BUFFERED_DATA_H_

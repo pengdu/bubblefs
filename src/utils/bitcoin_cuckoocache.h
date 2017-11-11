@@ -27,7 +27,7 @@
  */
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 namespace CuckooCache
 {
 /** bit_packed_atomic_flags implements a container for garbage collection flags
@@ -482,7 +482,7 @@ public:
 };
 
 } // namespace CuckooCache
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_CUCKOOCACHE_H_

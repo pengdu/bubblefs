@@ -19,7 +19,7 @@
 #endif
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 SynchronizableFile::~SynchronizableFile() {}
 
@@ -107,5 +107,5 @@ Status WholeFileBufferedRandomAccessFile::Load() {
   return status;
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

@@ -16,7 +16,7 @@
 #include "utils/pdlfs_coding.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 // Conversions between numeric keys/values and the types expected by Cache.
 static std::string EncodeKey(int k) {
@@ -181,9 +181,9 @@ TEST(CacheTest, NewId) {
   ASSERT_NE(a, b);
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

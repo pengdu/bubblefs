@@ -12,7 +12,7 @@
 #include "utils/bitcoin_serialize.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 /** A writer stream (for serialization) that computes a 256-bit hash. */
 class CHashWriter
@@ -92,7 +92,7 @@ uint256 SerializeHash(const T& obj, int nType=SER_GETHASH, int nVersion=10000000
     return ss.GetHash();
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_HASH_SERIALIZE_H_

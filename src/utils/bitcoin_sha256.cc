@@ -11,7 +11,7 @@
 #include "platform/bitcoin_endian.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 #if defined(__x86_64__) || defined(__amd64__)
 #if defined(USE_ASM)
@@ -252,5 +252,5 @@ CSHA256& CSHA256::Reset()
     return *this;
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

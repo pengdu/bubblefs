@@ -19,7 +19,7 @@
 #include <time.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
   
 void PosixLogger::Logv(const char* file, int line, int severity, int verbose,
                        const char* format, va_list ap) {
@@ -89,5 +89,5 @@ void PosixLogger::Logv(const char* file, int line, int severity, int verbose,
   }
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

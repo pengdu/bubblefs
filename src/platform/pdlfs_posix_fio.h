@@ -16,7 +16,7 @@
 #include "utils/pdlfs_fio.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class PosixFio : public Fio {
  public:
@@ -54,7 +54,7 @@ class PosixFio : public Fio {
   std::string root_;
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PDLFS_POSIX_FIO_H_

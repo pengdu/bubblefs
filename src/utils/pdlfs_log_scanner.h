@@ -14,8 +14,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace pdlfs {
-  
+namespace mypdlfs {
 namespace log {
 
 class Scanner {
@@ -65,5 +64,5 @@ class Scanner {
 };
 
 }  // namespace log
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs

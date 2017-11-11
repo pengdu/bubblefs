@@ -24,7 +24,7 @@
 // * In addition we support variable length "varint" encoding
 // * Strings are encoded prefixed by their length in varint format
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 using Slice = StringPiece;  
   
@@ -126,7 +126,7 @@ inline const char* GetVarint32Ptr(const char* p, const char* limit,
   return GetVarint32PtrFallback(p, limit, value);
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_CODING_H_

@@ -23,7 +23,7 @@
 // so that each new metadata server could get an equal load compared to other
 // metadata servers.
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 using Slice = StringPiece;
   
@@ -146,7 +146,7 @@ class DirIndex {
   DirIndex(const DirIndex&);
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_GIGAPLUS_H_

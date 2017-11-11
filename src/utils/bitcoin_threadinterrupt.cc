@@ -8,7 +8,7 @@
 #include "utils/bitcoin_threadinterrupt.h"
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
 
 CThreadInterrupt::operator bool() const
 {
@@ -45,5 +45,5 @@ bool CThreadInterrupt::sleep_for(std::chrono::minutes rel_time)
     return sleep_for(std::chrono::duration_cast<std::chrono::milliseconds>(rel_time));
 }
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs

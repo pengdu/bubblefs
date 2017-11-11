@@ -24,7 +24,7 @@
 #include <unistd.h>
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 inline Status IOError(const Slice& err_context, int err_number) {
   if (err_number != ENOENT && err_number != EEXIST) {
@@ -346,7 +346,7 @@ class PosixEmptyFile : public RandomAccessFile {
   }
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PDLFS_POSIX_ENV_H_

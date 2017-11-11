@@ -19,7 +19,7 @@
 #include "utils/pdlfs_mdb.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class DirTable;
 
@@ -144,7 +144,7 @@ class DirTable {
   DirTable(const DirTable&);
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_DCNTL_H_

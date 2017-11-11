@@ -14,7 +14,7 @@
 #include "utils/pdlfs_coding.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 class Coding {};
 
@@ -196,9 +196,9 @@ TEST(Coding, Strings) {
   ASSERT_EQ("", input.ToString());
 }
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
-  return ::bubblefs::pdlfs::test::RunAllTests(&argc, &argv);
+  return ::bubblefs::mypdlfs::test::RunAllTests(&argc, &argv);
 }

@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Thu Dec 31 13:35:39 CST 2015
-
 // brpc/src/butil/fast_rand.h
 
 #ifndef BUBBLEFS_UTILS_BRPC_FAST_RAND_H_
@@ -23,7 +20,7 @@
 #include <stdint.h>
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // Generate random values fast without global contentions.
 // All functions in this header are thread-safe.
@@ -66,7 +63,7 @@ template <typename T> T fast_rand_in(T min, T max) {
 // Cost: ~15ns
 double fast_rand_double();
 
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_FAST_RAND_H_

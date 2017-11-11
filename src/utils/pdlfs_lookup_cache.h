@@ -18,7 +18,7 @@
 #include "platform/pdlfs_port.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 // An LRU-cache of pathname lookup leases.
 class LookupCache {
@@ -49,7 +49,7 @@ class LookupCache {
   LookupCache(const LookupCache&);
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PDLFS_LOOKUP_CACHE_H_

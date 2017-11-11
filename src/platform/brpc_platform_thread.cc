@@ -22,7 +22,7 @@
 #endif
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
   
 void InitThreading();
 void InitOnThread();
@@ -315,5 +315,5 @@ size_t GetDefaultThreadStackSize(const pthread_attr_t& attributes) {
 #endif
 }
 
-} // namespace brpc
+} // namespace mybrpc
 } // namespace bubblefs

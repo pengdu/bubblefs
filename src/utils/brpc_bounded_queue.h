@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Ge,Jun (gejun@baidu.com)
-// Date: Sat Aug 18 12:42:16 CST 2012
-
 // A thread-unsafe bounded queue(ring buffer). It can push/pop from both
 // sides and is more handy than thread-safe queues in single thread. Use
 // boost::lockfree::spsc_queue or boost::lockfree::queue in multi-threaded
@@ -29,7 +26,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace brpc {
+namespace mybrpc {
 
 // [Create a on-stack small queue]
 //   char storage[64];
@@ -301,7 +298,7 @@ private:
     void* _items;
 };
 
-}  // namespace brpc
+}  // namespace mybrpc
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_BOUNDED_QUEUE_H_

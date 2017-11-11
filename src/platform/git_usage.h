@@ -96,7 +96,7 @@ a message, pass a strbuf that is explicitly ignored:
 */
 
 namespace bubblefs {
-namespace git {
+namespace mygit {
  
 extern void set_panic_routine(NORETURN_PTR void (*routine)(const char *err, va_list params));
 extern void set_error_routine(void (*routine)(const char *err, va_list params));
@@ -116,7 +116,7 @@ extern int error_errno(const char *err, ...) __attribute__((format (printf, 1, 2
 extern void warning(const char *err, ...) __attribute__((format (printf, 1, 2)));
 extern void warning_errno(const char *err, ...) __attribute__((format (printf, 1, 2)));
 
-}  // namespace git
+}  // namespace mygit
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_GIT_USAGE_H_

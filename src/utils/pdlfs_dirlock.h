@@ -15,7 +15,7 @@
 #include "utils/pdlfs_dcntl.h"
 
 namespace bubblefs {
-namespace pdlfs {
+namespace mypdlfs {
 
 // Helper class that locks a directory on construction and
 // unlocks the directory when the destructor of the DirLock
@@ -34,7 +34,7 @@ class DirLock {
   Dir* dir_;
 };
 
-}  // namespace pdlfs
+}  // namespace mypdlfs
 }  // namespace bubblefs
 
 #endif // BUBLEFS_UTILS_PDLFS_DIRLOCK_H_

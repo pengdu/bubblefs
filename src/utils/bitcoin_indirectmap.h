@@ -10,7 +10,7 @@
 #include <map>
 
 namespace bubblefs {
-namespace bitcoin {
+namespace mybitcoin {
   
 template <class T>
 struct DereferencingComparator { bool operator()(const T a, const T b) const { return *a < *b; } };
@@ -60,7 +60,7 @@ public:
     const_iterator cend() const     { return m.cend(); }
 };
 
-} // namespace bitcoin
+} // namespace mybitcoin
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_BITCOIN_INDIRECTMAP_H_

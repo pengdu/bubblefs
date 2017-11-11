@@ -41,7 +41,7 @@
 #include "gflags/gflags.h"
 
 namespace bubblefs {
-namespace caffe2 {
+namespace mycaffe2 {
   
 /**
  * Sets the usage message when a commandline tool is called with "--help".
@@ -67,7 +67,7 @@ bool ParseCaffeCommandLineFlags(int* pargc, char*** pargv);
  */
 bool CommandLineFlagsHasBeenParsed();
 
-}  // namespace caffe2
+}  // namespace mycaffe2
 }  // namespace bubblefs
 
 // gflags before 2.0 uses namespace google and after 2.1 uses namespace gflags.
@@ -76,38 +76,38 @@ bool CommandLineFlagsHasBeenParsed();
 namespace gflags = google;
 #endif  // GFLAGS_GFLAGS_H_
 
-#define CAFFE2_GFLAGS_DEF_WRAPPER(type, name, default_value, help_str)         \
+#define MYCAFFE2_GFLAGS_DEF_WRAPPER(type, name, default_value, help_str)         \
   DEFINE_##type(name, default_value, help_str);                                \
   namespace bubblefs {                                                         \
-  namespace caffe2 {                                                           \
+  namespace mycaffe2 {                                                           \
     using ::FLAGS_##name;                                                      \
   }                                                                            \
-  } // namespace bubblefs.caffe2
+  } // namespace bubblefs.mycaffe2
 
-#define CAFFE2_DEFINE_int(name, default_value, help_str)                       \
-  CAFFE2_GFLAGS_DEF_WRAPPER(int32, name, default_value, help_str)
-#define CAFFE2_DEFINE_int64(name, default_value, help_str)                     \
-  CAFFE2_GFLAGS_DEF_WRAPPER(int64, name, default_value, help_str)              
-#define CAFFE2_DEFINE_double(name, default_value, help_str)                    \
-  CAFFE2_GFLAGS_DEF_WRAPPER(double, name, default_value, help_str)
-#define CAFFE2_DEFINE_bool(name, default_value, help_str)                      \
-  CAFFE2_GFLAGS_DEF_WRAPPER(bool, name, default_value, help_str)
-#define CAFFE2_DEFINE_string(name, default_value, help_str) \
-  CAFFE2_GFLAGS_DEF_WRAPPER(string, name, default_value, help_str)
+#define MYCAFFE2_DEFINE_int(name, default_value, help_str)                       \
+  MYCAFFE2_GFLAGS_DEF_WRAPPER(int32, name, default_value, help_str)
+#define MYCAFFE2_DEFINE_int64(name, default_value, help_str)                     \
+  MYCAFFE2_GFLAGS_DEF_WRAPPER(int64, name, default_value, help_str)              
+#define MYCAFFE2_DEFINE_double(name, default_value, help_str)                    \
+  MYCAFFE2_GFLAGS_DEF_WRAPPER(double, name, default_value, help_str)
+#define MYCAFFE2_DEFINE_bool(name, default_value, help_str)                      \
+  MYCAFFE2_GFLAGS_DEF_WRAPPER(bool, name, default_value, help_str)
+#define MYCAFFE2_DEFINE_string(name, default_value, help_str) \
+  MYCAFFE2_GFLAGS_DEF_WRAPPER(string, name, default_value, help_str)
 
 // DECLARE_typed_var should be used in header files and in the global namespace.
-#define CAFFE2_GFLAGS_DECLARE_WRAPPER(type, name)                              \
+#define MYCAFFE2_GFLAGS_DECLARE_WRAPPER(type, name)                              \
   DECLARE_##type(name);                                                        \
   namespace bubblefs {                                                         \
-  namespace caffe2 {                                                           \
+  namespace mycaffe2 {                                                           \
     using ::FLAGS_##name;                                                      \
   }                                                                            \
-  } // namespace bubblefs.caffe2
+  } // namespace bubblefs.mycaffe2
 
-#define CAFFE2_DECLARE_int(name) CAFFE2_GFLAGS_DECLARE_WRAPPER(int32, name)
-#define CAFFE2_DECLARE_int64(name) CAFFE2_GFLAGS_DECLARE_WRAPPER(int64, name)
-#define CAFFE2_DECLARE_double(name) CAFFE2_GFLAGS_DECLARE_WRAPPER(double, name)
-#define CAFFE2_DECLARE_bool(name) CAFFE2_GFLAGS_DECLARE_WRAPPER(bool, name)
-#define CAFFE2_DECLARE_string(name) CAFFE2_GFLAGS_DECLARE_WRAPPER(string, name)
+#define MYCAFFE2_DECLARE_int(name) MYCAFFE2_GFLAGS_DECLARE_WRAPPER(int32, name)
+#define MYCAFFE2_DECLARE_int64(name) MYCAFFE2_GFLAGS_DECLARE_WRAPPER(int64, name)
+#define MYCAFFE2_DECLARE_double(name) MYCAFFE2_GFLAGS_DECLARE_WRAPPER(double, name)
+#define MYCAFFE2_DECLARE_bool(name) MYCAFFE2_GFLAGS_DECLARE_WRAPPER(bool, name)
+#define MYCAFFE2_DECLARE_string(name) MYCAFFE2_GFLAGS_DECLARE_WRAPPER(string, name)
 
 #endif  // BUBBLEFS_PLATFORM_CAFFE2_FLAGS_H_
