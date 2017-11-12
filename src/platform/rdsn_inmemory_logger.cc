@@ -10,7 +10,7 @@
 #include "platform/rdsn_inmemory_logger.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 InMemoryLogger::InMemoryLogger()
     : m_head(new Page)
@@ -51,5 +51,5 @@ InMemoryLogger::Event* InMemoryLogger::allocateEventFromNewPage()
     return &page->events[0];
 }
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs

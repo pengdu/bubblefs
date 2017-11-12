@@ -34,31 +34,31 @@
 #include <string>
 
 // an invalid enum value must be provided so as to be the default value when parsing failed
-#define RDSN_ENUM_BEGIN2(type, name, invalid_value)                                                     \
-    static inline ::bubblefs::rdsn::enum_helper_xxx<type> *RegisterEnu_##name()                               \
+#define MYRDSN_ENUM_BEGIN2(type, name, invalid_value)                                                     \
+    static inline ::bubblefs::myrdsn::enum_helper_xxx<type> *RegisterEnu_##name()                               \
     {                                                                                              \
-        ::bubblefs::rdsn::enum_helper_xxx<type> *helper = new ::bubblefs::rdsn::enum_helper_xxx<type>(invalid_value);
+        ::bubblefs::myrdsn::enum_helper_xxx<type> *helper = new ::bubblefs::myrdsn::enum_helper_xxx<type>(invalid_value);
 
-#define RDSN_ENUM_BEGIN(type, invalid_value) RDSN_ENUM_BEGIN2(type, type, invalid_value)
+#define MYRDSN_ENUM_BEGIN(type, invalid_value) MYRDSN_ENUM_BEGIN2(type, type, invalid_value)
 
-#define RDSN_ENUM_REG(e) helper->register_enum(#e, e);
+#define MYRDSN_ENUM_REG(e) helper->register_enum(#e, e);
 
-#define RDSN_ENUM_END2(type, name)                                                                      \
+#define MYRDSN_ENUM_END2(type, name)                                                                      \
     return helper;                                                                                 \
     }                                                                                              \
     inline type enum_from_string(const char *s, type invalid_value)                                \
     {                                                                                              \
-        return ::bubblefs::rdsn::enum_helper_xxx<type>::instance(RegisterEnu_##name).parse(s);                \
+        return ::bubblefs::myrdsn::enum_helper_xxx<type>::instance(RegisterEnu_##name).parse(s);                \
     }                                                                                              \
     inline const char *enum_to_string(type val)                                                    \
     {                                                                                              \
-        return ::bubblefs::rdsn::enum_helper_xxx<type>::instance(RegisterEnu_##name).to_string(val);          \
+        return ::bubblefs::myrdsn::enum_helper_xxx<type>::instance(RegisterEnu_##name).to_string(val);          \
     }
 
-#define RDSN_ENUM_END(type) RDSN_ENUM_END2(type, type)
+#define MYRDSN_ENUM_END(type) MYRDSN_ENUM_END2(type, type)
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 
 template <typename TEnum>
 class enum_helper_xxx
@@ -118,7 +118,7 @@ private:
 template <typename TEnum>
 enum_helper_xxx<TEnum> *enum_helper_xxx<TEnum>::_instance = 0;
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_ENUM_HELPER_H_

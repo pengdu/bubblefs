@@ -16,7 +16,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 using Slice = StringPiece;  
   
@@ -116,7 +116,7 @@ class Buffer {
   size_t write_index_;
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_BUFFER_H_

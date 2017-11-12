@@ -13,7 +13,7 @@
 #include <string.h>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class BaseSocket {
  public:
@@ -51,7 +51,7 @@ class BaseSocket {
   void operator=(const BaseSocket&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_BASE_SOCKET_H_

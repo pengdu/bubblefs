@@ -54,7 +54,7 @@
 #include <sstream>
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 /* Glob-style pattern matching. */
 int stringmatchlen(const char *pattern, int patternLen,
@@ -639,5 +639,5 @@ std::string StringTrim(const std::string& ori, const std::string& charlist) {
   return ori.substr(pos, rpos - pos + 1);
 }
 
-}  // namespace slash
+}  // namespace myslash
 }  // namespace bubblefs

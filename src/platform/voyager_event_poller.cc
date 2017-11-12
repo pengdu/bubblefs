@@ -7,7 +7,7 @@
 #include "platform/voyager_event_poller.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 EventPoller::EventPoller(EventLoop* ev) : eventloop_(ev) {}
 
@@ -24,5 +24,5 @@ bool EventPoller::HasDispatch(Dispatch* dispatch) const {
   return false;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

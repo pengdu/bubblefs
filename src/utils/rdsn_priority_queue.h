@@ -32,7 +32,7 @@
 #include "utils/rdsn_synchronize.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 namespace utils {
 
 template <typename T, int priority_count, typename TQueue = std::queue<T>>
@@ -137,7 +137,7 @@ private:
 };
 
 } // namespace utils
-} // namespace rdsn  
+} // namespace myrdsn  
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_PRIORITY_QUEUE_H_

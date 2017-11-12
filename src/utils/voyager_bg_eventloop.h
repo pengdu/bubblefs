@@ -14,7 +14,7 @@
 #include "utils/voyager_eventloop.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class BGEventLoop {
  public:
@@ -37,7 +37,7 @@ class BGEventLoop {
   void operator=(const BGEventLoop&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_BG_EVENTLOOP_H_

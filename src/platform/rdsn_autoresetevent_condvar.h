@@ -13,7 +13,7 @@
 #include <mutex>
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 //---------------------------------------------------------
 // AutoResetEventCondVar
@@ -59,7 +59,7 @@ public:
     }
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_RDSN_AUTORESETEVENT_CONDVAR_H_

@@ -13,9 +13,10 @@
 #include <random>
 #include "platform/rdsn_sema.h"
 #include "platform/rdsn_bitfield.h"
+#include "utils/status.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 //---------------------------------------------------------
 // NonRecursiveRWLock
@@ -23,11 +24,11 @@ namespace rdsn {
 class NonRecursiveRWLock
 {
 private:
-    BEGIN_BITFIELD_TYPE(Status, uint32_t)
-        ADD_BITFIELD_MEMBER(readers, 0, 10)
-        ADD_BITFIELD_MEMBER(waitToRead, 10, 10)
-        ADD_BITFIELD_MEMBER(writers, 20, 10)
-    END_BITFIELD_TYPE()
+    MYRDSN_BEGIN_BITFIELD_TYPE(Status, uint32_t)
+        MYRDSN_ADD_BITFIELD_MEMBER(readers, 0, 10)
+        MYRDSN_ADD_BITFIELD_MEMBER(waitToRead, 10, 10)
+        MYRDSN_ADD_BITFIELD_MEMBER(writers, 20, 10)
+    MYRDSN_END_BITFIELD_TYPE()
 
     std::atomic<uint32_t> m_status;
     DefaultSemaphoreType m_readSema;
@@ -158,7 +159,7 @@ public:
     }
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_RDSN_RWLOCK_H_

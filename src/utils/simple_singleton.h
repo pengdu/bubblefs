@@ -10,7 +10,7 @@
 #include <pthread.h>
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 template <typename T>
 class Singleton {
@@ -38,7 +38,7 @@ pthread_once_t Singleton<T>::once_ = PTHREAD_ONCE_INIT;
 template <typename T>
 T* Singleton<T>::instance_ = NULL;
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SIMPLE_SINGLETON_H_

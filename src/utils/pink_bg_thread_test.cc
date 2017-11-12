@@ -11,8 +11,6 @@
 #include "utils/pink_bg_thread.h"
 #include "platform/mutexlock.h"
 
-using namespace std;
-
 namespace bubblefs {
 
 static port::Mutex print_lock;
@@ -40,7 +38,7 @@ struct TimerItem {
 };
 
 int main() {
-  pink::BGThread t, t2(5);
+  mypink::BGThread t, t2(5);
   t.StartThread();
   t2.StartThread();
   int qsize = 0, pqsize = 0;

@@ -14,7 +14,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 using Slice = StringPiece;  
 
@@ -549,5 +549,5 @@ char Json::SkipWhiteSpace(JsonReader* reader) {
 }
 
 }  // namespace json
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

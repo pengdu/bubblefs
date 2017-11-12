@@ -12,7 +12,7 @@
 #include "utils/slash_base_conf.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 class BaseConfTest {
  public:
@@ -79,11 +79,11 @@ TEST(BaseConfTest, WriteReadConf) {
   ASSERT_EQ(values[2], "three");
 }
 
-} // namespace slash
+} // namespace myslash
 } // namespace bubblefs
 
 /*
 int main() {
-  return ::bubblefs::slash::test::RunAllTests();
+  return ::bubblefs::myslash::test::RunAllTests();
 }
 */

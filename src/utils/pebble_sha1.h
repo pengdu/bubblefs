@@ -57,7 +57,7 @@
 #include <string.h>
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 class SHA1
 {
@@ -89,7 +89,7 @@ class SHA1
         inline unsigned CircularShift(int bits, unsigned word);
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PEBBLE_SHA1_H_

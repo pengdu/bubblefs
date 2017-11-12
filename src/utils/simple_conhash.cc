@@ -10,7 +10,7 @@
 #include "utils/murmurhash3.h"
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 void ConHash::AddNode(const ConHashNode& node) {
   assert(node.replicas > 0);
@@ -53,5 +53,5 @@ uint32_t ConHash::Hash(const std::string& identify, int i) {
   return out;
 }
 
-} // namespace simple
+} // namespace mysimple
 } // namespace bubblefs

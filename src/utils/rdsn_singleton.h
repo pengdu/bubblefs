@@ -51,7 +51,7 @@
 
 namespace bubblefs {
   
-namespace android {
+namespace myandroid {
   
 // Singleton<TYPE> may be used in multiple libraries, only one of which should
 // define the static member variables using BUBBLEFS_SINGLETON_STATIC_INSTANCE.
@@ -98,16 +98,16 @@ private:
  * for some unknown reason using the default ctor doesn't emit the variable!
  */
 
-#define BUBBLEFS_SINGLETON_STATIC_INSTANCE(TYPE)                 \
+#define MYANDROID_SINGLETON_STATIC_INSTANCE(TYPE)                 \
     template<> ::bubblefs::port::Mutex  \
-        (::bubblefs::android::Singleton< TYPE >::sLock)();  \
-    template<> TYPE* ::bubblefs::android::Singleton< TYPE >::sInstance(0);  /* NOLINT */ \
-    template class ::bubblefs::android::Singleton< TYPE >;
+        (::bubblefs::myandroid::Singleton< TYPE >::sLock)();  \
+    template<> TYPE* ::bubblefs::myandroid::Singleton< TYPE >::sInstance(0);  /* NOLINT */ \
+    template class ::bubblefs::myandroid::Singleton< TYPE >;
 
-}  // namespace android
+}  // namespace myandroid
 
 namespace rdsn {
-namespace utils {
+namespace myrdsn {
   
 template <typename T>
 class Singleton
@@ -158,7 +158,7 @@ template <typename T>
 std::atomic<int> Singleton<T>::_l(0);
   
 } // namespace utils
-} // namespace rdsn
+} // namespace myrdsn
 
 } // namespace bubblefs
 

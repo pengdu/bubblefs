@@ -9,7 +9,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 class Test {
  public:
@@ -29,14 +29,14 @@ void ThreadFunc(void* arg) {
   printf("name=%s\n", ThreadLocalSingleton<Test>::get()->name().c_str());
 }
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 int main() {
   std::string s1("thread 1");
   std::string s2("thread 2");
-  bubblefs::simple::Thread t1(bubblefs::simple::ThreadFunc, &s1);
-  bubblefs::simple::Thread t2(bubblefs::simple::ThreadFunc, &s2);
+  bubblefs::mysimple::Thread t1(bubblefs::mysimple::ThreadFunc, &s1);
+  bubblefs::mysimple::Thread t2(bubblefs::mysimple::ThreadFunc, &s2);
   t1.Start();
   t2.Start();
   t1.Join();

@@ -6,10 +6,13 @@
 
 #include "platform/slash_testharness.h"
 #include "platform/voyager_logging.h"
+#include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
+using Slice = StringPiece;  
+  
 class LoggingTest {};
 
 TEST(LoggingTest, Simple) {
@@ -45,9 +48,9 @@ TEST(LoggingTest, Simple) {
   VOYAGER_CHECK_NOTNULL(q);
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 int main(int argc, char** argv) { 
-  return bubblefs::slash::test::RunAllTests(); 
+  return bubblefs::myslash::test::RunAllTests(); 
 }

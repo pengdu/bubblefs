@@ -19,7 +19,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 class Base64
 {
@@ -42,7 +42,7 @@ private:
     inline static int Base64DecodeLen(int n);
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PEBBLE_BASE64_H_

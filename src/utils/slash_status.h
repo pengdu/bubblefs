@@ -7,7 +7,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 using Slice = strings::Slice;  
   
@@ -139,7 +139,7 @@ inline void Status::operator=(const Status& s) {
   }
 }
 
-} // namespace slash
+} // namespace myslash
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SLASH_STATUS_H_

@@ -15,7 +15,7 @@
 #include "utils/peloton_circular_buffer.h"
 
 namespace bubblefs {
-namespace peloton {
+namespace mypeloton {
 
 // Push a new item
 template <typename ValueType>
@@ -44,5 +44,5 @@ void CircularBuffer<ValueType>::Clear() { circular_buffer_.clear(); }
 // Explicit template instantiation
 template class CircularBuffer<double>;
 
-}  // namespace peloton
+}  // namespace mypeloton
 }  // namespace bubblefs

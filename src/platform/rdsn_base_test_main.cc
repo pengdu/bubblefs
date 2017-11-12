@@ -9,7 +9,7 @@
 #include <iostream>
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 
 //---------------------------------------------------------
 // List of tests
@@ -38,7 +38,7 @@ TestInfo g_tests[] =
     ADD_TEST(testDiningPhilosophers)
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 //---------------------------------------------------------
@@ -48,7 +48,7 @@ int main()
 {
     bool allTestsPassed = true;
 
-    for (const bubblefs::rdsn::TestInfo& test : bubblefs::rdsn::g_tests)
+    for (const bubblefs::myrdsn::TestInfo& test : bubblefs::myrdsn::g_tests)
     {
         std::cout << "Running " << test.name << "...";
 

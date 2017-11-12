@@ -12,7 +12,7 @@
 #include "utils/voyager_dispatch.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class NewTimer {
  public:
@@ -44,7 +44,7 @@ class NewTimer {
   void operator=(const NewTimer&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_NEWTIMER_H_

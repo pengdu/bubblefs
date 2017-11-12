@@ -18,7 +18,7 @@
 #include "utils/pink_server_thread.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
   
 // Usage like:
 // class MyConn: public PbConn {
@@ -141,7 +141,7 @@ class HolyThread: public ServerThread {
   void Cleanup();
 };  // class HolyThread
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_HOLY_THREAD_H_

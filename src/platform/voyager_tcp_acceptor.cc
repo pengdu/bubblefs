@@ -14,7 +14,7 @@
 #include "utils/voyager_eventloop.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 TcpAcceptor::TcpAcceptor(EventLoop* eventloop, const SockAddr& addr,
                          int backlog, bool reuseport)
@@ -66,5 +66,5 @@ void TcpAcceptor::Accept() {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

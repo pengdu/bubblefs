@@ -16,7 +16,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 // Usage like:
 // class MyHTTPConn : public pink::SimpleHTTPConn {
@@ -103,7 +103,7 @@ class RedisConn: public PinkConn {
   uint32_t wbuf_pos_;
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_REDIS_CONN_H_

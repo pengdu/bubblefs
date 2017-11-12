@@ -13,7 +13,7 @@
 #include "platform/rdsn_sema.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 //---------------------------------------------------------
 // AutoResetEvent
@@ -60,7 +60,7 @@ public:
     }
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // __CPP11OM_AUTO_RESET_EVENT_H__

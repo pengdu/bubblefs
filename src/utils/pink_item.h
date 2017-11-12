@@ -12,7 +12,7 @@
 #include "utils/pink_define.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class PinkItem {
  public:
@@ -34,7 +34,7 @@ class PinkItem {
   std::string ip_port_;
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_ITEM_H_

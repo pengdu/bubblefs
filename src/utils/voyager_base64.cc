@@ -8,7 +8,7 @@
 #include "utils/modp_b64.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 bool Base64Encode(const std::string& input, std::string* output) {
   std::string x(modp_b64_encode_len(input.size()), '\0');
@@ -34,5 +34,5 @@ bool Base64Decode(const std::string& input, std::string* output) {
   return true;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

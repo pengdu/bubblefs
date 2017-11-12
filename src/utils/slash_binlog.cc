@@ -19,7 +19,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 class Version;
 class BinlogReader;
@@ -723,5 +723,5 @@ Status BinlogReaderImpl::ReadRecord(std::string &scratch) {
   return s;
 }
 
-} // namespace slash
+} // namespace myslash
 } // namespace bubblefs

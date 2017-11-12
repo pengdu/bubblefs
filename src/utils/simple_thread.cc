@@ -12,7 +12,7 @@
 #include <string.h>
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 struct ThreadData {
   void (*user_function)(void*);
@@ -63,5 +63,5 @@ void Thread::PthreadCall(const char* label, int result) {
   }
 }
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs

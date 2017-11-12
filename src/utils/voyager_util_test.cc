@@ -11,7 +11,7 @@
 #include "utils/voyager_timeops.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 using Slice = StringPiece;  
   
@@ -117,9 +117,9 @@ TEST(TimeopsTest, TestTimeops) {
   VOYAGER_LOG(INFO) << timeops::FormatTimestamp(timeops::NowMicros());
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 int main(int argc, char** argv) { 
-  return bubblefs::slash::test::RunAllTests();
+  return bubblefs::myslash::test::RunAllTests();
 }

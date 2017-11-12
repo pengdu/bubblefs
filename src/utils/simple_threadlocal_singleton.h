@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 template <typename T>
 class ThreadLocalSingleton {
@@ -51,7 +51,7 @@ __thread T* ThreadLocalSingleton<T>::value_ = NULL;
 template <typename T>
 typename ThreadLocalSingleton<T>::Helper ThreadLocalSingleton<T>::helper_;
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SIMPLE_THREADLOCAL_SINGLETON_H_

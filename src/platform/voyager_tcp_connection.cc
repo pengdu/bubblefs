@@ -13,7 +13,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 TcpConnection::TcpConnection(const std::string& name, EventLoop* ev, int fd,
                              const SockAddr& local, const SockAddr& peer)
@@ -280,5 +280,5 @@ std::string TcpConnection::StateToString() const {
   return result;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

@@ -13,7 +13,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 class BinlogReader;
   
@@ -80,7 +80,7 @@ class BinlogReader {
   void operator=(const BinlogReader&);
 };
 
-} // namespace slash
+} // namespace myslash
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SLASH_BINLOG_H_

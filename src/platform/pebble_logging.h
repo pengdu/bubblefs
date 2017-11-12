@@ -19,7 +19,7 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 /// @brief 日志输出设备，支持标准输出、文件
 /// @note 输出到网络通过tlog支持
@@ -145,16 +145,16 @@ private:
     int64_t         m_current_time;
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
-#define PEBBLE_PLOG_FATAL(fmt, ...) do { if (::bubblefs::pebble::LOG_PRIORITY_FATAL >= pebble::Log::Instance().GetPriority()) { pebble::Log::Instance().Write(::bubblefs::pebble::LOG_PRIORITY_FATAL, __FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__); } } while (0)
-#define PEBBLE_PLOG_ERROR(fmt, ...) do { if (::bubblefs::pebble::LOG_PRIORITY_ERROR >= pebble::Log::Instance().GetPriority()) { pebble::Log::Instance().Write(::bubblefs::pebble::LOG_PRIORITY_ERROR, __FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__); } } while (0)
-#define PEBBLE_PLOG_INFO(fmt,  ...) do { if (::bubblefs::pebble::LOG_PRIORITY_INFO  >= pebble::Log::Instance().GetPriority()) { pebble::Log::Instance().Write(::bubblefs::pebble::LOG_PRIORITY_INFO,  __FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__); } } while (0)
-#define PEBBLE_PLOG_DEBUG(fmt, ...) do { if (::bubblefs::pebble::LOG_PRIORITY_DEBUG >= pebble::Log::Instance().GetPriority()) { pebble::Log::Instance().Write(::bubblefs::pebble::LOG_PRIORITY_DEBUG, __FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__); } } while (0)
-#define PEBBLE_PLOG_TRACE(fmt, ...) do { if (::bubblefs::pebble::LOG_PRIORITY_TRACE >= pebble::Log::Instance().GetPriority()) { pebble::Log::Instance().Write(::bubblefs::pebble::LOG_PRIORITY_TRACE, __FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__); } } while (0)
+#define PEBBLE_PLOG_FATAL(fmt, ...) do { if (::bubblefs::mypebble::LOG_PRIORITY_FATAL >= mypebble::Log::Instance().GetPriority()) { ::bubblefs::mypebble::Log::Instance().Write(::bubblefs::mypebble::LOG_PRIORITY_FATAL, __FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__); } } while (0)
+#define PEBBLE_PLOG_ERROR(fmt, ...) do { if (::bubblefs::mypebble::LOG_PRIORITY_ERROR >= mypebble::Log::Instance().GetPriority()) { ::bubblefs::mypebble::Log::Instance().Write(::bubblefs::mypebble::LOG_PRIORITY_ERROR, __FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__); } } while (0)
+#define PEBBLE_PLOG_INFO(fmt,  ...) do { if (::bubblefs::mypebble::LOG_PRIORITY_INFO  >= mypebble::Log::Instance().GetPriority()) { ::bubblefs::mypebble::Log::Instance().Write(::bubblefs::mypebble::LOG_PRIORITY_INFO,  __FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__); } } while (0)
+#define PEBBLE_PLOG_DEBUG(fmt, ...) do { if (::bubblefs::mypebble::LOG_PRIORITY_DEBUG >= mypebble::Log::Instance().GetPriority()) { ::bubblefs::mypebble::Log::Instance().Write(::bubblefs::mypebble::LOG_PRIORITY_DEBUG, __FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__); } } while (0)
+#define PEBBLE_PLOG_TRACE(fmt, ...) do { if (::bubblefs::mypebble::LOG_PRIORITY_TRACE >= mypebble::Log::Instance().GetPriority()) { ::bubblefs::mypebble::Log::Instance().Write(::bubblefs::mypebble::LOG_PRIORITY_TRACE, __FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__); } } while (0)
 
-#define PEBBLE_PLOG_STAT(data) ::bubblefs::pebble::Log::Instance().Write(data);
+#define PEBBLE_PLOG_STAT(data) ::bubblefs::mypebble::Log::Instance().Write(data);
 
 // 条件日志
 #define PEBBLE_PLOG_IF_FATAL(condition, fmt, ...) if (condition) { PEBBLE_PLOG_FATAL(fmt, ##__VA_ARGS__); }
@@ -180,28 +180,28 @@ private:
 
 #define PEBBLE_PLOG_N_EVERY_SECOND(num, pri, fmt, args...) \
     do { \
-        if (pri >= ::bubblefs::pebble::Log::Instance().GetPriority()) { \
+        if (pri >= ::bubblefs::mypebble::Log::Instance().GetPriority()) { \
             static int32_t PEBBLE_LOG_CNT_VAR = 0; static int64_t PEBBLE_START_TIME_VAR = 0; \
-            if (PEBBLE_START_TIME_VAR == 0) { PEBBLE_START_TIME_VAR = ::bubblefs::pebble::Log::Instance().GetCurrentTime(); } \
-            int64_t PEBBLE_NOW_TIME_VAR = ::bubblefs::pebble::Log::Instance().GetCurrentTime(); \
+            if (PEBBLE_START_TIME_VAR == 0) { PEBBLE_START_TIME_VAR = ::bubblefs::mypebble::Log::Instance().GetCurrentTime(); } \
+            int64_t PEBBLE_NOW_TIME_VAR = ::bubblefs::mypebble::Log::Instance().GetCurrentTime(); \
             if (PEBBLE_START_TIME_VAR + 1000000 < NOW_TIME_VAR) { \
                 PEBBLE_START_TIME_VAR = NOW_TIME_VAR; \
                 if (PEBBLE_LOG_CNT_VAR > num) { \
-                    ::bubblefs::pebble::Log::Instance().Write(pri, __FILE__, __LINE__, __FUNCTION__, \
+                    ::bubblefs::mypebble::Log::Instance().Write(pri, __FILE__, __LINE__, __FUNCTION__, \
                         "discard %d logs last second", PEBBLE_LOG_CNT_VAR - num); \
                 } \
                 PEBBLE_LOG_CNT_VAR = 0; \
             } \
             if (++PEBBLE_LOG_CNT_VAR <= num) { \
-                ::bubblefs::pebble::Log::Instance().Write(pri, __FILE__, __LINE__, __FUNCTION__, fmt, ##args); \
+                ::bubblefs::mypebble::Log::Instance().Write(pri, __FILE__, __LINE__, __FUNCTION__, fmt, ##args); \
             } \
         } \
     } while (0)
 
-#define PEBBLE_PLOG_FATAL_N_EVERY_SECOND(num, fmt, args...) PEBBLE_PLOG_N_EVERY_SECOND(num, ::bubblefs::pebble::LOG_PRIORITY_FATAL, fmt, ##args)
-#define PEBBLE_PLOG_ERROR_N_EVERY_SECOND(num, fmt, args...) PEBBLE_PLOG_N_EVERY_SECOND(num, ::bubblefs::pebble::LOG_PRIORITY_ERROR, fmt, ##args)
-#define PEBBLE_PLOG_INFO_N_EVERY_SECOND(num, fmt,  args...) PEBBLE_PLOG_N_EVERY_SECOND(num, ::bubblefs::pebble::LOG_PRIORITY_INFO, fmt, ##args)
-#define PEBBLE_PLOG_DEBUG_N_EVERY_SECOND(num, fmt, args...) PEBBLE_PLOG_N_EVERY_SECOND(num, ::bubblefs::pebble::LOG_PRIORITY_DEBUG, fmt, ##args)
-#define PEBBLE_PLOG_TRACE_N_EVERY_SECOND(num, fmt, args...) PEBBLE_PLOG_N_EVERY_SECOND(num, ::bubblefs::pebble::LOG_PRIORITY_TRACE, fmt, ##args)
+#define PEBBLE_PLOG_FATAL_N_EVERY_SECOND(num, fmt, args...) PEBBLE_PLOG_N_EVERY_SECOND(num, ::bubblefs::mypebble::LOG_PRIORITY_FATAL, fmt, ##args)
+#define PEBBLE_PLOG_ERROR_N_EVERY_SECOND(num, fmt, args...) PEBBLE_PLOG_N_EVERY_SECOND(num, ::bubblefs::mypebble::LOG_PRIORITY_ERROR, fmt, ##args)
+#define PEBBLE_PLOG_INFO_N_EVERY_SECOND(num, fmt,  args...) PEBBLE_PLOG_N_EVERY_SECOND(num, ::bubblefs::mypebble::LOG_PRIORITY_INFO, fmt, ##args)
+#define PEBBLE_PLOG_DEBUG_N_EVERY_SECOND(num, fmt, args...) PEBBLE_PLOG_N_EVERY_SECOND(num, ::bubblefs::mypebble::LOG_PRIORITY_DEBUG, fmt, ##args)
+#define PEBBLE_PLOG_TRACE_N_EVERY_SECOND(num, fmt, args...) PEBBLE_PLOG_N_EVERY_SECOND(num, ::bubblefs::mypebble::LOG_PRIORITY_TRACE, fmt, ##args)
 
 #endif // BUBBLEFS_PLATFORM_PEBBLE_LOG_H_

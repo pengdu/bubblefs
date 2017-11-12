@@ -13,7 +13,7 @@
 #include "platform/rdsn_rwlock.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 
 //---------------------------------------------------------
 // RWLockTester
@@ -160,5 +160,5 @@ bool testRWLockSimple()
     return tester.test(4, 2000000);
 }
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs

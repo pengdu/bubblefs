@@ -29,7 +29,7 @@
 #include "utils/mozilla_utils.h"
 
 namespace bubblefs {
-namespace mozilla {
+namespace mymozilla {
 
 Bignum::Bignum()
     : bigits_(bigits_buffer_, kBigitCapacity), used_digits_(0), exponent_(0) {
@@ -760,5 +760,5 @@ void Bignum::SubtractTimes(const Bignum& other, int factor) {
   Clamp();
 }
 
-}  // namespace mozilla
+}  // namespace mymozilla
 }  // namespace bubblefs

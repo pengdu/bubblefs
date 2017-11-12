@@ -14,7 +14,7 @@
 #include "platform/rdsn_inmemory_logger.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 
 //---------------------------------------------------------
 // DiningPhilosopherTester
@@ -106,5 +106,5 @@ bool testDiningPhilosophers()
     return tester.test(5, 10000);
 }
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs

@@ -8,7 +8,7 @@
 #include <assert.h>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 BGEventLoop::BGEventLoop(PollType type) : type_(type), eventloop_(nullptr) {}
 
@@ -44,5 +44,5 @@ void BGEventLoop::ThreadFunc() {
   eventloop_ = nullptr;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

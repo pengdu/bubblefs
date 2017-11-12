@@ -11,7 +11,7 @@
 #include "utils/slash_binlog.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 class BinlogTest {
  public:
@@ -92,5 +92,5 @@ TEST(BinlogTest, ProducerStatusOp) {
   ASSERT_EQ(pro_offset, 8790);
 }
 
-} // namespace slash
+} // namespace myslash
 } // namespace bubblefs 

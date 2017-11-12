@@ -14,7 +14,7 @@
 #include <utility>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class EventLoop;
 
@@ -103,7 +103,7 @@ class Dispatch {
   void operator=(const Dispatch&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_DISPATCH_H_

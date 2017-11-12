@@ -18,7 +18,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 using Slice = StringPiece;  
   
@@ -103,7 +103,7 @@ inline const char* GetVarint32Ptr(const char* p,
   return GetVarint32PtrFallback(p, limit, value);
 }
 
-}  // namespace slash
+}  // namespace myslash
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SLASH_CODING_H_

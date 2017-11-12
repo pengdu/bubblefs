@@ -18,7 +18,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class HTTPConn;
 
@@ -209,7 +209,7 @@ class HTTPConn: public PinkConn {
   std::shared_ptr<HTTPHandles> handles_;
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_HTTP_CONN_H_

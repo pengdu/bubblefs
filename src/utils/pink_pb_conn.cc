@@ -11,7 +11,7 @@
 #include "utils/pink_define.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 PbConn::PbConn(const int fd, const std::string &ip_port, ServerThread *thread) :
   PinkConn(fd, ip_port, thread),
@@ -39,7 +39,7 @@ ReadStatus PbConn::GetRequest() {
     switch (connStatus_) {
       case kHeader: {
         ssize_t nread = read(
-            fd(), rbuf_ + rbuf_len_, PINK_COMMAND_HEADER_LENGTH - rbuf_len_);
+            fd(), rbuf_ + rbuf_len_, MYPINK_COMMAND_HEADER_LENGTH - rbuf_len_);
         if (nread == -1) {
           if (errno == EAGAIN) {
             return kReadHalf;
@@ -50,13 +50,13 @@ ReadStatus PbConn::GetRequest() {
           return kReadClose;
         } else {
           rbuf_len_ += nread;
-          if (rbuf_len_ - cur_pos_ == PINK_COMMAND_HEADER_LENGTH) {
+          if (rbuf_len_ - cur_pos_ == MYPINK_COMMAND_HEADER_LENGTH) {
             uint32_t integer = 0;
             memcpy(reinterpret_cast<char*>(&integer),
                    rbuf_ + cur_pos_, sizeof(uint32_t));
             header_len_ = ntohl(integer);
             remain_packet_len_ = header_len_;
-            cur_pos_ += PINK_COMMAND_HEADER_LENGTH;
+            cur_pos_ += MYPINK_COMMAND_HEADER_LENGTH;
             connStatus_ = kPacket;
             continue;
           }
@@ -64,7 +64,7 @@ ReadStatus PbConn::GetRequest() {
         }
       }
       case kPacket: {
-        if (header_len_ >= kProtoMaxMessage - PINK_COMMAND_HEADER_LENGTH) {
+        if (header_len_ >= kProtoMaxMessage - MYPINK_COMMAND_HEADER_LENGTH) {
           return kFullError;
         } else {
           // read msg body
@@ -150,10 +150,10 @@ Status PbConn::BuildObuf() {
   uint32_t u;
   u = htonl(wbuf_len_);
   memcpy(wbuf_, &u, sizeof(uint32_t));
-  wbuf_len_ += PINK_COMMAND_HEADER_LENGTH;
+  wbuf_len_ += MYPINK_COMMAND_HEADER_LENGTH;
 
   return Status::OK();
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

@@ -21,7 +21,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 int GetIpByIf(const char* if_name, std::string* ip);
 
@@ -228,7 +228,7 @@ private:
     std::list<NetAddr>  m_free_sockets;
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PEBBLE_NET_UTIL_H_

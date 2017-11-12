@@ -11,7 +11,7 @@
 #include "platform/voyager_logging.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 std::atomic<int> TcpServer::conn_id_(0);
 
@@ -70,5 +70,5 @@ void TcpServer::NewConnection(int fd, const struct sockaddr_storage& sa) {
   ev->RunInLoop([ptr]() { ptr->StartWorking(); });
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

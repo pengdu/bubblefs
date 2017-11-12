@@ -11,7 +11,7 @@
 #include "utils/mozilla_attributes.h"
 
 namespace bubblefs {
-namespace mozilla {
+namespace mymozilla {
 
 /**
  * EnumSet<T> is a set of values defined by an enumeration. It is implemented
@@ -206,7 +206,7 @@ private:
   uint32_t mBitField;
 };
 
-} // namespace mozilla
+} // namespace mymozilla
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_MOZILLA_ENUMSET_H_

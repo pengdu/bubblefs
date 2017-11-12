@@ -13,11 +13,11 @@
 #include <map>
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
-#define PINK_MAX_CLIENTS 10240
-#define PINK_MAX_MESSAGE 1024
-#define PINK_NAME_LEN 1024
+constexpr int MYPINK_MAX_CLIENTS = 10240;
+constexpr int MYPINK_MAX_MESSAGE = 1024;
+constexpr int MYPINK_NAME_LEN = 1024;
 
 constexpr int kProtoMaxMessage = 64 * 1024 * 1024;  // 64MB
 constexpr int kCommandHeaderLength = 4;
@@ -25,8 +25,8 @@ constexpr int kCommandHeaderLength = 4;
 /*
  * The pb head and code length
  */
-#define PINK_COMMAND_HEADER_LENGTH 4
-#define PINK_COMMAND_CODE_LENGTH 4
+constexpr int MYPINK_COMMAND_HEADER_LENGTH = 4;
+constexpr int MYPINK_COMMAND_CODE_LENGTH = 4;
 
 /*
  * The socket block type
@@ -87,15 +87,15 @@ constexpr int REDIS_REQ_MULTIBULK = 2;
 /*
  * define the pink cron interval (ms)
  */
-#define PINK_CRON_INTERVAL 1000
+constexpr int MYPINK_CRON_INTERVAL = 1000;
 
 /*
  * define the macro in PINK_conf
  */
 
-#define PINK_WORD_SIZE 1024
-#define PINK_LINE_SIZE 1024
-#define PINK_CONF_MAX_NUM 1024
+constexpr int MYPINK_WORD_SIZE = 1024;
+constexpr int MYPINK_LINE_SIZE = 1024;
+constexpr int MYPINK_CONF_MAX_NUM = 1024;
 
 /*
  * define common character
@@ -104,7 +104,7 @@ constexpr int REDIS_REQ_MULTIBULK = 2;
 //#define COLON ':'
 //#define SHARP '#'
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // PINK_INCLUDE_PINK_DEFINE_H_

@@ -32,10 +32,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifndef ASSERT
-#define ASSERT(x) assert(x)
-#endif
+#include "platform/macros.h"
 
 #ifndef UNIMPLEMENTED
 #define UNIMPLEMENTED() abort()
@@ -50,39 +47,8 @@
 //      write UINT64_2PART_C(0x12345678,90123456);
 #define UINT64_2PART_C(a, b) (((static_cast<uint64_t>(a) << 32) + 0x##b##u))
 
-
-// The expression ARRAY_SIZE(a) is a compile-time constant of type
-// size_t which represents the number of elements of the given
-// array. You should only use ARRAY_SIZE on statically allocated
-// arrays.
-#ifndef ARRAY_SIZE
-#define ARRAY_SIZE(a)                                   \
-  ((sizeof(a) / sizeof(*(a))) /                         \
-  static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
-#endif
-
-// A macro to disallow the evil copy constructor and operator= functions
-// This should be used in the private: declarations for a class
-#ifndef DISALLOW_COPY_AND_ASSIGN
-#define DISALLOW_COPY_AND_ASSIGN(TypeName)      \
-  TypeName(const TypeName&);                    \
-  void operator=(const TypeName&)
-#endif
-
-// A macro to disallow all the implicit constructors, namely the
-// default constructor, copy constructor and operator= functions.
-//
-// This should be used in the private: declarations for a class
-// that wants to prevent anyone from instantiating it. This is
-// especially useful for classes containing only static methods.
-#ifndef DISALLOW_IMPLICIT_CONSTRUCTORS
-#define DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
-  TypeName();                                    \
-  DISALLOW_COPY_AND_ASSIGN(TypeName)
-#endif
-
 namespace bubblefs {
-namespace mozilla {
+namespace mymozilla {
 
 static const int kCharSize = sizeof(char);
 
@@ -263,7 +229,7 @@ inline Dest BitCast(Source* source) {
   return BitCast<Dest>(reinterpret_cast<uintptr_t>(source));
 }
 
-}  // namespace mozilla
+}  // namespace mymozilla
 }  // namesapce bubblefs
 
 #endif  // BUBBLEFS_UTILS_MOZILLA_UTILS_H_ 

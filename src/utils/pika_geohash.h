@@ -39,15 +39,15 @@
 #include <stdint.h>
 
 namespace bubblefs {
-namespace pika {
+namespace mypika {
 
-#define GEO_STEP_MAX 18 /* 26*2 = 52 bits. */
+#define MYPIKA_GEO_STEP_MAX 18 /* 26*2 = 52 bits. */
 
 /* Limits from EPSG:900913 / EPSG:3785 / OSGEO:41001 */
-#define GEO_LAT_MIN -85.05112878
-#define GEO_LAT_MAX 85.05112878
-#define GEO_LONG_MIN -180
-#define GEO_LONG_MAX 180
+#define MYPIKA_GEO_LAT_MIN -85.05112878
+#define MYPIKA_GEO_LAT_MAX 85.05112878
+#define MYPIKA_GEO_LONG_MIN -180
+#define MYPIKA_GEO_LONG_MAX 180
 
 typedef enum {
     GEOHASH_NORTH = 0,
@@ -109,7 +109,7 @@ int geohashDecodeToLongLatWGS84(const GeoHashBits hash, double *xy);
 int geohashDecodeToLongLatMercator(const GeoHashBits hash, double *xy);
 void geohashNeighbors(const GeoHashBits *hash, GeoHashNeighbors *neighbors);
 
-} // namespace pika
+} // namespace mypika
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PIKA_GEOHASH_H_

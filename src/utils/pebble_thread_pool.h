@@ -31,7 +31,7 @@
 #include "utils/pebble_thread.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 class ThreadPool {
 public:
@@ -121,7 +121,7 @@ private:
     int32_t  m_mode;
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PEBBLE_THREAD_POOL_H_

@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 namespace bubblefs {
-namespace peloton {
+namespace mypeloton {
 
 // Install a signal handler to print callstack on the following signals:
 // SIGILL SIGSEGV SIGBUS SIGABRT
@@ -40,7 +40,7 @@ void PrintStackTrace(FILE *out = stderr,
 
 void SignalHandler(int signum);
 
-}  // namespace peloton
+}  // namespace mypeloton
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PELOTON_STACK_TRACE_H_

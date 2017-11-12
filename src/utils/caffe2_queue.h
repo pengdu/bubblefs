@@ -26,7 +26,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace caffe2 {
+namespace mycaffe2 {
   
 // This queue reduces the chance to allocate memory for deque
 template <typename T, int N>
@@ -162,7 +162,7 @@ class SimpleQueue {
   SimpleQueue(const SimpleQueue& /*src*/) {}
 };
 
-}  // namespace caffe2
+}  // namespace mycaffe2
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_CAFFE2_QUEUE_H_

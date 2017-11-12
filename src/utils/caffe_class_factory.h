@@ -46,7 +46,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace caffe {
+namespace mycaffe {
 
 #define CaffeTypeRegistry(TypeName) \
 class TypeName##Registry { \
@@ -99,7 +99,7 @@ class TypeName##Registerer { \
   } \
 }; \
 
-}  // namespace caffe
+}  // namespace mycaffe
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_CAFFE_CLASS_FACTORY_H_

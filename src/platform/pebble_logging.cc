@@ -32,7 +32,7 @@
 #include "utils/pebble_string_utility.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 #define ARRAYSIZE(a) (sizeof(a) / sizeof(*(a)))
 
@@ -378,5 +378,5 @@ int64_t Log::GetCurrentTime() {
     return TimeUtility::GetCurrentUS();
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

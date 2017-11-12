@@ -11,10 +11,10 @@
 #include "utils/voyager_eventloop.h"
 #include "utils/stringpiece.h"
 
-bubblefs::voyager::TcpClient* g_client = nullptr;
+bubblefs::myvoyager::TcpClient* g_client = nullptr;
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 void OnMessage(const TcpConnectionPtr& p, Buffer* buf) {
   std::string s = buf->RetrieveAllAsString();
@@ -34,18 +34,18 @@ void OnMessage(const TcpConnectionPtr& p, Buffer* buf) {
 
 void DeleteClient() { delete g_client; }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 using namespace std::placeholders;
 
 int main(int argc, char** argv) {
-  bubblefs::voyager::EventLoop ev;
-  bubblefs::voyager::SockAddr serveraddr("127.0.0.1", 5666);
-  g_client = new bubblefs::voyager::TcpClient(&ev, serveraddr);
-  g_client->SetMessageCallback(std::bind(bubblefs::voyager::OnMessage, _1, _2));
+  bubblefs::myvoyager::EventLoop ev;
+  bubblefs::myvoyager::SockAddr serveraddr("127.0.0.1", 5666);
+  g_client = new bubblefs::myvoyager::TcpClient(&ev, serveraddr);
+  g_client->SetMessageCallback(std::bind(bubblefs::myvoyager::OnMessage, _1, _2));
   g_client->Connect();
-  ev.RunAfter(15000000, []() { bubblefs::voyager::DeleteClient(); });
+  ev.RunAfter(15000000, []() { bubblefs::myvoyager::DeleteClient(); });
   ev.RunAfter(20000000, [&ev]() { ev.Exit(); });
   ev.Loop();
   return 0;

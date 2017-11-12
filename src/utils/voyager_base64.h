@@ -10,7 +10,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 // Encodes the input string in base64. Returns true if successful and false
 // otherwise. The output string is only modified if successful.
@@ -20,7 +20,7 @@ bool Base64Encode(const std::string& input, std::string* output);
 // otherwise. The output string is only modified if successful.
 bool Base64Decode(const std::string& input, std::string* output);
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_BASE64_H_

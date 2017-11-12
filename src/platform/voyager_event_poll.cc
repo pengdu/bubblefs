@@ -12,7 +12,7 @@
 #include "utils/voyager_dispatch.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 EventPoll::EventPoll(EventLoop* ev) : EventPoller(ev) {}
 
@@ -92,5 +92,5 @@ void EventPoll::UpdateDispatch(Dispatch* dispatch) {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

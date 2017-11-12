@@ -7,7 +7,7 @@
 #include "utils/saber_crc32c.h"
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 namespace crc {
 
 static const uint32_t table[256] = {
@@ -66,5 +66,5 @@ uint32_t crc32(uint32_t crc, const char *buf, size_t size) {
 }
 
 }  // namespace crc
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs

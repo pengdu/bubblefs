@@ -11,7 +11,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 namespace timeops {
 
 static const uint64_t kSecondsPerMinute = 60;
@@ -26,7 +26,7 @@ extern uint64_t NowMicros();
 extern std::string FormatTimestamp(uint64_t micros);
 
 }  // namespace timeops
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_TIMEOPS_H_

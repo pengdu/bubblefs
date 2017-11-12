@@ -33,7 +33,7 @@
 #include "platform/pebble_net_util.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 int GetIpByIf(const char* if_name, std::string* ip)
 {
@@ -1064,5 +1064,5 @@ int32_t NetIO::RawClose(SocketInfo* socket_info)
     return ret;
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

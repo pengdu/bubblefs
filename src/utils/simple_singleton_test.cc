@@ -8,7 +8,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 class SingletonTest {
  public:
@@ -36,6 +36,6 @@ void Test() {
 }  // namespace bubblefs
 
 int main() {
-  bubblefs::simple::Test();
+  bubblefs::mysimple::Test();
   return 0;
 }

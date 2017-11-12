@@ -20,7 +20,7 @@
 #include "platform/pebble_time_utility.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 int64_t TimeUtility::GetCurrentMS() {
     int64_t timestamp = GetCurrentUS();
@@ -96,5 +96,5 @@ time_t  TimeUtility::GetTimeDiff(const std::string &t1, const std::string &t2) {
     return time;
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

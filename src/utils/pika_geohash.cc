@@ -34,7 +34,7 @@
 #include "utils/pika_geohash.h"
 
 namespace bubblefs {
-namespace pika {
+namespace mypika {
   
 #define HASHISZERO(r) (!(r).bits && !(r).step)
 #define RANGEISZERO(r) (!(r).max && !(r).min)
@@ -122,10 +122,10 @@ static inline uint64_t deinterleave64(uint64_t interleaved) {
 void geohashGetCoordRange(GeoHashRange *long_range, GeoHashRange *lat_range) {
     /* These are constraints from EPSG:900913 / EPSG:3785 / OSGEO:41001 */
     /* We can't geocode at the north/south pole. */
-    long_range->max = GEO_LONG_MAX;
-    long_range->min = GEO_LONG_MIN;
-    lat_range->max = GEO_LAT_MAX;
-    lat_range->min = GEO_LAT_MIN;
+    long_range->max = MYPIKA_GEO_LONG_MAX;
+    long_range->min = MYPIKA_GEO_LONG_MIN;
+    lat_range->max = MYPIKA_GEO_LAT_MAX;
+    lat_range->min = MYPIKA_GEO_LAT_MIN;
 }
 
 int geohashEncode(const GeoHashRange *long_range, const GeoHashRange *lat_range,
@@ -304,5 +304,5 @@ void geohashNeighbors(const GeoHashBits *hash, GeoHashNeighbors *neighbors) {
     geohash_move_y(&neighbors->south_west, -1);
 }
 
-} // namespace pika
+} // namespace mypika
 } // namespace bubblefs

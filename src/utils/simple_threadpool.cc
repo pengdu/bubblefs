@@ -9,7 +9,7 @@
 #include "utils/simple_thread.h"
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 ThreadPool::ThreadPool(int size)
     : mutex_(), cond_(&mutex_), started_(false), size_(size) {}
@@ -80,5 +80,5 @@ void ThreadPool::ThreadFunc(void* obj) {
   }
 }
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs

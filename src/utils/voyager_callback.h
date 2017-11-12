@@ -11,7 +11,7 @@
 #include <memory>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class Buffer;
 class TcpConnection;
@@ -27,7 +27,7 @@ typedef std::function<void (const TcpConnectionPtr&,
                             size_t)> HighWaterMarkCallback;
 typedef std::function<void ()> TimerProcCallback;
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_CALLBACK_H_

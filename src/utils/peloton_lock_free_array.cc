@@ -17,7 +17,7 @@
 #include <memory>
 
 namespace bubblefs {
-namespace peloton {
+namespace mypeloton {
 
 template <typename ValueType>
 LockFreeArray<ValueType>::LockFreeArray(){
@@ -130,5 +130,5 @@ bool LockFreeArray<ValueType>::Contains(const ValueType& value) {
   return exists;
 }
 
-}  // namespace peloton
+}  // namespace mypeloton
 }  // namespace bubblefs

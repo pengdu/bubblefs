@@ -14,7 +14,7 @@
 #include "platform/voyager_logging.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 SockAddr::SockAddr(uint16_t port) { GetAddrInfo("127.0.0.1", port); }
 
@@ -156,5 +156,5 @@ int SockAddr::FormatAddress(const char* ip, uint16_t port, char* buf,
   return snprintf(buf, len, strchr(ip, ':') ? "[%s]:%u" : "%s:%u", ip, port);
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

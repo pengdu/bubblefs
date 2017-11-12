@@ -16,7 +16,7 @@
 #include "utils/voyager_eventloop.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class TcpConnector;
 
@@ -79,7 +79,7 @@ class TcpClient {
   void operator=(const TcpClient&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_TCP_CLIENT_H_

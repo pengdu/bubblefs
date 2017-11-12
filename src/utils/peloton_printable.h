@@ -19,7 +19,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace peloton {
+namespace mypeloton {
 //===--------------------------------------------------------------------===//
 // Printable Object
 //===--------------------------------------------------------------------===//
@@ -35,7 +35,7 @@ class Printable {
   friend std::ostream &operator<<(std::ostream &os, const Printable &printable);
 };
 
-}  // namespace peloton
+}  // namespace mypeloton
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PELOTON_PRINTABLE_H

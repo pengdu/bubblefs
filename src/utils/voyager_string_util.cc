@@ -11,7 +11,7 @@
 #include <iterator>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 void StripString(std::string* s, const char* remove, char replacewith) {
   const char* str_start = s->c_str();
@@ -231,5 +231,5 @@ void StringAppendF(std::string* dst, const char* format, ...) {
   va_end(ap);
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

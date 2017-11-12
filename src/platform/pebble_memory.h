@@ -18,14 +18,14 @@
 #define BUBBLEFS_PLATFORM_PEBBLE_MEMORY_H_
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 /// @brief 获取进程当前内存使用情况
 /// @param vm_size_kb 输出参数，虚存，单位为K
 /// @param rss_size_kb 输出参数，物理内存，单位为K
 int GetCurMemoryUsage(int* vm_size_kb, int* rss_size_kb);
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PEBBLE_MEMORY_H_

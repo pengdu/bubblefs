@@ -17,7 +17,7 @@
 #include "platform/rdsn_autoresetevent.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 //---------------------------------------------------------
 // AutoResetEventTester
@@ -111,9 +111,9 @@ bool testAutoResetEvent()
 
 std::string makeTimeString(const std::chrono::time_point<std::chrono::system_clock>& point)
 {
-    std::time_t time = std::chrono::system_clock::to_time_t(point);
+    time_t time = std::chrono::system_clock::to_time_t(point);
     char str[256];
-    if (strftime(str, sizeof(str), "%c", std::localtime(&time)))
+    if (strftime(str, sizeof(str), "%c", localtime(&time)))
         return str;
     else
         return "???";
@@ -255,11 +255,11 @@ public:
     }
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 int main()
 {
-    bubblefs::rdsn::LostWakeupTester tester;
+    bubblefs::myrdsn::LostWakeupTester tester;
     return tester.test() ? 0 : 1;
 }

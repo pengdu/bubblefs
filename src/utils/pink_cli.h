@@ -12,7 +12,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 // Usage like:
 // PinkCli* cli = NewPbCli();
@@ -71,7 +71,7 @@ extern PinkCli *NewRedisCli();
 
 void DeletePinkCli(PinkCli** cli);
   
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_CLI_H_

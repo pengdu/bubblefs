@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 // Usage like:
 // std::string str;
@@ -42,7 +42,7 @@ typedef std::vector<std::string> RedisCmdArgsType;
 extern int SerializeRedisCommand(std::string *cmd, const char *format, ...);
 extern int SerializeRedisCommand(RedisCmdArgsType argv, std::string *cmd);
 
-} // namespace pin
+} // namespace mypink
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_REDIS_CLI_H_

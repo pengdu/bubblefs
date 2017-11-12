@@ -10,7 +10,7 @@
 #include "platform/rdsn_benaphore.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 //---------------------------------------------------------
 // BenaphoreTester
@@ -57,5 +57,5 @@ bool testBenaphore()
     return tester.test(4, 400000);
 }
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs

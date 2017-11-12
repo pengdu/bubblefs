@@ -18,7 +18,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 namespace test {
 
 namespace {
@@ -67,5 +67,5 @@ int RunAllTests() {
 }
 
 }  // namespace test
-}  // namespace slash
+}  // namespace myslash
 }  // namespace bubblefs

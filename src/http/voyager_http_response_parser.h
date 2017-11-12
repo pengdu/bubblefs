@@ -10,7 +10,7 @@
 #include "http/voyager_http_response.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class Buffer;
 
@@ -39,7 +39,7 @@ class HttpResponseParser {
   void operator=(const HttpResponseParser&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_HTTP_VOYAGER_HTTP_RESPONSE_PARSER_H_

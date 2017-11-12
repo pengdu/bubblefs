@@ -13,7 +13,7 @@
 #include "utils/pink_thread.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 PinkConn::PinkConn(const int fd,
                    const std::string &ip_port,
@@ -62,5 +62,5 @@ bool PinkConn::CreateSSL(SSL_CTX* ssl_ctx) {
 }
 #endif
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

@@ -19,7 +19,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 class Uncopyable {
 protected:
@@ -31,7 +31,7 @@ private:
     const Uncopyable& operator=(const Uncopyable&);
 }; // class Uncopyable
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PEBBLE_UNCOPYABLE_H_

@@ -13,7 +13,7 @@
 #include "utils/slash_string.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 #define SPACE ' '
 #define COLON ':'
@@ -317,5 +317,5 @@ void BaseConf::WriteSampleConf() const {
   return;
 }
 
-}  // namespace slash
+}  // namespace myslash
 }  // namespace bubblefs 

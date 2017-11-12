@@ -10,7 +10,7 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 
 template <typename T>
 class SequenceNumber {
@@ -34,7 +34,7 @@ class SequenceNumber {
   void operator=(const SequenceNumber&);
 };
 
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SABER_SEQUENCE_NUMBER_H_

@@ -21,7 +21,7 @@
 #endif
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class EventLoop;
 
@@ -84,7 +84,7 @@ class TcpConnector : public std::enable_shared_from_this<TcpConnector> {
   void operator=(const TcpConnector&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_TCP_CONNECTOR_H_

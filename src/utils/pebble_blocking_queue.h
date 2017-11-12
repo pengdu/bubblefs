@@ -22,7 +22,7 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 template <typename T>
 class BlockingQueue
@@ -382,7 +382,7 @@ private:
     port::ConditionVariable m_cond_not_full;
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PEBBLE_BLOCKING_QUEUE_H_

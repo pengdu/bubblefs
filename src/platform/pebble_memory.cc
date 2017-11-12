@@ -21,7 +21,7 @@
 #include "platform/pebble_memory.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 int GetCurMemoryUsage(int* vm_size_kb, int* rss_size_kb) {
     if (!vm_size_kb || !rss_size_kb) {
@@ -58,5 +58,5 @@ int GetCurMemoryUsage(int* vm_size_kb, int* rss_size_kb) {
     return ret;
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

@@ -17,7 +17,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class Request {
  public:
@@ -127,7 +127,7 @@ class SimpleHTTPConn: public PinkConn {
   Response* response_;
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_SIMPLE_HTTP_CONN_H_

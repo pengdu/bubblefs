@@ -9,7 +9,7 @@
 #include <utility>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 Schedule::Schedule(EventLoop* ev, int size)
     : baseloop_(ev), size_(size), started_(false) {}
@@ -51,5 +51,5 @@ EventLoop* Schedule::AssignLoop() {
   return loop;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

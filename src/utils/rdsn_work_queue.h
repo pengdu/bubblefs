@@ -34,7 +34,7 @@
 #include "utils/rdsn_slist.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 
 template <typename T>
 class work_queue
@@ -102,7 +102,7 @@ protected:
     slist<T> _hdr;
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_WORK_QUEUE_H_

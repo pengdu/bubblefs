@@ -12,7 +12,7 @@
 #include "utils/voyager_dispatch.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 static const int kNew = -1;
 static const int kAdded = 1;
@@ -102,5 +102,5 @@ void EventEpoll::EpollCTL(int op, Dispatch* dispatch) {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

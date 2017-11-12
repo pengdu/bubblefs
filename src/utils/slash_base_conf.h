@@ -14,7 +14,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 class BaseConf {
  public:
@@ -54,7 +54,7 @@ class BaseConf {
   void operator=(const BaseConf&);
 };
 
-}  // namespace slash
+}  // namespace myslash
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SLASH_BASE_CONF_H_

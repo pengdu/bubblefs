@@ -17,7 +17,7 @@
 #include "google/protobuf/message.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class PbConn: public PinkConn {
  public:
@@ -75,7 +75,7 @@ class PbConn: public PinkConn {
   virtual Status BuildObuf();
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_PB_CONN_H_

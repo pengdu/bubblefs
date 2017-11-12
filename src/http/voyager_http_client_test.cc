@@ -9,7 +9,7 @@
 #include "utils/voyager_eventloop.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 void HandleResponse(HttpResponsePtr response, const Status& s) {
   if (s.ok()) {
@@ -19,7 +19,7 @@ void HandleResponse(HttpResponsePtr response, const Status& s) {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 int main(int argc, char** argv) {
@@ -31,18 +31,18 @@ int main(int argc, char** argv) {
   const char* host = argv[1];
   const char* path = argv[2];
 
-  bubblefs::voyager::EventLoop ev;
+  bubblefs::myvoyager::EventLoop ev;
 
-  bubblefs::voyager::HttpClient client(&ev);
-  bubblefs::voyager::HttpRequestPtr request(new bubblefs::voyager::HttpRequest());
-  request->SetMethod(bubblefs::voyager::HttpRequest::kGet);
+  bubblefs::myvoyager::HttpClient client(&ev);
+  bubblefs::myvoyager::HttpRequestPtr request(new bubblefs::myvoyager::HttpRequest());
+  request->SetMethod(bubblefs::myvoyager::HttpRequest::kGet);
   request->SetPath(path);
-  request->SetVersion(bubblefs::voyager::HttpMessage::kHttp11);
+  request->SetVersion(bubblefs::myvoyager::HttpMessage::kHttp11);
   request->AddHeader("Host", host);
   request->AddHeader("Connection", "keep-alive");
 
   client.DoHttpRequest(request,
-                       std::bind(bubblefs::voyager::HandleResponse, std::placeholders::_1,
+                       std::bind(bubblefs::myvoyager::HandleResponse, std::placeholders::_1,
                                  std::placeholders::_2));
   ev.Loop();
 }

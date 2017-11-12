@@ -21,22 +21,22 @@ struct AVLTree : public Tree {
 };
 // registry to get the trees
 struct TreeFactory
-    : public bubblefs::dmlc::FunctionRegEntryBase<TreeFactory, std::function<Tree*()> > {
+    : public bubblefs::mydmlc::FunctionRegEntryBase<TreeFactory, std::function<Tree*()> > {
 };
 
 #define REGISTER_TREE(Name)                                             \
-  DMLC_REGISTRY_REGISTER(::tree::TreeFactory, TreeFactory, Name)        \
+  MYDMLC_REGISTRY_REGISTER(::tree::TreeFactory, TreeFactory, Name)        \
   .set_body([]() { return new Name(); } )
 
-DMLC_REGISTRY_FILE_TAG(my_tree);
+MYDMLC_REGISTRY_FILE_TAG(my_tree);
 
 }  // namespace tree
 
 
 // usually this sits on a seperate file
 namespace bubblefs {
-namespace dmlc {
-DMLC_REGISTRY_ENABLE(tree::TreeFactory);
+namespace mydmlc {
+MYDMLC_REGISTRY_ENABLE(tree::TreeFactory);
 }
 }
 
@@ -47,15 +47,15 @@ REGISTER_TREE(BinaryTree)
 
 REGISTER_TREE(AVLTree);
 
-DMLC_REGISTRY_LINK_TAG(my_tree);
+MYDMLC_REGISTRY_LINK_TAG(my_tree);
 }
 
 int main(int argc, char *argv[]) {
   // construct a binary tree
-  tree::Tree *binary = bubblefs::dmlc::Registry<tree::TreeFactory>::Find("BinaryTree")->body();
+  tree::Tree *binary = bubblefs::mydmlc::Registry<tree::TreeFactory>::Find("BinaryTree")->body();
   binary->Print();
   // construct a binary tree
-  tree::Tree *avl = bubblefs::dmlc::Registry<tree::TreeFactory>::Find("AVLTree")->body();
+  tree::Tree *avl = bubblefs::mydmlc::Registry<tree::TreeFactory>::Find("AVLTree")->body();
   avl->Print();
   delete binary; delete avl;
   return 0;

@@ -9,11 +9,11 @@
 #define BUBBLEFS_PLATFORM_RDSN_SEMA_H_
 
 #include <assert.h>
-#include <error.h>
+#include <errno.h>
 #include <atomic>
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 #if defined(_WIN32)
 //---------------------------------------------------------
@@ -225,7 +225,7 @@ public:
 
 typedef LightweightSemaphore DefaultSemaphoreType;
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_RDSN_SEMA_H_

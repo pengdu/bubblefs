@@ -10,7 +10,7 @@
 #include "utils/pink_thread_name.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 Thread::Thread()
   : should_stop_(false),
@@ -54,5 +54,5 @@ int Thread::JoinThread() {
   return pthread_join(thread_id_, nullptr);
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namesapce bubblefs

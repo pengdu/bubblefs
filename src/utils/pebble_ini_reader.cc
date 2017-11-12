@@ -24,7 +24,7 @@
 #include "utils/pebble_string_utility.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
   
 int INIReader::Parse(const std::string& filename) {
     FILE* file = fopen(filename.c_str(), "r");
@@ -218,5 +218,5 @@ std::set<std::string> INIReader::GetFields(const std::string& section) {
     return fields;
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

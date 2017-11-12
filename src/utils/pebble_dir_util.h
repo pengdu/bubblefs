@@ -19,7 +19,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 class DirUtil {
 public:
@@ -41,7 +41,7 @@ private:
     static char m_last_error[256];
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PEBBLE_DIR_UTIL_H_

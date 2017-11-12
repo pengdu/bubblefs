@@ -19,7 +19,7 @@
 #include "utils/pebble_base64.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 static char base64_code[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -180,5 +180,5 @@ int Base64::Base64DecodeLen(int n)
     return n / 4 * 3 + 2;
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

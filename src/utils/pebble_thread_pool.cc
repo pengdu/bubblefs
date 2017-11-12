@@ -17,7 +17,7 @@
 #include <iostream>
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 ThreadPool::ThreadPool() : m_exit(false), m_initialized(false),
     m_thread_num(0), m_mode(PENDING) {
@@ -149,5 +149,5 @@ void ThreadPool::InnerThread::Terminate(bool waiting /* = true */) {
     m_waiting = waiting;
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

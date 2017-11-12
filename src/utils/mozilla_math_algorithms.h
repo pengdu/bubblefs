@@ -13,7 +13,7 @@
 #include "utils/mozilla_attributes.h"
 
 namespace bubblefs {
-namespace mozilla {
+namespace mymozilla {
 
 // Greatest Common Divisor
 template<typename IntegerType>
@@ -447,7 +447,7 @@ Clamp(const T aValue, const T aMin, const T aMax)
     return aValue;
 }
 
-} // namespace mozilla
+} // namespace mymozilla
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_MOZILLA_MATH_ALGORITHMS_H_

@@ -16,7 +16,7 @@
 #include "utils/voyager_timeops.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 NewTimer::NewTimer(EventLoop* ev, const TimerProcCallback& cb)
     : timerfd_(::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC)),
@@ -96,5 +96,5 @@ void NewTimer::HandleRead() {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

@@ -18,7 +18,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 namespace test {
 
 // Run some of the tests registered by the TEST() macro.  If the
@@ -105,14 +105,14 @@ class Tester {
   }
 };
 
-#define ASSERT_TRUE(c) ::bubblefs::slash::test::Tester(__FILE__, __LINE__).Is((c), #c)
-#define ASSERT_OK(s) ::bubblefs::slash::test::Tester(__FILE__, __LINE__).IsOk((s))
-#define ASSERT_EQ(a,b) ::bubblefs::slash::test::Tester(__FILE__, __LINE__).IsEq((a),(b))
-#define ASSERT_NE(a,b) ::bubblefs::slash::test::Tester(__FILE__, __LINE__).IsNe((a),(b))
-#define ASSERT_GE(a,b) ::bubblefs::slash::test::Tester(__FILE__, __LINE__).IsGe((a),(b))
-#define ASSERT_GT(a,b) ::bubblefs::slash::test::Tester(__FILE__, __LINE__).IsGt((a),(b))
-#define ASSERT_LE(a,b) ::bubblefs::slash::test::Tester(__FILE__, __LINE__).IsLe((a),(b))
-#define ASSERT_LT(a,b) ::bubblefs::slash::test::Tester(__FILE__, __LINE__).IsLt((a),(b))
+#define ASSERT_TRUE(c) ::bubblefs::myslash::test::Tester(__FILE__, __LINE__).Is((c), #c)
+#define ASSERT_OK(s) ::bubblefs::myslash::test::Tester(__FILE__, __LINE__).IsOk((s))
+#define ASSERT_EQ(a,b) ::bubblefs::myslash::test::Tester(__FILE__, __LINE__).IsEq((a),(b))
+#define ASSERT_NE(a,b) ::bubblefs::myslash::test::Tester(__FILE__, __LINE__).IsNe((a),(b))
+#define ASSERT_GE(a,b) ::bubblefs::myslash::test::Tester(__FILE__, __LINE__).IsGe((a),(b))
+#define ASSERT_GT(a,b) ::bubblefs::myslash::test::Tester(__FILE__, __LINE__).IsGt((a),(b))
+#define ASSERT_LE(a,b) ::bubblefs::myslash::test::Tester(__FILE__, __LINE__).IsLe((a),(b))
+#define ASSERT_LT(a,b) ::bubblefs::myslash::test::Tester(__FILE__, __LINE__).IsLt((a),(b))
 
 #define TCONCAT(a,b) TCONCAT1(a,b)
 #define TCONCAT1(a,b) a##b
@@ -127,7 +127,7 @@ class TCONCAT(_Test_,name) : public base {                              \
   }                                                                     \
 };                                                                      \
 bool TCONCAT(_Test_ignored_,name) =                                     \
-  ::bubblefs::slash::test::RegisterTest(#base, #name, &TCONCAT(_Test_,name)::_RunIt); \
+  ::bubblefs::myslash::test::RegisterTest(#base, #name, &TCONCAT(_Test_,name)::_RunIt); \
 void TCONCAT(_Test_,name)::_Run()
 
 // Register the specified test.  Typically not used directly, but
@@ -135,7 +135,7 @@ void TCONCAT(_Test_,name)::_Run()
 extern bool RegisterTest(const char* base, const char* name, void (*func)());
 
 }  // namespace test
-}  // namespace slash
+}  // namespace myslash
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_SLASH_TESTHARNESS_H_

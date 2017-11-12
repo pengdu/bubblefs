@@ -14,7 +14,7 @@
 #include "utils/pink_server_thread.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class DefaultServerHandle : public ServerHandle {
  public:
@@ -163,7 +163,7 @@ void *ServerThread::ThreadMain() {
   when.tv_usec += ((cron_interval_ % 1000) * 1000);
   int timeout = cron_interval_;
   if (timeout <= 0) {
-    timeout = PINK_CRON_INTERVAL;
+    timeout = MYPINK_CRON_INTERVAL;
   }
 
   std::string ip_port;
@@ -339,5 +339,5 @@ void DeleteServerThread(ServerThread** st) {
   *st = nullptr;
 }
   
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

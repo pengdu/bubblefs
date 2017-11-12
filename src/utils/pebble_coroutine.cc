@@ -32,7 +32,7 @@
 #include "platform/pebble_timer.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 struct stCoEpoll_t;
 struct stCoRoutineEnv_t {
@@ -1139,5 +1139,5 @@ coroutine *co_self() {
     return get_curr_coroutine(co_get_curr_thread_env()->co_schedule);
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

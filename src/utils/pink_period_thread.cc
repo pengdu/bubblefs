@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 PeriodThread::PeriodThread(timeval period) :
   period_(period) {
@@ -21,5 +21,5 @@ void *PeriodThread::ThreadMain() {
   return NULL;
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

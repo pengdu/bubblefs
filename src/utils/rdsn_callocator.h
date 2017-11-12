@@ -32,7 +32,7 @@
 #include <inttypes.h>
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 
 typedef void *(*t_allocate)(uint32_t);
 typedef void (*t_deallocate)(void *);
@@ -81,5 +81,5 @@ public:
 //template <typename T>
 //using transient_allocator = callocator<T, dsn_transient_malloc, dsn_transient_free>;
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs

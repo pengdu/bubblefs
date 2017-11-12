@@ -13,7 +13,7 @@
 #include "platform/mutex.h"
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 
 class Timer;
 class TimerList;
@@ -63,7 +63,7 @@ class RunLoop {
   void operator=(const RunLoop&);
 };
 
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SABER_RUNLOOP_H_

@@ -8,10 +8,10 @@
 #ifndef BUBBLEFS_PLATFORM_PINK_EPOLL_H_
 #define BUBBLEFS_PLATFORM_PINK_EPOLL_H_
 
-#include "sys/epoll.h"
+#include <sys/epoll.h>
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 struct PinkFiredEvent {
   int fd;
@@ -37,7 +37,7 @@ class PinkEpoll {
   PinkFiredEvent *firedevent_;
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_PINK_EPOLL_H_

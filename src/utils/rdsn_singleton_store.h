@@ -33,11 +33,11 @@
 #include <vector>
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 namespace utils {
 
 template <typename TKey, typename TValue, typename TCompare = std::less<TKey>>
-class singleton_store : public rdsn::utils::singleton<singleton_store<TKey, TValue, TCompare>>
+class singleton_store : public myrdsn::utils::singleton<singleton_store<TKey, TValue, TCompare>>
 {
 public:
     bool put(TKey key, TValue val)
@@ -123,7 +123,7 @@ private:
 
 //------------- inline implementation ----------
 } // namespace utils
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_SINGLETON_STORE_H_

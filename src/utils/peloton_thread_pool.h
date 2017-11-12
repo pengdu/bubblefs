@@ -25,7 +25,7 @@
 #include "boost/function.hpp"
 
 namespace bubblefs {
-namespace peloton {
+namespace mypeloton {
   
 // a wrapper for boost worker thread pool.
 class ThreadPool {
@@ -102,7 +102,7 @@ class ThreadPool {
   std::vector<std::unique_ptr<std::thread>> dedicated_threads_;
 };
 
-}  // namespace peloton
+}  // namespace mypeloton
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PELOTON_THREAD_POOL_H_

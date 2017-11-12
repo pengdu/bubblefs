@@ -25,6 +25,7 @@ limitations under the License.
 #ifndef BUBBLEFS_PLATFORM_MACROS_H_
 #define BUBBLEFS_PLATFORM_MACROS_H_
 
+#include <assert.h>
 #include <inttypes.h> // PRId64
 #include <stddef.h>  // For size_t.
 #include <string.h>  // For memcpy.
@@ -214,6 +215,10 @@ template <> struct CAssert<false> { static const char * x; };
 // The impl. of chrome does not work for offsetof(Object, private_filed)
 #undef COMPILE_ASSERT
 #define COMPILE_ASSERT(expr, msg)  BASE_CASSERT(expr, msg)
+           
+#ifndef ASSERT
+#define ASSERT(x) assert(x)
+#endif
 
 // Used to explicitly mark the return value of a function as unused. If you are
 // really sure you don't want to do anything with the return value of a function

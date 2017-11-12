@@ -13,7 +13,7 @@
 #include "utils/saber_timerlist.h"
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 
 RunLoop::RunLoop()
     : exit_(false),
@@ -117,5 +117,5 @@ TimerId RunLoop::RunEvery(uint64_t micros_interval, TimerProcCallback&& cb) {
 
 void RunLoop::Remove(TimerId t) { timers_->Remove(t); }
 
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs

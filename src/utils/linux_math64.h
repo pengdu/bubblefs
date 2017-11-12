@@ -35,11 +35,11 @@
 #include <stdint.h>
 
 namespace bubblefs {
-namespace linux {
+namespace mylinux {
   
-constexpr int DIV_ROUND_UP(int x, int y) { return (((x)+((y)-1)) / (y)); }  
+constexpr int MYLINUX_DIV_ROUND_UP(int x, int y) { return (((x)+((y)-1)) / (y)); }  
   
-#define linux_do_div(n, base) ({                      \
+#define mylinux_do_div(n, base) ({                      \
         uint32_t __base = (base);               \
         uint32_t __rem;                         \
         __rem = ((uint64_t)(n)) % __base;       \
@@ -91,7 +91,7 @@ div_u64(uint64_t dividend, uint32_t divisor)
         return (dividend / divisor);
 }
 
-}  // namespace linux
+}  // namespace mylinux
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_LINUX_MATH64_H_

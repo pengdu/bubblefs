@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <atomic>
 #include <array>
+#include <memory>
 #include <mutex>
 #include <utility>
 #include <vector>
@@ -19,7 +20,7 @@
 #include "platform/rdsn_bitfield.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 //---------------------------------------------------------
 // DiningPhiloHelpers
@@ -171,9 +172,9 @@ private:
     // 1: Philosopher is eating
     // 2+: Philosopher is waiting and must not eat before his/her direct neighbors if they have a lower status.
     typedef uint32_t IntType;
-    BEGIN_BITFIELD_TYPE(AllStatus, IntType)
-        ADD_BITFIELD_ARRAY(philos, 0, 4, 8)     // 8 array elements, 4 bits each
-    END_BITFIELD_TYPE()
+    MYRDSN_BEGIN_BITFIELD_TYPE(AllStatus, IntType)
+        MYRDSN_ADD_BITFIELD_ARRAY(philos, 0, 4, 8)     // 8 array elements, 4 bits each
+    MYRDSN_END_BITFIELD_TYPE()
     std::atomic<IntType> m_allStatus;
 
     // "Bouncers"
@@ -292,7 +293,7 @@ public:
 
 typedef LockReducedDiningPhilosophers DefaultDiningPhilosophersType;
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_DINING_PHILOSOPHERS_H_

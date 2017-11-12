@@ -23,7 +23,7 @@
 #include "utils/pebble_dir_util.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 char DirUtil::m_last_error[256] = {0};
 
@@ -74,5 +74,5 @@ int DirUtil::MakeDirP(const std::string& path) {
     return MakeDir(path);
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

@@ -23,7 +23,7 @@
 #include "utils/status.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 using Slice = StringPiece;  
   
@@ -110,7 +110,7 @@ class FileLock {
 class FileLockTable {
  private:
   port::Mutex mu_;
-  pdlfs::HashSet locked_files_;
+  mypdlfs::HashSet locked_files_;
 
   // No copying allowed
   FileLockTable(const FileLockTable&);
@@ -375,7 +375,7 @@ class ThreadPool {
   ThreadPool(const ThreadPool&);
 };
 
-} // namespace slash
+} // namespace myslash
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_SLASH_ENV_H_

@@ -11,7 +11,7 @@
 #include <assert.h>
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 //---------------------------------------------------------
 // BitFieldMember<>: Used internally by ADD_BITFIELD_MEMBER macro.
@@ -163,7 +163,7 @@ struct BitFieldArray
 // All members are public to simplify compliance with sections 9.0.7 and
 // 9.5.1 of the C++11 standard, thereby avoiding undefined behavior.
 //---------------------------------------------------------
-#define BEGIN_BITFIELD_TYPE(typeName, T) \
+#define MYRDSN_BEGIN_BITFIELD_TYPE(typeName, T) \
     union typeName \
     { \
         struct Wrapper { T value; }; \
@@ -174,16 +174,16 @@ struct BitFieldArray
         operator T() const { return wrapper.value; } \
         typedef T StorageType;
 
-#define ADD_BITFIELD_MEMBER(memberName, offset, bits) \
+#define MYRDSN_ADD_BITFIELD_MEMBER(memberName, offset, bits) \
         BitFieldMember<StorageType, offset, bits> memberName;
 
-#define ADD_BITFIELD_ARRAY(memberName, offset, bits, numItems) \
+#define MYRDSN_ADD_BITFIELD_ARRAY(memberName, offset, bits, numItems) \
         BitFieldArray<StorageType, offset, bits, numItems> memberName;
 
-#define END_BITFIELD_TYPE() \
+#define MYRDSN_END_BITFIELD_TYPE() \
     };
     
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_RDSN_BITFIELD_H_

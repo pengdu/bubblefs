@@ -24,7 +24,7 @@
 #include "platform/pebble_timer.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 
 #if 0
@@ -256,5 +256,5 @@ int32_t SequenceTimer::Update() {
     return num;
 }
 
-}  // namespace pebble
+}  // namespace mypebble
 }  // namespace bubblefs

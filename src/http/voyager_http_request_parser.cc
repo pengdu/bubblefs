@@ -10,7 +10,7 @@
 #include "utils/voyager_buffer.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 HttpRequestParser::HttpRequestParser()
     : state_(kLine), request_(new HttpRequest()) {}
@@ -112,5 +112,5 @@ bool HttpRequestParser::ParseRequestBody(Buffer* buf) {
   return false;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

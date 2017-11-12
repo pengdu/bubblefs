@@ -12,7 +12,7 @@
 #include "platform/rdsn_benaphore.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 //---------------------------------------------------------
 // RecursiveBenaphoreTester
@@ -147,5 +147,5 @@ bool testRecursiveBenaphore()
     return tester.test(4, 100000);
 }
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs

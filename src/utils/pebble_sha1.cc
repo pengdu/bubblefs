@@ -43,7 +43,7 @@
 #include <stdio.h>
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 SHA1::SHA1()
 {
@@ -366,5 +366,5 @@ unsigned SHA1::CircularShift(int bits, unsigned word)
     return ((word << bits) & 0xFFFFFFFF) | ((word & 0xFFFFFFFF) >> (32-bits));
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

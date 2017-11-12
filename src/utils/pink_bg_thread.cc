@@ -9,7 +9,7 @@
 #include "utils/pink_bg_thread.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 void BGThread::Schedule(void (*function)(void*), void* arg) {
   mu_.Lock();
@@ -97,5 +97,5 @@ void BGThread::DelaySchedule(
   mu_.Unlock();
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

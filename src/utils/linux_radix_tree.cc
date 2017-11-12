@@ -41,20 +41,20 @@
 #include <stdlib.h>
 
 namespace bubblefs {
-namespace linux {
+namespace mylinux {
 
 //static MALLOC_DEFINE(M_RADIX, "radix", "Linux radix compat");
 
 static inline int
 radix_max(struct radix_tree_root *root)
 {
-        return (1 << (root->height * RADIX_TREE_MAP_SHIFT)) - 1;
+        return (1 << (root->height * MYLINUX_RADIX_TREE_MAP_SHIFT)) - 1;
 }
 
 static inline int
 radix_pos(long id, int height)
 {
-        return (id >> (RADIX_TREE_MAP_SHIFT * height)) & RADIX_TREE_MAP_MASK;
+        return (id >> (MYLINUX_RADIX_TREE_MAP_SHIFT * height)) & MYLINUX_RADIX_TREE_MAP_MASK;
 }
 
 void *
@@ -81,7 +81,7 @@ out:
 void *
 radix_tree_delete(struct radix_tree_root *root, unsigned long index)
 {
-        struct radix_tree_node *stack[RADIX_TREE_MAX_HEIGHT];
+        struct radix_tree_node *stack[MYLINUX_RADIX_TREE_MAX_HEIGHT];
         struct radix_tree_node *node;
         void *item;
         int height;
@@ -129,7 +129,7 @@ int
 radix_tree_insert(struct radix_tree_root *root, unsigned long index, void *item)
 {
         struct radix_tree_node *node;
-        struct radix_tree_node *temp[RADIX_TREE_MAX_HEIGHT - 1];
+        struct radix_tree_node *temp[MYLINUX_RADIX_TREE_MAX_HEIGHT - 1];
         int height;
         int idx;
 
@@ -153,7 +153,7 @@ radix_tree_insert(struct radix_tree_root *root, unsigned long index, void *item)
         while (radix_max(root) < index) {
 
                 /* check if the radix tree is getting too big */
-                if (root->height == RADIX_TREE_MAX_HEIGHT)
+                if (root->height == MYLINUX_RADIX_TREE_MAX_HEIGHT)
                         return (-E2BIG);
 
                 /*
@@ -218,5 +218,5 @@ radix_tree_insert(struct radix_tree_root *root, unsigned long index, void *item)
         return (0);
 }
 
-}  // namespace linux
+}  // namespace mylinux
 }  // namespace bubblefs

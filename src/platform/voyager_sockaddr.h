@@ -11,7 +11,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class SockAddr {
  public:
@@ -53,7 +53,7 @@ class SockAddr {
   std::string ipbuf_;
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_SOCKADDR_H_

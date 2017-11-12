@@ -47,7 +47,7 @@
 #include "utils/slash_hash.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 class SHA256 {
  protected:
@@ -605,5 +605,5 @@ std::string md5(const std::string &str, bool raw) {
   return md5.hexdigest();
 }
 
-}  // namespace slash
+}  // namespace myslash
 }  // namespace bubblefs

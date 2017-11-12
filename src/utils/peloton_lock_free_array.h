@@ -21,7 +21,7 @@
 #include <memory>
 
 namespace bubblefs {
-namespace peloton {
+namespace mypeloton {
 
 constexpr size_t LOCK_FREE_ARRAY_MAX_SIZE = 1024 * 1024;
 
@@ -76,7 +76,7 @@ class LockFreeArray {
   std::unique_ptr<lock_free_array_t> lock_free_array;
 };
 
-}  // namespace peloton
+}  // namespace mypeloton
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PELOTON_LOCK_FREE_ARRAY_H_

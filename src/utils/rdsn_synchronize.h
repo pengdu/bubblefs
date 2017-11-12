@@ -36,10 +36,10 @@
 #include "platform/rdsn_rwlock.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 namespace utils {
   
-constexpr unsigned int TIME_MS_MAX = 0xffffffff;
+constexpr unsigned int MYRDSN_TIME_MS_MAX = 0xffffffff;
 
 #if 0
 //# if defined(_WIN32)
@@ -122,7 +122,7 @@ public:
     inline void wait() { _ready.wait(); }
     inline bool wait_for(int milliseconds)
     {
-        if (TIME_MS_MAX == static_cast<unsigned int>(milliseconds)) {
+        if (MYRDSN_TIME_MS_MAX == static_cast<unsigned int>(milliseconds)) {
             _ready.wait();
             return true;
         } else
@@ -149,7 +149,7 @@ public:
 
     inline bool wait(int milliseconds)
     {
-        if (TIME_MS_MAX == static_cast<unsigned int>(milliseconds)) {
+        if (MYRDSN_TIME_MS_MAX == static_cast<unsigned int>(milliseconds)) {
             _sema.wait();
             return true;
         } else
@@ -202,5 +202,5 @@ private:
 };
 
 } // namespace utils
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs

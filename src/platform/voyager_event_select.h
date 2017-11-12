@@ -14,7 +14,7 @@
 #include "platform/voyager_event_poller.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class EventSelect : public EventPoller {
  public:
@@ -32,7 +32,7 @@ class EventSelect : public EventPoller {
   std::map<int, Dispatch*> worker_map_;
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_EVENT_SELECT_H_

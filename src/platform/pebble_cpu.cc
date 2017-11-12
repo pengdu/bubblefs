@@ -23,7 +23,7 @@
 #include "platform/pebble_cpu.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 // /proc/pid/stat字段定义
 struct pid_stat_fields {
@@ -116,5 +116,5 @@ float CalculateCurCpuUseage(long long cur_cpu_time_start, long long cur_cpu_time
     return (sysconf(_SC_NPROCESSORS_ONLN) * 100.0f *(cur_cpu_time_stop - cur_cpu_time_start)) / cpu_result;
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

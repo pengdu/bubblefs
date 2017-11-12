@@ -8,7 +8,7 @@
 #include "platform/voyager_logging.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 void ServerSocket::Bind(const struct sockaddr* sa, socklen_t salen) {
   if (::bind(fd_, sa, salen) == -1) {
@@ -52,5 +52,5 @@ int ServerSocket::Accept(struct sockaddr* sa, socklen_t* salen) {
   return connectfd;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

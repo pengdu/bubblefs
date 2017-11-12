@@ -9,7 +9,7 @@
 #include "utils/slash_rsync.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
   
 // Clean files for rsync info, such as the lock, log, pid, conf file
 static bool CleanRsyncInfo(const std::string& path) {
@@ -136,5 +136,5 @@ int RsyncSendClearTarget(const std::string& local_dir_path, const std::string& r
   return ret;
 }
 
-}  // namespace slash
+}  // namespace myslash
 }  // namespace bubblefs

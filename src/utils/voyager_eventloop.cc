@@ -21,7 +21,7 @@
 #include "utils/voyager_timerlist.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 namespace {
 
 __thread EventLoop* runloop = nullptr;
@@ -277,5 +277,5 @@ void EventLoop::Abort() {
                      << std::this_thread::get_id();
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

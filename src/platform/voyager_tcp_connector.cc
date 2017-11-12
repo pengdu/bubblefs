@@ -13,7 +13,7 @@
 #include "utils/voyager_tcp_client.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 TcpConnector::TcpConnector(EventLoop* ev, const SockAddr& addr)
     : ev_(VOYAGER_CHECK_NOTNULL(ev)),
@@ -184,5 +184,5 @@ void TcpConnector::ResetDispatch() {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

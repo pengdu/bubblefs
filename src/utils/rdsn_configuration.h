@@ -40,7 +40,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 
 class configuration;
 typedef std::shared_ptr<configuration> configuration_ptr;
@@ -295,7 +295,7 @@ inline bool configuration::get_value<bool>(const char *section,
     }
 }
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_CONFIGURATION_H_

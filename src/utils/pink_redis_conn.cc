@@ -12,7 +12,7 @@
 #include "utils/pink_redis_conn.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 static bool IsHexDigit(char ch) {
   return (ch>='0' && ch<='9') || (ch>='a' && ch<='f') || (ch>='A' && ch<'F');
@@ -449,5 +449,5 @@ int32_t RedisConn::GetNextNum(int32_t pos, int32_t *value) {
   return 0;
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

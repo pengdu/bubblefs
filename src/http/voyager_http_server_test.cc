@@ -14,7 +14,7 @@
 #include "utils/voyager_eventloop.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 void HandleHttpRequest(HttpRequestPtr request, HttpResponse* response) {
   std::cout << request->RequestMessage().Peek() << std::endl;
@@ -35,14 +35,14 @@ void HandleHttpRequest(HttpRequestPtr request, HttpResponse* response) {
   response->SetCloseState(true);
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 int main() {
-  bubblefs::voyager::EventLoop ev;
-  bubblefs::voyager::SockAddr addr(5666);
-  bubblefs::voyager::HttpServer server(&ev, addr, "WebServer", 4);
-  server.SetHttpCallback(std::bind(bubblefs::voyager::HandleHttpRequest,
+  bubblefs::myvoyager::EventLoop ev;
+  bubblefs::myvoyager::SockAddr addr(5666);
+  bubblefs::myvoyager::HttpServer server(&ev, addr, "WebServer", 4);
+  server.SetHttpCallback(std::bind(bubblefs::myvoyager::HandleHttpRequest,
                                    std::placeholders::_1,
                                    std::placeholders::_2));
   server.Start();

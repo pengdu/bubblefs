@@ -18,7 +18,7 @@
 #include "utils/pebble_string_utility.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 void StringUtility::Split(const std::string& str,
     const std::string& delim,
@@ -309,5 +309,5 @@ bool StringUtility::Bin2Hex(const char* bin_str, std::string* hex_str)
     return true;
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

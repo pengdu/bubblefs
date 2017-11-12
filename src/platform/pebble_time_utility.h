@@ -21,7 +21,7 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 class TimeUtility {
 public:
@@ -44,7 +44,7 @@ public:
     static time_t GetTimeDiff(const std::string &t1, const std::string &t2);
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_PEBBLE_TIME_UTILITY_H_

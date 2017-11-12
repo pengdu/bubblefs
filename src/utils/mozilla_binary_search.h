@@ -10,7 +10,7 @@
 #include <stddef.h>
 
 namespace bubblefs {
-namespace mozilla {
+namespace mymozilla {
 
 /*
  * The BinarySearch() algorithm searches the given container |aContainer| over
@@ -133,7 +133,7 @@ BinarySearch(const Container& aContainer, size_t aBegin, size_t aEnd,
                         aMatchOrInsertionPoint);
 }
 
-} // namespace mozilla
+} // namespace mymozilla
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_MOZILLA_BINARY_SEARCH_H_

@@ -26,7 +26,7 @@
 #endif
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class ServerSocket;
 class PinkEpoll;
@@ -235,7 +235,7 @@ extern ServerThread *NewDispatchThread(
 
 void DeleteServerThread(ServerThread** st);
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_SERVER_THREAD_H_

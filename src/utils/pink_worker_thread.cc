@@ -12,7 +12,7 @@
 #include "utils/pink_worker_thread.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 WorkerThread::WorkerThread(ConnFactory *conn_factory,
                            ServerThread* server_thread,
@@ -84,7 +84,7 @@ void *WorkerThread::ThreadMain() {
   when.tv_usec += ((cron_interval_ % 1000) * 1000);
   int timeout = cron_interval_;
   if (timeout <= 0) {
-    timeout = PINK_CRON_INTERVAL;
+    timeout = MYPINK_CRON_INTERVAL;
   }
 
   while (!should_stop()) {
@@ -284,5 +284,5 @@ void WorkerThread::Cleanup() {
   conns_.clear();
 }
 
-} // namespace pink
+} // namespace mypink
 } // namespace bubblefs 

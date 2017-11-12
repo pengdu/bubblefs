@@ -8,7 +8,7 @@
 #include "utils/simple_thread.h"
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 class ThreadLocalStorageTest {
  public:
@@ -34,16 +34,16 @@ void ThreadFunc(void*) {
   Test();
 }
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 int main() {
-  bubblefs::simple::obj1.Get()->set_name("main one");
-  bubblefs::simple::obj2.Get()->set_name("main two");
-  bubblefs::simple::Test();
-  bubblefs::simple::Thread t1(bubblefs::simple::ThreadFunc, NULL);
+  bubblefs::mysimple::obj1.Get()->set_name("main one");
+  bubblefs::mysimple::obj2.Get()->set_name("main two");
+  bubblefs::mysimple::Test();
+  bubblefs::mysimple::Thread t1(bubblefs::mysimple::ThreadFunc, NULL);
   t1.Start();
   t1.Join();
-  bubblefs::simple::Test();
+  bubblefs::mysimple::Test();
   return 0;
 }

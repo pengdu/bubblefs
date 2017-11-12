@@ -10,7 +10,7 @@
 #include <pthread.h>
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 class Thread {
  public:
@@ -37,7 +37,7 @@ class Thread {
   void operator=(const Thread&);
 };
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SIMPLE_THREAD_H_

@@ -5,7 +5,7 @@
 #include "platform/slash_xdebug.h"
  
 namespace bubblefs { 
-namespace slash { 
+namespace myslash { 
   
 /*********************************************
  * Wrappers for Unix process control functions
@@ -839,5 +839,5 @@ int Open_listenfd(int port)
   return rc;
 }
 
-} // namespace slash
+} // namespace myslash
 } // namespace bubblefs

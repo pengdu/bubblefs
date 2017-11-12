@@ -7,7 +7,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
   
 const std::string kRsyncConfFile = "slash_rsync.conf";
 const std::string kRsyncLogFile = "slash_rsync.log";
@@ -31,7 +31,7 @@ int RsyncSendFile(const std::string& local_file_path, const std::string& remote_
 int RsyncSendClearTarget(const std::string& local_dir_path, const std::string& remote_dir_path,
     const RsyncRemote& remote);
 
-} // namespace slash
+} // namespace myslash
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_SLASH_RSYNC_H

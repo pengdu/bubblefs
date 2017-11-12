@@ -19,7 +19,7 @@
 #include <pthread.h>
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 class Thread
 {
@@ -38,7 +38,7 @@ private:
     ::pthread_t m_thread_id;
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PEBBLE_THREAD_H_

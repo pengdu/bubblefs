@@ -13,7 +13,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 enum LogLevel {
   LOGLEVEL_DEBUG,
@@ -66,8 +66,8 @@ class LogFinisher {
 };
 
 #define VOYAGER_LOG(LEVEL)   \
-  ::bubblefs::voyager::LogFinisher() = \
-      ::bubblefs::voyager::Logger(::bubblefs::voyager::LOGLEVEL_##LEVEL, __FILE__, __LINE__)
+  ::bubblefs::myvoyager::LogFinisher() = \
+      ::bubblefs::myvoyager::Logger(::bubblefs::myvoyager::LOGLEVEL_##LEVEL, __FILE__, __LINE__)
 
 template <typename T>
 T* CheckNotNull(const char* /* filename */, int /* line */,
@@ -79,7 +79,7 @@ T* CheckNotNull(const char* /* filename */, int /* line */,
 }
 
 #define VOYAGER_CHECK_NOTNULL(value)                  \
-  ::bubblefs::voyager::CheckNotNull(__FILE__, __LINE__, \
+  ::bubblefs::myvoyager::CheckNotNull(__FILE__, __LINE__, \
                                     "'" #value "' Must not be nullptr", (value))
 
 typedef void LogHandler(LogLevel level, const char* filename, int line,
@@ -95,7 +95,7 @@ extern LogHandler* SetLogHandler(LogHandler* new_func);
 
 extern LogLevel SetLogLevel(LogLevel new_level);
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_LOGGING_H_

@@ -14,7 +14,7 @@
 #include "utils/voyager_tcp_server.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class Buffer;
 class EventLoop;
@@ -46,7 +46,7 @@ class HttpServer {
   void operator=(const HttpServer&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_HTTP_VOYAGER_HTTP_SERVER_H_

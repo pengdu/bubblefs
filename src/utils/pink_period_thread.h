@@ -12,7 +12,7 @@
 #include "utils/pink_thread.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class PeriodThread : public Thread {
  public:
@@ -24,7 +24,7 @@ class PeriodThread : public Thread {
   struct timeval period_;
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_PERIOD_THREAD_H_

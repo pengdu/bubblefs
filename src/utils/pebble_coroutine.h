@@ -26,7 +26,7 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 /// @brief 协程模块错误码定义
 typedef enum {
@@ -309,7 +309,7 @@ private:
     std::set<CoroutineTask*> pre_start_task_;
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PEBBLE_COROUTINE_H_

@@ -17,9 +17,7 @@
 
 namespace bubblefs {
 
-using namespace pink;
-
-class MyHTTPHandles : public pink::HTTPHandles {
+class MyHTTPHandles : public mypink::HTTPHandles {
  public:
   std::string body_data;
   std::string body_md5;
@@ -29,7 +27,7 @@ class MyHTTPHandles : public pink::HTTPHandles {
   std::chrono::duration<double, std::milli> diff;
 
   // Request handles
-  virtual bool HandleRequest(const HTTPRequest* req) {
+  virtual bool HandleRequest(const mypink::HTTPRequest* req) {
     req->Dump();
     body_data.clear();
 
@@ -44,8 +42,8 @@ class MyHTTPHandles : public pink::HTTPHandles {
   }
 
   // Response handles
-  virtual void PrepareResponse(HTTPResponse* resp) {
-    body_md5.assign(slash::md5(body_data));
+  virtual void PrepareResponse(mypink::HTTPResponse* resp) {
+    body_md5.assign(myslash::md5(body_data));
 
     resp->SetStatusCode(200);
     resp->SetContentLength(body_md5.size());
@@ -63,13 +61,13 @@ class MyHTTPHandles : public pink::HTTPHandles {
   }
 };
 
-class MyConnFactory : public ConnFactory {
+class MyConnFactory : public mypink::ConnFactory {
  public:
-  virtual PinkConn* NewPinkConn(int connfd, const std::string& ip_port,
-                                ServerThread* thread,
+  virtual mypink::PinkConn* NewPinkConn(int connfd, const std::string& ip_port,
+                                mypink::ServerThread* thread,
                                 void* worker_specific_data) const {
     auto my_handles = std::make_shared<MyHTTPHandles>();
-    return new pink::HTTPConn(connfd, ip_port, thread, my_handles,
+    return new mypink::HTTPConn(connfd, ip_port, thread, my_handles,
                               worker_specific_data);
   }
 };
@@ -100,8 +98,8 @@ int main(int argc, char* argv[]) {
 
   SignalSetup();
 
-  ConnFactory* my_conn_factory = new MyConnFactory();
-  ServerThread *st = NewDispatchThread(port, 4, my_conn_factory, 1000);
+  mypink::ConnFactory* my_conn_factory = new MyConnFactory();
+  mypink::ServerThread *st = mypink::NewDispatchThread(port, 4, my_conn_factory, 1000);
 
   if (st->EnableSecurity("/complete_path_to/host.crt",
                          "/complete_path_to/host.key") != 0) {

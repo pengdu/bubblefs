@@ -14,7 +14,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 namespace json {
 
 enum JsonType {
@@ -135,7 +135,7 @@ class JsonValueBoolean : public JsonValue {
 };
 
 }  // namespace json
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_JSON_VALUE_H_

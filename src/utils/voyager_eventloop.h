@@ -19,7 +19,7 @@
 #include "utils/voyager_callback.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class Dispatch;
 class EventPoller;
@@ -109,7 +109,7 @@ class EventLoop {
   void operator=(const EventLoop&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_EVENTLOOP_H_

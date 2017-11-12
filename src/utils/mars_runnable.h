@@ -16,7 +16,7 @@
 #define BUBBLEFS_UTILS_MARS_RUNNABLE_H_
 
 namespace bubblefs {
-namespace mars {
+namespace mymars {
   
 struct Runnable {
     virtual ~Runnable() {}
@@ -82,7 +82,7 @@ inline Runnable* transform(const T& t) {
 
 } // namespace detail
 
-}  // namespace mars
+}  // namespace mymars
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_MARS_RUNNABLE_H_

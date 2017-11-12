@@ -39,7 +39,7 @@
     PEBBLE_LOG_MESSAGE((m_last_error), (sizeof(m_last_error)), fmt, ##__VA_ARGS__)
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 /// @brief 每个模块错误码BASE定义，模块错误码取值为XXX_BASE - N
 enum ERROR_CODE_BASE {
@@ -63,7 +63,7 @@ const char* GetErrorString(int32_t error_code);
 /// @brief 设置错误描述
 void SetErrorString(int32_t error_code, const char* error_string);
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PEBBLE_ERROR_H_

@@ -14,7 +14,7 @@
 #include "utils/voyager_eventloop.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class TimerList {
  public:
@@ -46,7 +46,7 @@ class TimerList {
   void operator=(const TimerList&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_TIMERLIST_H_

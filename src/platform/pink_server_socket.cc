@@ -16,7 +16,7 @@
 #include "utils/pink_define.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 int Setnonblocking(int sockfd) {
   int flags;
@@ -102,5 +102,5 @@ void ServerSocket::Close() {
   close(sockfd_);
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

@@ -10,7 +10,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 inline char* string_as_array(std::string* str) {
   return str->empty() ? nullptr : &*str->begin();
@@ -41,7 +41,7 @@ void STLDeleteValues(T* v) {
   v->clear();
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_STL_UTIL_H_

@@ -9,7 +9,7 @@
 #include <time.h>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 namespace timeops {
 
 uint64_t NowMicros() {
@@ -34,5 +34,5 @@ std::string FormatTimestamp(uint64_t micros) {
 }
 
 }  // namespace timeops
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

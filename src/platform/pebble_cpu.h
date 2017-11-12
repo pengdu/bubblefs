@@ -18,7 +18,7 @@
 #define BUBBLEFS_PLATFORM_PEBBLE_CPU_H_
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 /// @brief 获取当前进程的cpu使用时间
 long long GetCurCpuTime();
@@ -34,7 +34,7 @@ long long GetTotalCpuTime();
 float CalculateCurCpuUseage(long long cur_cpu_time_start, long long cur_cpu_time_stop,
     long long total_cpu_time_start, long long total_cpu_time_stop);
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_PEBBLE_CPU_H_

@@ -12,7 +12,7 @@
 #include <utility>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class HttpMessage {
  public:
@@ -61,7 +61,7 @@ class HttpMessage {
   std::string body_;
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_HTTP_VOYAGER_HTTP_MESSAGE_H_

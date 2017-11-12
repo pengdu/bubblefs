@@ -22,7 +22,7 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 /// @brief Timer模块错误码定义
 typedef enum {
@@ -186,7 +186,7 @@ private:
     char m_last_error[256];
 };
 
-}  // namespace pebble
+}  // namespace mypebble
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_PEBBLE_TIMER_H_

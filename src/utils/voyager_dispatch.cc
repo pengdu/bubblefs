@@ -9,7 +9,7 @@
 #include "utils/voyager_eventloop.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 Dispatch::Dispatch(EventLoop* eventloop, int fd)
     : eventloop_(eventloop),
@@ -125,5 +125,5 @@ void Dispatch::Tie(const std::shared_ptr<void>& obj) {
   tied_ = true;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

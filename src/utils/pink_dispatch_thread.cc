@@ -13,7 +13,7 @@
 #include "utils/pink_worker_thread.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 DispatchThread::DispatchThread(int port,
                                int work_num, ConnFactory* conn_factory,
@@ -206,5 +206,5 @@ extern ServerThread *NewDispatchThread(
                             cron_interval, queue_limit, handle);
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

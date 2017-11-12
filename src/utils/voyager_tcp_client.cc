@@ -9,7 +9,7 @@
 #include "utils/voyager_tcp_client.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 std::atomic<int> TcpClient::conn_id_(0);
 
@@ -86,5 +86,5 @@ void TcpClient::SetConnectFailureCallback(ConnectFailureCallback&& cb) {
   connector_->SetConnectFailureCallback(std::move(cb));
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

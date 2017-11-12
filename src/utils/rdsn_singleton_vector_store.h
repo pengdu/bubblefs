@@ -33,12 +33,12 @@
 #include "utils/rdsn_singleton.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 namespace utils {
 
 template <typename T, T default_value>
 class singleton_vector_store
-    : public rdsn::utils::singleton<singleton_vector_store<T, default_value>>
+    : public myrdsn::utils::singleton<singleton_vector_store<T, default_value>>
 {
 public:
     singleton_vector_store(void) {}
@@ -86,7 +86,7 @@ private:
 };
 
 } // namespace utils
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_SINGLETON_VECTOR_STORE_H_

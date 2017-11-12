@@ -12,7 +12,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
   
 class ConHashNode {
  public:
@@ -40,7 +40,7 @@ class ConHash {
   void operator=(const ConHash&);
 };
 
-} // namespace simple
+} // namespace mysimple
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SIMPLE_CONHASH_H_

@@ -31,7 +31,7 @@
 #include "utils/mozilla_utils.h"
 
 namespace bubblefs {
-namespace mozilla {
+namespace mymozilla {
 
 class Bignum {
  public:
@@ -141,7 +141,7 @@ class Bignum {
   DISALLOW_COPY_AND_ASSIGN(Bignum);
 };
 
-}  // namespace mozilla
+}  // namespace mymozilla
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_MOZILLA_BIGNUM_H_

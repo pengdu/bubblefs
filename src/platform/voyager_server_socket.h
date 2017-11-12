@@ -10,7 +10,7 @@
 #include "platform/voyager_base_socket.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class ServerSocket : public BaseSocket {
  public:
@@ -29,7 +29,7 @@ class ServerSocket : public BaseSocket {
   void operator=(const ServerSocket&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_SERVER_SOCKET_H_

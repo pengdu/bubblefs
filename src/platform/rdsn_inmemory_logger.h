@@ -14,7 +14,7 @@
 #include <thread>
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 
 //---------------------------------------------------------
 // InMemberLogger
@@ -136,7 +136,7 @@ public:
     }
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_RDSN_INMEMORY_LOGGER_H_

@@ -16,7 +16,7 @@
 #include "utils/pink_server_thread.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 // Usage like:
 // class MyConn: public PbConn {
@@ -117,7 +117,7 @@ class DispatchThread : public ServerThread {
   void operator=(const DispatchThread&);
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_DISPATCH_THREAD_H_

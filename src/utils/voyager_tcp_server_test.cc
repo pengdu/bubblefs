@@ -6,10 +6,10 @@
 #include "utils/voyager_eventloop.h"
 #include "utils/voyager_tcp_server.h"
 
-bubblefs::voyager::TcpServer* g_server = nullptr;
+bubblefs::myvoyager::TcpServer* g_server = nullptr;
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 void DeleteServer() {
   if (g_server) {
@@ -17,15 +17,15 @@ void DeleteServer() {
   }
 }
 
-} // namespace voyager
+} // namespace myvoyager
 } // namespace bubblefs
 
 int main(int argc, char** argv) {
-  bubblefs::voyager::EventLoop eventloop;
-  bubblefs::voyager::SockAddr addr(5666);
-  g_server = new bubblefs::voyager::TcpServer(&eventloop, addr, "Voyager", 4);
+  bubblefs::myvoyager::EventLoop eventloop;
+  bubblefs::myvoyager::SockAddr addr(5666);
+  g_server = new bubblefs::myvoyager::TcpServer(&eventloop, addr, "Voyager", 4);
   g_server->Start();
-  eventloop.RunAfter(5000000, []() { bubblefs::voyager::DeleteServer(); });
+  eventloop.RunAfter(5000000, []() { bubblefs::myvoyager::DeleteServer(); });
   eventloop.RunAfter(6000000, [&eventloop]() { eventloop.Exit(); });
   eventloop.Loop();
   return 0;

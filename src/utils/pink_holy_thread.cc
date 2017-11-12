@@ -12,7 +12,7 @@
 #include "utils/pink_item.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 HolyThread::HolyThread(int port,
                        ConnFactory* conn_factory,
@@ -249,5 +249,5 @@ extern ServerThread *NewHolyThread(
   return new HolyThread(bind_ips, port, conn_factory, cron_interval, handle);
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

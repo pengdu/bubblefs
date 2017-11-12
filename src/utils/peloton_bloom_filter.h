@@ -35,7 +35,7 @@
 #endif
 
 namespace bubblefs {
-namespace peloton{
+namespace mypeloton{
 namespace index {
 
 /*
@@ -202,7 +202,7 @@ class BloomFilter {
 };
 
 } // namespace index
-} // namespace peloton
+} // namespace mypeloton
 } // namespace bubblefs
 
 #ifdef __APPLE__

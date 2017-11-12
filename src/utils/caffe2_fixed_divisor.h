@@ -23,7 +23,7 @@
 #include <stdlib.h>
 
 namespace bubblefs {
-namespace caffe2 {
+namespace mycaffe2 {
 
 // Utility class for quickly calculating quotients and remainders for
 // a known integer divisor
@@ -127,7 +127,7 @@ class FixedDivisor<int32_t> {
   int shift_;
 };
 
-} // namespace caffe2
+} // namespace mycaffe2
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_CAFFE2_FIXED_DIVISOR_H_

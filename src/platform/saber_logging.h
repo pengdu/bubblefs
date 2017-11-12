@@ -11,7 +11,7 @@
 #include <stdarg.h>
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 
 enum LogLevel {
   LOGLEVEL_DEBUG,
@@ -29,23 +29,23 @@ extern void Log(LogLevel level, const char* filename, int line,
     ;
 
 #define SABER_LOG_DEBUG(format, ...)                                      \
-  ::bubblefs::saber::Log(::bubblefs::saber::LOGLEVEL_DEBUG, __FILE__, __LINE__, format, \
+  ::bubblefs::mysaber::Log(::bubblefs::mysaber::LOGLEVEL_DEBUG, __FILE__, __LINE__, format, \
                          ##__VA_ARGS__)
 
 #define SABER_LOG_INFO(format, ...)                                      \
-  ::bubblefs::saber::Log(::bubblefs::saber::LOGLEVEL_INFO, __FILE__, __LINE__, format, \
+  ::bubblefs::mysaber::Log(::bubblefs::mysaber::LOGLEVEL_INFO, __FILE__, __LINE__, format, \
                          ##__VA_ARGS__)
 
 #define SABER_LOG_WARN(format, ...)                                      \
-  ::bubblefs::saber::Log(::bubblefs::saber::LOGLEVEL_WARN, __FILE__, __LINE__, format, \
+  ::bubblefs::mysaber::Log(::bubblefs::mysaber::LOGLEVEL_WARN, __FILE__, __LINE__, format, \
                          ##__VA_ARGS__)
 
 #define SABER_LOG_ERROR(format, ...)                                      \
-  ::bubblefs::saber::Log(::bubblefs::saber::LOGLEVEL_ERROR, __FILE__, __LINE__, format, \
+  ::bubblefs::mysaber::Log(::bubblefs::mysaber::LOGLEVEL_ERROR, __FILE__, __LINE__, format, \
                          ##__VA_ARGS__)
 
 #define SABER_LOG_FATAL(format, ...)                                      \
-  ::bubblefs::saber::Log(::bubblefs::saber::LOGLEVEL_FATAL, __FILE__, __LINE__, format, \
+  ::bubblefs::mysaber::Log(::bubblefs::mysaber::LOGLEVEL_FATAL, __FILE__, __LINE__, format, \
                          ##__VA_ARGS__)
 
 extern void DefaultLogHandler(LogLevel level, const char* filename, int line,
@@ -58,7 +58,7 @@ extern LogHandler* SetLogHandler(LogHandler* new_handler);
 
 extern LogLevel SetLogLevel(LogLevel new_level);
 
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_SABER_LOGGING_H_

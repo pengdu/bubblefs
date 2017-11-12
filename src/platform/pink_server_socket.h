@@ -15,7 +15,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 int Setnonblocking(int sockfd);  
   
@@ -102,7 +102,7 @@ class ServerSocket {
   void operator=(const ServerSocket&);
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_PINK_SERVER_SOCKET_H_

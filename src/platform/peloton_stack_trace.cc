@@ -19,7 +19,7 @@
 #include <memory>
 
 namespace bubblefs {
-namespace peloton {
+namespace mypeloton {
 
 namespace {
 
@@ -215,5 +215,5 @@ void RegisterSignalHandlers() {
   signal(SIGFPE, SignalHandler);
 }
 
-}  // namespace peloton
+}  // namespace mypeloton
 }  // namespace bubblefs

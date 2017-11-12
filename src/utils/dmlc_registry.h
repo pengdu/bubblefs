@@ -204,7 +204,7 @@ Device* DeviceFactory::NewDevice(const string& type,
 */ 
 
 namespace bubblefs {  
-namespace dmlc {
+namespace mydmlc {
 /*!
  * \brief Registry class.
  *  Registry can be used to register global singletons.
@@ -253,9 +253,10 @@ class Registry {
                        const std::string& alias) {
     EntryType* e = fmap_.at(key_name);
     if (fmap_.count(alias)) {
-      CHECK_EQ(e, fmap_.at(alias))
-          << "Trying to register alias " << alias << " for key " << key_name
+      if (e != fmap_.at(alias)) {
+        std::cerr << "Trying to register alias " << alias << " for key " << key_name
           << " but " << alias << " is already taken";
+      }
     } else {
       fmap_[alias] = e;
     }
@@ -450,7 +451,7 @@ class FunctionRegEntryBase {
  * This macro must be used under namespace dmlc, and only used once in cc file.
  * \param EntryType Type of registry entry
  */
-#define DMLC_REGISTRY_ENABLE(EntryType)                                 \
+#define MYDMLC_REGISTRY_ENABLE(EntryType)                                 \
   template<>                                                            \
   Registry<EntryType > *Registry<EntryType >::Get() {                   \
     static Registry<EntryType > inst;                                   \
@@ -466,9 +467,9 @@ class FunctionRegEntryBase {
  * \param Name The name to be registered.
  * \sa FactoryRegistryEntryBase
  */
-#define DMLC_REGISTRY_REGISTER(EntryType, EntryTypeName, Name)          \
+#define MYDMLC_REGISTRY_REGISTER(EntryType, EntryTypeName, Name)          \
   static ATTRIBUTE_UNUSED EntryType & __make_ ## EntryTypeName ## _ ## Name ## __ = \
-      ::bubblefs::dmlc::Registry<EntryType>::Get()->__REGISTER__(#Name)           \
+      ::bubblefs::mydmlc::Registry<EntryType>::Get()->__REGISTER__(#Name)           \
 
 /*!
  * \brief (Optional) Declare a file tag to current file that contains object registrations.
@@ -479,8 +480,8 @@ class FunctionRegEntryBase {
  * \param UniqueTag The unique tag used to represent.
  * \sa DMLC_REGISTRY_LINK_TAG
  */
-#define DMLC_REGISTRY_FILE_TAG(UniqueTag)                                \
-  int __dmlc_registry_file_tag_ ## UniqueTag ## __() { return 0; }
+#define MYDMLC_REGISTRY_FILE_TAG(UniqueTag)                                \
+  int __mydmlc_registry_file_tag_ ## UniqueTag ## __() { return 0; }
 
 /*!
  * \brief (Optional) Force link to all the objects registered in file tag.
@@ -521,12 +522,12 @@ class FunctionRegEntryBase {
  * \param UniqueTag The unique tag used to represent.
  * \sa DMLC_REGISTRY_ENABLE, DMLC_REGISTRY_FILE_TAG
  */
-#define DMLC_REGISTRY_LINK_TAG(UniqueTag)                                \
-  int __dmlc_registry_file_tag_ ## UniqueTag ## __();                   \
+#define MYDMLC_REGISTRY_LINK_TAG(UniqueTag)                                \
+  int __mydmlc_registry_file_tag_ ## UniqueTag ## __();                   \
   static int ATTRIBUTE_UNUSED __reg_file_tag_ ## UniqueTag ## __ = \
-      __dmlc_registry_file_tag_ ## UniqueTag ## __();
+      __mydmlc_registry_file_tag_ ## UniqueTag ## __();
       
-}  // namespace dmlc   
+} // namespace mydmlc   
 } // namesapce bubblefs  
 
 #endif  // BUBBLEFS_UTILS_DMLC_REGISTRY_H_

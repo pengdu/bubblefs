@@ -18,7 +18,7 @@
 #endif
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 
 namespace CurrentThread {
 
@@ -102,5 +102,5 @@ void Thread::PthreadCall(const char* label, int result) {
   }
 }
 
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs

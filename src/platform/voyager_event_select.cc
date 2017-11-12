@@ -10,7 +10,7 @@
 #include "platform/voyager_logging.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 EventSelect::EventSelect(EventLoop* ev) : EventPoller(ev), nfds_(0) {
   FD_ZERO(&readfds_);
@@ -138,5 +138,5 @@ void EventSelect::UpdateDispatch(Dispatch* dispatch) {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

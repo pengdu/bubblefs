@@ -12,7 +12,7 @@
 #include "platform/voyager_event_poller.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class EventEpoll : public EventPoller {
  public:
@@ -32,7 +32,7 @@ class EventEpoll : public EventPoller {
   std::vector<struct epoll_event> epollfds_;
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_EVENT_EPOLL_H_

@@ -13,7 +13,7 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 class Thread;
 
@@ -55,7 +55,7 @@ class ThreadPool {
   void operator=(const ThreadPool&);
 };
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SIMPLE_THREADPOOL_H_

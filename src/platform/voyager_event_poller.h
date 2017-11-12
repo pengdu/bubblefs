@@ -13,7 +13,7 @@
 #include "utils/voyager_eventloop.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class EventPoller {
  public:
@@ -36,7 +36,7 @@ class EventPoller {
   void operator=(const EventPoller&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_EVENT_POLLER_H_

@@ -9,7 +9,7 @@
 #include <errno.h>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 const char Buffer::kCRLF[] = "\r\n";
 
@@ -37,5 +37,5 @@ ssize_t Buffer::ReadV(int socketfd) {
   return n;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

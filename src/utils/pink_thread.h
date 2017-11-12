@@ -14,7 +14,7 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class Thread {
  public:
@@ -68,7 +68,7 @@ class Thread {
   void operator=(const Thread&);
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_THREAD_H_

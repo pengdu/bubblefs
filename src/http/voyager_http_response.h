@@ -13,7 +13,7 @@
 #include "utils/voyager_buffer.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class HttpResponse : public HttpMessage {
  public:
@@ -45,7 +45,7 @@ class HttpResponse : public HttpMessage {
 
 typedef std::shared_ptr<HttpResponse> HttpResponsePtr;
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_HTTP_VOYAGER_HTTP_RESPONSE_H_

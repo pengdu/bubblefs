@@ -17,7 +17,7 @@
 #include "utils/mozilla_attributes.h"
 
 namespace bubblefs {
-namespace mozilla {
+namespace mymozilla {
 
 /*
  * This class implements a counting Bloom filter as described at
@@ -248,7 +248,7 @@ BloomFilter<KeySize, T>::mightContain(const T* aValue) const
   return mightContain(hash);
 }
 
-} // namespace mozilla
+} // namespace mymozilla
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_MOZILLA_BLOOM_FILTER_H_

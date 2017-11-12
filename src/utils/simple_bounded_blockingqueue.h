@@ -12,7 +12,7 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 template <typename T>
 class BoundedBlockingQueue {
@@ -96,7 +96,7 @@ class BoundedBlockingQueue {
   void operator=(const BoundedBlockingQueue&);
 };
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SIMPLE_BOUNDED_BLOCKINGQUEUE_H_

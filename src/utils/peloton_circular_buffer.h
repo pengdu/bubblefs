@@ -18,7 +18,7 @@
 #include "boost/circular_buffer.hpp"
 
 namespace bubblefs {
-namespace peloton {
+namespace mypeloton {
 
 template <typename ValueType>
 class CircularBuffer {
@@ -53,7 +53,7 @@ class CircularBuffer {
   circular_buffer_t circular_buffer_;
 };
 
-}  // namespace peloton
+}  // namespace mypeloton
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PELOTON_CIRCULAR_BUFFER_H_

@@ -17,7 +17,7 @@
 #include <unordered_map>
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 // 避免全局变量构造、析构顺序问题
 static std::unordered_map<int32_t, const char*> * g_error_string_map = NULL;
@@ -51,5 +51,5 @@ void SetErrorString(int32_t error_code, const char* error_string) {
     (*g_error_string_map)[error_code] = error_string;
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

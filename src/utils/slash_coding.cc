@@ -7,7 +7,7 @@
 #include "utils/slash_coding.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 void EncodeFixed32(char* buf, uint32_t value) {
   memcpy(buf, &value, sizeof(value));
@@ -200,5 +200,5 @@ bool GetLengthPrefixedString(std::string* input, std::string* result) {
   }
 }
 
-}  // namespace slash
+}  // namespace myslash
 }  // namespace bubblefs

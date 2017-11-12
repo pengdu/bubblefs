@@ -18,7 +18,7 @@
 #include "utils/pebble_random.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 TrueRandom::TrueRandom()
     : m_fd(-1) {
@@ -47,5 +47,5 @@ uint32_t TrueRandom::NextUInt32(uint32_t max_random) {
     return NextUInt32() % max_random;
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

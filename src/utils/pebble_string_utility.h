@@ -20,7 +20,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 class StringUtility {
 public:
@@ -65,7 +65,7 @@ public:
     static bool Bin2Hex(const char* bin_str, std::string* hex_str);
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PEBBLE_STRING_UTILITY_H_

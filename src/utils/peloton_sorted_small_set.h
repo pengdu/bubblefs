@@ -8,7 +8,7 @@
 #include <algorithm>
 
 namespace bubblefs {
-namespace peloton {
+namespace mypeloton {
 namespace index {
 
 /*
@@ -168,7 +168,7 @@ class SortedSmallSet {
 };
 
 } // namespace index
-} // namespace peloton
+} // namespace mypeloton
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PELOTON_SORTED_SMALL_SET_H_

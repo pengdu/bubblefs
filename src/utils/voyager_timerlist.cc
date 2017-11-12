@@ -9,7 +9,7 @@
 #include "utils/voyager_timeops.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class Timer {
  private:
@@ -135,5 +135,5 @@ void TimerList::RunTimerProcs() {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

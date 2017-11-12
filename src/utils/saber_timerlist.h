@@ -14,7 +14,7 @@
 #include "utils/saber_runloop.h"
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 
 class TimerList {
  public:
@@ -49,7 +49,7 @@ class TimerList {
   void operator=(const TimerList&);
 };
 
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SABER_TIMERLIST_H_

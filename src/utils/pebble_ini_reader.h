@@ -23,7 +23,7 @@
 #include "platform/macros.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 class INIReader {
  public:
@@ -92,7 +92,7 @@ private:
     std::map<std::string, std::map<std::string, std::string> > m_fields;
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PEBBLE_INI_READER_H_

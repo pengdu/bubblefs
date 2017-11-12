@@ -9,7 +9,7 @@
 #include <map>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 HttpRequest::HttpRequest() {}
 
@@ -110,5 +110,5 @@ Buffer& HttpRequest::RequestMessage() {
   return message_;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

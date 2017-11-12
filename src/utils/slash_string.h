@@ -40,7 +40,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 int stringmatchlen(const char *p, int plen, const char *s, int slen, int nocase);
 int stringmatch(const char *p, const char *s, int nocase);
@@ -59,7 +59,7 @@ std::string ToRead(const std::string& str);
 bool ParseIpPortString(const std::string& ip_port, std::string& ip, int &port);
 std::string StringTrim(const std::string& ori, const std::string& charlist = " ");
 
-}  // namespace slash
+}  // namespace myslash
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SLASH_STRING_H_

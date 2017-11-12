@@ -12,7 +12,7 @@
 #include <string>
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 #if defined(__GLIBC__) && !defined(__APPLE__) && !defined(__ANDROID__)
 # if __GLIBC_PREREQ(2, 12)
@@ -33,7 +33,7 @@ inline bool SetThreadName(pthread_t id, const std::string& name) {
 }
 #endif
 
-} // namespace pink
+} // namespace mypink
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PINK_THREAD_NAME_H_

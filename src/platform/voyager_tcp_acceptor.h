@@ -14,7 +14,7 @@
 #include "utils/voyager_dispatch.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class SockAddr;
 class EventLoop;
@@ -54,7 +54,7 @@ class TcpAcceptor {
   void operator=(const TcpAcceptor&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_TCP_ACCEPTOR_H_

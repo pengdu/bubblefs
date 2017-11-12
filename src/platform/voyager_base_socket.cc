@@ -12,7 +12,7 @@
 #include "platform/voyager_logging.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 BaseSocket::BaseSocket(int domain, bool nonblocking)
     : fd_(::socket(domain, SOCK_STREAM, IPPROTO_TCP)), need_close_(true) {
@@ -142,5 +142,5 @@ bool BaseSocket::IsSelfConnect() const {
   return memcmp(&localaddr, &peeraddr, sizeof(sockaddr_storage)) == 0;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

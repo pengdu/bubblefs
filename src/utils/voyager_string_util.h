@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 // Check if an ASCII character is alphanumberic.
 inline bool ascii_isalnum(char c) {
@@ -164,7 +164,7 @@ extern const std::string& SStringPrintf(std::string* dst, const char* format,
 // Append result into a supplied string.
 extern void StringAppendF(std::string* dst, const char* format, ...);
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_STRING_UTIL_H_

@@ -11,7 +11,7 @@
 #include "platform/voyager_event_poller.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class EventPoll : public EventPoller {
  public:
@@ -26,7 +26,7 @@ class EventPoll : public EventPoller {
   std::vector<struct pollfd> pollfds_;
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_EVENT_POLL_H_

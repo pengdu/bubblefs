@@ -37,7 +37,7 @@
 #include "utils/rdsn_callocator.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 template <typename T>
 std::shared_ptr<T> make_shared_array(size_t size)
@@ -353,7 +353,7 @@ inline void binary_writer::write(const blob &val)
         write((const char *)val.data(), len);
 }
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_BLOB_H_

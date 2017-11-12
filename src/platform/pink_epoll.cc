@@ -14,7 +14,7 @@
 #include "utils/pink_define.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 static const int kPinkMaxClients = 10240;
 
@@ -69,7 +69,7 @@ int PinkEpoll::PinkDelEvent(const int fd) {
 
 int PinkEpoll::PinkPoll(const int timeout) {
   int retval, numevents = 0;
-  retval = epoll_wait(epfd_, events_, PINK_MAX_CLIENTS, timeout);
+  retval = epoll_wait(epfd_, events_, MYPINK_MAX_CLIENTS, timeout);
   if (retval > 0) {
     numevents = retval;
     for (int i = 0; i < numevents; i++) {
@@ -94,5 +94,5 @@ int PinkEpoll::PinkPoll(const int timeout) {
   return numevents;
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

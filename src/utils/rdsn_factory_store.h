@@ -39,7 +39,7 @@
 #include "utils/rdsn_singleton_store.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
 
 enum provider_type
 {
@@ -170,7 +170,7 @@ private:
 
 } // namespace utils
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_FACTORY_STORE_H_

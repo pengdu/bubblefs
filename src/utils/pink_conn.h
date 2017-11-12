@@ -20,7 +20,7 @@
 #endif
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class Thread;
 
@@ -122,7 +122,7 @@ class ConnFactory {
     void* worker_private_data /* Has set in ThreadEnvHandle */) const = 0;
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_CONN_H_

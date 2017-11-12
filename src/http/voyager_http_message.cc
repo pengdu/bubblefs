@@ -8,7 +8,7 @@
 #include <string.h>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 const char* HttpMessage::kConnection = "Connection";
 const char* HttpMessage::kContentLength = "Content-Length";
@@ -82,5 +82,5 @@ void HttpMessage::TransferField(std::string* s) {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

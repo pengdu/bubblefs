@@ -10,7 +10,7 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 class CountDownLatch {
  public:
@@ -43,7 +43,7 @@ class CountDownLatch {
   int count_;
 };
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SIMPLE_COUNTDOWNLATCH_H_

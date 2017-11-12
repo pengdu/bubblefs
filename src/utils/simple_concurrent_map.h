@@ -12,7 +12,7 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 static const int kNumShardBits = 4;
 static const int kNumShards = 1 << kNumShardBits;
@@ -84,7 +84,7 @@ class ConcurrentMap {
   void operator=(const ConcurrentMap&);
 };
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SIMPLE_CONCURRENT_MAP_H_

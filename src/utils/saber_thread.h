@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 
 namespace CurrentThread {
 
@@ -44,7 +44,7 @@ class Thread {
   void operator=(const Thread&);
 };
 
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SABER_THREAD_H_

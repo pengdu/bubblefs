@@ -8,7 +8,7 @@
 #include <map>
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 Buffer& HttpResponse::ResponseMessage() {
   message_.Append(VersionToString());
@@ -29,5 +29,5 @@ Buffer& HttpResponse::ResponseMessage() {
   return message_;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

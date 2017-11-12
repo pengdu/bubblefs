@@ -13,7 +13,7 @@
 #include "utils/mozilla_attributes.h"
 
 namespace bubblefs {
-namespace mozilla {
+namespace mymozilla {
 
 template<class T, class C>
 class SplayTree;
@@ -322,7 +322,7 @@ SplayTree<T, Comparator>::findOrInsert(const T& aValue)
   return finishInsertion(last, cmp, new T(aValue));
 }
 
-}  // namespace mozilla
+}  // namespace mymozilla
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_MOZILLA_SPLAY_TREE_H_

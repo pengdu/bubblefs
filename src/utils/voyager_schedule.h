@@ -10,7 +10,7 @@
 #include "utils/voyager_bg_eventloop.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 class Schedule {
  public:
@@ -36,7 +36,7 @@ class Schedule {
   void operator=(const Schedule&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_SCHEDULE_H_

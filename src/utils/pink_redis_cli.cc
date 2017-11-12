@@ -15,7 +15,7 @@
 #include "utils/pink_cli.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class RedisCli : public PinkCli {
  public:
@@ -623,5 +623,5 @@ int SerializeRedisCommand(RedisCmdArgsType argv, std::string *cmd)  {
   return redisFormatCommandArgv(argv, cmd);
 }
 
-} // namespace pink
+} // namespace mypink
 } // namespace bubblefs

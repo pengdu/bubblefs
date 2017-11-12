@@ -9,7 +9,7 @@
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 
 void* RunLoopThread::StartRunLoop(void* data) {
   RunLoopThread* thread = reinterpret_cast<RunLoopThread*>(data);
@@ -49,5 +49,5 @@ void RunLoopThread::ThreadFunc() {
   loop_ = nullptr;
 }
 
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs

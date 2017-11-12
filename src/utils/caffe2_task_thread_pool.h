@@ -27,7 +27,7 @@
 #include <utility>
 
 namespace bubblefs {
-namespace caffe2 {
+namespace mycaffe2 {
   
 class TaskThreadPool{
  private:
@@ -163,7 +163,7 @@ class TaskThreadPool{
     }
 };
 
-} // namesapce caffe2
+} // namesapce mycaffe2
 } // namesapce bubblefs
 
 #endif // BUBBLEFS_UTILS_CAFFE2_TASK_THREAD_POOL_H_

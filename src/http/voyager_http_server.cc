@@ -10,7 +10,7 @@
 #include "platform/voyager_tcp_connection.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 HttpServer::HttpServer(EventLoop* ev, const SockAddr& addr,
                        const std::string& name, int thread_size)
@@ -70,5 +70,5 @@ void HttpServer::HandleMessage(const TcpConnectionPtr& ptr, Buffer* buf) {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

@@ -14,7 +14,7 @@
 #include "utils/pink_thread.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 struct TimerItem {
   uint64_t exec_time;
@@ -80,7 +80,7 @@ class BGThread : public Thread {
   virtual void *ThreadMain() override;
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_BG_THREAD_H_

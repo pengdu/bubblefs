@@ -8,7 +8,7 @@
 #include <pthread.h>
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 template <typename T>
 class ThreadLocalStorage {
@@ -36,7 +36,7 @@ class ThreadLocalStorage {
   void operator=(const ThreadLocalStorage&);
 };
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SIMPLE_THREADLOCAL_STORAGE_H_

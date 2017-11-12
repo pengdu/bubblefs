@@ -21,7 +21,7 @@
 #include "utils/pebble_uncopyable.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 class TrueRandom {
     DISALLOW_COPY_AND_ASSIGN(TrueRandom);
@@ -40,7 +40,7 @@ private:
     int32_t m_fd;
 }; // class TrueRandom
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PEBBLE_RANDOM_H_

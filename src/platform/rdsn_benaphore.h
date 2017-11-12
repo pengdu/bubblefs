@@ -14,7 +14,7 @@
 #include "platform/rdsn_sema.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 //---------------------------------------------------------
 // NonRecursiveBenaphore
@@ -142,7 +142,7 @@ public:
     }
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_RDSN_BENAPHORE_H_

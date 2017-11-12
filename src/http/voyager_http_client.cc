@@ -13,7 +13,7 @@
 #include "utils/voyager_eventloop.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 HttpClient::HttpClient(EventLoop* ev, uint64_t timeout)
     : eventloop_(ev), timeout_(timeout) {}
@@ -103,5 +103,5 @@ void HttpClient::HandleTimeout() {
   }
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

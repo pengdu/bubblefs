@@ -4,7 +4,7 @@
 #include "utils/simple_countdownlatch.h"
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 void Print(void* obj) { printf("%p, hello word!\n", obj); }
 
@@ -25,10 +25,10 @@ void Test(int poolsize) {
   pool.Stop();
 }
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 int main() {
-  bubblefs::simple::Test(4);
+  bubblefs::mysimple::Test(4);
   return 0;
 }

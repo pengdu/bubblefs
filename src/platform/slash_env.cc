@@ -31,7 +31,7 @@
 #include "platform/slash_xdebug.h"
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 static int PthreadCall(const char* label, int result) {
   if (result != 0) {
@@ -1495,5 +1495,5 @@ void StartThread(void* (*function)(void*), void* arg) {
   Pthread(function, arg, NULL);
 }
 
-} // namespace slash
+} // namespace myslash
 } // namespace bubblefs

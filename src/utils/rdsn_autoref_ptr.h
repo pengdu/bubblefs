@@ -33,7 +33,7 @@
 #include <atomic>
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 class ref_counter
 {
@@ -159,7 +159,7 @@ private:
     T *_obj;
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_AUTOREF_PTR_H_

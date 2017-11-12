@@ -15,7 +15,7 @@
 #include "utils/slash_string.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 static const uint32_t kHTTPMaxMessage = 1024 * 1024 * 8;
 static const uint32_t kHTTPMaxHeader = 1024 * 64;
@@ -114,7 +114,7 @@ bool Request::ParseHeadLine(const char* data, int line_start,
         if (data[i] != '\r' && data[i] != '\n') {
           param_value.push_back(data[i]);
         } else if (data[i] == '\r') {
-          headers[slash::StringToLower(param_key)] = param_value;
+          headers[myslash::StringToLower(param_key)] = param_value;
           *parseStatus = kHeaderParamKey;
         }
         break;
@@ -329,7 +329,7 @@ bool SimpleHTTPConn::BuildRequestHeader() {
     remain_packet_len_ = 0;
   } else {
     long tmp = 0;
-    if (slash::string2l(iter->second.data(), iter->second.size(), &tmp)) {
+    if (myslash::string2l(iter->second.data(), iter->second.size(), &tmp)) {
       remain_packet_len_ = tmp;
     } else {
       remain_packet_len_ = 0;
@@ -479,5 +479,5 @@ WriteStatus SimpleHTTPConn::SendReply() {
   return kWriteAll;
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

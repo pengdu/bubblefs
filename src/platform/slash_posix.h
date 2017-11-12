@@ -27,7 +27,7 @@
 #include <unistd.h>
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
   
 /* Default file permissions are DEF_MODE & ~DEF_UMASK */
 /* $begin createmasks */
@@ -162,7 +162,7 @@ int open_listenfd(int portno);
 int Open_clientfd(char *hostname, int port);
 int Open_listenfd(int port); 
 
-} // namespace slash
+} // namespace myslash
 } // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_SLASH_POSIX_H_

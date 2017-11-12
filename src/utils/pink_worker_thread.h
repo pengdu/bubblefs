@@ -23,7 +23,7 @@
 #include "utils/pink_thread.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 class PinkItem;
 class PinkEpoll;
@@ -100,7 +100,7 @@ class WorkerThread : public Thread {
   void Cleanup();
 };
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_PINK_WORKER_THREAD_H_

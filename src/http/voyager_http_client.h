@@ -17,7 +17,7 @@
 #include "utils/voyager_timerlist.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 
 // Noly write for test, which cann't use in produce environment!
 class HttpClient {
@@ -49,7 +49,7 @@ class HttpClient {
   void operator=(const HttpClient&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_HTTP_VOYAGER_HTTP_CLIENT_H_

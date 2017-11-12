@@ -16,7 +16,7 @@
 #include "utils/pebble_thread.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 Thread::Thread() {
     m_thread_id = 0;
@@ -49,5 +49,5 @@ void Thread::Exit() {
     ::pthread_exit(NULL);
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

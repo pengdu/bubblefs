@@ -12,7 +12,7 @@
 #include "utils/mozilla_attributes.h"
 
 namespace bubblefs {
-namespace mozilla {
+namespace mymozilla {
 
 /*
  * This class, and the corresponding macro MOZ_ALIGNOF, figures out how many
@@ -134,7 +134,7 @@ struct MOZ_INHERIT_TYPE_ANNOTATIONS_FROM_TEMPLATE_ARGS AlignedStorage2
   T* addr() { return static_cast<T*>(static_cast<void*>(u.mBytes)); }
 };
 
-} // namespace mozilla
+} // namespace mymozilla
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_MOZILLA_ALIGNMENT_H_

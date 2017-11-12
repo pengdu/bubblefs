@@ -14,7 +14,7 @@
 #include <utility>
 
 namespace bubblefs {
-namespace voyager {  
+namespace myvoyager {  
   
 void DefaultLogHandler(LogLevel level, const char* filename, int line,
                        const std::string& message) {
@@ -139,5 +139,5 @@ LogLevel SetLogLevel(LogLevel new_level) {
   return old_level;
 }
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs

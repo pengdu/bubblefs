@@ -12,7 +12,7 @@
 #include <time.h>
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 
 void DefaultLogHandler(LogLevel level, const char* filename, int line,
                        const char* format, va_list ap) {
@@ -103,5 +103,5 @@ LogLevel SetLogLevel(LogLevel new_level) {
   return old_level;
 }
 
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs

@@ -73,12 +73,12 @@ documentation and/or software.
 */
 
 namespace bubblefs {
-namespace slash {
+namespace myslash {
 
 std::string md5(const std::string &str, bool raw = false);
 std::string sha256(const std::string &input, bool raw = false);
 
-}  // namespace slash
+}  // namespace myslash
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_SLASH_HASH_H_

@@ -34,11 +34,11 @@
 #include "utils/rdsn_singleton.h"
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
-constexpr int DELAY_COUNT = 6;
-static const double s_default_delay_points[DELAY_COUNT] = {1.0, 1.2, 1.4, 1.6, 1.8, 2.0};
-static const int s_default_delay[DELAY_COUNT] = {0, 0, 1, 2, 5, 10}; // millieseconds
+constexpr int MYRDSN_DELAY_COUNT = 6;
+static const double s_default_delay_points[MYRDSN_DELAY_COUNT] = {1.0, 1.2, 1.4, 1.6, 1.8, 2.0};
+static const int s_default_delay[MYRDSN_DELAY_COUNT] = {0, 0, 1, 2, 5, 10}; // millieseconds
 
 class exp_delay
 {
@@ -51,7 +51,7 @@ public:
 
     void initialize(const std::vector<int> &delays, int threshold)
     {
-        assert((int)delays.size() == DELAY_COUNT);
+        assert((int)delays.size() == MYRDSN_DELAY_COUNT);
 
         int i = 0;
         for (auto &d : delays) {
@@ -68,11 +68,11 @@ public:
             double f = (double)value / (double)_threshold;
             int delay_milliseconds;
 
-            if (f < s_default_delay_points[DELAY_COUNT - 1]) {
+            if (f < s_default_delay_points[MYRDSN_DELAY_COUNT - 1]) {
                 int idx = static_cast<int>((f - 1.0) / 0.2);
                 delay_milliseconds = _delay[idx];
             } else {
-                delay_milliseconds = _delay[DELAY_COUNT - 1];
+                delay_milliseconds = _delay[MYRDSN_DELAY_COUNT - 1];
             }
 
             return delay_milliseconds;
@@ -82,7 +82,7 @@ public:
     }
 
 private:
-    int _delay[DELAY_COUNT];
+    int _delay[MYRDSN_DELAY_COUNT];
     int _threshold;
 };
 
@@ -93,7 +93,7 @@ public:
 
     void initialize(const std::vector<int> &delays)
     {
-        assert((int)delays.size() == DELAY_COUNT);
+        assert((int)delays.size() == MYRDSN_DELAY_COUNT);
 
         int i = 0;
         for (auto &d : delays) {
@@ -107,11 +107,11 @@ public:
             double f = (double)value / (double)threshold;
             int delay_milliseconds;
 
-            if (f < s_default_delay_points[DELAY_COUNT - 1]) {
+            if (f < s_default_delay_points[MYRDSN_DELAY_COUNT - 1]) {
                 int idx = static_cast<int>((f - 1.0) / 0.2);
                 delay_milliseconds = _delay[idx];
             } else {
-                delay_milliseconds = _delay[DELAY_COUNT - 1];
+                delay_milliseconds = _delay[MYRDSN_DELAY_COUNT - 1];
             }
 
             return delay_milliseconds;
@@ -121,10 +121,10 @@ public:
     }
 
 private:
-    int _delay[DELAY_COUNT];
+    int _delay[MYRDSN_DELAY_COUNT];
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_EXP_DELAY_H_

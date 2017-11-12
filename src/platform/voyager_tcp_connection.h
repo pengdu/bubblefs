@@ -18,7 +18,7 @@
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-namespace voyager {  
+namespace myvoyager {  
   
 class Dispatch;
 class EventLoop;
@@ -126,7 +126,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
   void operator=(const TcpConnection&);
 };
 
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_PLATFORM_VOYAGER_TCP_CONNECTION_H_

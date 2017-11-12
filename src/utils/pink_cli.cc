@@ -16,7 +16,7 @@
 #include <unistd.h>
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 struct PinkCli::Rep {
   std::string peer_ip;
@@ -280,5 +280,5 @@ void DeletePinkCli(PinkCli** cli) {
   *cli = nullptr;
 }  
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

@@ -21,7 +21,7 @@
 #include "platform/types.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 std::string GetSelfName();
 
@@ -54,7 +54,7 @@ private:
     FILE*       m_file;
 };
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PEBBLE_FILE_UTIL_H_

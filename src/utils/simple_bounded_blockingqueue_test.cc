@@ -11,7 +11,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
 
 class BoundedBlockingQueueTest {
  public:
@@ -69,11 +69,11 @@ class BoundedBlockingQueueTest {
   std::vector<Thread*> threads_;
 };
 
-}  // namespace simple
+}  // namespace mysimple
 }  // namespace bubblefs
 
 int main() {
-  bubblefs::simple::BoundedBlockingQueueTest t(4);
+  bubblefs::mysimple::BoundedBlockingQueueTest t(4);
   t.Task(100);
   t.Join();
   return 0;

@@ -12,7 +12,7 @@
 #include "google/protobuf/message.h"
 
 namespace bubblefs {
-namespace pink {
+namespace mypink {
 
 // Default PBCli is block IO;
 class PbCli : public PinkCli {
@@ -91,5 +91,5 @@ PinkCli *NewPbCli(const std::string& peer_ip, const int peer_port) {
   return new PbCli(peer_ip, peer_port);
 }
 
-}  // namespace pink
+}  // namespace mypink
 }  // namespace bubblefs

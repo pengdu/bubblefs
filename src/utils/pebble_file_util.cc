@@ -22,7 +22,7 @@
 #include "utils/pebble_file_util.h"
 
 namespace bubblefs {
-namespace pebble {
+namespace mypebble {
 
 /// @brief 获取当前程序名
 std::string GetSelfName() {
@@ -170,5 +170,5 @@ void RollUtil::Flush() {
     }
 }
 
-} // namespace pebble
+} // namespace mypebble
 } // namespace bubblefs

@@ -32,7 +32,7 @@
 #include <assert.h>
 
 namespace bubblefs {
-namespace rdsn {
+namespace myrdsn {
   
 //
 // assuming public T::T* next; exists and inited to nullptr in T::T(...)
@@ -202,7 +202,7 @@ private:
     dlink *_prev;
 };
 
-} // namespace rdsn
+} // namespace myrdsn
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_RDSN_SLIST_H_

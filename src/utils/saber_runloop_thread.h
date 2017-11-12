@@ -12,7 +12,7 @@
 #include "utils/saber_thread.h"
 
 namespace bubblefs {
-namespace saber {
+namespace mysaber {
 
 class RunLoopThread {
  public:
@@ -36,7 +36,7 @@ class RunLoopThread {
   void operator=(const RunLoopThread&);
 };
 
-}  // namespace saber
+}  // namespace mysaber
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_SABER_RUNLOOP_THREAD_H_

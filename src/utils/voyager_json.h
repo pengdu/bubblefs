@@ -14,7 +14,7 @@
 #include "utils/voyager_json_value.h"
 
 namespace bubblefs {
-namespace voyager {
+namespace myvoyager {
 namespace json {
 
 // 读字符串类
@@ -93,7 +93,7 @@ class Json {
 };
 
 }  // namespace json
-}  // namespace voyager
+}  // namespace myvoyager
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_VOYAGER_JSON_H_

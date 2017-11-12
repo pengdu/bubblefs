@@ -16,7 +16,7 @@
 #include <sstream>
 
 namespace bubblefs {
-namespace peloton {
+namespace mypeloton {
   
 // Get a string representation for debugging
 std::ostream &operator<<(std::ostream &os, const Printable &printable) {
@@ -24,5 +24,5 @@ std::ostream &operator<<(std::ostream &os, const Printable &printable) {
   return os;
 };
 
-}  // namespace peloton
+}  // namespace mypeloton
 }  // namespace bubblefs
