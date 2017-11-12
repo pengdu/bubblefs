@@ -28,7 +28,7 @@ limitations under the License. */
 #include "platform/mutexlock.h"
 
 namespace bubblefs {
-namespace paddle {
+namespace mypaddle {
   
 /**
  * A thread-safe queue that automatically grows but never shrinks.
@@ -260,7 +260,7 @@ private:
   size_t capacity_;
 };  
 
-}  // namespace paddle
+}  // namespace mypaddle
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PADDLE_BLOCKING_QUEUE_H_

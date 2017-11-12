@@ -29,7 +29,7 @@
 #include <sstream>
 
 namespace bubblefs {
-namespace palo {
+namespace mypalo {
 
 std::list<Register::Field>* Register::_s_fieldlist = NULL;
 std::map<std::string, std::string>* confmap = NULL;
@@ -273,5 +273,5 @@ bool init(const char* filename, bool fillconfmap) {
     return true;
 }
 
-} // namespace palo
+} // namespace mypalo
 } // namespace bubblefs

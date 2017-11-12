@@ -17,7 +17,7 @@ limitations under the License. */
 #include <vector>
 
 namespace bubblefs {
-namespace paddle {
+namespace mypaddle {
   
 static std::recursive_mutex g_pyMutex;
 
@@ -152,5 +152,5 @@ void initPython(int argc, char** argv) {
   PyRun_SimpleString(enable_virtualenv_py);
 }
 
-}  // namespace paddle
+}  // namespace mypaddle
 }  // namespace bubblefs

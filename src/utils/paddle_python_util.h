@@ -11,8 +11,6 @@ limitations under the License. */
 
 // Paddle/paddle/utils/PythonUtil.h
 
-//#pragma once
-
 #ifndef BUBBLEFS_UTILS_PADDLE_PYTHON_UTIL_H_
 #define BUBBLEFS_UTILS_PADDLE_PYTHON_UTIL_H_
 
@@ -27,7 +25,7 @@ limitations under the License. */
 #include "platform/logging.h"
 
 namespace bubblefs {
-namespace paddle {
+namespace mypaddle {
   
 std::string callPythonFunc(const std::string& moduleName,
                            const std::string& funcName,
@@ -332,7 +330,7 @@ inline PyObject* iterNext(const PyObjectPtr& context, bool* atEnd) {
  */
 void initPython(int argc, char** argv);
 
-}  // namespace paddle
+}  // namespace mypaddle
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_PADDLE_PYTHON_UTIL_H_
