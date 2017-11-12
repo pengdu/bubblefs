@@ -21,7 +21,7 @@
 #include "gtest/gtest.h"
 
 namespace bubblefs {
-namespace apollo {
+namespace myapollo {
 
 class Base {
  public:
@@ -93,5 +93,5 @@ TEST(FactoryTest, TwoArgConstructor) {
   EXPECT_EQ(10, ptr->Value());
 }
 
-}  // namespace apollo
+}  // namespace myapollo
 }  // namespace bubblefs

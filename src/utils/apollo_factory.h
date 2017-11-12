@@ -34,7 +34,7 @@
  * @brief apollo::common::util
  */
 namespace bubblefs {
-namespace apollo {
+namespace myapollo {
 
 /**
  * @class Factory
@@ -100,7 +100,7 @@ class Factory {
   MapContainer producers_;
 };
 
-}  // namespace apollo
+}  // namespace myapollo
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_APOLLO_FACTORY_H_
