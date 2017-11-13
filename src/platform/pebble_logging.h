@@ -184,8 +184,8 @@ private:
             static int32_t PEBBLE_LOG_CNT_VAR = 0; static int64_t PEBBLE_START_TIME_VAR = 0; \
             if (PEBBLE_START_TIME_VAR == 0) { PEBBLE_START_TIME_VAR = ::bubblefs::mypebble::Log::Instance().GetCurrentTime(); } \
             int64_t PEBBLE_NOW_TIME_VAR = ::bubblefs::mypebble::Log::Instance().GetCurrentTime(); \
-            if (PEBBLE_START_TIME_VAR + 1000000 < NOW_TIME_VAR) { \
-                PEBBLE_START_TIME_VAR = NOW_TIME_VAR; \
+            if (PEBBLE_START_TIME_VAR + 1000000 < PEBBLE_NOW_TIME_VAR) { \
+                PEBBLE_START_TIME_VAR = PEBBLE_NOW_TIME_VAR; \
                 if (PEBBLE_LOG_CNT_VAR > num) { \
                     ::bubblefs::mypebble::Log::Instance().Write(pri, __FILE__, __LINE__, __FUNCTION__, \
                         "discard %d logs last second", PEBBLE_LOG_CNT_VAR - num); \
