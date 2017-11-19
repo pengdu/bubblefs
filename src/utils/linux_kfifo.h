@@ -95,17 +95,17 @@ struct __kfifo {
 #define STRUCT_KFIFO_PTR(type) \
         struct __STRUCT_KFIFO_PTR(type, 0, type)
 
-#define STRUCT_KFIFO_REC_1(size) \
-        struct __STRUCT_KFIFO(unsigned char, size, 1, void)
+//#define STRUCT_KFIFO_REC_1(size) \
+//        struct __STRUCT_KFIFO(unsigned char, size, 1, void)
 
-#define STRUCT_KFIFO_REC_2(size) \
-        struct __STRUCT_KFIFO(unsigned char, size, 2, void)
+//#define STRUCT_KFIFO_REC_2(size) \
+//        struct __STRUCT_KFIFO(unsigned char, size, 2, void)
 
 /*
  * define kfifo_rec types
  */
-struct kfifo_rec_ptr_1 __STRUCT_KFIFO_PTR(unsigned char, 1, void);
-struct kfifo_rec_ptr_2 __STRUCT_KFIFO_PTR(unsigned char, 2, void);
+//struct kfifo_rec_ptr_1 __STRUCT_KFIFO_PTR(unsigned char, 1, void);
+//struct kfifo_rec_ptr_2 __STRUCT_KFIFO_PTR(unsigned char, 2, void);
 
 /*
  * helper macro to distinguish between real in place fifo where the fifo
