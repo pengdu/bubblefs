@@ -24,7 +24,7 @@
 #include <cstddef>
 
 namespace bubblefs {
-namespace simple {
+namespace mysimple {
   
 template<typename Element, size_t Size> 
 class CircularFifo{
@@ -106,7 +106,7 @@ size_t CircularFifo<Element, Size>::increment(size_t idx) const
   return (idx + 1) % Capacity;
 }
 
-} // namespace simple
+} // namespace mysimple
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_SIMPLE_LOCKFREE_CIRCULAR_FIFO_H_
