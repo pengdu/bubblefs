@@ -7,7 +7,6 @@
 #include <sys/msg.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <list>
 #include <string>
 
 namespace bubblefs {
@@ -15,22 +14,16 @@ namespace mysimple {
 
 /*Open a socket bond with the specific IP address and port number. Return fd of the opened socket if success, otherwise -1.*/
 int unix_tcp_open(char *ip, unsigned int port);
-
 /*Close an opened socket*/
 int unix_tcp_close(int sockfd);
-
 /*Listen on the specific socket. Return 0 if success. Otherwise -1*/
 int unix_tcp_listen(int sockfd);
-
 /*Connect to the specific remote ip/port. Return sockfd if success. Otherwise return -1.*/
 int unix_tcp_connect(char *ip, unsigned int port);
-
 /*Non-blocking accept method. Wait 1ms to accepte incoming connections. Return new sockfd if success. Otherwise return 0 indicating no connection accepted.*/
 int unix_tcp_poll_accept(int sockfd);
-
 /*Non-blocking send method. Return whole len if no error occurs. Otherwise return <=0 value*/
 int unix_tcp_poll_send(int sockfd, char *buf, unsigned int buf_len);
-
 /*Non-blocking receive method. Return whole len if no error occurs. Otherwise return <=0 */
 int unix_tcp_poll_recv(int sockfd, char *buf, unsigned int buf_len);
 
