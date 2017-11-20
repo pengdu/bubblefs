@@ -22,15 +22,12 @@ namespace bubblefs {
   
 void InitializeLogging(int argc, char** argv) {
   (void)(argc);
-#if TF_USE_GLOG
   if (!getenv("GLOG_logtostderr")) {
     google::LogToStderr();
   }
   google::InstallFailureSignalHandler();
   google::InitGoogleLogging(argv[0]);
-#endif
 }
-
 
 void SetupLog(const std::string& name) {
     // log info/warning/error/fatal to tera.log
@@ -54,27 +51,17 @@ void SetupLog(const std::string& name) {
     google::SetLogSymlink(google::FATAL, "");
 }
 
-namespace logging {
-
 void SetMinLogLevel(int level) {
-#if TF_USE_GLOG
   FLAGS_minloglevel = level; 
-#endif
 }
 
 void InstallFailureFunction(void (*callback)()) {
-#if TF_USE_GLOG
   google::InstallFailureFunction(callback);
-#endif
 }
 
 void InstallFailureWriter(void (*callback)(const char*, int)) {
-#if TF_USE_GLOG
   google::InstallFailureWriter(callback);
-#endif
 }
-
-}  // namespace logging
 
 void LoggerUtil::FlushLogFiles() { google::FlushLogFiles(google::INFO); }
 
@@ -96,7 +83,7 @@ void InternalLogOpen(
   }
   google::InitGoogleLogging(log_fname);
 }
-}
+} // namespace
 
 void LoggerUtil::Initialize(const char* log_fname) {
   InternalLogOpen(log_fname);

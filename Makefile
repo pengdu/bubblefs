@@ -14,7 +14,6 @@ include $(PROJECT_DIR)/depends.mk
 INCLUDE_PATH = -I$(PROJECT_DIR)/src \
                -I$(TBB_PATH)/include \
                -I$(BOOST_PATH) \
-               -I$(LIBCO_PATH)/include \
                -I$(RAPIDJSON_PATH)/include \
                -isystem $(GTEST_PATH)/include \
                -I$(SNAPPY_PATH)/include \
@@ -24,14 +23,13 @@ INCLUDE_PATH = -I$(PROJECT_DIR)/src \
                -I$(GPERFTOOLS_PATH)/include
 
 LDFLAGS = -L$(TBB_PATH)/lib -ltbb -Wl,-rpath=$(TBB_PATH)/lib \
-          -L$(LIBCO_PATH)/lib -lcolib \
           -L$(GTEST_PATH)/lib -lgtest \
           -L$(SNAPPY_PATH)/lib -lsnappy \
           -L$(LEVELDB_PATH)/lib -lleveldb \
           -L$(PROTOBUF_PATH)/lib -lprotobuf \
           -L$(SOFA_PBRPC_PATH)/lib -lsofa-pbrpc \
           -L$(GPERFTOOLS_PATH)/lib -ltcmalloc_minimal \
-          -lglog -lgflags -lpthread -lstdc++ -ldl -lz -lrt
+          -lgflags -lpthread -lstdc++ -ldl -lz -lrt
 
 SO_LDFLAGS += -rdynamic $(DEPS_LDPATH) $(SO_DEPS_LDFLAGS) -lpthread -lrt -lz -ldl \
               -shared -Wl,--version-script,so-version-script # hide symbol of third_party libs

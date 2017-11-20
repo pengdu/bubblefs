@@ -30,33 +30,15 @@ limitations under the License. */
 #include "platform/platform.h"
 #if TF_USE_GLOG
 #include "glog/logging.h"
-namespace bubblefs {
-  
-#if defined(NDEBUG) && defined(OS_CHROMEOS)
-#define NOTREACHED() LOG(ERROR) << "NOTREACHED() hit in "       \
-    << __FUNCTION__ << ". "
-#else
-#define NOTREACHED() DCHECK(false)
-#endif  
+namespace bubblefs { 
   
 void InitializeLogging(int argc, char** argv);
 
 void SetupLog(const std::string& program_name);
 
-namespace logging {
-
 void SetMinLogLevel(int level);
 void InstallFailureFunction(void (*callback)());
 void InstallFailureWriter(void (*callback)(const char*, int));
-
-}  // namespace logging
-
-namespace internal {
-// Emit "message" as a log message to the log for the specified
-// "severity" as if it came from a LOG call at "fname:line"
-void LogString(const char* fname, int line, int severity,
-               const std::string& message);
-}  // namespace internal
 
 // indexfs/common/logging.h
 struct LoggerUtil {
@@ -75,10 +57,29 @@ struct LoggerUtil {
   //
   static void Initialize(const char* log_fname);
 };
+
 }  // namespace bubblefs
 #else
 // use a light version of glog
 #include "platform/logging_default.h"
 #endif // TF_USE_GLOG
+
+#if defined(NDEBUG) && defined(OS_CHROMEOS)
+#define NOTREACHED() LOG(ERROR) << "NOTREACHED() hit in "       \
+    << __FUNCTION__ << ". "
+#else
+#define NOTREACHED() DCHECK(false)
+#endif 
+    
+namespace bubblefs {
+
+namespace internal {
+// Emit "message" as a log message to the log for the specified
+// "severity" as if it came from a LOG call at "fname:line"
+void LogString(const char* fname, int line, int severity,
+               const string& message);
+}  // namespace internal
+
+}  // namespace bubblefs 
 
 #endif  // BUBBLEFS_PLATFORM_LOGGING_H_
