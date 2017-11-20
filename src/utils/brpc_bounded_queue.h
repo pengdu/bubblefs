@@ -22,7 +22,9 @@
 #ifndef BUBBLEFS_UTILS_BRPC_BOUNDED_QUEUE_H_
 #define BUBBLEFS_UTILS_BRPC_BOUNDED_QUEUE_H_
 
-#include "platform/logging.h"
+#include <malloc.h>
+#include <utility>
+#include "platform/base_error.h"
 #include "platform/macros.h"
 
 namespace bubblefs {
@@ -62,7 +64,7 @@ public:
         , _start(0)
         , _ownership(ownership)
         , _items(mem) {
-        DCHECK(_items);
+        PANIC_ENFORCE_EQ(_items != nullptr, true);
     };
     
     // Construct a queue with the given capacity.
@@ -74,7 +76,7 @@ public:
         , _start(0)
         , _ownership(OWNS_STORAGE)
         , _items(malloc(capacity * sizeof(T))) {
-        DCHECK(_items);
+        PANIC_ENFORCE_EQ(_items != nullptr, true);
     };
     
     BoundedQueue()

@@ -37,11 +37,6 @@
 
 namespace bubblefs {
 namespace mybrpc {
-
-// 基础库不输出log到文件
-#define DBG(fmt, ...) PRINTF_INFO(fmt, ##__VA_ARGS__)
-#define INFO(fmt, ...) PRINTF_INFO(fmt, ##__VA_ARGS__)
-#define ERR(fmt, ...) LOG_MESSAGE((m_last_error), (sizeof(m_last_error)), fmt, ##__VA_ARGS__)
   
 int unix_socket_listen(const char* sockname, bool remove_previous_file) {
     struct sockaddr_un addr;

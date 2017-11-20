@@ -19,7 +19,7 @@
 
 /*! \brief whether use glog for logging */
 #ifndef TF_USE_GLOG
-#define TF_USE_GLOG 1
+#define TF_USE_GLOG 0
 #endif
 
 #ifndef TF_USE_JEMALLOC
