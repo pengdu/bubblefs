@@ -16,13 +16,15 @@ limitations under the License. */
 
 #include "platform/macros.h"
 
-#include <python2.7/Python.h>
-#include <python2.7/frameobject.h>
 #include <stdarg.h>
 #include <memory>
 #include <map>
 #include <mutex>
+#include <vector>
 #include "platform/logging.h"
+
+#include <python2.7/Python.h>
+#include <python2.7/frameobject.h>
 
 namespace bubblefs {
 namespace mypaddle {

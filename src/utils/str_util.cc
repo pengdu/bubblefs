@@ -1306,7 +1306,7 @@ bool SplitStringIntoKeyValue(const string& line,
   // Find the delimiter.
   size_t end_key_pos = line.find_first_of(key_value_delimiter);
   if (end_key_pos == string::npos) {
-    DVLOG(1) << "cannot find delimiter in: " << line;
+    fprintf(stderr, "cannot find delimiter in: %s\n", line.c_str());
     return false;    // no delimiter
   }
   key->assign(line, 0, end_key_pos);
@@ -1315,7 +1315,7 @@ bool SplitStringIntoKeyValue(const string& line,
   string remains(line, end_key_pos, line.size() - end_key_pos);
   size_t begin_value_pos = remains.find_first_not_of(key_value_delimiter);
   if (begin_value_pos == string::npos) {
-    DVLOG(1) << "cannot parse value from line: " << line;
+    fprintf(stderr, "cannot parse value from line: %s\n", line.c_str());
     return false;   // no value
   }
   value->assign(remains, begin_value_pos, remains.size() - begin_value_pos);

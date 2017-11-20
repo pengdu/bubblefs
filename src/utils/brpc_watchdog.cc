@@ -112,7 +112,7 @@ void Watchdog::Disarm() {
 }
 
 void Watchdog::Alarm() {
-  DVLOG(1) << "Watchdog alarmed for " << thread_watched_name_;
+  fprintf(stdout, "Watchdog alarmed for %s\n", thread_watched_name_.c_str());
 }
 
 //------------------------------------------------------------------------------
@@ -172,7 +172,7 @@ void Watchdog::ThreadDelegate::ThreadMain() {
 void Watchdog::ThreadDelegate::SetThreadName() const {
   std::string name = watchdog_->thread_watched_name_ + " Watchdog";
   PlatformThread::SetName(name.c_str());
-  DVLOG(1) << "Watchdog active: " << name;
+  fprintf(stdout, "Watchdog active: %s\n", name.c_str());
 }
 
 // static

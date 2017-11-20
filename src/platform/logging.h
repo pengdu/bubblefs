@@ -30,11 +30,6 @@ limitations under the License. */
 #include "platform/platform.h"
 #if TF_USE_GLOG
 #include "glog/logging.h"
-#else
-// use a light version of glog
-#include "platform/logging_default.h"
-#endif // TF_USE_GLOG
-
 namespace bubblefs {
   
 #if defined(NDEBUG) && defined(OS_CHROMEOS)
@@ -80,7 +75,10 @@ struct LoggerUtil {
   //
   static void Initialize(const char* log_fname);
 };
-
 }  // namespace bubblefs
+#else
+// use a light version of glog
+#include "platform/logging_default.h"
+#endif // TF_USE_GLOG
 
 #endif  // BUBBLEFS_PLATFORM_LOGGING_H_

@@ -17,6 +17,7 @@ limitations under the License. */
 
 #include "platform/logging.h"
 
+#if TF_USE_GLOG
 namespace bubblefs {
   
 void InitializeLogging(int argc, char** argv) {
@@ -105,3 +106,4 @@ void LoggerUtil::Initialize(const char* log_fname) {
 void LoggerUtil::Shutdown() { google::ShutdownGoogleLogging(); }
 
 }  // namespace bubblefs
+#endif // TF_USE_GLOG

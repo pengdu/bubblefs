@@ -118,7 +118,8 @@ bool CreateThread(size_t stack_size, bool joinable,
     // Value of |handle| is undefined if pthread_create fails.
     handle = 0;
     errno = err;
-    PLOG(ERROR) << "pthread_create";
+    //PLOG(ERROR) << "pthread_create";
+    return false;
   }
 
   pthread_attr_destroy(&attributes);
@@ -269,7 +270,7 @@ void PlatformThread::SetName(const char* name) {
   int err = prctl(PR_SET_NAME, name);
   // We expect EPERM failures in sandboxed processes, just ignore those.
   if (err < 0 && errno != EPERM)
-    DLOG(ERROR) << "prctl(PR_SET_NAME)";
+    fprintf(stderr, "prctl(PR_SET_NAME)\n");
 #endif  //  !defined(OS_NACL)
 }
 
@@ -292,8 +293,7 @@ void PlatformThread::SetThreadPriority(PlatformThreadHandle handle,
   DCHECK_NE(handle.id_, kInvalidThreadId);
   const int kNiceSetting = ThreadNiceValue(priority);
   if (setpriority(PRIO_PROCESS, handle.id_, kNiceSetting)) {
-    DLOG(ERROR) << "Failed to set nice value of thread ("
-              << handle.id_ << ") to " << kNiceSetting;
+    fprintf(stderr, "Failed to set nice value of thread (%d) to %d\n", (int)handle.id_, kNiceSetting);
   }
 #endif  //  !defined(OS_NACL)
 }
