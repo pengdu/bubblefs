@@ -55,7 +55,7 @@ using mybdcom::FATAL;
 
 } // namespace bubblefs
 
-#define MYBDCOM_LOG(level, fmt, args...) ::bubblefs::mybdcom::LogC(level, "[%s:%d] " fmt, __FILE__, __LINE__, ##args)
-#define MYBDCOM_LOGS(level) ::bubblefs::mybdcom::LogStream(level)
+#define LOG(level, fmt, args...) ::bubblefs::mybdcom::LogC(level, "[%s:%d] " fmt, __FILE__, __LINE__, ##args)
+#define LOGS(level) ::bubblefs::mybdcom::LogStream(level)
 
 #endif // BUBBLEFS_PLATFORM_BDCOM_LOGGING_H_

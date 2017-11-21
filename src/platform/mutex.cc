@@ -58,18 +58,17 @@ void InitOnce(OnceType* once, void (*initializer)()) {
 }  
 
 Mutex::Mutex() : owner_(0) {
-  // PthreadCall("init mutex", pthread_mutex_init(&mu_, NULL));
-  // prevent called by the same thread.
-  pthread_mutexattr_t attr;
-  PthreadCall("init mutexattr", pthread_mutexattr_init(&attr));
-  PthreadCall("set mutexattr errorcheck", pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK));
-  PthreadCall("init mutex errorcheck", pthread_mutex_init(&mu_, &attr));
-  PthreadCall("destroy mutexattr errorcheck", pthread_mutexattr_destroy(&attr));
+  PthreadCall("init mutex default", pthread_mutex_init(&mu_, nullptr));
 }
 
 Mutex::Mutex(bool adaptive) : owner_(0) {
   if (!adaptive) {
-    PthreadCall("init mutex default", pthread_mutex_init(&mu_, nullptr));
+    // prevent called by the same thread.
+    pthread_mutexattr_t attr;
+    PthreadCall("init mutexattr", pthread_mutexattr_init(&attr));
+    PthreadCall("set mutexattr errorcheck", pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK));
+    PthreadCall("init mutex errorcheck", pthread_mutex_init(&mu_, &attr));
+    PthreadCall("destroy mutexattr errorcheck", pthread_mutexattr_destroy(&attr));
   } else {
     pthread_mutexattr_t mutex_attr;
     PthreadCall("init mutexattr", pthread_mutexattr_init(&mutex_attr));
@@ -382,7 +381,7 @@ void RecordMutex::Unlock(const std::string &key) {
 }
 
 CondLock::CondLock() {
-  PthreadCall("init condlock", pthread_mutex_init(&mutex_, NULL));
+  PthreadCall("init condlock", pthread_mutex_init(&mutex_, nullptr));
 }
 
 CondLock::~CondLock() {
