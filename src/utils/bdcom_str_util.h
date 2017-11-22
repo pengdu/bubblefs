@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sstream>
 #include <string>
 #include <vector>
 #include "utils/bdcom_ascii.h"
@@ -21,6 +22,274 @@
 namespace bubblefs {
 namespace mybdcom {
 
+extern const std::string kNullptrString;  
+
+// stringfy
+template <typename T>
+inline std::string ToString(T value) {
+#if !(defined OS_ANDROID) && !(defined CYGWIN) && !(defined OS_FREEBSD)
+  return std::to_string(value);
+#else
+  // Andorid or cygwin doesn't support all of C++11, std::to_string() being
+  // one of the not supported features.
+  std::ostringstream os;
+  os << value;
+  return os.str();
+#endif
+}
+
+// ----------------------------------------------------------------------
+// ascii_isalnum()
+//    Check if an ASCII character is alphanumeric.  We can't use ctype's
+//    isalnum() because it is affected by locale.  This function is applied
+//    to identifiers in the protocol buffer language, not to natural-language
+//    strings, so locale should not be taken into account.
+// ascii_isdigit()
+//    Like above, but only accepts digits.
+// ascii_isspace()
+//    Check if the character is a space character.
+// ----------------------------------------------------------------------
+
+inline bool ascii_isalnum(char c) {
+  return ('a' <= c && c <= 'z') ||
+         ('A' <= c && c <= 'Z') ||
+         ('0' <= c && c <= '9');
+}
+
+inline bool ascii_isdigit(char c) {
+  return ('0' <= c && c <= '9');
+}
+
+inline bool ascii_isspace(char c) {
+  return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' ||
+      c == '\r';
+}
+
+inline bool ascii_isupper(char c) {
+  return c >= 'A' && c <= 'Z';
+}
+
+inline bool ascii_islower(char c) {
+  return c >= 'a' && c <= 'z';
+}
+
+inline char ascii_toupper(char c) {
+  return ascii_islower(c) ? c - ('a' - 'A') : c;
+}
+
+inline char ascii_tolower(char c) {
+  return ascii_isupper(c) ? c + ('a' - 'A') : c;
+}
+
+inline int hex_digit_to_int(char c) {
+  /* Assume ASCII. */
+  int x = static_cast<unsigned char>(c);
+  if (x > '9') {
+    x += 9;
+  }
+  return x & 0xf;
+}  
+
+inline bool IsVisible(char c) {
+  return (c >= 0x20 && c <= 0x7E);
+}
+
+// 2 small internal utility functions, for efficient hex conversions
+// and no need for snprintf, toupper etc...
+// Originally from wdt/util/EncryptionUtils.cpp - for ToString(true)/DecodeHex:
+static inline char ToHex(uint8_t v) {
+  if (v <= 9) {
+    return '0' + v;
+  }
+  return 'A' + v - 10;
+}
+
+// most of the code is for validation/error check
+inline int FromHex(char c) {
+  // toupper:
+  if (c >= 'a' && c <= 'f') {
+    c -= ('a' - 'A');  // aka 0x20
+  }
+  // validation
+  if (c < '0' || (c > '9' && (c < 'A' || c > 'F'))) {
+    return -1;  // invalid not 0-9A-F hex char
+  }
+  if (c <= '9') {
+    return c - '0';
+  }
+  return c - 'A' + 10;
+}
+
+// ASCII-specific tolower.  The standard library's tolower is locale sensitive,
+// so we don't want to use it here.
+inline char ToLowerASCII(char c) {
+  return (c >= 'A' && c <= 'Z') ? (c + ('a' - 'A')) : c;
+}
+inline uint16_t ToLowerASCII(uint16_t c) {
+  return (c >= 'A' && c <= 'Z') ? (c + ('a' - 'A')) : c;
+}
+
+// ASCII-specific toupper.  The standard library's toupper is locale sensitive,
+// so we don't want to use it here.
+inline char ToUpperASCII(char c) {
+  return (c >= 'a' && c <= 'z') ? (c + ('A' - 'a')) : c;
+}
+inline uint16_t ToUpperASCII(uint16_t c) {
+  return (c >= 'a' && c <= 'z') ? (c + ('A' - 'a')) : c;
+}
+
+// Function objects to aid in comparing/searching strings.
+// butil::CaseInsensitiveCompare<typename STR::value_type>()
+template<typename Char> struct CaseInsensitiveCompare {
+ public:
+  bool operator()(Char x, Char y) const {
+    // TODO(darin): Do we really want to do locale sensitive comparisons here?
+    // See http://crbug.com/24917
+    return tolower(x) == tolower(y);
+  }
+};
+
+template<typename Char> struct CaseInsensitiveCompareASCII {
+ public:
+  bool operator()(Char x, Char y) const {
+    return ToLowerASCII(x) == ToLowerASCII(y);
+  }
+};
+
+// Determines the type of ASCII character, independent of locale (the C
+// library versions will change based on locale).
+template <typename Char>
+inline bool IsAsciiWhitespace(Char c) {
+  return c == ' ' || c == '\r' || c == '\n' || c == '\t';
+}
+template <typename Char>
+inline bool IsAsciiAlpha(Char c) {
+  return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+template <typename Char>
+inline bool IsAsciiUpper(Char c) {
+  return c >= 'A' && c <= 'Z';
+}
+template <typename Char>
+inline bool IsAsciiLower(Char c) {
+  return c >= 'a' && c <= 'z';
+}
+template <typename Char>
+inline bool IsAsciiDigit(Char c) {
+  return c >= '0' && c <= '9';
+}
+
+template <typename Char>
+inline bool IsHexDigit(Char c) {
+  return (c >= '0' && c <= '9') ||
+         (c >= 'A' && c <= 'F') ||
+         (c >= 'a' && c <= 'f');
+}
+
+template <typename Char>
+inline Char HexDigitToInt(Char c) {
+  if (!IsHexDigit(c))
+    return 0;
+  if (c >= '0' && c <= '9')
+    return c - '0';
+  if (c >= 'A' && c <= 'F')
+    return c - 'A' + 10;
+  if (c >= 'a' && c <= 'f')
+    return c - 'a' + 10;
+  return 0;
+}
+
+// Append a human-readable time in micros.
+int AppendHumanMicros(uint64_t micros, char* output, int len,
+                      bool fixed_format);
+// Append a human-readable size in bytes
+int AppendHumanBytes(uint64_t bytes, char* output, int len);
+
+std::string HumanReadableString(int64_t num);
+// Return a human-readable version of num.
+// for num >= 10.000, prints "xxK"
+// for num >= 10.000.000, prints "xxM"
+// for num >= 10.000.000.000, prints "xxG"
+std::string NumberToHumanString(int64_t num);
+// Return a human-readable version of bytes
+// ex: 1048576 -> 1.00 GB
+std::string BytesToHumanString(uint64_t bytes);
+
+std::string NumberInt64ToString(int64_t num);
+std::string NumberIntToString(int num);
+std::string NumberUint32ToString(uint32_t num);
+std::string NumberDoubleToString(double num);
+std::string RoundNumberToNDecimalPlaces(double n, int d);
+
+bool SerializeIntVector(const std::vector<int>& vec, std::string* value);
+
+bool ParseBoolean(const std::string& type, const std::string& value);
+uint32_t ParseUint32(const std::string& value);
+uint64_t ParseUint64(const std::string& value);
+int ParseInt(const std::string& value);
+double ParseDouble(const std::string& value);
+size_t ParseSizeT(const std::string& value);
+std::vector<int> ParseVectorInt(const std::string& value);
+
+void ToUpper(std::string* str);
+void ToLower(std::string* str);
+std::string Hex2Str(const char* _str, unsigned int _len);
+std::string Str2Hex(const char* _str, unsigned int _len);
+bool Hex2Bin(const char* hex_str, std::string* bin_str);
+bool Bin2Hex(const char* bin_str, std::string* hex_str);
+
+bool StartsWith(const std::string& str, const std::string& prefix);
+bool EndsWith(const std::string& str, const std::string& suffix);
+
+// ----------------------------------------------------------------------
+// HasSuffixString()
+//    Return true if str ends in suffix.
+// ----------------------------------------------------------------------
+inline bool HasSuffixString(const std::string& str,
+                            const std::string& suffix) {
+  return str.size() >= suffix.size() &&
+         str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+// ----------------------------------------------------------------------
+// HasPrefixString()
+//    Check if a string begins with a given prefix.
+// ----------------------------------------------------------------------
+inline bool HasPrefixString(const std::string& str,
+                            const std::string& prefix) {
+  return str.size() >= prefix.size() &&
+         str.compare(0, prefix.size(), prefix) == 0;
+}
+
+bool StripSuffix(std::string* str, const std::string& suffix);
+bool StripPrefix(std::string* str, const std::string& prefix);
+// Obtains the base name from a full path.
+std::string StripBasename(const std::string& full_path);
+
+std::string& Ltrim(std::string& str); // NOLINT
+std::string& Rtrim(std::string& str); // NOLINT
+std::string& Trim(std::string& str); // NOLINT
+void Trim(std::vector<std::string>* str_list);
+
+void SplitStringChar(const std::string& str,
+                     char delim,
+                     std::vector<std::string>* result);
+// Splits |line| into key value pairs according to the given delimiters and
+// removes whitespace leading each key and trailing each value. Returns true
+// only if each pair has a non-empty key and value. |key_value_pairs| will
+// include ("","") pairs for entries without |key_value_delimiter|.
+typedef std::vector<std::pair<std::string, std::string> > StringPairs;
+bool SplitStringIntoKeyValuePairs(const std::string& line,
+                                  char key_value_delimiter,
+                                  char key_value_pair_delimiter,
+                                  StringPairs* key_value_pairs);
+
+
+int EditDistance(const std::string& a, const std::string& b);
+
+std::string GetLocalHostName();
+
+std::string DebugString(const std::string& src);
+  
 /// -----------------------------------------------------------------------
 /// @brief Parse the string from the first position. stop when error occurs.
 /// @return true if part of the string can be converted to a valid number
@@ -124,7 +393,17 @@ char* WriteUInt32ToBuffer(uint32_t u, char* buffer);
 char* WriteInt64ToBuffer(int64_t i, char* buffer);
 char* WriteUInt64ToBuffer(uint64_t u64, char* buffer);
 
-char* WriteIntegerToBuffer(int n, char* buffer);
+char* WriteIntegerToBuffer(int n, char* buffer);std::string DebugString(const std::string& src);
+
+std::string HumanReadableString(int64_t num);
+
+std::string RoundNumberToNDecimalPlaces(double n, int d);
+int EditDistance(const std::string& a, const std::string& b);
+
+std::string GetLocalHostName();
+
+// Obtains the base name from a full path.
+std::string StripBasename(const std::string& full_path);
 char* WriteIntegerToBuffer(unsigned int n, char* buffer);
 char* WriteIntegerToBuffer(long n, char* buffer);
 char* WriteIntegerToBuffer(unsigned long n, char* buffer);
@@ -241,56 +520,6 @@ bool StringStartWith(const std::string& str,
                     const std::string& sub_str);
 
 char* StringAsArray(std::string* str);
-
-inline bool IsVisible(char c) {
-    return (c >= 0x20 && c <= 0x7E);
-}
-
-inline char ToHex(uint8_t i) {
-    char j = 0;
-    if (i < 10) {
-        j = i + '0';
-    } else {
-        j = i - 10 + 'a';
-    }
-    return j;
-}
-
-std::string DebugString(const std::string& src);
-
-inline std::string NumToString(int64_t num) {
-    char buf[32];
-    snprintf(buf, sizeof(buf), "%ld", num);
-    return std::string(buf);
-}
-
-inline std::string NumToString(int num) {
-    return NumToString(static_cast<int64_t>(num));
-}
-
-inline std::string NumToString(uint32_t num) {
-    return NumToString(static_cast<int64_t>(num));
-}
-
-inline std::string NumToString(double num) {
-    char buf[32];
-    snprintf(buf, sizeof(buf), "%.3f", num);
-    return std::string(buf);
-}
-
-std::string HumanReadableString(int64_t num);
-
-std::string RoundNumberToNDecimalPlaces(double n, int d);
-int EditDistance(const std::string& a, const std::string& b);
-
-std::string GetLocalHostName();
-
-bool SplitPath(const std::string& path, 
-               std::vector<std::string>* element,
-               bool* isdir = nullptr);
-
-// Obtains the base name from a full path.
-std::string StripBasename(const std::string& full_path);
 
 } // namespace mybdcom
 } // namespace bubblefs
