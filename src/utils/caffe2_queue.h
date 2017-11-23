@@ -130,13 +130,17 @@ class SimpleQueue {
   }
 
   // Push pushes a value to the queue.
-  void Push(const T& value) {
+  bool Push(const T& value) {
     {
       std::lock_guard<std::mutex> mutex_lock(mutex_);
-      PANIC_ENFORCE(!no_more_jobs_, "Cannot push to a closed queue.");
+      if (no_more_jobs_) {
+        PRINTF_ERROR("Cannot push to a closed queue.");
+        return false;
+      }
       queue_.push(value);
     }
     cv_.notify_one();
+    return true;
   }
 
   // NoMoreJobs() marks the close of this queue. It also notifies all waiting
