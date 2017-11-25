@@ -283,6 +283,17 @@ inline uint64_t NextPowerOf2(uint64_t n) {
 #endif
 }
 
+inline int NextPOT(int x)
+{
+    x = x - 1;
+    x = x | (x >> 1);
+    x = x | (x >> 2);
+    x = x | (x >> 4);
+    x = x | (x >> 8);
+    x = x | (x >>16);
+    return x + 1;
+}
+
 } // namespace mathutil 
 } // namespace bubblefs
 

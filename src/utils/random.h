@@ -93,6 +93,7 @@ BASE_EXPORT int RandInt(int min, int max);
 // Returns a random double in range [0, 1). Thread-safe.
 BASE_EXPORT double RandDouble();
 
+// cocos2d-x/cocos/base/ccRandom.h
 /**
  * @class RandomHelper
  * @brief A helper class for creating random number.
