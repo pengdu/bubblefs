@@ -75,6 +75,9 @@ limitations under the License.
 #if defined(PLATFORM_POSIX) || defined(PLATFORM_POSIX_ANDROID) || \
     defined(PLATFORM_GOOGLE_ANDROID) || defined(PLATFORM_WINDOWS) 
 namespace bubblefs {
+//------------------------------------------------------------------------------
+// Basis POD types.
+//------------------------------------------------------------------------------  
 /*
 typedef signed char int8;
 typedef short int16;
@@ -85,7 +88,21 @@ typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned int uint32;
 typedef unsigned long long uint64;
+
+#ifdef _MSC_VER
+typedef __int8  int8;
+typedef __int16 int16;
+typedef __int32 int32;
+typedef __int64 int64;
+
+typedef unsigned __int8  uint8;
+typedef unsigned __int16 uint16;
+typedef unsigned __int32 uint32;
+typedef unsigned __int64 uint64;
+#endif
 */
+
+typedef unsigned int uint;
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -130,6 +147,20 @@ static const int32 kint32min = ((int32)~0x7FFFFFFF);
 static const int32 kint32max = ((int32)0x7FFFFFFF);
 static const int64 kint64min = ((int64)~0x7FFFFFFFFFFFFFFFll);
 static const int64 kint64max = ((int64)0x7FFFFFFFFFFFFFFFll);
+
+static const int32 kInt32Max = 0x7FFFFFFF;
+static const int32 kInt32Min = -kInt32Max - 1;
+static const int64 kInt64Max = 0x7FFFFFFFFFFFFFFFll;
+static const int64 kInt64Min = -kInt64Max - 1;
+static const uint32 kUInt32Max = 0xFFFFFFFFu;
+static const uint64 kUInt64Max = 0xFFFFFFFFFFFFFFFFull;
+
+static const float kFloatMax = std::numeric_limits<float>::max();
+static const float kFloatMin = std::numeric_limits<float>::min();
+
+/* To avoid dividing by zero */
+static const float kVerySmallNumber = 1e-15;
+static const double kVerySmallNumberDouble = 1e-15;
 
 // A typedef for a uint64 used as a short fingerprint.
 typedef uint64 Fprint;

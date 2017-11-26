@@ -1,23 +1,6 @@
 // Copyright (c) 2014, Baidu.com, Inc. All Rights Reserved
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-//
-// Author: yanshiguang02@baidu.com
-/*
- * Copyright (C) 2005 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
 // https://developers.google.com/protocol-buffers/
@@ -47,9 +30,25 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//------------------------------------------------------------------------------
+// Copyright (c) 2016 by contributors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//------------------------------------------------------------------------------
 
 // brpc/src/butil/time.h
 // caffe2/caffe2/core/timer.h
+// xlearn/src/base/timer.h
 
 #ifndef BUBBLEFS_PLATFORM_TIMER_H_
 #define BUBBLEFS_PLATFORM_TIMER_H_
@@ -61,44 +60,12 @@
 #include <ratio>
 #include <sstream>
 #include <string>
-#include <unordered_map>
 #include "platform/base_error.h"
 #include "platform/time.h"
 #include "utils/peloton_printable.h"
 
 namespace bubblefs {
 namespace timeutil {
-
-// ----------------------------------------
-// Control frequency of operations.
-// ----------------------------------------
-// Example:
-//   EveryManyUS every_1s(1000000L);
-//   while (1) {
-//       ...
-//       if (every_1s) {
-//           // be here at most once per second
-//       }
-//   }
-class EveryManyUS {
-public:
-    explicit EveryManyUS(int64_t interval_us)
-        : _last_time_us(cpuwide_time_us())
-        , _interval_us(interval_us) {}
-    
-    operator bool() {
-        const int64_t now_us = cpuwide_time_us();
-        if (now_us < _last_time_us + _interval_us) {
-            return false;
-        }
-        _last_time_us = now_us;
-        return true;
-    }
-
-private:
-    int64_t _last_time_us;
-    const int64_t _interval_us;
-};
 
 // ---------------
 //  Count elapses
@@ -141,6 +108,37 @@ private:
     int64_t _stop;
     int64_t _start;
 };
+  
+// ----------------------------------------
+// Control frequency of operations.
+// ----------------------------------------
+// Example:
+//   EveryManyUS every_1s(1000000L);
+//   while (1) {
+//       ...
+//       if (every_1s) {
+//           // be here at most once per second
+//       }
+//   }
+class EveryManyUS {
+public:
+    explicit EveryManyUS(int64_t interval_us)
+        : _last_time_us(cpuwide_time_us())
+        , _interval_us(interval_us) {}
+    
+    operator bool() {
+        const int64_t now_us = cpuwide_time_us();
+        if (now_us < _last_time_us + _interval_us) {
+            return false;
+        }
+        _last_time_us = now_us;
+        return true;
+    }
+
+private:
+    int64_t _last_time_us;
+    const int64_t _interval_us;
+};
 
 /**
  * @brief A simple timer object for measuring time.
@@ -149,7 +147,7 @@ private:
  * serves as a utility class for testing code.
  */
 template<typename ResolutionRatio = std::ratio<1> >
-class ChronoTimer : public peloton::Printable {
+class ChronoTimer : public mypeloton::Printable {
  public:
   typedef std::chrono::high_resolution_clock clock;
   typedef std::chrono::nanoseconds ns;
@@ -213,6 +211,38 @@ class ChronoTimer : public peloton::Printable {
   int invocations_;
   
   DISALLOW_COPY_AND_ASSIGN(ChronoTimer);
+};
+
+//------------------------------------------------------------------------------
+// We can use the Timer class like this:
+//
+//   Timer timer();
+//   timer.tic();
+//
+//     .... /* code we want to evaluate */
+//
+//   float time = timer.toc();  // (sec)
+//
+// This class can be used to evaluate multi-thread code.
+//------------------------------------------------------------------------------
+class MyxlearnTimer {
+ public:
+    MyxlearnTimer();
+    // Reset start time
+    void reset();
+    // Code start
+    void tic();
+    // Code end
+    float toc();
+    // Get the time duration
+    float get();
+
+ protected:
+    std::chrono::high_resolution_clock::time_point begin;
+    std::chrono::milliseconds duration;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MyxlearnTimer);
 };
   
 } // namespace timeutil
