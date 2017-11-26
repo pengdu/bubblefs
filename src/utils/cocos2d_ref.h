@@ -29,7 +29,7 @@ THE SOFTWARE.
 #define CC_REF_LEAK_DETECTION 0
 
 namespace bubblefs {
-namespace cocos2d {
+namespace mycocos2d {
 
 class Ref;
 
@@ -169,7 +169,7 @@ typedef void (Ref::*SEL_SCHEDULE)(float);
 #define CC_MENU_SELECTOR(_SELECTOR) static_cast<cocos2d::SEL_MenuHandler>(&_SELECTOR)
 #define CC_SCHEDULE_SELECTOR(_SELECTOR) static_cast<cocos2d::SEL_SCHEDULE>(&_SELECTOR)
 
-} // namespace cocos2d
-} // namepspace bubblefs
+} // namespace mycocos2d
+} // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_COCOS2D_REF_H_

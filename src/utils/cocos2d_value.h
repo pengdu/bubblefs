@@ -29,7 +29,7 @@
 #include <vector>
 
 namespace bubblefs {
-namespace cocos2d {
+namespace mycocos2d {
   
 class Value;
 
@@ -237,7 +237,7 @@ private:
     Type _type;
 };
 
-} // namespace cocos2d
+} // namespace mycocos2d
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_COCOS2D_VALUE_H_

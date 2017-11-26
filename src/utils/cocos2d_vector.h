@@ -34,7 +34,7 @@ THE SOFTWARE.
 #include <vector>
 
 namespace bubblefs {
-namespace cocos2d {
+namespace mycocos2d {
   
 /*
  * Similar to std::vector, but it will manage reference count automatically internally.
@@ -509,7 +509,7 @@ protected:
     std::vector<T> _data;
 };
 
-} // namespace cocos2d
+} // namespace mycocos2d
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_COCOS2D_VECTOR_H_

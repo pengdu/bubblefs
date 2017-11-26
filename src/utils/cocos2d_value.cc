@@ -28,7 +28,7 @@
 #include <sstream>
 
 namespace bubblefs {
-namespace cocos2d {
+namespace mycocos2d {
 
 const ValueVector ValueVectorNull;
 const ValueMap ValueMapNull;
@@ -952,5 +952,5 @@ void Value::reset(Type type)
 }
 
 
-} // namespace cocos2d
+} // namespace mycocos2d
 } // namespace bubblefs

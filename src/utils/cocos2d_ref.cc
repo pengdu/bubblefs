@@ -30,7 +30,7 @@ THE SOFTWARE.
 #endif
 
 namespace bubblefs {
-namespace cocos2d {
+namespace mycocos2d {
   
 #if CC_REF_LEAK_DETECTION
 static void trackRef(Ref* ref);
@@ -206,5 +206,5 @@ static void untrackRef(Ref* ref)
 
 #endif // #if CC_REF_LEAK_DETECTION
 
-} // namespace cocos2d
+} // namespace mycocos2d
 } // namepsace bubblefs

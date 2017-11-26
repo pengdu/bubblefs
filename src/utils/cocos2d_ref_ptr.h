@@ -35,7 +35,7 @@
 #include <type_traits>
 
 namespace bubblefs {
-namespace cocos2d {
+namespace mycocos2d {
 
 /**
  * Utility/support macros. Defined to enable RefPtr<T> to contain types like 'const T' because we do not
@@ -350,7 +350,7 @@ template<class T, class U> RefPtr<T> dynamic_pointer_cast(const RefPtr<U> & r)
 #undef CC_REF_PTR_SAFE_RELEASE
 #undef CC_REF_PTR_SAFE_RELEASE_NULL
 
-} // namespace cocos2d
+} // namespace mycocos2d
 } // namespace bubblefs
 
 /// @endcond

@@ -42,7 +42,7 @@
 #endif
 
 namespace bubblefs {
-namespace cocos2d {
+namespace mycocos2d {
 
  /**
  * Similar to std::unordered_map, but it will manage reference count automatically internally.
@@ -416,7 +416,7 @@ protected:
     RefMap _data;
 };
 
-} // namespace cocos2d
+} // namespace mycocos2d
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_COCOS2D_MAP_H_

@@ -25,7 +25,7 @@ THE SOFTWARE.
 #include "platform/cocos2d_macros.h"
 
 namespace bubblefs {
-namespace cocos2d {
+namespace mycocos2d {
   
 AutoreleasePool::AutoreleasePool()
 : _name("")
@@ -166,5 +166,5 @@ void PoolManager::pop()
     _releasePoolStack.pop_back();
 }
 
-} // namespace cocos2d
+} // namespace mycocos2d
 } // namespace bubblefs

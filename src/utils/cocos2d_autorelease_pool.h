@@ -29,7 +29,7 @@ THE SOFTWARE.
 #include "utils/cocos2d_ref.h"
 
 namespace bubblefs {
-namespace cocos2d {
+namespace mycocos2d {
   
 /**
  * A pool for managing autorelease objects.
@@ -174,7 +174,7 @@ private:
     std::vector<AutoreleasePool*> _releasePoolStack;
 };
 
-} // namespace cocos2d
+} // namespace mycocos2d
 } // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_COCOS2D_AUTORELEASE_POOL_H_
