@@ -359,4 +359,9 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 // remove 'unused parameter' warning    
 #define EXPR_UNUSED(expr) do { (void)(expr); } while (0)
 
+/*
+   can be used like #if (QT_VERSION >= QT_VERSION_CHECK(4, 4, 0))
+*/
+#define BASE_VERSION_CHECK(major, minor, patch) ((major<<16)|(minor<<8)|(patch))
+
 #endif // BUBBLEFS_PLATFORM_MACROS_H_
