@@ -47,6 +47,47 @@ class MutexLock {
   DISALLOW_COPY_AND_ASSIGN(MutexLock);
 };
 
+/*
+  // qt/src/corelib/thread/qorderedmutexlocker_p.h
+  Locks 2 mutexes in a defined order, avoiding a recursive lock if
+  we're trying to lock the same mutex twice.
+  
+class QOrderedMutexLocker
+{
+public:
+    QOrderedMutexLocker(QMutex *m1, QMutex *m2)
+        : mtx1((m1 == m2) ? m1 : (m1 < m2 ? m1 : m2)),
+          mtx2((m1 == m2) ?  0 : (m1 < m2 ? m2 : m1)),
+          locked(false)
+    {
+        relock();
+    }
+    ~QOrderedMutexLocker()
+    {
+        unlock();
+    }
+    void relock()
+    {
+        if (!locked) {
+            if (mtx1) mtx1->lockInline();
+            if (mtx2) mtx2->lockInline();
+            locked = true;
+        }
+    }
+    void unlock()
+    {
+        if (locked) {
+            if (mtx1) mtx1->unlockInline();
+            if (mtx2) mtx2->unlockInline();
+            locked = false;
+        }
+    }
+private:
+    QMutex *mtx1, *mtx2;
+    bool locked;
+};
+*/
+
 //
 // Acquire a ReadLock on the specified RWMutex.
 // The Lock will be automatically released then the

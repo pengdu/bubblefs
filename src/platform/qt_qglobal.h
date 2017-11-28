@@ -70,6 +70,25 @@ typedef quint64 qulonglong;
 typedef double qreal;
 
 /*
+  quintptr and qptrdiff is guaranteed to be the same size as a pointer, i.e.
+      sizeof(void *) == sizeof(quintptr)
+      && sizeof(void *) == sizeof(qptrdiff)
+*/
+template <int> struct QIntegerForSize;
+template <>    struct QIntegerForSize<1> { typedef quint8  Unsigned; typedef qint8  Signed; };
+template <>    struct QIntegerForSize<2> { typedef quint16 Unsigned; typedef qint16 Signed; };
+template <>    struct QIntegerForSize<4> { typedef quint32 Unsigned; typedef qint32 Signed; };
+template <>    struct QIntegerForSize<8> { typedef quint64 Unsigned; typedef qint64 Signed; };
+template <class T> struct QIntegerForSizeof: QIntegerForSize<sizeof(T)> { };
+typedef QIntegerForSizeof<void*>::Unsigned quintptr;
+typedef QIntegerForSizeof<void*>::Signed qptrdiff;
+
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+
+/*
    Utility macros and inline functions
 */
 
@@ -210,7 +229,15 @@ public:
 
 #endif // QGlobalStatic if (QT_NO_THREAD)
 
-#ifndef Q_NO_TYPESAFE_FLAGS
+class QFlag
+{
+    int i;
+public:
+    inline QFlag(int i);
+    inline operator int() const { return i; }
+};
+
+inline QFlag::QFlag(int ai) : i(ai) {}
 
 template<typename Enum>
 class QFlags
@@ -247,8 +274,6 @@ public:
 
     inline bool testFlag(Enum f) const { return (i & f) == f && (f != 0 || i == int(f) ); }
 };
-
-#endif /* Q_NO_TYPESAFE_FLAGS */
 
 #if defined(__GNUC__)
 /* make use of typeof-extension */
