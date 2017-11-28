@@ -61,13 +61,13 @@ bool SPSCLockFreeCircularFifo<Element, Size>::push(const Element& item)
   // No cross-thread synchronization is needed for the load.
   const auto current_tail = _tail.load(std::memory_order_relaxed); 
   const auto next_tail = increment(current_tail); 
-  // Like memory read barrier, following reads get the new updates.
+  // Like memory read barrier, following reads get the new updates, not be re-ordered before the atomic ops.
   if(next_tail != _head.load(std::memory_order_acquire))                           
   {     
     // The item is saved in the position pointed to by the not-yet-synchronized current_tail. 
     // This happens-before the release_store.
     _array[current_tail] = item;
-    // Like memory write barrier, previous writes set the new updates.
+    // Like memory write barrier, previous writes set the new updates, not be re-ordered after the atomic ops.
     _tail.store(next_tail, std::memory_order_release); 
     return true;
   }
@@ -85,12 +85,12 @@ bool SPSCLockFreeCircularFifo<Element, Size>::pop(Element& item)
   // it is guaranteed that the head value will be the latest. 
   // No cross-thread synchronization is needed for the load.
   const auto current_head = _head.load(std::memory_order_relaxed);
-  // Like memory read barrier, following reads get the new updates.
+  // Like memory read barrier.
   if(current_head == _tail.load(std::memory_order_acquire)) 
     return false; // empty queue
   // This happens-before the release_store.
   item = _array[current_head];
-  // Like memory write barrier, previous writes set the new updates.
+  // Like memory write barrier.
   _head.store(increment(current_head), std::memory_order_release); 
   return true;
 }
