@@ -45,6 +45,7 @@
 #define BUBBLEFS_PLATFORM_QT_QGLOBAL_H_
 
 #include <stddef.h>
+#include <utility>
 
 namespace bubblefs {
 namespace myqt {
@@ -292,6 +293,93 @@ for (QForeachContainer<__typeof__(container)> _container_(container); \
      __extension__  ({ ++_container_.brk; ++_container_.i; }))                       \
     for (variable = *_container_.i;; __extension__ ({--_container_.brk; break;}))
 #endif // Q_FOREACH
+      
+class QBool
+{
+    bool b;
+
+public:
+    inline explicit QBool(bool B) : b(B) {}
+    inline operator const void *() const
+    { return b ? static_cast<const void *>(this) : static_cast<const void *>(0); }
+};
+
+inline bool operator==(QBool b1, bool b2) { return !b1 == !b2; }
+inline bool operator==(bool b1, QBool b2) { return !b1 == !b2; }
+inline bool operator==(QBool b1, QBool b2) { return !b1 == !b2; }
+inline bool operator!=(QBool b1, bool b2) { return !b1 != !b2; }
+inline bool operator!=(bool b1, QBool b2) { return !b1 != !b2; }
+inline bool operator!=(QBool b1, QBool b2) { return !b1 != !b2; }
+
+constexpr static inline bool qFuzzyCompare(double p1, double p2)
+{
+    return (qAbs(p1 - p2) <= 0.000000000001 * qMin(qAbs(p1), qAbs(p2)));
+}
+
+constexpr static inline bool qFuzzyCompare(float p1, float p2)
+{
+    return (qAbs(p1 - p2) <= 0.00001f * qMin(qAbs(p1), qAbs(p2)));
+}
+
+/*!
+  \internal
+*/
+constexpr static inline bool qFuzzyIsNull(double d)
+{
+    return qAbs(d) <= 0.000000000001;
+}
+
+/*!
+  \internal
+*/
+constexpr static inline bool qFuzzyIsNull(float f)
+{
+    return qAbs(f) <= 0.00001f;
+}
+
+/*
+   This function tests a double for a null value. It doesn't
+   check whether the actual value is 0 or close to 0, but whether
+   it is binary 0.
+*/
+static inline bool qIsNull(double d)
+{
+    union U {
+        double d;
+        quint64 u;
+    };
+    U val;
+    val.d = d;
+    return val.u == quint64(0);
+}
+
+/*
+   This function tests a float for a null value. It doesn't
+   check whether the actual value is 0 or close to 0, but whether
+   it is binary 0.
+*/
+static inline bool qIsNull(float f)
+{
+    union U {
+        float f;
+        quint32 u;
+    };
+    U val;
+    val.f = f;
+    return val.u == 0u;
+}
+
+template <typename T>
+inline void qSwap(T &value1, T &value2)
+{
+#ifdef QT_NO_STL
+    const T t = value1;
+    value1 = value2;
+    value2 = t;
+#else
+    std::swap(value1, value2);
+#endif
+}
 
 } // namespace myqt
 } // namespace bubblefs

@@ -75,7 +75,9 @@ void InitOnce(OnceType* once, void (*initializer)()) {
     1. bool QMutexPrivate::wait(int timeout): 
          while (contenders.fetchAndStoreAcquire(2) > 0) { syscall(SYS_futex, &contenders._q_value, FUTEX_WAIT, 2, timeout);  xtimeout -= timer.nsecsElapsed(); }
     2. bool QMutexPrivate::wait(int timeout):
-         contenders.fetchAndAddAcquire(1); pthread_mutex_lock(&mutex); while (!wakeup) { pthread_cond_timedwait(&cond, &mutex, &ti); } wakeup = false; pthread_mutex_unlock(&mutex); contenders.deref();
+         contenders.fetchAndAddAcquire(1); pthread_mutex_lock(&mutex); 
+         while (!wakeup) { pthread_cond_timedwait(&cond, &mutex, &ti); } 
+         wakeup = false; pthread_mutex_unlock(&mutex); contenders.deref();
     3. void QMutexPrivate::wakeUp():
          contenders.fetchAndStoreRelease(0); syscall(SYS_futex, &contenders._q_value, FUTEX_WAKE, 1, timeout);
     4. void QMutexPrivate::wakeUp():
