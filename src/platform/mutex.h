@@ -75,6 +75,8 @@ extern void InitOnce(OnceType* once, void (*initializer)());
   
 class CondVar;
 
+#define MUTEX_DEBUG
+
 // A Mutex represents an exclusive lock.
 class Mutex {
  public:
@@ -97,6 +99,7 @@ class Mutex {
   bool IsLocked();
   // this will assert if the mutex is not locked
   // it does NOT verify that mutex is held by a calling thread
+  // use when MUTEX_DEBUG is defined
   void AssertHeld();
   pthread_mutex_t* GetMutex() {
     return &mu_;
@@ -108,9 +111,12 @@ class Mutex {
    
   friend class CondVar;
   pthread_mutex_t mu_;
+  
+#ifdef MUTEX_DEBUG
   pthread_t owner_;
-#ifndef NDEBUG
-  bool locked_;
+  const char* msg_;
+  int64_t msg_threshold_;
+  int64_t lock_time_;
 #endif
   DISALLOW_COPY_AND_ASSIGN(Mutex);
 };

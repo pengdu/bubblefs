@@ -19,6 +19,10 @@
 #include <string.h>
 #include <time.h>
 
+#ifdef MUTEX_DEBUG
+#include "platform/bdcom_timer.h" // use timer utils
+#endif
+
 namespace bubblefs {
   
 namespace port {
@@ -39,18 +43,6 @@ static int PthreadCall(const char* label, int result) {
     abort();
   }
   return result;
-}
-
-// Return false if timeout
-static bool PthreadTimeoutCall(const char* label, int result) {
-  if (result != 0) {
-    if (result == ETIMEDOUT) {
-      return false;
-    }
-    fprintf(stderr, "pthreadtimeoutcall %s: %s\n", label, strerror(result));
-    abort();
-  }
-  return true;
 }
 
 void InitOnce(OnceType* once, void (*initializer)()) {
@@ -84,11 +76,25 @@ void InitOnce(OnceType* once, void (*initializer)()) {
          pthread_mutex_lock(&mutex); wakeup = true; pthread_cond_signal(&cond); pthread_mutex_unlock(&mutex);
 */
 
-Mutex::Mutex() : owner_(0) {
+Mutex::Mutex() {
+#ifdef MUTEX_DEBUG
+  owner_ = 0;
+  msg_ = 0;
+  msg_threshold_ = 0;
+  lock_time_ = 0;
+#endif
+  
   PthreadCall("init mutex default", pthread_mutex_init(&mu_, nullptr));
 }
 
-Mutex::Mutex(bool adaptive) : owner_(0) {
+Mutex::Mutex(bool adaptive) {
+#ifdef MUTEX_DEBUG
+  owner_ = 0;
+  msg_ = 0;
+  msg_threshold_ = 0;
+  lock_time_ = 0;
+#endif
+  
   if (!adaptive) {
     // prevent called by the same thread.
     pthread_mutexattr_t attr;
@@ -149,8 +155,20 @@ Mutex::~Mutex() { PthreadCall("destroy mutex", pthread_mutex_destroy(&mu_)); }
     }
 */
 void Mutex::Lock(const char* msg, int64_t msg_threshold) {
+#ifdef MUTEX_DEBUG
+  int64_t s = (msg) ? mybdcom::get_micros() : 0;
+#endif
+  
   PthreadCall("mutex lock", pthread_mutex_lock(&mu_));
-  AfterLock(msg);
+  AfterLock(msg, msg_threshold);
+  
+#ifdef MUTEX_DEBUG
+  if (msg && lock_time_ - s > msg_threshold) {
+    char buf[32];
+    mybdcom::now_time_str(buf, sizeof(buf));
+    printf("%s [Mutex] %s wait lock %.3f ms\n", buf, msg, (lock_time_ -s) / 1000.0);
+  }
+#endif
 }
 
 /*!
@@ -277,14 +295,13 @@ bool Mutex::IsLocked() {
 }
 
 void Mutex::AssertHeld() {
-#ifndef NDEBUG
-  assert(locked_);
-#endif
+#ifdef MUTEX_DEBUG
   if (0 == pthread_equal(owner_, pthread_self())) {
     fprintf(stderr, "mutex is held by two calling threads " PRIu64_FORMAT ":" PRIu64_FORMAT "\n",
             (uint64_t)owner_, (uint64_t)pthread_self());
     abort();
   }
+#endif
 }
 
 /*
@@ -319,19 +336,29 @@ void Mutex::AssertHeld() {
 */
 
 void Mutex::AfterLock(const char* msg, int64_t msg_threshold) {
-#ifndef NDEBUG
-  locked_ = true;
-  //printf("AfterLock %p\n", &mu_);
-#endif
+#ifdef MUTEX_DEBUG
+  msg_ = msg;
+  msg_threshold_ = msg_threshold;
+  if (msg_) {
+    lock_time_ = mybdcom::get_micros();
+  }
+  (void)msg;
+  (void)msg_threshold;
   owner_ = pthread_self();
+#endif
 }
 
 void Mutex::BeforeUnlock(const char* msg) {
-#ifndef NDEBUG
-  locked_ = false;
-  //printf("BeforeUnlock %p\n", &mu_);
-#endif
+#ifdef MUTEX_DEBUG
+  if (msg_ && mybdcom::get_micros() - lock_time_ > msg_threshold_) {
+    char buf[32];
+    mybdcom::now_time_str(buf, sizeof(buf));
+    printf("%s [Mutex] %s locked %.3f ms\n", 
+           buf, msg_, (mybdcom::get_micros() - lock_time_) / 1000.0);
+  }
+  msg_ = NULL;
   owner_ = 0;
+#endif
 }
 
 /*!
@@ -458,9 +485,15 @@ CondVar::~CondVar() { PthreadCall("destroy cv", pthread_cond_destroy(&cv_)); }
     mutex->lock();
 */
 void CondVar::Wait(const char* msg) {
+#ifdef MUTEX_DEBUG
   mu_->BeforeUnlock();
+#endif
+  
   PthreadCall("cv wait", pthread_cond_wait(&cv_, &mu_->mu_));
+  
+#ifdef MUTEX_DEBUG
   mu_->AfterLock();
+#endif
 }
 
 bool CondVar::TimedWaitAbsolute(uint64_t abs_time_us, const char* msg) {
@@ -468,9 +501,16 @@ bool CondVar::TimedWaitAbsolute(uint64_t abs_time_us, const char* msg) {
   ts.tv_sec = static_cast<time_t>(abs_time_us / 1000000);
   ts.tv_nsec = static_cast<suseconds_t>((abs_time_us % 1000000) * 1000);
 
+#ifdef MUTEX_DEBUG
   mu_->BeforeUnlock();
+#endif
+  
   int err = pthread_cond_timedwait(&cv_, &mu_->mu_, &ts);
+  
+#ifdef MUTEX_DEBUG
   mu_->AfterLock();
+#endif  
+
   if (err == ETIMEDOUT) {
     return true;
   }
@@ -491,11 +531,17 @@ bool CondVar::TimedWait(uint64_t timeout, const char* msg) {
   int64_t usec = now.tv_usec + timeout * 1000LL;
   ts.tv_sec = now.tv_sec + usec / 1000000;
   ts.tv_nsec = (usec % 1000000) * 1000;
+  
+#ifdef MUTEX_DEBUG  
   mu_->BeforeUnlock();
-  bool ret = PthreadTimeoutCall("timewait",
-      pthread_cond_timedwait(&cv_, &mu_->mu_, &ts));
+#endif
+  bool ret = pthread_cond_timedwait(&cv_, &mu_->mu_, &ts);
+  
+#ifdef MUTEX_DEBUG
   mu_->AfterLock(msg);
-  return ret;
+#endif
+  
+  return (ret == 0);
 }
 
 /*!
