@@ -17,26 +17,6 @@ limitations under the License.
 // Copyright (c) 2011 The LevelDB Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
-/****************************************************************************
-Copyright (c) 2010-2012 cocos2d-x.org
-Copyright (c) 2013-2017 Chukong Technologies Inc.
-http://www.cocos2d-x.org
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-****************************************************************************/
 /*
  * Ceph - scalable distributed file system
  *
@@ -51,7 +31,6 @@ THE SOFTWARE.
 
 // tensorflow/tensorflow/core/lib/random/random.h
 // cocos2d-x/cocos/base/ccRandom.h
-// Pebble/src/common/random.h
 // ceph/src/include/Distribution.h
 
 #ifndef BUBBLEFS_UTILS_RANDOM_H_
@@ -93,87 +72,7 @@ BASE_EXPORT int RandInt(int min, int max);
 // Returns a random double in range [0, 1). Thread-safe.
 BASE_EXPORT double RandDouble();
 
-// cocos2d-x/cocos/base/ccRandom.h
-/**
- * @class RandomHelper
- * @brief A helper class for creating random number.
- */
-class RandomHelper {
-public:
-    template<typename T>
-    static T random_real(T min, T max) {
-        std::uniform_real_distribution<T> dist(min, max);
-        auto &mt = RandomHelper::getEngine();
-        return dist(mt);
-    }
-
-    template<typename T>
-    static T random_int(T min, T max) {
-        std::uniform_int_distribution<T> dist(min, max);
-        auto &mt = RandomHelper::getEngine();
-        return dist(mt);
-    }
-private:
-    static std::mt19937 &getEngine();
-};
-
-/**
- * Returns a random value between `min` and `max`.
- */
-template<typename T>
-inline T random(T min, T max) {
-    return RandomHelper::random_int<T>(min, max);
-}
-
-template<>
-inline float random(float min, float max) {
-    return RandomHelper::random_real(min, max);
-}
-
-template<>
-inline long double random(long double min, long double max) {
-    return RandomHelper::random_real(min, max);
-}
-
-template<>
-inline double random(double min, double max) {
-    return RandomHelper::random_real(min, max);
-}
-
-/**
- * Returns a random int between 0 and RAND_MAX.
- */
-inline int random() {
-    return random(0, RAND_MAX);
-};
-
-/**
- * Returns a random float between -1 and 1.
- * It can be seeded using std::srand(seed);
- */
-inline float rand_minus1_1() {
-    // FIXME: using the new c++11 random engine generator
-    // without a proper way to set a seed is not useful.
-    // Resorting to the old random method since it can
-    // be seeded using std::srand()
-    return ((rand() / (float)RAND_MAX) * 2) -1;
-
-//    return cocos2d::random(-1.f, 1.f);
-};
-
-/**
- * Returns a random float between 0 and 1.
- * It can be seeded using std::srand(seed);
- */
-inline float rand_0_1() {
-    // FIXME: using the new c++11 random engine generator
-    // without a proper way to set a seed is not useful.
-    // Resorting to the old random method since it can
-    // be seeded using std::srand()
-    return rand() / (float)RAND_MAX;
-
-//    return cocos2d::random(0.f, 1.f);
-};
+///////////////////////////////////////////////////////////
 
 // A very simple random number generator.  Not especially good at
 // generating truly random bits, but good enough for our needs in this
@@ -280,36 +179,6 @@ public:
         }
         return s;
     }
-};
-
-class TrueRandom {
-public:
-    TrueRandom();
-    ~TrueRandom();
-
-    uint32_t NextUInt32();
-
-    uint32_t NextUInt32(uint32_t max_random);
-
-    bool NextBytes(void* buffer, size_t size);
-
-private:
-    DISALLOW_COPY_AND_ASSIGN(TrueRandom);
-    int32_t m_fd;
-}; // class TrueRandom
-
-// slash/slash/include/random.h
-class RandomOnce {
- public:
-  RandomOnce() {
-    srand(time(NULL));
-  }
-  /*
-   * return OnceRandom number in [1...n]
-   */
-  static uint32_t Uniform(int n) {
-    return (random() % n) + 1;
-  }
 };
 
 // peloton/src/include/common/generator.h

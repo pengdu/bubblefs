@@ -26,8 +26,8 @@ THE SOFTWARE.
 #define BUBBLEFS_UTILS_COCOS2D_VECTOR_H_
 
 #include "platform/cocos2d_macros.h"
+#include "utils/cocos2d_random.h"
 #include "utils/cocos2d_ref.h"
-#include "utils/random.h"
 #include <algorithm> // for std::find
 #include <functional>
 #include <type_traits>
@@ -286,7 +286,7 @@ public:
     {
         if (!_data.empty())
         {
-            ssize_t randIdx = random::RandomHelper::random_int<int>(0, static_cast<int>(_data.size()) - 1);
+            ssize_t randIdx = RandomHelper::random_int<int>(0, static_cast<int>(_data.size()) - 1);
             return *(_data.begin() + randIdx);
         }
         return nullptr;

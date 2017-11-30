@@ -109,12 +109,6 @@ double RandDouble() {
   return BitsToOpenEndedUnitInterval(New64());
 }
 
-std::mt19937 &RandomHelper::getEngine() {
-    static std::random_device seed_gen;
-    static std::mt19937 engine(seed_gen());
-    return engine;
-}
-
 // rocksdb/util/random.cc
 
 Random* Random::GetTLSInstance() {
@@ -128,34 +122,6 @@ Random* Random::GetTLSInstance() {
     tls_instance = rv;
   }
   return rv;
-}
-
-// for unix
-TrueRandom::TrueRandom()
-    : m_fd(-1) {
-    m_fd = open("/dev/urandom", O_RDONLY, 0);
-    if (m_fd < 0) {
-        abort();
-    }
-}
-
-TrueRandom::~TrueRandom() {
-    close(m_fd);
-    m_fd = -1;
-}
-
-bool TrueRandom::NextBytes(void* buffer, size_t size) {
-    return read(m_fd, buffer, size) == static_cast<int32_t>(size);
-}
-
-uint32_t TrueRandom::NextUInt32() {
-    uint32_t random = -1;
-    NextBytes(&random, sizeof(random));
-    return random;
-}
-
-uint32_t TrueRandom::NextUInt32(uint32_t max_random) {
-    return NextUInt32() % max_random;
 }
 
 }  // namespace random

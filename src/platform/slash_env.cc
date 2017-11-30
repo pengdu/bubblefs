@@ -525,7 +525,7 @@ Status GetTestDirectory(std::string* result) {
 std::string RandomString(const int len) {
   char buf[len];
   for (int i = 0; i < len; i++) {
-    buf[i] = random::RandomOnce::Uniform('z' - 'a') + 'a';
+    buf[i] = Random::Uniform('z' - 'a') + 'a';
   }
   return std::string(buf, len);
 }

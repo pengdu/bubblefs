@@ -30,8 +30,8 @@
 #define USE_STD_UNORDERED_MAP 1
 
 #include "platform/cocos2d_macros.h"
+#include "utils/cocos2d_random.h"
 #include "utils/cocos2d_ref.h"
-#include "utils/random.h"
 #include <type_traits>
 #include <vector>
 
@@ -346,7 +346,7 @@ public:
     {
         if (!_data.empty())
         {
-            ssize_t randIdx = random::RandomHelper::random_int<int>(0, static_cast<int>(_data.size()) - 1);
+            ssize_t randIdx = RandomHelper::random_int<int>(0, static_cast<int>(_data.size()) - 1);
             const_iterator randIter = _data.begin();
             std::advance(randIter , randIdx);
             return randIter->second;
