@@ -75,7 +75,7 @@ extern void InitOnce(OnceType* once, void (*initializer)());
   
 class CondVar;
 
-#define MUTEX_DEBUG
+//#define MUTEX_DEBUG
 
 // A Mutex represents an exclusive lock.
 class Mutex {

@@ -535,6 +535,7 @@ bool CondVar::TimedWait(uint64_t timeout, const char* msg) {
 #ifdef MUTEX_DEBUG  
   mu_->BeforeUnlock();
 #endif
+  
   bool ret = pthread_cond_timedwait(&cv_, &mu_->mu_, &ts);
   
 #ifdef MUTEX_DEBUG
