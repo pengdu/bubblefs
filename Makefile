@@ -8,7 +8,7 @@ OPT ?= -g2 -Werror # (B) Debug mode, w/ full line-level debugging symbols
 
 PROJECT_DIR=.
 
-# dependencies
+# Dependencies
 include $(PROJECT_DIR)/depends.mk
 
 INCLUDE_PATH = -I$(PROJECT_DIR)/src \
@@ -79,8 +79,8 @@ HTTP_SRCS = $(wildcard $(PROJECT_DIR)/src/http/*.cc)
 HTTP_OBJS = $(addsuffix .o, $(basename $(HTTP_SRCS)))
 
 PLATFORM_SRCS = \
-		$(PROJECT_DIR)/src/platform/bdcommon_logging.cc \
-        $(PROJECT_DIR)/src/platform/mutex.cc
+    $(PROJECT_DIR)/src/platform/bdcommon_logging.cc \
+    $(PROJECT_DIR)/src/platform/mutex.cc
 PLATFORM_OBJS = $(addsuffix .o, $(basename $(PLATFORM_SRCS))) 
 
 PROTO_FILES = $(wildcard src/proto/*.proto)
@@ -92,47 +92,63 @@ RPC_SRCS = $(wildcard $(PROJECT_DIR)/src/rpc/*.cc)
 RPC_OBJS = $(addsuffix .o, $(basename $(RPC_SRCS)))
 
 UTILS_SRCS = \
-        $(PROJECT_DIR)/src/utils/bdcommon_str_util.cc \
-		$(PROJECT_DIR)/src/utils/bdcommon_thread.cc \
-        $(PROJECT_DIR)/src/utils/hash.cc \
-        $(PROJECT_DIR)/src/utils/status.cc \
-        $(PROJECT_DIR)/src/utils/string_format.cc \
-        $(PROJECT_DIR)/src/utils/stringpiece.cc
-UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS)))
+    $(PROJECT_DIR)/src/utils/bdcommon_str_util.cc \
+    $(PROJECT_DIR)/src/utils/bdcommon_thread.cc \
+    $(PROJECT_DIR)/src/utils/hash.cc \
+    $(PROJECT_DIR)/src/utils/status.cc \
+    $(PROJECT_DIR)/src/utils/string_format.cc \
+    $(PROJECT_DIR)/src/utils/stringpiece.cc
+UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS))) 
 
 OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(DB_OBJS) $(CLIENT_OBJS)
 
 LIBS =
  
-BIN = $(PLATFORM_UTILS_OBJS) $(HTTP_OBJS) #$(PROJECT_DIR)/src/db/redis_store.o
+BINS = $(PLATFORM_UTILS_OBJS) $(HTTP_OBJS) #$(PROJECT_DIR)/src/db/redis_store.o
+
+# Commands
 
 .PHONY:all
-all: $(BIN)
+all: $(BINS)
 	@echo "# Done"
 
 .PHONY:clean
 clean:
 	@echo "# Clean"
 	rm -rf $(ALL_OBJS)
-	rm -rf $(BIN)
+	rm -rf $(BINS)
 	rm -rf $(PROTO_SRCS) $(PROTO_HDRS)
 	rm -rf *.o
 
 #.SECONDARY: $(PROTO_SRCS)
 .PRECIOUS: $(PROTO_SRCS)
 
+# Make
+
 # Depends
 $(PROTO_OBJS): $(PROTO_HDRS)
 
-# Targets
-
 # Tests	
+.PHONY:test
+TEST_BINS = ambry_bit_util_test
+test: $(TEST_BINS)
+	@echo "# Test"
+
+.PHONY:test_clean
+test_clean:
+	@echo "# Test Clean"
+	rm -rf $(TEST_BINS)
+
 dmlc_registry_test: $(PROJECT_DIR)/src/utils/dmlc_registry_test.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 caffe2_registry_test: $(PROJECT_DIR)/src/utils/caffe2_registry_test.o $(PROJECT_DIR)/src/utils/caffe2_typeid.o
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
+ambry_bit_util_test: $(PROJECT_DIR)/src/utils/ambry_bit_util.o $(PROJECT_DIR)/src/utils/ambry_bit_util_test.o
+	$(CXX) $^ -o $@ $(LDFLAGS)
+
+# Compile & Link
 %.pb.cc %.pb.h: %.proto
 	@echo "# Protoc gen $@"
 	$(PROTOC) --proto_path=$(PROJECT_DIR)/src/proto --proto_path=/usr/local/include --cpp_out=$(PROJECT_DIR)/src/proto/ $<

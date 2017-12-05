@@ -30,71 +30,110 @@
  */
 
 // '\n'
-#define CHAR_NEW_LINE 010
+#define CHAR_NEW_LINE 10
 
 #define STR_ERRORNO() (errno == 0 ? "None" : strerror(errno)) 
 
 /// @brief 格式化输出log信息到buff
 #define SPRINT_LOG_MESSAGE(buff, buff_len, fmt, ...) \
-    snprintf((buff), (buff_len), "[%s:%d](%s)" fmt, \
+    snprintf((buff), (buff_len), "[%s:%d](%s) " fmt, \
     __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
     
 /// @brief 记录最后错误信息，内部使用，要求buff名字为m_last_error
 #define _LOG_LAST_ERROR(fmt, ...) \
     SPRINT_LOG_MESSAGE((m_last_error), (sizeof(m_last_error)), fmt, ##__VA_ARGS__)   
     
+/// print utils    
 #define PRINTF_INFO(fmt, ...) \
     fprintf(stderr, "INFO [%s:%d](%s) " fmt, \
     __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
     
 #define PRINTF_WARN(fmt, ...) \
-    fprintf(stderr, "WARN [%s:%d](%s) errno: %s," fmt, \
-    __FILE__, __LINE__, __FUNCTION__, STR_ERRORNO(), ##__VA_ARGS__)
+    fprintf(stderr, "WARN [%s:%d](%s) errno: %d %s, " fmt, \
+    __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__)
     
 #define PRINTF_ERROR(fmt, ...) \
-    fprintf(stderr, "ERROR [%s:%d](%s) errno: %s," fmt, \
-    __FILE__, __LINE__, __FUNCTION__, STR_ERRORNO(), ##__VA_ARGS__)
+    fprintf(stderr, "ERROR [%s:%d](%s) errno: %d %s, " fmt, \
+    __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__)
+    
+#define PRINTF_ASSERT(fmt, ...) \
+    fprintf(stderr, "ASSERT [%s:%d](%s) errno: %d %s, " fmt, \
+    __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__)
 
-#define PRINTF_CHECK(condition, msg) \
-    if (!(condition)) { \
+#define PRINTF_TEST_DONE() \
+    PRINTF_INFO("TEST DOWN \n") 
+    
+#define PRINTF_CHECK(c, msg) \
+    if (!(c)) { \
       std::string str_msg(msg); \
-      PRINTF_ERROR("%s%c", str_msg.c_str(), CHAR_NEW_LINE); \
+      PRINTF_ASSERT("%s\n", str_msg.c_str()); \
     }
     
-#define PRINTF_CHECK_EQ(condition, val) \
-    if ((val) != (condition)) { \
-      PRINTF_ERROR("%s is not EQ %s%c", #condition, #val, CHAR_NEW_LINE); \
+#define PRINTF_CHECK_TRUE(c) \
+    if (!(c)) { \
+      PRINTF_ASSERT("%s is not TRUE \n", #c); \
     }
     
-#define PRINTF_CHECK_GT(condition, val) \
-    if ((val) >= (condition)) { \
-      PRINTF_ERROR("%s is not GT %s%c", #condition, #val, CHAR_NEW_LINE); \
+#define PRINTF_CHECK_FALSE(c) \
+    if (c) { \
+      PRINTF_ASSERT("%s is not FALSE \n", #c); \
+    }
+    
+#define PRINTF_CHECK_EQ(c, val) \
+    if ((c) != (val)) { \
+      PRINTF_ASSERT("%s is not EQ %s \n", #c, #val); \
+    }
+    
+#define PRINTF_CHECK_NE(c, val) \
+    if ((c) == (val)) { \
+      PRINTF_ASSERT("%s is not NE %s \n", #c, #val); \
+    }    
+    
+#define PRINTF_CHECK_GE(c, val) \
+    if ((c) < (val)) { \
+      PRINTF_ASSERT("%s is not GE %s \n", #c, #val); \
+    }
+    
+#define PRINTF_CHECK_GT(c, val) \
+    if ((c) <= (val)) { \
+      PRINTF_ASSERT("%s is not GT %s \n", #c, #val); \
     } 
     
+#define PRINTF_CHECK_LE(c, val) \
+    if ((c) > (val)) { \
+      PRINTF_ASSERT("%s is not LE %s \n", #c, #val); \
+    } 
+    
+#define PRINTF_CHECK_LT(c, val) \
+    if ((c) >= (val)) { \
+      PRINTF_ASSERT("%s is not LT %s \n", #c, #val); \
+    } 
+
+/// panic utils
 #define PANIC(fmt, ...) \
     PRINTF_ERROR(fmt, ##__VA_ARGS__); \
-    PRINTF_ERROR("%cPanic%c", CHAR_NEW_LINE, CHAR_NEW_LINE); \
+    PRINTF_ERROR("\n Panic \n"); \
     abort()
   
-#define PANIC_ENFORCE(condition, msg) \
-    if (!(condition)) { \
+#define PANIC_ENFORCE(c, msg) \
+    if (!(c)) { \
       std::string str_msg(msg); \
-      PANIC("%s%c", str_msg.c_str(), CHAR_NEW_LINE); \
+      PANIC("%s\n", str_msg.c_str()); \
     }
     
-#define PANIC_ENFORCE_EQ(condition, val) \
-    if ((val) != (condition)) { \
-      PANIC("%s is not EQ %s%c", #condition, #val, CHAR_NEW_LINE); \
+#define PANIC_ENFORCE_EQ(c, val) \
+    if ((c) != (val)) { \
+      PANIC("%s is not EQ %s \n", #c, #val); \
     }
     
-#define PANIC_ENFORCE_GT(condition, val) \
-    if ((val) >= (condition)) { \
-      PANIC("%s is not GT %s%c", #condition, #val, CHAR_NEW_LINE); \
+#define PANIC_ENFORCE_GT(c, val) \
+    if ((c) <= (val)) { \
+      PANIC("%s is not GT %s \n", #c, #val); \
     }    
 
 #define EXIT_FAIL(fmt, ...) \
     PRINTF_ERROR(fmt, ##__VA_ARGS__); \
-    PRINTF_ERROR("%cExit%c", CHAR_NEW_LINE, CHAR_NEW_LINE); \
+    PRINTF_ERROR("\n EXIT_FAILURE \n"); \
     exit(EXIT_FAILURE)
     
 #endif // BUBBLEFS_PLATFORM_BASE_ERROR_H_
