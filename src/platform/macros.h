@@ -79,6 +79,44 @@ limitations under the License.
 #define DISALLOW_IMPLICIT_CONSTRUCTORS(TypeName) \
     BASE_DELETE_FUNCTION(TypeName());            \
     DISALLOW_COPY_AND_ASSIGN(TypeName)
+
+//  Private copy constructor and copy assignment ensure classes derived from
+//  class Uncopyable cannot be copied.
+/*
+Usage:
+class Foo {
+    TOFT_DECLARE_UNCOPYABLE(Foo);
+public:
+    Foo();
+    ~Foo();
+};
+*/
+//  Contributed by Dave Abrahams
+/// The macro way
+#ifdef BASE_CXX11_ENABLED
+#define DECLARE_UNCOPYABLE(Class) \
+private: \
+    Class(const Class&) = delete; \
+    Class& operator=(const Class&) = delete
+#else
+#define DECLARE_UNCOPYABLE(Class) \
+private: \
+    Class(const Class&); \
+    Class& operator=(const Class&)
+#endif
+
+// DECLARE_STATIC_CLASS Mark a class that all members a static.
+#ifdef BASE_CXX11_ENABLED
+#define DECLARE_STATIC_CLASS(Name) \
+    private: \
+        Name() = delete; \
+        ~Name() = delete
+#else
+#define DECLARE_STATIC_CLASS(Name) \
+    private: \
+        Name(); \
+        ~Name()
+#endif
    
 #undef arraysize
 // The arraysize(arr) macro returns the # of elements in an array arr.
@@ -95,51 +133,52 @@ limitations under the License.
 // This template function declaration is used in defining arraysize.
 // Note that the function doesn't need an implementation, as we only
 // use its type.
-namespace bubblefs {
-namespace base {
-template <typename T, size_t N>
-char (&ArraySizeHelper(T (&array)[N]))[N];
-} // namespace base
-} // namespace bubblefs
 
-// That gcc wants both of these prototypes seems mysterious. VC, for
-// its part, can't decide which to use (another mystery). Matching of
-// template overloads: the final frontier.
-#ifndef _MSC_VER
+// toft/base/array_size.h
 namespace bubblefs {
-namespace base {
-template <typename T, size_t N>
-char (&ArraySizeHelper(const T (&array)[N]))[N];
-} // namespace base
-} // namespace bubblefs
+namespace mytoft {
+struct ArraySizeHelper
+{
+    template <size_t N>
+    struct SizedType
+    {
+        char elements[N];
+    };
+
+    template <typename T, size_t N>
+    static SizedType<N> Helper(const T (&a)[N]);
+#ifdef __GNUC__ // gcc allow 0 sized array
+    template <typename T>
+    static SizedType<0> Helper(const T (&a)[0]);
 #endif
+};
+} // namespace mytoft
+} // namespace bubblefs
 
-#define arraysize(array) (sizeof(::bubblefs::base::ArraySizeHelper(array)))
-
+#define arraysize(a) (sizeof(::bubblefs::mytoft::ArraySizeHelper::Helper(a)))
 // gejun: Following macro was used in other modules.
 #undef ARRAY_SIZE
-#define ARRAY_SIZE(array) arraysize(array)
+#define ARRAY_SIZE(a) arraysize(a)
 
-// ARRAYSIZE_UNSAFE performs essentially the same calculation as arraysize,
-// but can be used on anonymous types or types defined inside
-// functions.  It's less safe than arraysize as it accepts some
-// (although not all) pointers.  Therefore, you should use arraysize
-// whenever possible.
+// XXX: from protobuf/stubs/common.h
+// ===================================================================
+// from google3/base/basictypes.h
+
+// The GOOGLE_ARRAYSIZE(arr) macro returns the # of elements in an array arr.
+// The expression is a compile-time constant, and therefore can be
+// used in defining new arrays, for example.
 //
-// The expression ARRAYSIZE_UNSAFE(a) is a compile-time constant of type
-// size_t.
-//
-// ARRAYSIZE_UNSAFE catches a few type errors.  If you see a compiler error
+// GOOGLE_ARRAYSIZE catches a few type errors.  If you see a compiler error
 //
 //   "warning: division by zero in ..."
 //
-// when using ARRAYSIZE_UNSAFE, you are (wrongfully) giving it a pointer.
-// You should only use ARRAYSIZE_UNSAFE on statically allocated arrays.
+// when using GOOGLE_ARRAYSIZE, you are (wrongfully) giving it a pointer.
+// You should only use GOOGLE_ARRAYSIZE on statically allocated arrays.
 //
 // The following comments are on the implementation details, and can
 // be ignored by the users.
 //
-// ARRAYSIZE_UNSAFE(arr) works by inspecting sizeof(arr) (the # of bytes in
+// ARRAYSIZE(arr) works by inspecting sizeof(arr) (the # of bytes in
 // the array) and sizeof(*(arr)) (the # of bytes in one array
 // element).  If the former is divisible by the latter, perhaps arr is
 // indeed an array, in which case the division result is the # of
@@ -156,6 +195,8 @@ char (&ArraySizeHelper(const T (&array)[N]))[N];
 // size.  Since all our code has to go through a 32-bit compiler,
 // where a pointer is 4 bytes, this means all pointers to a type whose
 // size is 3 or greater than 4 will be (righteously) rejected.
+//
+// Kudos to Jorg Brown for this simple and elegant implementation.
 #undef ARRAYSIZE_UNSAFE
 #define ARRAYSIZE_UNSAFE(a) \
     ((sizeof(a) / sizeof(*(a))) / \
