@@ -5,11 +5,12 @@
 #define BUBBLEFS_UTILS_SLASH_STATUS_H_
 
 #include <string>
+#include "utils/stringpiece.h"
 
 namespace bubblefs {
 namespace myslash {
 
-using Slice = strings::Slice;  
+using Slice = StringPiece;  
   
 class Status {
  public:
