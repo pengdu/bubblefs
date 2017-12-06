@@ -358,8 +358,7 @@ enum LinkerInitialized { LINKER_INITIALIZED };
     
 // remove 'unused parameter' warning    
 #define EXPR_UNUSED(expr) do { (void)(expr); } while (0)
-
-#define UNUSED_PARAM(unusedparam) (void)unusedparam
+#define UNUSED_PARAM(unusedparam) (void)(unusedparam)
 
 /*
    can be used like #if (QT_VERSION >= QT_VERSION_CHECK(4, 4, 0))
