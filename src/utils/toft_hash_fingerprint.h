@@ -38,8 +38,8 @@ uint64_t Fingerprint64(const std::string& str);
 //  Helper functions for Fingerprint, it's shorter than IntegerToString,
 //  So it's better to use it as key of sstable (For example , int64 can be used
 //  as docid, and docid is key of sstable for many appcations).
-std::string Fingerprint64ToString(uint64_t hash);
-uint64_t StringToFingerprint64(const std::string& str);
+//std::string Fingerprint64ToString(uint64_t hash);
+//uint64_t StringToFingerprint64(const std::string& str);
 
 }  //  namespace mytoft
 }  //  namespace bubblefs
