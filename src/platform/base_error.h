@@ -126,10 +126,25 @@
       PANIC("%s is not EQ %s \n", #c, #val); \
     }
     
+#define PANIC_ENFORCE_GE(c, val) \
+    if ((c) < (val)) { \
+      PANIC("%s is not GE %s \n", #c, #val); \
+    }
+    
 #define PANIC_ENFORCE_GT(c, val) \
     if ((c) <= (val)) { \
       PANIC("%s is not GT %s \n", #c, #val); \
-    }    
+    }     
+    
+#define PANIC_ENFORCE_LE(c, val) \
+    if ((c) > (val)) { \
+      PANIC("%s is not LE %s \n", #c, #val); \
+    } 
+    
+#define PANIC_ENFORCE_LT(c, val) \
+    if ((c) >= (val)) { \
+      PANIC("%s is not LT %s \n", #c, #val); \
+    } 
 
 #define EXIT_FAIL(fmt, ...) \
     PRINTF_ERROR(fmt, ##__VA_ARGS__); \

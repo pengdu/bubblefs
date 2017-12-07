@@ -159,8 +159,8 @@ ambry_bit_util_test: $(PROJECT_DIR)/src/utils/ambry_bit_util.o $(PROJECT_DIR)/sr
 
 %.o:%.cpp
 	@echo "# Compiling cpp $@"
-	@$(CXX) -c $(HDRPATHS) $(CXXFLAGS) $< -o $@
+	@$(CXX) -c $(CXXFLAGS) $(INCLUDE_PATH) $< -o $@
 
 %.o:%.c
 	@echo "# Compiling c $@"
-	@$(CC) -c $(HDRPATHS) $(CFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) $(INCLUDE_PATH) $< -o $@
