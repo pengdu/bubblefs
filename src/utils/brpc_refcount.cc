@@ -9,6 +9,8 @@
 namespace bubblefs {
 namespace mybrpc {  
   
+namespace subtle {
+
 bool RefCountedThreadSafeBase::HasOneRef() const {
   return AtomicRefCountIsOne(
       &const_cast<RefCountedThreadSafeBase*>(this)->ref_count_);
@@ -47,6 +49,8 @@ bool RefCountedThreadSafeBase::Release() const {
   }
   return false;
 }
+
+}  // namespace subtle
   
 } // namespace mybrpc  
 } // namespace bubblefs

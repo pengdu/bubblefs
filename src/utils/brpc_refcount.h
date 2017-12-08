@@ -1,3 +1,6 @@
+// Copyright (c) 2012 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 // brpc/src/butil/memory/ref_counted.h
 
@@ -13,9 +16,9 @@
 namespace bubblefs {
 namespace mybrpc {
 
-////////////////////////////////////////////////////////////////////////////
+namespace subtle {
 
-class BASE_EXPORT RefCountedBase {
+class RefCountedBase {
  public:
   bool HasOneRef() const { return ref_count_ == 1; }
 
@@ -31,6 +34,7 @@ class BASE_EXPORT RefCountedBase {
     DCHECK(in_dtor_) << "RefCounted object deleted without calling Release()";
   #endif
   }
+
 
   void AddRef() const {
     // TODO(maruel): Add back once it doesn't assert 500 times/sec.
@@ -68,11 +72,12 @@ class BASE_EXPORT RefCountedBase {
 #else
   mutable bool in_dtor_;
 #endif
+  //DFAKE_MUTEX(add_release_);
 
   DISALLOW_COPY_AND_ASSIGN(RefCountedBase);
 };
 
-class BASE_EXPORT RefCountedThreadSafeBase {
+class RefCountedThreadSafeBase {
  public:
   bool HasOneRef() const;
 
@@ -96,40 +101,42 @@ class BASE_EXPORT RefCountedThreadSafeBase {
   DISALLOW_COPY_AND_ASSIGN(RefCountedThreadSafeBase);
 };
 
+}  // namespace subtle
+
 //
 // A base class for reference counted classes.  Otherwise, known as a cheap
-// knock-off of WebKit's RefCountedThreadUnsafe<T> class.  To use this guy just extend your
+// knock-off of WebKit's RefCounted<T> class.  To use this guy just extend your
 // class from it like so:
 //
-//   class MyFoo : public butil::RefCountedThreadUnsafe<MyFoo> {
+//   class MyFoo : public butil::RefCounted<MyFoo> {
 //    ...
 //    private:
-//     friend class butil::RefCountedThreadUnsafe<MyFoo>;
+//     friend class butil::RefCounted<MyFoo>;
 //     ~MyFoo();
 //   };
 //
 // You should always make your destructor private, to avoid any code deleting
 // the object accidently while there are references to it.
 template <class T>
-class RefCountedThreadUnsafe : public RefCountedBase {
+class RefCounted : public subtle::RefCountedBase {
  public:
-  RefCountedThreadUnsafe() {}
+  RefCounted() {}
 
   void AddRef() const {
-    RefCountedBase::AddRef();
+    subtle::RefCountedBase::AddRef();
   }
 
   void Release() const {
-    if (RefCountedBase::Release()) {
+    if (subtle::RefCountedBase::Release()) {
       delete static_cast<const T*>(this);
     }
   }
 
  protected:
-  ~RefCountedThreadUnsafe() {}
+  ~RefCounted() {}
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(RefCountedThreadUnsafe<T>);
+  DISALLOW_COPY_AND_ASSIGN(RefCounted<T>);
 };
 
 // Forward declaration.
@@ -161,16 +168,16 @@ struct DefaultRefCountedThreadSafeTraits {
 //     friend class butil::RefCountedThreadSafe<MyFoo>;
 //     ~MyFoo();
 template <class T, typename Traits = DefaultRefCountedThreadSafeTraits<T> >
-class RefCountedThreadSafe : public RefCountedThreadSafeBase {
+class RefCountedThreadSafe : public subtle::RefCountedThreadSafeBase {
  public:
   RefCountedThreadSafe() {}
 
   void AddRef() const {
-    RefCountedThreadSafeBase::AddRef();
+    subtle::RefCountedThreadSafeBase::AddRef();
   }
 
   void Release() const {
-    if (RefCountedThreadSafeBase::Release()) {
+    if (subtle::RefCountedThreadSafeBase::Release()) {
       Traits::Destruct(static_cast<const T*>(this));
     }
   }
@@ -191,7 +198,7 @@ class RefCountedThreadSafe : public RefCountedThreadSafeBase {
 //
 template<typename T>
 class RefCountedData
-    : public RefCountedThreadSafe< RefCountedData<T> > {
+    : public mybrpc::RefCountedThreadSafe< mybrpc::RefCountedData<T> > {
  public:
   RefCountedData() : data() {}
   RefCountedData(const T& in_value) : data(in_value) {}
@@ -199,11 +206,12 @@ class RefCountedData
   T data;
 
  private:
-  friend class RefCountedThreadSafe<RefCountedData<T> >;
+  friend class mybrpc::RefCountedThreadSafe<mybrpc::RefCountedData<T> >;
   ~RefCountedData() {}
-};  
-  
+};
+
 } // namespace mybrpc
+} // namespace bubblefs
 
 //
 // A smart pointer class for reference counted objects.  Use this class instead
@@ -211,7 +219,7 @@ class RefCountedData
 // avoid common memory leaks caused by forgetting to Release an object
 // reference.  Sample usage:
 //
-//   class MyFoo : public RefCountedThreadSafe<MyFoo> {
+//   class MyFoo : public RefCounted<MyFoo> {
 //    ...
 //   };
 //
@@ -340,7 +348,5 @@ template <typename T>
 scoped_refptr<T> make_scoped_refptr(T* t) {
   return scoped_refptr<T>(t);
 }
-
-} // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_BRPC_REFCOUNT_H_
