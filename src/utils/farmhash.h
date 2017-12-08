@@ -40,8 +40,52 @@
 // of a+b is easily derived from the hashes of a and b.  This property
 // doesn't hold for any hash functions in this file.
 
-#ifndef FARM_HASH_H_
-#define FARM_HASH_H_
+/*
+Recommended Usage
+=================
+
+Our belief is that the typical hash function is mostly used for in-memory hash
+tables and similar.  That use case allows hash functions that differ on
+different platforms, and that change from time to time.  For this, I recommend
+using wrapper functions in a .h file with comments such as, "may change from
+time to time, may differ on different platforms, and may change depending on
+NDEBUG."
+
+Some projects may also require a forever-fixed, portable hash function.  Again
+we recommend using wrapper functions in a .h, but in this case the comments on
+them would be very different.
+
+We have provided a sample of these wrapper functions in src/farmhash.h.  Our
+hope is that most people will need nothing more than src/farmhash.h and
+src/farmhash.cc.  Those two files are a usable and relatively portable library.
+(One portability snag: if your compiler doesn't have __builtin_expect then
+you may need to define FARMHASH_NO_BUILTIN_EXPECT.)  For those that prefer
+using a configure script (perhaps because they want to "make install" later),
+FarmHash has one, but for many people it's best to ignore it.
+
+Note that the wrapper functions such as Hash() in src/farmhash.h can select
+one of several hash functions.  The selection is done at compile time, based
+on your machine architecture (e.g., sizeof(size_t)) and the availability of
+vector instructions (e.g., SSE4.1).
+
+To get the best performance from FarmHash, one will need to think a bit about
+when to use compiler flags that allow vector instructions and such: -maes,
+-msse4.2, -mavx, etc., or their equivalents for other compilers.  Those are
+the g++ flags that make g++ emit more types of machine instructions than it
+otherwise would.  For example, if you are confident that you will only be
+using FarmHash on systems with SSE4.2 and/or AES, you may communicate that to
+the compiler as explained in src/farmhash.cc.  If not, use -maes, -mavx, etc.,
+when you can, and the appropriate choices will be made by via conditional
+compilation in src/farmhash.cc.
+
+It may be beneficial to try -O3 or other compiler flags as well.  I also have
+found feedback-directed optimization (FDO) to improve the speed of FarmHash.
+*/
+
+// farmhash/src/farmhash.h
+
+#ifndef BUBBLEFS_UITLS_FARM_HASH_H_
+#define BUBBLEFS_UITLS_FARM_HASH_H_
 
 #include <assert.h>
 #include <stdint.h>
@@ -325,4 +369,4 @@ inline uint128_t Fingerprint128(const Str& s) {
   #error "Unable to determine endianness!"
 #endif /* __BIG_ENDIAN__ */
 
-#endif  // FARM_HASH_H_
+#endif  // BUBBLEFS_UITLS_FARM_HASH_H_

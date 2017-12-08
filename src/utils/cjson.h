@@ -20,8 +20,10 @@
   THE SOFTWARE.
 */
 
-#ifndef cJSON__h
-#define cJSON__h
+// DaveGamble/cJSON/cJSON.h
+
+#ifndef BUBBLEFS_UITLS_CJSON_H_
+#define BUBBLEFS_UITLS_CJSON_H_
 
 #ifdef __cplusplus
 extern "C"
@@ -260,4 +262,4 @@ CJSON_PUBLIC(void) cJSON_free(void *object);
 }
 #endif
 
-#endif
+#endif // BUBBLEFS_UITLS_CJSON_H_

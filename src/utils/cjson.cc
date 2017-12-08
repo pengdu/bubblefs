@@ -20,6 +20,8 @@
   THE SOFTWARE.
 */
 
+// DaveGamble/cJSON/cJSON.c
+
 /* cJSON */
 /* JSON parser in C. */
 
@@ -56,7 +58,7 @@
 #pragma GCC visibility pop
 #endif
 
-#include "utils/cjson.h"
+#include "cjson.h"
 
 /* define our own boolean type */
 #define true ((cJSON_bool)1)

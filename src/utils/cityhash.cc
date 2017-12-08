@@ -27,6 +27,8 @@
 // possible hash functions, by using SIMD instructions, or by
 // compromising on hash quality.
 
+// cityhash/src/city.cc
+
 #include "cityhash.h"
 
 #include <algorithm>

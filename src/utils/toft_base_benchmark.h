@@ -68,7 +68,7 @@ extern Benchmark* benchmarks[10000];
 extern int NumCPUs();
 
 #define MYTOFT_BENCHMARK(f) \
-    ::bubblefs::mytoft::Benchmark* _benchmark_##f = (new :::bubblefs::mytoft::Benchmark(#f, f))
+    ::bubblefs::mytoft::Benchmark* _benchmark_##f = (new ::bubblefs::mytoft::Benchmark(#f, f))
 
 #define MYTOFT_BENCHMARK_RANGE(f, lo, hi) \
     :::bubblefs::mytoft::Benchmark* _benchmark_##f = \
