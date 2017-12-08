@@ -17,8 +17,9 @@
 #ifndef BUBBLEFS_UTILS_BRPC_CLOSURE_GUARD_H_
 #define BUBBLEFS_UTILS_BRPC_CLOSURE_GUARD_H_
 
-#include "google/protobuf/service.h"
 #include "platform/macros.h"
+
+#include "google/protobuf/service.h"
 
 namespace bubblefs {
 namespace mybrpc {
