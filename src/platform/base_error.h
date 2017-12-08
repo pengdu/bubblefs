@@ -16,6 +16,7 @@
 #ifndef BUBBLEFS_PLATFORM_BASE_ERROR_H_
 #define BUBBLEFS_PLATFORM_BASE_ERROR_H_
 
+#include <assert.h>
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>

@@ -117,6 +117,16 @@ private: \
         Name(); \
         ~Name()
 #endif
+
+#ifndef DECLARE_PROPERTY
+#define DECLARE_PROPERTY(type, name) \
+public:\
+    void set_##name(const type& val) { m_##name = val; }\
+    const type& name() const { return m_##name; }\
+    type* mutable_##name() { return &m_##name; }\
+private:\
+    type m_##name;
+#endif // #ifndef DECLARE_PROPERTY
    
 #undef arraysize
 // The arraysize(arr) macro returns the # of elements in an array arr.
