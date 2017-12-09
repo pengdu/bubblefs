@@ -26,7 +26,7 @@ limitations under the License.
 #include <mutex>
 #include <vector>
 #include "platform/logging.h"
-#include "platform/threadlocal.h"
+#include "platform/macros.h"
 #include "platform/types.h"
 #include "utils/threadpool.h"
 

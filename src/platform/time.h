@@ -553,6 +553,15 @@ inline int fast_realtime(timespec* ts) {
     return clock_gettime(CLOCK_REALTIME, ts);
 }
 
+/*!
+ * \brief return time in seconds
+ */
+// dmlc-core/include/dmlc/timer.h
+inline double ChronoGetTime(void) {
+  return std::chrono::duration<double>(
+      std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+}
+
 // saber/saber/util/timeops.cc
 
 extern uint64_t NowMillis();

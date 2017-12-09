@@ -17,7 +17,6 @@
 
 // protobuf/src/google/protobuf/stubs/mutex.h
 // brpc/src/butil/thread_local.h
-// dmlc-core/include/dmlc/thread_local.h
 
 #ifndef BUBBLEFS_PLATFORM_THREADLOCAL_H_
 #define BUBBLEFS_PLATFORM_THREADLOCAL_H_
@@ -35,35 +34,9 @@
 #include <new>
 #include <random>
 #include <unordered_map>
-#include <vector>
-#include "platform/logging.h"
+
+#include "platform/base_error.h"
 #include "platform/macros.h"
-#include "platform/port.h"
-
-#ifdef TF_SUPPORT_THREAD_LOCAL
-#define STATIC_THREAD_LOCAL static __thread
-#define THREAD_LOCAL __thread
-#else
-#define STATIC_THREAD_LOCAL static thread_local
-#define THREAD_LOCAL thread_local
-#endif
-
-// Try to come up with a portable implementation of thread local variables
-// Provide thread_local keyword (for primitive types) before C++11
-// DEPRECATED: define this keyword before C++11 might make the variable ABI
-// incompatible between C++11 and C++03
-#if !defined(thread_local) &&                                           \
-    (__cplusplus < 201103L ||                                           \
-     (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) < 40800)
-// GCC supports thread_local keyword of C++11 since 4.8.0
-#ifdef _MSC_VER
-// WARNING: don't use this macro in C++03
-#define thread_local __declspec(thread)
-#else
-// WARNING: don't use this macro in C++03
-#define thread_local __thread
-#endif  // _MSC_VER
-#endif  // thread_local
 
 namespace bubblefs { 
   
@@ -120,7 +93,8 @@ template <class T>
 class ThreadLocal {
 public:
   ThreadLocal() {
-    CHECK(pthread_key_create(&threadSpecificKey_, dataDestructor) == 0);
+    PANIC_ENFORCE(pthread_key_create(&threadSpecificKey_, dataDestructor) == 0,
+                  "pthread_key_create fail");
   }
   ~ThreadLocal() { pthread_key_delete(threadSpecificKey_); }
 
@@ -134,7 +108,7 @@ public:
     if (!p && createLocal) {
       p = new T();
       int ret = pthread_setspecific(threadSpecificKey_, p);
-      CHECK(ret == 0);
+      PANIC_ENFORCE(ret == 0, "pthread_setspecific return 0");
     }
     return p;
   }
@@ -148,7 +122,8 @@ public:
     if (T* q = get(false)) {
       dataDestructor(q);
     }
-    CHECK(pthread_setspecific(threadSpecificKey_, p) == 0);
+    PANIC_ENFORCE(pthread_setspecific(threadSpecificKey_, p) == 0,
+                  "pthread_setspecific fail");
   }
 
   /**
@@ -181,7 +156,8 @@ private:
 template <class T>
 class ThreadLocalD {
 public:
-  ThreadLocalD() { CHECK(pthread_key_create(&threadSpecificKey_, NULL) == 0); }
+  ThreadLocalD() { PANIC_ENFORCE(pthread_key_create(&threadSpecificKey_, NULL) == 0,
+                                 "pthread_key_create fail"); }
   ~ThreadLocalD() {
     pthread_key_delete(threadSpecificKey_);
     for (auto t : threadMap_) {
@@ -196,7 +172,8 @@ public:
     T* p = (T*)pthread_getspecific(threadSpecificKey_);
     if (!p) {
       p = new T();
-      CHECK(pthread_setspecific(threadSpecificKey_, p) == 0);
+      PANIC_ENFORCE(pthread_setspecific(threadSpecificKey_, p) == 0,
+                    "pthread_setspecific fail");
       updateMap(p);
     }
     return p;
@@ -210,7 +187,8 @@ public:
     if (T* q = (T*)pthread_getspecific(threadSpecificKey_)) {
       dataDestructor(q);
     }
-    CHECK(pthread_setspecific(threadSpecificKey_, p) == 0);
+    PANIC_ENFORCE(pthread_setspecific(threadSpecificKey_, p) == 0,
+                  "pthread_setspecific fail");
     updateMap(p);
   }
 
@@ -224,7 +202,7 @@ private:
 
   void updateMap(T* p) {
     pid_t tid = syscall(SYS_gettid);
-    CHECK_NE(tid, -1);
+    PANIC_ENFORCE_NE(tid, -1);
     std::lock_guard<std::mutex> guard(mutex_);
     auto ret = threadMap_.insert(std::make_pair(tid, p));
     if (!ret.second) {
@@ -238,115 +216,6 @@ private:
 };
 
 }  // namespace internal
-
-namespace base {
-
-// Get a thread-local object typed T. The object will be default-constructed
-// at the first call to this function, and will be deleted when thread
-// exits.
-template <typename T> inline T* get_thread_local();
-
-// |fn| or |fn(arg)| will be called at caller's exit. If caller is not a 
-// thread, fn will be called at program termination. Calling sequence is LIFO:
-// last registered function will be called first. Duplication of functions 
-// are not checked. This function is often used for releasing thread-local
-// resources declared with __thread (or thread_local defined in 
-// butil/thread_local.h) which is much faster than pthread_getspecific or
-// boost::thread_specific_ptr.
-// Returns 0 on success, -1 otherwise and errno is set.
-int thread_atexit(void (*fn)());
-int thread_atexit(void (*fn)(void*), void* arg);
-
-// Remove registered function, matched functions will not be called.
-void thread_atexit_cancel(void (*fn)());
-void thread_atexit_cancel(void (*fn)(void*), void* arg);
-
-// Delete the typed-T object whose address is `arg'. This is a common function
-// to thread_atexit.
-template <typename T> void delete_object(void* arg) {
-    delete static_cast<T*>(arg);
-}
-
-namespace detail {
-
-template <typename T>
-class ThreadLocalHelper {
-public:
-    inline static T* get() {
-        if (__builtin_expect(value != nullptr, 1)) {
-            return value;
-        }
-        value = new (std::nothrow) T;
-        if (value != nullptr) {
-            base::thread_atexit(delete_object<T>, value);
-        }
-        return value;
-    }
-    static THREAD_LOCAL T* value;
-};
-
-template <typename T> THREAD_LOCAL T* ThreadLocalHelper<T>::value = nullptr;
-
-}  // namespace detail
-
-template <typename T> inline T* get_thread_local() {
-    return detail::ThreadLocalHelper<T>::get();
-}
-
-/*!
- * \brief A threadlocal store to store threadlocal variables.
- *  Will return a thread local singleton of type T
- * \tparam T the type we like to store
- */
-template<typename T>
-class ThreadLocalStore {
- public:
-  /*! \return get a thread local singleton */
-  static T* Get() {
-#if TF_SUPPORT_THREAD_LOCAL
-    static __thread T* ptr = nullptr;
-    if (ptr == nullptr) {
-      ptr = new T();
-      Singleton()->RegisterDelete(ptr);
-    }
-    return ptr;
-#else
-    static thread_local T inst;
-    return &inst;
-#endif
-  }
-
- private:
-  /*! \brief constructor */
-  ThreadLocalStore() {}
-  /*! \brief destructor */
-  ~ThreadLocalStore() {
-    for (size_t i = 0; i < data_.size(); ++i) {
-      delete data_[i];
-    }
-  }
-  /*! \return singleton of the store */
-  static ThreadLocalStore<T> *Singleton() {
-    static ThreadLocalStore<T> inst;
-    return &inst;
-  }
-  /*!
-   * \brief register str for internal deletion
-   * \param str the string pointer
-   */
-  void RegisterDelete(T *str) {
-    std::unique_lock<std::mutex> lock(mutex_);
-    data_.push_back(str);
-    lock.unlock();
-  }
-  /*! \brief internal mutex */
-  std::mutex mutex_;
-  /*!\brief internal data */
-  std::vector<T*> data_;
-};
-
-}  // namespace base
-
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_THREADLOCAL_H_

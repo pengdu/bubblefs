@@ -174,8 +174,12 @@ limitations under the License.
 #define BASE_STRING16_ITERATOR_IS_CHAR16_POINTER
 #endif
 
+/// check if g++ is before c++11
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 #define BASE_CXX11_ENABLED 1
+#else
+#pragma message("Will need g++-4.6 or higher to compile all," \                         \
+                "compile without c++0x, some features may be disabled")
 #endif
 
 #if !defined(BASE_CXX11_ENABLED)

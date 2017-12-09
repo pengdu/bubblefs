@@ -64,10 +64,9 @@
 #define PRINTF_TEST_DONE() \
     PRINTF_INFO("TEST DOWN \n") 
     
-#define PRINTF_CHECK(c, msg) \
+#define PRINTF_CHECK(c, fmt, ...) \
     if (!(c)) { \
-      std::string str_msg(msg); \
-      PRINTF_ASSERT("%s\n", str_msg.c_str()); \
+      PRINTF_ASSERT("%s is False" fmt, #c, ##__VA_ARGS__); \
     }
     
 #define PRINTF_CHECK_TRUE(c) \
@@ -116,15 +115,21 @@
     PRINTF_ERROR("\n Panic \n"); \
     abort()
   
-#define PANIC_ENFORCE(c, msg) \
+#define PANIC_ENFORCE(c, fmt, ...) \
     if (!(c)) { \
-      std::string str_msg(msg); \
-      PANIC("%s\n", str_msg.c_str()); \
+      PRINTF_ERROR("%s is False" fmt, #c, ##__VA_ARGS__); \
+      PRINTF_ERROR("\n Panic \n"); \
+      abort(); \
     }
     
 #define PANIC_ENFORCE_EQ(c, val) \
     if ((c) != (val)) { \
       PANIC("%s is not EQ %s \n", #c, #val); \
+    }
+    
+#define PANIC_ENFORCE_NE(c, val) \
+    if ((c) == (val)) { \
+      PANIC("%s is not NE %s \n", #c, #val); \
     }
     
 #define PANIC_ENFORCE_GE(c, val) \

@@ -327,9 +327,17 @@
 
 #ifndef NOEXCEPT
 # if defined(BASE_CXX11_ENABLED)
-#  define NOEXCEPT noexcept
+#  define NOEXCEPT noexcept(true)
 # else
 #  define NOEXCEPT
+# endif
+#endif
+
+#ifndef THROW_EXCEPT
+# if defined(BASE_CXX11_ENABLED)
+#  define THROW_EXCEPT noexcept(false)
+# else
+#  define THROW_EXCEPT
 # endif
 #endif
 
@@ -352,6 +360,25 @@
 #else
 # define CACHE_LINE_ALIGNMENT
 #endif /* _MSC_VER */
+
+/*! \brief Whether cxx11 thread local is supported */
+#ifndef BASE_CXX11_THREAD_LOCAL
+#if defined(_MSC_VER)
+#define BASE_CXX11_THREAD_LOCAL (_MSC_VER >= 1900)
+#elif defined(__clang__)
+#define BASE_CXX11_THREAD_LOCAL (__has_feature(cxx_thread_local))
+#else
+#define BASE_CXX11_THREAD_LOCAL (__cplusplus >= 201103L)
+#endif
+#endif
+
+/*!
+ * \brief Enable std::thread related modules,
+ *  Used to disable some module in mingw compile.
+ */
+#ifndef BASE_ENABLE_STD_THREAD
+#define BASE_ENABLE_STD_THREAD (__cplusplus >= 201103L)
+#endif
 
 ////////////////////////////////////////////////////////////
 

@@ -29,7 +29,7 @@
 #include <syscall.h>                         // SYS_clock_gettime
 #include <time.h>
 #include <unistd.h>                          // syscall
-#include "platform/threadlocal.h"
+#include "platform/macros.h"
 
 namespace bubblefs {
 namespace timeutil {  

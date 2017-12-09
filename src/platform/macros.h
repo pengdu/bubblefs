@@ -377,6 +377,10 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 # define BASE_SYMBOLSTR_HELPER(a) #a
 #endif
 
+/*! \brief helper macro to generate string concat */
+#define BASE_STR_CONCAT_(__x, __y) __x##__y
+#define BASE_STR_CONCAT(__x, __y) BASE_STR_CONCAT_(__x, __y)
+
 #ifndef BASE_TYPEOF
 # if defined(BASE_CXX11_ENABLED)
 #  define BASE_TYPEOF decltype
@@ -410,6 +414,21 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 // remove 'unused parameter' warning    
 #define EXPR_UNUSED(expr) do { (void)(expr); } while (0)
 #define UNUSED_PARAM(unusedparam) (void)(unusedparam)
+
+#ifdef BASE_CXX11_ENABLED
+#define STATIC_THREAD_LOCAL static thread_local
+#define THREAD_LOCAL thread_local
+#else
+#define STATIC_THREAD_LOCAL static __thread // gcc
+#define THREAD_LOCAL __thread
+#endif
+
+#if defined(__APPLE__) || defined(_WIN32)
+#define BASE_LITTLE_ENDIAN 1
+#else
+#include <endian.h>
+#define BASE_LITTLE_ENDIAN (__BYTE_ORDER == __LITTLE_ENDIAN)
+#endif
 
 /*
    can be used like #if (QT_VERSION >= QT_VERSION_CHECK(4, 4, 0))
