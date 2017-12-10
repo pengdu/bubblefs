@@ -17,7 +17,6 @@
 #include "platform/mutexlock.h"
 #include "utils/pink_define.h"
 #include "utils/pink_thread.h"
-#include "utils/status.h"
 
 #ifdef TF_USE_SSL
 #include <openssl/ssl.h>

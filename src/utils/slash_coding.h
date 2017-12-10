@@ -15,12 +15,10 @@
 #include <stdint.h>
 #include <string.h>
 #include <string>
-#include "utils/stringpiece.h"
+#include "utils/slash_slice.h"
 
 namespace bubblefs {
-namespace myslash {
-
-using Slice = StringPiece;  
+namespace myslash { 
   
 // Standard Put... routines append to a string
 extern void PutFixed32(std::string* dst, uint32_t value);

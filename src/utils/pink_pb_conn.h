@@ -12,9 +12,11 @@
 #include <map>
 #include "utils/pink_conn.h"
 #include "utils/pink_define.h"
-#include "utils/status.h"
+#include "utils/slash_status.h"
 
 #include "google/protobuf/message.h"
+
+using bubblefs::myslash::Status;
 
 namespace bubblefs {
 namespace mypink {

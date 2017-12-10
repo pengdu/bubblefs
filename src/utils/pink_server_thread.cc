@@ -11,7 +11,10 @@
 #include "platform/pink_epoll.h"
 #include "platform/pink_server_socket.h"
 #include "platform/slash_xdebug.h"
+#include "utils/slash_status.h"
 #include "utils/pink_server_thread.h"
+
+using bubblefs::myslash::Status;
 
 namespace bubblefs {
 namespace mypink {

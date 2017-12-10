@@ -5,8 +5,8 @@
 
 // pink/pink/include/pink_define.h
 
-#ifndef PINK_INCLUDE_PINK_DEFINE_H_
-#define PINK_INCLUDE_PINK_DEFINE_H_
+#ifndef BUBBLEFS_UTILS_PINK_DEFINE_H_
+#define BUBBLEFS_UTILS_PINK_DEFINE_H_
 
 #include <functional>
 #include <iostream>
@@ -107,4 +107,4 @@ constexpr int MYPINK_CONF_MAX_NUM = 1024;
 }  // namespace mypink
 }  // namespace bubblefs
 
-#endif  // PINK_INCLUDE_PINK_DEFINE_H_
+#endif  // BUBBLEFS_UTILS_PINK_DEFINE_H_

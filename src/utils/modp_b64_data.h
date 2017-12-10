@@ -1,6 +1,9 @@
 // VC8 doesn't have stdint.h.  On the other hand, some compilers don't like
 // the below code, because basictypes.h itself includes stdint.h and the
 // typedefs below can cause conflicts.
+
+// voyager/voyager/util/base64/modp_base64/modp_b64_data.h
+
 typedef unsigned char uint8_t;
 typedef unsigned int uint32_t;
 

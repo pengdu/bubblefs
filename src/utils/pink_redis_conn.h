@@ -13,7 +13,6 @@
 #include <vector>
 #include "utils/pink_conn.h"
 #include "utils/pink_define.h"
-#include "utils/status.h"
 
 namespace bubblefs {
 namespace mypink {

@@ -9,7 +9,9 @@
 #define BUBBLEFS_UTILS_PINK_CLI_H_
 
 #include <string>
-#include "utils/status.h"
+#include "utils/slash_status.h"
+
+using bubblefs::myslash::Status;
 
 namespace bubblefs {
 namespace mypink {

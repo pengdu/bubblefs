@@ -10,7 +10,7 @@
 
 #include <assert.h>
 #include <string>
-#include "utils/status.h"
+#include "utils/slash_status.h"
 
 namespace bubblefs {
 namespace myslash {

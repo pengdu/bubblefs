@@ -12,7 +12,6 @@
 #include "utils/pink_http_conn.h"
 #include "utils/pink_thread.h"
 #include "utils/pink_server_thread.h"
-#include "utils/status.h"
 #include "utils/slash_hash.h"
 
 namespace bubblefs {

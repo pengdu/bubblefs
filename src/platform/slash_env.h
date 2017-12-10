@@ -20,12 +20,10 @@
 #include "platform/mutexlock.h"
 #include "utils/pdlfs_map.h"
 #include "utils/slash_random.h"
-#include "utils/status.h"
+#include "utils/slash_status.h"
 
 namespace bubblefs {
-namespace myslash {
-
-using Slice = StringPiece;  
+namespace myslash { 
   
 class RandomAccessFile;
 class WritableFile;
@@ -103,58 +101,6 @@ class FileLock {
     FileLock(const FileLock&);
     void operator=(const FileLock&);
 };
-
-// Set of locked files.  We keep a separate set instead of just
-// relying on fcntrl(F_SETLK) since fcntl(F_SETLK) does not provide
-// any protection against multiple uses from the same process.
-class FileLockTable {
- private:
-  port::Mutex mu_;
-  mypdlfs::HashSet locked_files_;
-
-  // No copying allowed
-  FileLockTable(const FileLockTable&);
-  void operator=(const FileLockTable&);
-
- public:
-  FileLockTable() {}
-
-  void Remove(const Slice& fname) {
-    MutexLock l(&mu_);
-    locked_files_.Erase(fname);
-  }
-
-  bool Insert(const Slice& fname) {
-    MutexLock l(&mu_);
-    if (locked_files_.Contains(fname)) {
-      return false;
-    } else {
-      locked_files_.Insert(fname);
-      return true;
-    }
-  }
-};
-
-// Lock the specified file.  Used to prevent concurrent access to
-// the same db by multiple processes.  On failure, stores NULL in
-// *lock and returns non-OK.
-//
-// On success, stores a pointer to the object that represents the
-// acquired lock in *lock and returns OK.  The caller should call
-// UnlockFile(*lock) to release the lock.  If the process exits,
-// the lock will be automatically released.
-//
-// If somebody else already holds the lock, finishes immediately
-// with a failure.  I.e., this call does not wait for existing locks
-// to go away.
-//
-// May create the named file if it does not already exist.
-Status LockFileThreadSafe(const char* fname, FileLock** lock);
-
-// Release the lock acquired by a previous successful call to LockFile.
-// REQUIRES: lock was returned by a successful LockFile() call
-// REQUIRES: lock has not already been unlocked.
-Status UnlockFileThreadSafe(FileLock* lock);
 
 Status LockFile(const std::string& f, FileLock** l);
 Status UnlockFile(FileLock* l);
@@ -249,7 +195,7 @@ class WritableFile {
   virtual Status Close() = 0;
   virtual Status Flush() = 0;
   virtual Status Sync() = 0;
-  virtual Status Trim(uint64_t offset) { return Status::UnimplementedError(); };
+  virtual Status Trim(uint64_t offset) { return Status::NotSupported("Trim is not supported"); };
   virtual uint64_t Filesize() { return 0; };
 
  private:

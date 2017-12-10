@@ -16,7 +16,6 @@
 #include "platform/mutexlock.h"
 #include "platform/slash_env.h"
 #include "platform/slash_xdebug.h"
-#include "utils/status.h"
 
 namespace bubblefs {
 namespace myslash {

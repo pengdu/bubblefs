@@ -178,43 +178,6 @@ static int LockOrUnlock(int fd, bool lock) {
   return fcntl(fd, F_SETLK, &f);
 }
 
-// We keep a separate set instead of just
-// relying on fcntrl(F_SETLK) since fcntl(F_SETLK) does not provide
-// any protection against multiple uses from the same process.
-Status LockFileThreadSafe(FileLockTable& locks, const char* fname, FileLock** lock) {
-  *lock = NULL;
-  Status s;
-  int fd = open(fname, O_RDWR | O_CREAT, 0644);
-  if (fd < 0) {
-    s = IOError(fname, errno);
-  } else if (!locks.Insert(fname)) {
-    close(fd);
-    s = Status::IOError(fname, "Lock already held by process");
-  } else if (LockOrUnlock(fd, true) == -1) {
-    s = IOError(fname, errno);
-    close(fd);
-    locks.Remove(fname);
-  } else {
-    FileLock* my_lock = new FileLock;
-    my_lock->name_ = fname;
-    my_lock->fd_ = fd;
-    *lock = my_lock;
-  }
-  return s;
-}
-
-Status UnlockFileThreadSafe(FileLockTable& locks, FileLock* lock) {
-  Status s;
-  FileLock* my_lock = reinterpret_cast<FileLock*>(lock);
-  if (LockOrUnlock(my_lock->fd_, false) == -1) {
-    s = IOError("Unlock", errno);
-  }
-  locks.Remove(my_lock->name_);
-  close(my_lock->fd_);
-  delete my_lock;
-  return s;
-}
-
 Status LockFile(const std::string& fname, FileLock** lock) {
   *lock = NULL;
   Status result;

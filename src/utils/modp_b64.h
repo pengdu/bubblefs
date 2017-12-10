@@ -18,8 +18,10 @@
  *
  */
 
-#ifndef MODP_B64
-#define MODP_B64
+// voyager/voyager/util/base64/modp_base64/modp_b64.h
+
+#ifndef BUBBLEFS_UTILS_MODP_B64_H_
+#define BUBBLEFS_UTILS_MODP_B64_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -165,4 +167,4 @@ inline std::string& modp_b64_decode(std::string& s)
 
 #endif /* __cplusplus */
 
-#endif /* MODP_B64 */
+#endif // BUBBLEFS_UTILS_MODP_B64_H_
