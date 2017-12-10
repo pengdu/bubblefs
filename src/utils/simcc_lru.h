@@ -26,6 +26,34 @@
 #include <unordered_map>
 #include <functional>
 
+/*
+usage:
+    struct Deletor : std::unary_function<Stat*, void> {
+        void operator()(Stat*& v) const {
+            delete v;
+            v = NULL;
+        }
+    };
+
+    struct Sizeof : std::unary_function<Stat*, size_t> {
+        size_t operator()(const Stat* v) const {
+            return sizeof(string) + simcc::MD5::kBinDigestLength + sizeof(v) + sizeof(*v);
+        }
+    };
+    
+    typedef LRUCacheH4< string, Stat*, Sizeof, Deletor > LRUCache;
+    typedef std::shared_ptr<LRUCache> LRUCachePtr;
+    
+    lru_max_item_count_ = lru_max_item_count;
+    lru_max_memery_size_bytes_ = lru_max_memery_size_mb * 1024 * 1024;
+
+    if (enable_) {
+        lru_.reset(new LRUCache(lru_max_item_count_,
+                                lru_max_memery_size_bytes_,
+                                Sizeof(), Deletor()));
+    }
+*/
+
 namespace bubblefs {
 namespace mysimcc {
 

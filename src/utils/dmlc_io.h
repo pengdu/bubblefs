@@ -18,7 +18,7 @@
 
 #include "platform/base_error.h"
 #include "platform/macros.h"
-#include "./serializer.h"
+#include "utils/dmlc_serializer.h"
 
 // include uint64_t only to make io standalone
 #ifdef _MSC_VER
