@@ -137,6 +137,12 @@
 #define NOINLINE
 #endif
 
+#if defined(BASE_CXX11_ENABLED)
+#define INLINE inline
+#else
+#define INLINE
+#endif
+
 #ifndef BASE_FORCE_INLINE
 #if defined(COMPILER_MSVC)
 #define BASE_FORCE_INLINE    __forceinline
@@ -384,7 +390,7 @@
 
 // dynamic cast reroute: if RTTI is disabled, go to reinterpret_cast
 template <typename Dst, typename Src>
-inline Dst dynamic_cast_if_rtti(Src ptr) {
+INLINE Dst dynamic_cast_if_rtti(Src ptr) {
 #ifdef __GXX_RTTI
   return dynamic_cast<Dst>(ptr);
 #else

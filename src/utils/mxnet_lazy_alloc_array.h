@@ -33,11 +33,12 @@
 #include <memory>
 #include <mutex>
 #include <vector>
-#include "platform/logging.h"
+#include "platform/base_error.h"
 
 namespace bubblefs {
-namespace mxnet {
-
+namespace mymxnet {
+namespace common {
+  
 template<typename TElem>
 class LazyAllocArray {
  public:
@@ -101,7 +102,7 @@ inline LazyAllocArray<TElem>::LazyAllocArray()
 template<typename TElem>
 template<typename FCreate>
 inline std::shared_ptr<TElem> LazyAllocArray<TElem>::Get(int index, FCreate creator) {
-  CHECK_GE(index, 0);
+  PANIC_ENFORCE_GE(index, 0);
   size_t idx = static_cast<size_t>(index);
   if (idx < kInitSize) {
     std::shared_ptr<TElem> ptr = head_[idx];
@@ -182,7 +183,8 @@ inline void LazyAllocArray<TElem>::SignalForKill() {
   exit_now_.store(true);
 }
 
-}  // namespace mxnet
+}  // namespace common
+}  // namespace mymxnet
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_MXNET_LAZY_ALLOC_ARRAY_H_
