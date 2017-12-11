@@ -300,6 +300,25 @@ if [ ! -f "${FLAG_DIR}/hiredis_0_13_3" ] \
     touch "${FLAG_DIR}/hiredis_0_13_3"
 fi
 
+# zeromq
+if [ ! -f "${FLAG_DIR}/zeromq_4_2_2" ] \
+    || [ ! -f "${DEPS_PREFIX}/lib/libzmq.a" ] \
+    || [ ! -f "${DEPS_PREFIX}/include/zmq.h" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/zeromq" ] ; then
+    	rm -rf ${DEPS_SOURCE}/zeromq
+    fi
+    tar zxvf ${DEPS_PACKAGE}/zeromq-4.2.2.tar.gz -C .
+    mv zeromq-4.2.2 zeromq && cd zeromq
+    mkdir build
+    ./configure --prefix=${DEPS_SOURCE}/zeromq/build
+    make && make check
+    make install
+    cd build
+    cp -a lib/libzmq.a ${DEPS_PREFIX}/lib
+    cp -a include/zmq.h include/zmq_utils.h ${DEPS_PREFIX}/include
+    touch "${FLAG_DIR}/zeromq_4_2_2"
+fi
 
 :<<\EOF
 # glog

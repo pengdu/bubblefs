@@ -7,12 +7,13 @@
 #ifndef BUBBLEFS_UTILS_PSLITE_ZMQ_VAN_H_
 #define BUBBLEFS_UTILS_PSLITE_ZMQ_VAN_H_
 
-#include <zmq.h> // install zmq
 #include <stdlib.h>
 #include <thread>
 #include <string>
 #include "platform/base_error.h"
 #include "utils/pslite_van.h"
+
+#include "zmq.h" // zeromq
 
 #if _MSC_VER
 #define rand_r(x) rand()
