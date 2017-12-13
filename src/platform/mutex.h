@@ -125,11 +125,13 @@ class CondVar {
  public:
   explicit CondVar(Mutex* mu);
   ~CondVar();
-  void Wait(const char* msg = nullptr);
+  void Wait();
   // Timed condition wait.  Returns true if timeout occurred.
-  bool TimedWaitAbsolute(uint64_t abs_time_us, const char* msg = nullptr);
+  bool TimedWaitAbsolute(uint64_t abs_time_us);
+  bool TimedWaitAbsolute(const struct timespec& absolute_time);
   // Time wait in timeout ms, return true if timeout
-  bool TimedWait(uint64_t timeout, const char* msg = nullptr);
+  bool TimedWait(uint64_t timeout);
+  bool TimedwaitRelative(const struct timespec& relative_time);
   void Signal();
   void SignalAll();
   void Broadcast();

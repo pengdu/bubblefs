@@ -6,10 +6,10 @@
 
 // tera/src/common/event.h
 
-#ifndef BUBBLEFS_PLATFORM_BDCOM_AUTORESET_EVENT_H_
-#define BUBBLEFS_PLATFORM_BDCOM_AUTORESET_EVENT_H_
+#ifndef BUBBLEFS_PLATFORM_BDCOM_EVENT_H_
+#define BUBBLEFS_PLATFORM_BDCOM_EVENT_H_
 
-#include "mutexlock.h"
+#include "platform/mutexlock.h"
 
 namespace bubblefs {
 namespace mybdcom {
@@ -52,4 +52,4 @@ private:
 } // namespace mybdcom
 } // namespace bubblefs
 
-#endif  // BUBBLEFS_PLATFORM_BDCOM_AUTORESET_EVENT_H_
+#endif  // BUBBLEFS_PLATFORM_BDCOM_EVENT_H_

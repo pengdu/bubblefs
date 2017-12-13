@@ -29,21 +29,6 @@ limitations under the License.
 #include "utils/stringpiece.h"
 
 namespace bubblefs {
-  
-//===--------------------------------------------------------------------===//
-// Iterator Interface
-//===--------------------------------------------------------------------===//
-// peloton/src/include/common/iterator.h
-template <class T>
-class Iterator {
- public:
-  virtual bool Next(T &out) = 0;
-
-  virtual bool HasNext() = 0;
-
-  virtual ~Iterator() {}
-};  
-
 namespace table {
 
 class Iterator {
@@ -112,7 +97,6 @@ extern Iterator* NewEmptyIterator();
 extern Iterator* NewErrorIterator(const Status& status);
 
 }  // namespace table
-
 }  // namespace bubblefs
 
 #endif  // BUBBLEFS_UTILS_ITERATOR_H_

@@ -28,7 +28,89 @@ limitations under the License.
 #include <utility>
 #include "platform/macros.h"
 
-// <stdint.h>
+/*
+// complete all missing definitions in case previous <stdint.h> inclusion
+// without __STDC_LIMIT_MACROS
+
+#ifndef __WORDSIZE
+# ifndef _WIN32
+#  ifdef _WIN64
+#   define __WORDSIZE 64
+#  else
+#   define __WORDSIZE 32
+#  endif
+# endif
+#endif
+
+#ifndef INT64_MIN
+// Minimum of signed integral types.  
+# define INT8_MIN       (-128)
+# define INT16_MIN      (-32767-1)
+# define INT32_MIN      (-2147483647-1)
+# define INT64_MIN      (-__INT64_C(9223372036854775807)-1)
+// Maximum of signed integral types.  
+# define INT8_MAX       (127)
+# define INT16_MAX      (32767)
+# define INT32_MAX      (2147483647)
+# define INT64_MAX      (__INT64_C(9223372036854775807))
+
+// Maximum of unsigned integral types.  
+# define UINT8_MAX      (255)
+# define UINT16_MAX     (65535)
+# define UINT32_MAX     (4294967295U)
+# define UINT64_MAX     (__UINT64_C(18446744073709551615))
+
+// Values to test for integral types holding `void *' pointer.  
+# if __WORDSIZE == 64
+#  define INTPTR_MIN        (-9223372036854775807L-1)
+#  define INTPTR_MAX        (9223372036854775807L)
+#  define UINTPTR_MAX       (18446744073709551615UL)
+# else
+#  define INTPTR_MIN        (-2147483647-1)
+#  define INTPTR_MAX        (2147483647)
+#  define UINTPTR_MAX       (4294967295U)
+# endif
+
+// Minimum for largest signed integral type.  
+# define INTMAX_MIN     (-__INT64_C(9223372036854775807)-1)
+// Maximum for largest signed integral type.  
+# define INTMAX_MAX     (__INT64_C(9223372036854775807))
+
+// Maximum for largest unsigned integral type. 
+# define UINTMAX_MAX        (__UINT64_C(18446744073709551615))
+
+// Limits of other integer types.  
+
+// Limits of `ptrdiff_t' type.  
+# if __WORDSIZE == 64
+#  define PTRDIFF_MIN       (-9223372036854775807L-1)
+#  define PTRDIFF_MAX       (9223372036854775807L)
+# else
+#  define PTRDIFF_MIN       (-2147483647-1)
+#  define PTRDIFF_MAX       (2147483647)
+# endif
+
+// Limit of `size_t' type.
+# ifndef SIZE_MAX
+#  if __WORDSIZE == 64
+#   define SIZE_MAX      (18446744073709551615UL)
+#  else
+#   define SIZE_MAX      (4294967295U)
+#  endif
+# endif
+
+// Limits of `wchar_t'.
+# ifndef WCHAR_MIN
+// These constants might also be defined in <wchar.h>. 
+#  define WCHAR_MIN     __WCHAR_MIN
+#  define WCHAR_MAX     __WCHAR_MAX
+# endif
+
+// Limits of `wint_t'. 
+# define WINT_MIN       (0u)
+# define WINT_MAX       (4294967295u)
+*/
+
 #ifndef  INT8_MAX
 #define  INT8_MAX   0x7f
 #endif

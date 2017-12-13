@@ -15,7 +15,6 @@
 // Author: Ge,Jun (gejun@baidu.com)
 // Date: Tue Sep 16 12:39:12 CST 2014
 
-// protobuf/src/google/protobuf/stubs/mutex.h
 // brpc/src/butil/thread_local.h
 
 #ifndef BUBBLEFS_PLATFORM_THREADLOCAL_H_
@@ -38,8 +37,7 @@
 #include "platform/base_error.h"
 #include "platform/macros.h"
 
-namespace bubblefs { 
-  
+namespace bubblefs {
 namespace internal {
   
 template<typename T>
@@ -68,153 +66,6 @@ class ThreadLocalStorage {
   DISALLOW_COPY_AND_ASSIGN(ThreadLocalStorage);
 };  
   
-/**
- * Thread local storage for object.
- * Example:
- *
- * Declarartion:
- * ThreadLocal<vector<int>> vec_;
- *
- * Use in thread:
- * vector<int>& vec = *vec; // obtain the thread specific object
- * vec.resize(100);
- *
- * Note that this ThreadLocal will desconstruct all internal data when thread
- * exits
- * This class is suitable for cases when frequently creating and deleting
- * threads.
- *
- * Consider implementing a new ThreadLocal if one needs to frequently create
- * both instances and threads.
- *
- * see also ThreadLocalD
- */
-template <class T>
-class ThreadLocal {
-public:
-  ThreadLocal() {
-    PANIC_ENFORCE(pthread_key_create(&threadSpecificKey_, dataDestructor) == 0,
-                  "pthread_key_create fail");
-  }
-  ~ThreadLocal() { pthread_key_delete(threadSpecificKey_); }
-
-  /**
-   * @brief get thread local object.
-   * @param if createLocal is true and thread local object is never created,
-   * return a new object. Otherwise, return nullptr.
-   */
-  T* get(bool createLocal = true) {
-    T* p = (T*)pthread_getspecific(threadSpecificKey_);
-    if (!p && createLocal) {
-      p = new T();
-      int ret = pthread_setspecific(threadSpecificKey_, p);
-      PANIC_ENFORCE(ret == 0, "pthread_setspecific return 0");
-    }
-    return p;
-  }
-
-  /**
-   * @brief set (overwrite) thread local object. If there is a thread local
-   * object before, the previous object will be destructed before.
-   *
-   */
-  void set(T* p) {
-    if (T* q = get(false)) {
-      dataDestructor(q);
-    }
-    PANIC_ENFORCE(pthread_setspecific(threadSpecificKey_, p) == 0,
-                  "pthread_setspecific fail");
-  }
-
-  /**
-   * return reference.
-   */
-  T& operator*() { return *get(); }
-
-  /**
-   * Implicit conversion to T*
-   */
-  operator T*() { return get(); }
-
-private:
-  static void dataDestructor(void* p) { delete (T*)p; }
-
-  pthread_key_t threadSpecificKey_;
-};
-
-/**
- * Almost the same as ThreadLocal, but note that this ThreadLocalD will
- * destruct all internal data when ThreadLocalD instance destructs.
- *
- * This class is suitable for cases when frequently creating and deleting
- * objects.
- *
- * see also ThreadLocal
- *
- * @note The type T must implemented default constructor.
- */
-template <class T>
-class ThreadLocalD {
-public:
-  ThreadLocalD() { PANIC_ENFORCE(pthread_key_create(&threadSpecificKey_, NULL) == 0,
-                                 "pthread_key_create fail"); }
-  ~ThreadLocalD() {
-    pthread_key_delete(threadSpecificKey_);
-    for (auto t : threadMap_) {
-      dataDestructor(t.second);
-    }
-  }
-
-  /**
-   * @brief Get thread local object. If not exists, create new one.
-   */
-  T* get() {
-    T* p = (T*)pthread_getspecific(threadSpecificKey_);
-    if (!p) {
-      p = new T();
-      PANIC_ENFORCE(pthread_setspecific(threadSpecificKey_, p) == 0,
-                    "pthread_setspecific fail");
-      updateMap(p);
-    }
-    return p;
-  }
-
-  /**
-   * @brief Set thread local object. If there is an object create before, the
-   * old object will be destructed.
-   */
-  void set(T* p) {
-    if (T* q = (T*)pthread_getspecific(threadSpecificKey_)) {
-      dataDestructor(q);
-    }
-    PANIC_ENFORCE(pthread_setspecific(threadSpecificKey_, p) == 0,
-                  "pthread_setspecific fail");
-    updateMap(p);
-  }
-
-  /**
-   * @brief Get reference of the thread local object.
-   */
-  T& operator*() { return *get(); }
-
-private:
-  static void dataDestructor(void* p) { delete (T*)p; }
-
-  void updateMap(T* p) {
-    pid_t tid = syscall(SYS_gettid);
-    PANIC_ENFORCE_NE(tid, -1);
-    std::lock_guard<std::mutex> guard(mutex_);
-    auto ret = threadMap_.insert(std::make_pair(tid, p));
-    if (!ret.second) {
-      ret.first->second = p;
-    }
-  }
-
-  pthread_key_t threadSpecificKey_;
-  std::mutex mutex_;
-  std::map<pid_t, T*> threadMap_;
-};
-
 }  // namespace internal
 }  // namespace bubblefs
 

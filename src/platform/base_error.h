@@ -31,6 +31,8 @@
  */
 
 // '\n'
+#define ENABLE_DEBUG 1
+
 #define CHAR_NEW_LINE 10
 
 #define STR_ERRORNO() (errno == 0 ? "None" : strerror(errno)) 
@@ -46,20 +48,31 @@
     
 /// print utils    
 #define PRINTF_INFO(fmt, ...) \
-    fprintf(stderr, "INFO [%s:%d](%s) " fmt, \
-    __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+    fprintf(stdout, "INFO [%s:%d](%s) " fmt, \
+            __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__); \
+    fflush(stdout)
     
 #define PRINTF_WARN(fmt, ...) \
     fprintf(stderr, "WARN [%s:%d](%s) errno: %d %s, " fmt, \
-    __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__)
+            __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__); \
+    fflush(stderr)
     
 #define PRINTF_ERROR(fmt, ...) \
     fprintf(stderr, "ERROR [%s:%d](%s) errno: %d %s, " fmt, \
-    __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__)
+            __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__); \
+    fflush(stderr)
     
 #define PRINTF_ASSERT(fmt, ...) \
     fprintf(stderr, "ASSERT [%s:%d](%s) errno: %d %s, " fmt, \
-    __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__)
+            __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__); \
+    fflush(stderr)
+    
+#define PRINTF_TRACE(fmt, ...) \
+    if (ENABLE_DEBUG) { \
+      fprintf(stdout, "TRACE [%s:%d](%s) " fmt, \
+              __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__); \
+      fflush(stdout); \
+    }
 
 #define PRINTF_TEST_DONE() \
     PRINTF_INFO("TEST DOWN \n") 

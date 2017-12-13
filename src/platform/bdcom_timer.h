@@ -1,8 +1,9 @@
-// Copyright (c) 2014, Baidu.com, Inc. All Rights Reserved
+// Copyright (c) 2015, Baidu.com, Inc. All Rights Reserved
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 //
 
+// tera/src/common/timer.h
 // baidu/common/include/timer.h
 
 #ifndef  BUBBLEFS_PLATFORM_BDCOM_TIMER_H_
@@ -22,6 +23,32 @@ enum Precision {
     kMin,
     kUsec,
 };
+
+static inline std::string get_time_str(int64_t timestamp) {
+    struct tm tt;
+    char buf[20];
+    time_t t = timestamp;
+    strftime(buf, 20, "%Y%m%d-%H:%M:%S", localtime_r(&t, &tt));
+    return std::string(buf, 17);
+}
+
+static inline std::string get_curtime_str() {
+    return get_time_str(time(NULL));
+}
+
+static inline int64_t get_clock_micros() {
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return static_cast<int64_t>(ts.tv_sec) * 1000000 + static_cast<int64_t>(ts.tv_nsec) / 1000;
+}
+
+static inline int64_t get_unique_micros(int64_t ref) {
+    int64_t now;
+    do {
+        now = get_clock_micros();
+    } while (now == ref);
+    return now;
+}
 
 static inline long get_micros() {
     struct timeval tv;

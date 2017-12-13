@@ -11,8 +11,8 @@ limitations under the License. */
 
 // Paddle/paddle/utils/Queue.h
 
-#ifndef BUBBLEFS_UTILS_PADDLE_BLOCKING_QUEUE_H_
-#define BUBBLEFS_UTILS_PADDLE_BLOCKING_QUEUE_H_
+#ifndef BUBBLEFS_UTILS_PADDLE_QUEUE_H_
+#define BUBBLEFS_UTILS_PADDLE_QUEUE_H_
 
 #include <assert.h>
 #include <algorithm>
@@ -25,7 +25,6 @@ limitations under the License. */
 #include <vector>
 #include <utility>
 #include "platform/macros.h"
-#include "platform/mutexlock.h"
 
 namespace bubblefs {
 namespace mypaddle {
@@ -263,4 +262,4 @@ private:
 }  // namespace mypaddle
 }  // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_PADDLE_BLOCKING_QUEUE_H_
+#endif // BUBBLEFS_UTILS_PADDLE_QUEUE_H_

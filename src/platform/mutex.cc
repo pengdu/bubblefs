@@ -484,7 +484,7 @@ CondVar::~CondVar() { PthreadCall("destroy cv", pthread_cond_destroy(&cv_)); }
     bool returnValue = d->wait(time);
     mutex->lock();
 */
-void CondVar::Wait(const char* msg) {
+void CondVar::Wait() {
 #ifdef MUTEX_DEBUG
   mu_->BeforeUnlock();
 #endif
@@ -496,7 +496,7 @@ void CondVar::Wait(const char* msg) {
 #endif
 }
 
-bool CondVar::TimedWaitAbsolute(uint64_t abs_time_us, const char* msg) {
+bool CondVar::TimedWaitAbsolute(uint64_t abs_time_us) {
   struct timespec ts;
   ts.tv_sec = static_cast<time_t>(abs_time_us / 1000000);
   ts.tv_nsec = static_cast<suseconds_t>((abs_time_us % 1000000) * 1000);
@@ -520,7 +520,18 @@ bool CondVar::TimedWaitAbsolute(uint64_t abs_time_us, const char* msg) {
   return false;
 }
 
-bool CondVar::TimedWait(uint64_t timeout, const char* msg) {
+// Returns true if the lock is acquired, false otherwise. abstime is the
+// *absolute* time.
+bool CondVar::TimedWaitAbsolute(const struct timespec& absolute_time) {
+  int status = pthread_cond_timedwait(&cv_, &mu_->mu_, &absolute_time);
+  if (status == ETIMEDOUT) {
+    return false;
+  }
+  assert(status == 0);
+  return true;
+}
+
+bool CondVar::TimedWait(uint64_t timeout) {
   /*
    * pthread_cond_timedwait api use absolute API
    * so we need gettimeofday + timeout
@@ -539,10 +550,24 @@ bool CondVar::TimedWait(uint64_t timeout, const char* msg) {
   bool ret = pthread_cond_timedwait(&cv_, &mu_->mu_, &ts);
   
 #ifdef MUTEX_DEBUG
-  mu_->AfterLock(msg);
+  mu_->AfterLock();
 #endif
   
   return (ret == 0);
+}
+
+// Calls timedwait with a relative, instead of an absolute, timeout.
+bool CondVar::TimedwaitRelative(const struct timespec& relative_time) {
+  struct timespec absolute;
+  // clock_gettime would be more convenient, but that needs librt
+  // int status = clock_gettime(CLOCK_REALTIME, &absolute);
+  struct timeval tv;
+  int status = gettimeofday(&tv, NULL);
+  assert(status == 0);
+  absolute.tv_sec = tv.tv_sec + relative_time.tv_sec;
+  absolute.tv_nsec = tv.tv_usec * 1000 + relative_time.tv_nsec;
+
+  return TimedWaitAbsolute(absolute);
 }
 
 /*!

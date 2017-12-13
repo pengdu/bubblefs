@@ -191,7 +191,7 @@ private:
             Task task;
             MutexLock lock(&mutex_, "ThreadProc");
             while (time_queue_.empty() && queue_.empty() && !stop_) {
-                work_cv_.Wait("ThreadProcWait");
+                work_cv_.Wait();
             }
             if (stop_) {
                 break;
@@ -219,7 +219,7 @@ private:
                     }
                     continue;
                 } else if (queue_.empty() && !stop_) {
-                    work_cv_.TimedWait(wait_time, "ThreadProcTimeWait");
+                    work_cv_.TimedWait(wait_time);
                     continue;
                 }
             }

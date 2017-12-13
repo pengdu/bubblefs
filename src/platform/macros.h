@@ -377,10 +377,6 @@ enum LinkerInitialized { LINKER_INITIALIZED };
 # define BASE_SYMBOLSTR_HELPER(a) #a
 #endif
 
-/*! \brief helper macro to generate string concat */
-#define BASE_STR_CONCAT_(__x, __y) __x##__y
-#define BASE_STR_CONCAT(__x, __y) BASE_STR_CONCAT_(__x, __y)
-
 #ifndef BASE_TYPEOF
 # if defined(BASE_CXX11_ENABLED)
 #  define BASE_TYPEOF decltype
