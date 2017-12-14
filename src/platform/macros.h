@@ -118,6 +118,18 @@ private: \
         ~Name()
 #endif
 
+#ifndef DECLARE_SINGLETON
+#define DECLARE_SINGLETON(classname)        \
+ public:                                    \
+  static classname *instance() {            \
+    static classname instance;              \
+    return &instance;                       \
+  }                                         \
+ private:                                   \
+  classname();                              \
+  DISALLOW_COPY_AND_ASSIGN(classname)
+#endif // DECLARE_SINGLETON
+
 #ifndef DECLARE_PROPERTY
 #define DECLARE_PROPERTY(type, name) \
 public:\

@@ -14,10 +14,14 @@
  * limitations under the License.
  *****************************************************************************/
 
-#include "utils/bdcom_string_tokenizer.h"
+// apollo/modules/common/util/string_tokenizer.cc
+
+#include "utils/apollo_string_tokenizer.h"
 
 namespace bubblefs {
-namespace mybdcom {
+namespace myapollo {
+namespace common {
+namespace util {
 
 StringTokenizer::StringTokenizer(const std::string &s,
                                  const std::string &delims) {
@@ -52,5 +56,7 @@ std::string StringTokenizer::Next() {
   return "";
 }
 
-}  // namespace mybdcom
+}  // namespace util
+}  // namespace common
+}  // namespace myapollo
 }  // namespace bubblefs

@@ -16,11 +16,13 @@
 
 // apollo/modules/common/util/string_tokenizer_test.cc
 
-#include "utils/bdcom_string_tokenizer.h"
+#include "utils/apollo_string_tokenizer.h"
 #include "gtest/gtest.h"
 
 namespace bubblefs {
-namespace mybdcom {
+namespace myapollo {
+namespace common {
+namespace util {
 
 TEST(UtilTest, StringTokenizerNext) {
   std::string str("     aa,  bbb , c   ");
@@ -76,5 +78,7 @@ TEST(UtilTest, StringTokenizerBothEmpty) {
   EXPECT_EQ(t1, "");
 }
 
-}  // namespace mybdcom
+}  // namespace util
+}  // namespace common
+}  // namespace myapollo
 }  // namespace bubblefs

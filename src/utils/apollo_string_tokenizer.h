@@ -21,8 +21,8 @@
  * @brief Defines the StringTokenizer class
  */
 
-#ifndef BUBBLEFS_UTILS_BDCOM_STRING_TOKENIZER_H_
-#define BUBBLEFS_UTILS_BDCOM_STRING_TOKENIZER_H_
+#ifndef BUBBLEFS_UTILS_APOLLO_STRING_TOKENIZER_H_
+#define BUBBLEFS_UTILS_APOLLO_STRING_TOKENIZER_H_
 
 #include <string>
 #include <vector>
@@ -32,7 +32,9 @@
  * @brief apollo::common::util
  */
 namespace bubblefs {
-namespace mybdcom {
+namespace myapollo {
+namespace common {
+namespace util {
 
 /**
  * @class StringTokenizer
@@ -82,7 +84,9 @@ class StringTokenizer {
   size_t last_index_;
 };
 
-}  // namespace mybdcom
+}  // namespace util
+}  // namespace common
+}  // namespace myapollo
 }  // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_BDCOM_STRING_TOKENIZER_H_
+#endif // BUBBLEFS_UTILS_APOLLO_STRING_TOKENIZER_H_
