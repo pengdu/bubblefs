@@ -264,6 +264,15 @@ inline void swap(Blob& lhs, Blob& rhs) {
   lhs.swap(rhs);
 }
 
+namespace BlobStat {
+
+size_t sizeBytes(const Blob& blob) {
+  auto* p = BlobStatRegistry::instance().get(blob.meta().id());
+  return p ? p->sizeBytes(blob) : 0;
+}
+
+} // namespace BlobStats
+
 }  // namespace mycaffe2
 }  // namespace bubblefs
 

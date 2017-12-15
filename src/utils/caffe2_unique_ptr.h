@@ -21,6 +21,9 @@
 
 #include <memory> // std::unique_ptr
 
+namespace bubblefs {
+namespace mycaffe2 {
+  
 // make_unique is a C++14 feature. If we don't have 14, we will emulate
 // its behavior. This is copied from folly/Memory.h
 #if __cplusplus >= 201402L ||                                              \
@@ -50,5 +53,18 @@ typename std::enable_if<
 make_unique(Args&&...) = delete;
 
 #endif // make_unique
+
+// dynamic cast reroute: if RTTI is disabled, go to reinterpret_cast
+template <typename Dst, typename Src>
+inline Dst dynamic_cast_if_rtti(Src ptr) {
+#ifdef __GXX_RTTI
+  return dynamic_cast<Dst>(ptr);
+#else
+  return reinterpret_cast<Dst>(ptr);
+#endif
+}
+
+} // namespace mycaffe2
+} // namespace bubblefs
 
 #endif // BUBBLEFS_UTILS_CAFFE2_UNIQUE_PTR_H_

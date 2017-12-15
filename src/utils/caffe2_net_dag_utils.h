@@ -20,6 +20,7 @@
 #ifndef CAFFE2_CORE_NET_DAG_UTILS_H_
 #define CAFFE2_CORE_NET_DAG_UTILS_H_
 
+#include <algorithm>
 #include <atomic>
 #include <climits>
 #include <cstddef>
@@ -33,9 +34,10 @@
 #include "utils/caffe2_simple_queue.h"
 #include "platform/base_error.h"
 #include "platform/types.h"
+#include "platform/caffe2_timer.h"
 #include "utils/caffe2_blob.h"
 #include "utils/caffe2_observer.h"
-#include "utils/caffe2_operator_schema.h"
+#include "utils/caffe2_operator.h"
 #include "utils/caffe2_net.h"
 #include "utils/caffe2_tensor.h"
 #include "utils/caffe2_workspace.h"
@@ -56,7 +58,7 @@ struct OperatorNode {
 
 struct OpGraphNode {
   std::vector<int> children_;
-  std::svector<int> parents_;
+  std::vector<int> parents_;
   int visited_inputs = 0;
   int num_orig_parents;
 };
@@ -75,7 +77,7 @@ std::vector<OpGraphNode> prepareChainGraphNodes(
     const std::vector<dag_utils::OperatorNode>& operator_nodes,
     const std::vector<std::vector<int>>& execution_chains);
 
-namespace internal {
+namespace {
 void prune(int node_idx, std::vector<OpGraphNode>& nodes) {
   // Ancestor table for tracking the visited nodes
   std::vector<bool> ancestors(nodes.size(), false);
@@ -177,10 +179,10 @@ void updateOperatorNodes(
     node.runtime_parent_count_ = 0;
   }
 }
-} // namespace internal
+} // namespace
 
 ExecutionChains computeChains(std::vector<OperatorNode>& orig_nodes) {
-  const std::vector<OpGraphNode> nodes = internal::pruneOpNodeGraph(orig_nodes);
+  const std::vector<OpGraphNode> nodes = pruneOpNodeGraph(orig_nodes);
   std::vector<int> initial_frontier;
   for (int idx = 0; idx < nodes.size(); ++idx) {
     if (nodes[idx].parents_.size() == 0) {
@@ -327,7 +329,7 @@ ExecutionChains computeChains(std::vector<OperatorNode>& orig_nodes) {
       "Haven't seen all the nodes, expected number of nodes , but seen only",
       nodes.size());
 
-  internal::updateOperatorNodes(orig_nodes, chains);
+  updateOperatorNodes(orig_nodes, chains);
   return chains;
 }
 
@@ -336,7 +338,7 @@ ExecutionChains singleChains(std::vector<OperatorNode>& nodes) {
   for (auto i = 0; i < nodes.size(); ++i) {
     chains[i] = {i};
   }
-  internal::updateOperatorNodes(nodes, chains);
+  updateOperatorNodes(nodes, chains);
   return chains;
 }
 

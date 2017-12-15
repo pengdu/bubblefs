@@ -15,10 +15,12 @@
  */
 
 // caffe2/caffe2/core/context.h
+// caffe2/caffe2/core/context.cc
 
 #ifndef BUBBLEFS_UTILS_CAFFE2_CONTEXT_H_
 #define BUBBLEFS_UTILS_CAFFE2_CONTEXT_H_
 
+#include <atomic>
 #include <cstdlib>
 #include <ctime>
 #include <random>
@@ -109,6 +111,26 @@ class CPUContext final {
     ev->Record(CPU, this, err_msg);
   }
 
+  /**
+   * A struct to host thread-local cuda objects.
+   *
+   * In Caffe2, each thread has its own non-default cuda stream as well as
+   * related objects such as cublas and curand handles. This is achieved by
+   * having the ThreadLocalCUDAObjects wrapper that takes care of allocating
+   * and deallocating these objects at the thread scope. This class is solely
+   * used inside CUDAContext and should not be used externally.s
+   * ThreadLocalCUDAObjects:
+   *   vector<cudaStream_t> cuda_streams_[CAFFE2_COMPILE_TIME_MAX_GPUS];
+   *   vector<cublasHandle_t> cublas_handles_[CAFFE2_COMPILE_TIME_MAX_GPUS];
+   *   vector<cudnnHandle_t> cudnn_handles_[CAFFE2_COMPILE_TIME_MAX_GPUS];
+   * 
+   * static thread_local ThreadLocalCUDAObjects cuda_objects_;
+   * cublasHandle_t cblast = cuda_objects_.GetHandle(gpu_id_, stream_id_);
+   * cudnnHandle_t cdnnt = cuda_objects_.GetCudnnHandle(gpu_id_, stream_id_);
+   * cudaStream_t cs = cuda_objects_.GetStream(gpu_id, stream_id);
+   * cudaStreamSynchronize(cs);
+   * cudaError_t error = cudaGetLastError();
+   */
   inline void FinishDeviceComputation() {}
 
   inline rand_gen_type& RandGenerator() {
@@ -192,6 +214,23 @@ inline void CPUContext::CopyBytes<CPUContext, CPUContext>(
   PANIC_ENFORCE(src, "src is NULL");
   PANIC_ENFORCE(dst, "dst is NULL");
   memcpy(dst, src, nbytes);
+}
+
+uint32_t RandomNumberSeed() {
+  // Originally copied from folly::randomNumberSeed (at 418ad4)
+  // modified to use chrono instead of sys/time.h
+  static std::atomic<uint32_t> seedInput(0);
+  auto tv = std::chrono::system_clock::now().time_since_epoch();
+  uint64_t usec = static_cast<uint64_t>(
+      std::chrono::duration_cast<std::chrono::microseconds>(tv).count());
+  uint32_t tv_sec = usec / 1000000;
+  uint32_t tv_usec = usec % 1000000;
+  const uint32_t kPrime0 = 51551;
+  const uint32_t kPrime1 = 61631;
+  const uint32_t kPrime2 = 64997;
+  const uint32_t kPrime3 = 111857;
+  return kPrime0 * (seedInput++) + kPrime1 * static_cast<uint32_t>(getpid()) +
+      kPrime2 * tv_sec + kPrime3 * tv_usec;
 }
 
 }  // namespace mycaffe2

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// caffe2/caffe2/core/common.h
 // caffe2/caffe2/core/logging.h
 // caffe2/caffe2/utils/string_utils.h
 
@@ -78,6 +79,37 @@ inline std::string JoinToString(const std::string& delimiter, const Container& v
   s << "}";
   return s.str();
 }  
+
+template <typename T>
+std::string to_string(T value)
+{
+  std::ostringstream os;
+  os << value;
+  return os.str();
+}
+
+inline int stoi(const std::string& str) {
+  std::stringstream ss;
+  int n = 0;
+  ss << str;
+  ss >> n;
+  return n;
+}
+
+inline double stod(const std::string& str, std::size_t* pos = 0) {
+  std::stringstream ss;
+  ss << str;
+  double val = 0;
+  ss >> val;
+  if (pos) {
+    if (ss.tellg() == -1) {
+      *pos = str.size();
+    } else {
+      *pos = ss.tellg();
+    }
+  }
+  return val;
+}
   
 std::vector<std::string> split(char separator, const std::string& string);
 size_t editDistance(

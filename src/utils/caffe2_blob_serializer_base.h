@@ -15,17 +15,20 @@
  */
 
 // caffe2/caffe2/core/blob_serializer_base.h
+// caffe2/caffe2/core/blob_serialization.cc
 
 #ifndef BUBBLEFS_UTILS_CAFFE2_BLOB_SERIALIZER_BASE_H_
 #define BUBBLEFS_UTILS_CAFFE2_BLOB_SERIALIZER_BASE_H_
 
 #include <string>
 #include <functional>
+#include "platform/base_error.h"
 
 namespace bubblefs {
 namespace mycaffe2 {
 
 class Blob;
+class BlobProto;
 
 constexpr int kDefaultChunkSize = -1;
 constexpr int kNoChunking = 0;
@@ -71,6 +74,83 @@ class BlobSerializerBase {
     Serialize(blob, name, acceptor);
   }
 };
+
+/**
+ * @brief BlobDeserializerBase is an abstract class that deserializes a blob
+ * from a BlobProto or a TensorProto.
+ */
+class BlobDeserializerBase {
+ public:
+  virtual ~BlobDeserializerBase() {}
+
+  // Deserializes from a BlobProto object.
+  virtual void Deserialize(const BlobProto& proto, Blob* blob) = 0;
+};
+
+/**
+ * @brief StringSerializer is the serializer for String.
+ *
+ * StringSerializer takes in a blob that contains a String, and serializes it
+ * into a BlobProto protocol buffer.
+ */
+class StringSerializer : public BlobSerializerBase {
+ public:
+  StringSerializer() {}
+  ~StringSerializer() {}
+  /**
+   * Serializes a Blob. Note that this blob has to contain Tensor<Context>,
+   * otherwise this function produces a fatal error.
+   */
+  void Serialize(
+      const Blob& blob,
+      const string& name,
+      SerializationAcceptor acceptor) override {
+    PANIC_ENFORCE(blob.IsType<std::string>());
+
+    BlobProto blob_proto;
+    //blob_proto.set_name(name);
+    //blob_proto.set_type("std::string");
+    //blob_proto.set_content(blob.template Get<std::string>());
+    acceptor(name, blob_proto.SerializeAsString());
+  }
+};
+
+/**
+ * @brief StringDeserializer is the deserializer for Strings.
+ *
+ */
+class StringDeserializer : public BlobDeserializerBase {
+ public:
+  void Deserialize(const BlobProto& proto, Blob* blob) override {
+    *blob->GetMutable<std::string>() = proto.content();
+  }
+};
+
+// The blob serialization member function implementation.
+void Blob::Serialize(
+    const string& name,
+    BlobSerializerBase::SerializationAcceptor acceptor,
+    int chunk_size) const {
+  std::unique_ptr<BlobSerializerBase> serializer(CreateSerializer(meta_.id()));
+  PANIC_ENFORCE(serializer, "No known serializer for ", meta_.name());
+  serializer->SerializeWithChunkSize(*this, name, acceptor, chunk_size);
+}
+
+// The blob serialization member function implementation.
+std::string Blob::Serialize(const string& name) const {
+  std::string data;
+  BlobSerializerBase::SerializationAcceptor acceptor = [&data](
+      const std::string&, const std::string& blob) {
+    //DCHECK(data.empty()); // should be called once with kNoChunking
+    data = blob;
+  };
+  this->Serialize(name, acceptor, kNoChunking);
+  return data;
+}
+void Blob::Deserialize(const string& content) {
+  BlobProto blob_proto;
+  this->Deserialize(blob_proto);
+}
 
 } // namespace mycaffe2
 } // namespace bubblefs
