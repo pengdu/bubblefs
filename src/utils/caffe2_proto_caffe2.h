@@ -15,7 +15,7 @@
 namespace bubblefs {
 namespace mycaffe2 {
 
-typedef std::vector<char> bytes;   
+typedef std::string bytes;   
 
 // Data type for caffe2 Index/Size. We use size_t to be safe here as well as for
 // large matrices that are common in sparse math.

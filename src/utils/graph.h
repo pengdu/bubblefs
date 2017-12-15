@@ -64,6 +64,18 @@ class NeighborIter;  // Declared below
 class NodeIter;      // Declared below
 class NodeProperties;  // Defined in .cc
 
+
+// Represents the output of 'node' at 'index'.
+struct NodeOut {
+  Node* node;
+  int index;
+
+  // Returns the string name that represents the output of this node.
+  string name() const;
+  // Returns the data type of the output of this node.
+  DataType dtype() const;
+};
+
 struct NodeDef {
   NodeDef(string name2, string op2, string device2) 
       : name(name2), op(op2), device(device2) { }
@@ -73,6 +85,34 @@ struct NodeDef {
   string op;
   string device;
   std::map<string, string> attr;
+};
+
+// Control flow info for a graph node.
+struct ControlFlowInfo {
+  const Node* frame = nullptr;         // frame of a node
+  const Node* parent_frame = nullptr;  // parent frame of a node
+  string frame_name;                   // frame name of a node
+};
+
+struct PairIntHash {
+ public:
+  std::size_t operator()(const std::pair<int, int>& x) const {
+    return std::hash<int>()(x.first) ^ std::hash<int>()(x.second);
+  }
+};
+
+// A map used to store memory types for the inputs/outputs of every node.
+// The key is a pair of ints consisting of a node id and input/output index.
+typedef std::unordered_map<std::pair<int, int>, MemoryType, PairIntHash>
+    MemoryTypeMap;
+
+// We collect the following information about the graph before performing
+// graph partitioning.
+struct GraphInfo {
+  std::vector<DeviceType> device_types;
+  MemoryTypeMap input_types;
+  MemoryTypeMap output_types;
+  std::vector<ControlFlowInfo> cf_info;
 };
 
 class Node {
