@@ -66,9 +66,9 @@ bool stringUtil_EndsWith(const T& str, const T& pattern, bool case_sensitive) {
     }
 
     if (case_sensitive) {
-        return equal(pattern.rbegin() , pattern.rend() , str.rbegin());
+        return std::equal(pattern.rbegin() , pattern.rend() , str.rbegin());
     } else {
-        return equal(pattern.rbegin() , pattern.rend() , str.rbegin() , no_case_compare_char);
+        return std::equal(pattern.rbegin() , pattern.rend() , str.rbegin() , no_case_compare_char);
     }
 }
 
@@ -361,7 +361,7 @@ inline void _stringUtilSplitSliceToSlice(
 
 template<typename StringType>
 void stringUtil_Split(const StringType& src, StringType& left, StringType& right, typename StringType::const_pointer pDelims , size_t nDelimsLength) {
-    typename StringType::const_iterator iter = find_first_of(src.begin() , src.end() , pDelims , pDelims + nDelimsLength);
+    typename StringType::const_iterator iter = std::find_first_of(src.begin() , src.end() , pDelims , pDelims + nDelimsLength);
     if (src.end() == iter) {
         return ;
     }

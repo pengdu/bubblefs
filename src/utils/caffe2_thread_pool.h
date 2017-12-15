@@ -16,8 +16,8 @@
 
 // caffe2/caffe2/utils/thread_pool.h
 
-#ifndef BUBBLEFS_UTILS_CAFFE2_TASK_THREAD_POOL_H_
-#define BUBBLEFS_UTILS_CAFFE2_TASK_THREAD_POOL_H_
+#ifndef BUBBLEFS_UTILS_CAFFE2_THREAD_POOL_H_
+#define BUBBLEFS_UTILS_CAFFE2_THREAD_POOL_H_
 
 #include <condition_variable>
 #include <functional>
@@ -166,4 +166,4 @@ class TaskThreadPool{
 } // namesapce mycaffe2
 } // namesapce bubblefs
 
-#endif // BUBBLEFS_UTILS_CAFFE2_TASK_THREAD_POOL_H_
+#endif // BUBBLEFS_UTILS_CAFFE2_THREAD_POOL_H_

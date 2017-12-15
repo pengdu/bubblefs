@@ -4,6 +4,7 @@
 #ifndef BUBBLEFS_UTILS_SIMCC_TOKENER_H_
 #define BUBBLEFS_UTILS_SIMCC_TOKENER_H_
 
+#include <stdio.h>
 #include "platform/types.h"
 #include "utils/simcc_slice.h"
 

@@ -250,10 +250,6 @@ static const double kVerySmallNumberDouble = 1e-15;
 // A typedef for a uint64 used as a short fingerprint.
 typedef uint64 Fprint;
 
-// Data type for caffe2 Index/Size. We use size_t to be safe here as well as for
-// large matrices that are common in sparse math.
-typedef int64_t TIndex;
-
 }  // namespace bubblefs
 
 #endif // BUBBLEFS_PLATFORM_TYPES_H_

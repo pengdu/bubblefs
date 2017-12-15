@@ -16,8 +16,8 @@
 
 // caffe2/caffe2/utils/simple_queue.h
 
-#ifndef BUBBLEFS_UTILS_CAFFE2_QUEUE_H_
-#define BUBBLEFS_UTILS_CAFFE2_QUEUE_H_
+#ifndef BUBBLEFS_UTILS_CAFFE2_SIMPLE_QUEUE_H_
+#define BUBBLEFS_UTILS_CAFFE2_SIMPLE_QUEUE_H_
 
 #include <condition_variable>
 #include <mutex>
@@ -134,7 +134,7 @@ class SimpleQueue {
     {
       std::lock_guard<std::mutex> mutex_lock(mutex_);
       if (no_more_jobs_) {
-        PRINTF_ERROR("Cannot push to a closed queue.");
+        PRINTF_ERROR("Cannot push to a closed queue.\n");
         return false;
       }
       queue_.push(value);
@@ -169,4 +169,4 @@ class SimpleQueue {
 }  // namespace mycaffe2
 }  // namespace bubblefs
 
-#endif  // BUBBLEFS_UTILS_CAFFE2_QUEUE_H_
+#endif  // BUBBLEFS_UTILS_CAFFE2_SIMPLE_QUEUE_H_

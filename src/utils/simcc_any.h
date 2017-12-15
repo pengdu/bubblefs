@@ -4,7 +4,9 @@
 #ifndef BUBBLEFS_UTILS_SIMCC_ANY_H_
 #define BUBBLEFS_UTILS_SIMCC_ANY_H_
 
+#include <algorithm>
 #include <typeinfo>
+#include "platform/base_error.h"
 
 namespace bubblefs {
 namespace mysimcc {
