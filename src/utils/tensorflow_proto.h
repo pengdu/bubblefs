@@ -375,7 +375,7 @@ struct TensorProto {
   std::vector<ResourceHandleProto> resource_handle_val;
 
   // DT_VARIANT
-  std::vector<VariantTensorDataProto> variant_val;
+  std::vector<VariantTensorDataProto*> variant_val;
 
   // DT_UINT32
   std::vector<uint32> uint32_val;
@@ -391,7 +391,7 @@ struct VariantTensorDataProto {
   // Portions of the object that are not Tensors.
   bytes metadata;
   // Tensors contained within objects being serialized.
-  std::vector<TensorProto*> tensors;
+  std::vector<TensorProto> tensors;
 };
 
 /// tensorflow/tensorflow/core/framework/attr_value.proto
@@ -417,7 +417,7 @@ struct AttrValue {
     std::vector<DataType> type;  // "list(type)"
     std::vector<TensorShapeProto> shape;         // "list(shape)"
     std::vector<TensorProto> tensor;             // "list(tensor)"
-    std::vector<NameAttrList> func;              // "list(attr)"
+    std::vector<NameAttrList*> func;              // "list(attr)"
   };
   // LINT.ThenChange(https://www.tensorflow.org/code/tensorflow/c/c_api.cc)
 
@@ -435,7 +435,7 @@ struct AttrValue {
     // a primitive op's name. func.attr.first is the name of an attr
     // defined for that function. func.attr.second is the value for
     // that attr in the instantiation.
-    NameAttrList func;
+    NameAttrList* func;
 
     // This is a placeholder only used in nodes defined inside a
     // function.  It indicates the attr value will be supplied when
@@ -452,7 +452,7 @@ struct AttrValue {
 // with a string name.  E.g., MatMul[T=float].
 struct NameAttrList {
   string name;
-  std::map<string, AttrValue*> attr;
+  std::map<string, AttrValue> attr;
 };
 
 /// tensorflow/tensorflow/core/framework/tensor_slice.proto
