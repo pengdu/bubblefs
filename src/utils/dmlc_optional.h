@@ -15,7 +15,7 @@
 #include <algorithm>
 
 #include "platform/macros.h"
-#include "utils/dmlc_common.h"
+#include "utils/dmlc_base.h"
 #include "utils/dmlc_type_traits.h"
 
 namespace bubblefs {
@@ -231,13 +231,13 @@ inline std::istream &operator>>(std::istream &is, optional<bool> &t) {
 }
 
 /*! \brief description for optional int */
-MYDMLC_DECLARE_TYPE_NAME(optional<int>, "int or None");
+DMLC_DECLARE_TYPE_NAME(optional<int>, "int or None");
 /*! \brief description for optional bool */
-MYDMLC_DECLARE_TYPE_NAME(optional<bool>, "boolean or None");
+DMLC_DECLARE_TYPE_NAME(optional<bool>, "boolean or None");
 /*! \brief description for optional float */
-MYDMLC_DECLARE_TYPE_NAME(optional<float>, "float or None");
+DMLC_DECLARE_TYPE_NAME(optional<float>, "float or None");
 /*! \brief description for optional double */
-MYDMLC_DECLARE_TYPE_NAME(optional<double>, "double or None");
+DMLC_DECLARE_TYPE_NAME(optional<double>, "double or None");
 
 }  // namespace mydmlc
 }  // namespace bubblefs
@@ -245,7 +245,7 @@ MYDMLC_DECLARE_TYPE_NAME(optional<double>, "double or None");
 namespace std {
 /*! \brief std hash function for optional */
 template<typename T>
-struct hash<dmlc::optional<T> > {
+struct hash<bubblefs::mydmlc::optional<T> > {
   /*!
    * \brief returns hash of the optional value.
    * \param val value.

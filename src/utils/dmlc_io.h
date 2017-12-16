@@ -34,6 +34,7 @@ namespace bubblefs {
 namespace mydmlc {
 /*!
  * \brief interface of stream I/O for serialization
+ *  derived class may have std::FILE *fp_ or others;
  */
 class Stream {  // NOLINT(*)
  public:

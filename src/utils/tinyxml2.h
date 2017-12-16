@@ -21,8 +21,10 @@
  distribution.
  */
 
-#ifndef TINYXML2_INCLUDED
-#define TINYXML2_INCLUDED
+// mars/mars/comm/tinyxml2.h
+
+#ifndef BUBBLEFS_UTILS_TINYXML2_H_
+#define BUBBLEFS_UTILS_TINYXML2_H_
 
 #if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__)
 #   include <ctype.h>
@@ -2176,4 +2178,4 @@ namespace tinyxml2
 #   pragma warning(pop)
 #endif
 
-#endif // TINYXML2_INCLUDED
+#endif // BUBBLEFS_UTILS_TINYXML2_H_

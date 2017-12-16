@@ -1,4 +1,7 @@
-#include <stdio.h>
+
+// dmlc-core/test/registry_test.cc
+
+#include <cstdio>
 #include <functional>
 #include "utils/dmlc_registry.h"
 
@@ -25,10 +28,10 @@ struct TreeFactory
 };
 
 #define REGISTER_TREE(Name)                                             \
-  MYDMLC_REGISTRY_REGISTER(::tree::TreeFactory, TreeFactory, Name)        \
+  DMLC_REGISTRY_REGISTER(::tree::TreeFactory, TreeFactory, Name)        \
   .set_body([]() { return new Name(); } )
 
-MYDMLC_REGISTRY_FILE_TAG(my_tree);
+DMLC_REGISTRY_FILE_TAG(my_tree);
 
 }  // namespace tree
 
@@ -36,7 +39,7 @@ MYDMLC_REGISTRY_FILE_TAG(my_tree);
 // usually this sits on a seperate file
 namespace bubblefs {
 namespace mydmlc {
-MYDMLC_REGISTRY_ENABLE(tree::TreeFactory);
+DMLC_REGISTRY_ENABLE(tree::TreeFactory);
 }
 }
 
@@ -47,7 +50,7 @@ REGISTER_TREE(BinaryTree)
 
 REGISTER_TREE(AVLTree);
 
-MYDMLC_REGISTRY_LINK_TAG(my_tree);
+DMLC_REGISTRY_LINK_TAG(my_tree);
 }
 
 int main(int argc, char *argv[]) {

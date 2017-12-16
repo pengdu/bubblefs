@@ -17,7 +17,7 @@
 #include <algorithm>
 
 #include "platform/base_error.h"
-#include "utils/dmlc_common.h"
+#include "utils/dmlc_base.h"
 #include "utils/dmlc_data.h"
 #include "utils/dmlc_io.h"
 

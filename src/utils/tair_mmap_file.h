@@ -15,6 +15,7 @@
 #define BUBBLEFS_UTILS_TAIR_MMAP_FILE_H_
 
 #include <sys/mman.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #define log_error(...)

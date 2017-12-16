@@ -6,17 +6,27 @@
 
 // dmlc-core/include/dmlc/base.h
 // dmlc-core/include/dmlc/common.h
+// dmlc-core/include/dmlc/timer.h
 
-#ifndef BUBBLEFS_UTILS_DMLC_COMMON_H_
-#define BUBBLEFS_UTILS_DMLC_COMMON_H_
+#ifndef BUBBLEFS_UTILS_DMLC_BASE_H_
+#define BUBBLEFS_UTILS_DMLC_BASE_H_
 
+#include <time.h>
+#include <chrono>
 #include <string>
 #include <sstream>
 #include <vector>
+#include "platform/macros.h"
+#include "platform/types.h"
 
 namespace bubblefs {
 namespace mydmlc {
 
+
+/*! \brief helper macro to generate string concat */
+#define DMLC_STR_CONCAT_(__x, __y) __x##__y
+#define DMLC_STR_CONCAT(__x, __y) DMLC_STR_CONCAT_(__x, __y)  
+  
 /*!
  * \brief safely get the beginning address of a vector
  * \param vec input vector
@@ -95,7 +105,15 @@ inline size_t HashCombine<size_t>(size_t key, const size_t& value) {
   return key ^ (value + 0x9e3779b9 + (key << 6) + (key >> 2));
 }
 
+/*!
+ * \brief return time in seconds
+ */
+inline double GetTime(void) {
+  return std::chrono::duration<double>(
+      std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+}
+
 }  // namespace mydmlc
 }  // namespace bubblefs
 
-#endif  // BUBBLEFS_UTILS_DMLC_COMMON_H_
+#endif  // BUBBLEFS_UTILS_DMLC_BASE_H_

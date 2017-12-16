@@ -10,10 +10,8 @@
 #define BUBBLEFS_UTILS_DMLC_TYPE_TRAITS_H_
 
 #include "platform/macros.h"
-#if BASE_CXX11_ENABLED
-#include <type_traits>
-#endif
 #include <string>
+#include <type_traits>
 
 namespace bubblefs {
 namespace mydmlc {
@@ -127,14 +125,14 @@ template<bool cond, typename Then, typename Else>
 struct IfThenElseType;
 
 /*! \brief macro to quickly declare traits information */
-#define MYDMLC_DECLARE_TRAITS(Trait, Type, Value)       \
+#define DMLC_DECLARE_TRAITS(Trait, Type, Value)       \
   template<>                                          \
   struct Trait<Type> {                                \
     static const bool value = Value;                  \
   }
 
 /*! \brief macro to quickly declare traits information */
-#define MYDMLC_DECLARE_TYPE_NAME(Type, Name)            \
+#define DMLC_DECLARE_TYPE_NAME(Type, Name)            \
   template<>                                          \
   struct type_name_helper<Type> {                     \
     static inline std::string value() {               \
@@ -146,41 +144,41 @@ struct IfThenElseType;
 // declare special traits when C++11 is not available
 #if BASE_CXX11_ENABLED == 0
 
-MYDMLC_DECLARE_TRAITS(is_pod, char, true);
-MYDMLC_DECLARE_TRAITS(is_pod, int8_t, true);
-MYDMLC_DECLARE_TRAITS(is_pod, int16_t, true);
-MYDMLC_DECLARE_TRAITS(is_pod, int32_t, true);
-MYDMLC_DECLARE_TRAITS(is_pod, int64_t, true);
-MYDMLC_DECLARE_TRAITS(is_pod, uint8_t, true);
-MYDMLC_DECLARE_TRAITS(is_pod, uint16_t, true);
-MYDMLC_DECLARE_TRAITS(is_pod, uint32_t, true);
-MYDMLC_DECLARE_TRAITS(is_pod, uint64_t, true);
-MYDMLC_DECLARE_TRAITS(is_pod, float, true);
-MYDMLC_DECLARE_TRAITS(is_pod, double, true);
+DMLC_DECLARE_TRAITS(is_pod, char, true);
+DMLC_DECLARE_TRAITS(is_pod, int8_t, true);
+DMLC_DECLARE_TRAITS(is_pod, int16_t, true);
+DMLC_DECLARE_TRAITS(is_pod, int32_t, true);
+DMLC_DECLARE_TRAITS(is_pod, int64_t, true);
+DMLC_DECLARE_TRAITS(is_pod, uint8_t, true);
+DMLC_DECLARE_TRAITS(is_pod, uint16_t, true);
+DMLC_DECLARE_TRAITS(is_pod, uint32_t, true);
+DMLC_DECLARE_TRAITS(is_pod, uint64_t, true);
+DMLC_DECLARE_TRAITS(is_pod, float, true);
+DMLC_DECLARE_TRAITS(is_pod, double, true);
 
-MYDMLC_DECLARE_TRAITS(is_integral, char, true);
-MYDMLC_DECLARE_TRAITS(is_integral, int8_t, true);
-MYDMLC_DECLARE_TRAITS(is_integral, int16_t, true);
-MYDMLC_DECLARE_TRAITS(is_integral, int32_t, true);
-MYDMLC_DECLARE_TRAITS(is_integral, int64_t, true);
-MYDMLC_DECLARE_TRAITS(is_integral, uint8_t, true);
-MYDMLC_DECLARE_TRAITS(is_integral, uint16_t, true);
-MYDMLC_DECLARE_TRAITS(is_integral, uint32_t, true);
-MYDMLC_DECLARE_TRAITS(is_integral, uint64_t, true);
+DMLC_DECLARE_TRAITS(is_integral, char, true);
+DMLC_DECLARE_TRAITS(is_integral, int8_t, true);
+DMLC_DECLARE_TRAITS(is_integral, int16_t, true);
+DMLC_DECLARE_TRAITS(is_integral, int32_t, true);
+DMLC_DECLARE_TRAITS(is_integral, int64_t, true);
+DMLC_DECLARE_TRAITS(is_integral, uint8_t, true);
+DMLC_DECLARE_TRAITS(is_integral, uint16_t, true);
+DMLC_DECLARE_TRAITS(is_integral, uint32_t, true);
+DMLC_DECLARE_TRAITS(is_integral, uint64_t, true);
 
-MYDMLC_DECLARE_TRAITS(is_floating_point, float, true);
-MYDMLC_DECLARE_TRAITS(is_floating_point, double, true);
+DMLC_DECLARE_TRAITS(is_floating_point, float, true);
+DMLC_DECLARE_TRAITS(is_floating_point, double, true);
 
 #endif
 
-MYDMLC_DECLARE_TYPE_NAME(float, "float");
-MYDMLC_DECLARE_TYPE_NAME(double, "double");
-MYDMLC_DECLARE_TYPE_NAME(int, "int");
-MYDMLC_DECLARE_TYPE_NAME(uint32_t, "int (non-negative)");
-MYDMLC_DECLARE_TYPE_NAME(uint64_t, "long (non-negative)");
-MYDMLC_DECLARE_TYPE_NAME(std::string, "string");
-MYDMLC_DECLARE_TYPE_NAME(bool, "boolean");
-MYDMLC_DECLARE_TYPE_NAME(void*, "ptr");
+DMLC_DECLARE_TYPE_NAME(float, "float");
+DMLC_DECLARE_TYPE_NAME(double, "double");
+DMLC_DECLARE_TYPE_NAME(int, "int");
+DMLC_DECLARE_TYPE_NAME(uint32_t, "int (non-negative)");
+DMLC_DECLARE_TYPE_NAME(uint64_t, "long (non-negative)");
+DMLC_DECLARE_TYPE_NAME(std::string, "string");
+DMLC_DECLARE_TYPE_NAME(bool, "boolean");
+DMLC_DECLARE_TYPE_NAME(void*, "ptr");
 
 template<typename Then, typename Else>
 struct IfThenElseType<true, Then, Else> {

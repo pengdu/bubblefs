@@ -9,8 +9,15 @@
  *
  */
 
+// tbnet/tbsys/databuffer.h
+
 #ifndef BUBBLEFS_UTILS_TBNET_DATABUFFER_H_
 #define BUBBLEFS_UTILS_TBNET_DATABUFFER_H_
+
+#include <malloc.h>
+#include <stdlib.h>
+#include <string.h>
+#include "platform/base_error.h"
 
 #define MAX_BUFFER_SIZE 2048
 
@@ -501,7 +508,7 @@ class DataBuffer
         unsigned char *newbuf = (unsigned char *) malloc(bufsize);
         if (newbuf == NULL)
         {
-          TBSYS_LOG(ERROR, "expand data buffer failed, length: %d", bufsize);
+          PANIC("expand data buffer failed, length: %d", bufsize);
         }
         assert(newbuf != NULL);
         if (dlen > 0)

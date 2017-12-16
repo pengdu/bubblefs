@@ -289,11 +289,11 @@ template<typename T>
 inline void any::check_type() const {
   PANIC_ENFORCE(type_ != nullptr,
       "The any container is empty requested= %s",
-      typeid(T).name().c_str());
+      typeid(T).name());
   PANIC_ENFORCE(*(type_->ptype_info) == typeid(T),
       "The stored type mismatch stored= %s requested= %s",
-      type_->ptype_info->name().c_str(),
-      typeid(T).name().c_str());
+      type_->ptype_info->name(),
+      typeid(T).name());
 }
 
 template<typename T>

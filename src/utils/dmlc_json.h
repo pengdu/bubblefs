@@ -535,7 +535,7 @@ struct Handler<any> {
     std::type_index id = std::type_index(data.type());
     auto it = nmap.find(id);
     PANIC_ENFORCE(it != nmap.end() && it->first == id,
-                  "Type %s has not been registered via MYDMLC_JSON_ENABLE_ANY", id.name()->c_str());
+                  "Type %s has not been registered via MYDMLC_JSON_ENABLE_ANY", id.name());
     std::string type_name = it->second;
     AnyJSONManager::Entry e = AnyJSONManager::Global()->type_map_.at(type_name);
     writer->BeginArray(false);

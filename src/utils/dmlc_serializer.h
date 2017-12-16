@@ -20,7 +20,8 @@
 #include <unordered_set>
 #include <utility>
 
-#include "platform/macros.h"
+#include "utils/dmlc_base.h"
+#include "utils/dmlc_io.h"
 #include "utils/dmlc_type_traits.h"
 
 namespace bubblefs {

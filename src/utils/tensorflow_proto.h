@@ -310,7 +310,17 @@ struct TensorShapeProto {
 
 // Protocol buffer representing a tensor.
 
-struct VariantTensorDataProto;
+struct TensorProto;
+
+// Protocol buffer representing the serialization format of DT_VARIANT tensors.
+struct VariantTensorDataProto {
+  // Name of the type of objects being serialized.
+  string type_name;
+  // Portions of the object that are not Tensors.
+  bytes metadata;
+  // Tensors contained within objects being serialized.
+  std::vector<TensorProto*> tensors;
+};
 
 struct TensorProto {
   DataType dtype;
@@ -375,23 +385,13 @@ struct TensorProto {
   std::vector<ResourceHandleProto> resource_handle_val;
 
   // DT_VARIANT
-  std::vector<VariantTensorDataProto*> variant_val;
+  std::vector<VariantTensorDataProto> variant_val;
 
   // DT_UINT32
   std::vector<uint32> uint32_val;
 
   // DT_UINT64
   std::vector<uint64> uint64_val;
-};
-
-// Protocol buffer representing the serialization format of DT_VARIANT tensors.
-struct VariantTensorDataProto {
-  // Name of the type of objects being serialized.
-  string type_name;
-  // Portions of the object that are not Tensors.
-  bytes metadata;
-  // Tensors contained within objects being serialized.
-  std::vector<TensorProto> tensors;
 };
 
 /// tensorflow/tensorflow/core/framework/attr_value.proto
@@ -405,19 +405,26 @@ struct VariantTensorDataProto {
 // Comment indicates the corresponding attr type.  Only the field matching the
 // attr type may be filled.
 
-struct NameAttrList;
+struct AttrValue;
+
+// A list of attr names and their values. The whole list is attached
+// with a string name.  E.g., MatMul[T=float].
+struct NameAttrList {
+  string name;
+  std::map<string, AttrValue*> attr;
+};
 
 struct AttrValue {
   // LINT.IfChange
   struct ListValue {
-    std::vector<bytes> s;                        // "list(string)"
+    std::vector<bytes> s;        // "list(string)"
     std::vector<int64> i;        // "list(int)"
     std::vector<float> f;        // "list(float)"
     std::vector<bool> b;         // "list(bool)"
     std::vector<DataType> type;  // "list(type)"
     std::vector<TensorShapeProto> shape;         // "list(shape)"
     std::vector<TensorProto> tensor;             // "list(tensor)"
-    std::vector<NameAttrList*> func;              // "list(attr)"
+    std::vector<NameAttrList> func;              // "list(attr)"
   };
   // LINT.ThenChange(https://www.tensorflow.org/code/tensorflow/c/c_api.cc)
 
@@ -435,7 +442,7 @@ struct AttrValue {
     // a primitive op's name. func.attr.first is the name of an attr
     // defined for that function. func.attr.second is the value for
     // that attr in the instantiation.
-    NameAttrList* func;
+    NameAttrList func;
 
     // This is a placeholder only used in nodes defined inside a
     // function.  It indicates the attr value will be supplied when
@@ -446,13 +453,6 @@ struct AttrValue {
     // given the value "bar".
     string placeholder;
   };
-};
-
-// A list of attr names and their values. The whole list is attached
-// with a string name.  E.g., MatMul[T=float].
-struct NameAttrList {
-  string name;
-  std::map<string, AttrValue> attr;
 };
 
 /// tensorflow/tensorflow/core/framework/tensor_slice.proto
@@ -1124,7 +1124,94 @@ struct ReaderBaseState {
   bytes current_work;
 };
 
+/// tensorflow/tensorflow/core/framework/step_stats.proto
+
+//option cc_enable_arenas = true;
+//option java_outer_classname = "StepStatsProtos";
+//option java_multiple_files = true;
+//option java_package = "org.tensorflow.framework";
+
+// An allocation/de-allocation operation performed by the allocator.
+struct AllocationRecord {
+  // The timestamp of the operation.
+  int64 alloc_micros;
+  // Number of bytes allocated, or de-allocated if negative.
+  int64 alloc_bytes;
+};
+
+struct AllocatorMemoryUsed {
+  string allocator_name;
+  // These are per-node allocator memory stats.
+  int64 total_bytes;
+  int64 peak_bytes;
+  // The bytes that are not deallocated.
+  int64 live_bytes;
+  // The allocation and deallocation timeline.
+  std::vector<AllocationRecord> allocation_records;
+
+  // These are snapshots of the overall allocator memory stats.
+  // The number of live bytes currently allocated by the allocator.
+  int64 allocator_bytes_in_use;
+};
+
+// Output sizes recorded for a single execution of a graph node.
+struct NodeOutput {
+  int32 slot;
+  TensorDescription tensor_description;
+};
+
+// For memory tracking.
+struct MemoryStats {
+  int64 host_temp_memory_size;
+  int64 device_temp_memory_size;
+  int64 host_persistent_memory_size;
+  int64 device_persistent_memory_size;
+  std::vector<int64> host_persistent_tensor_alloc_ids;
+  std::vector<int64> device_persistent_tensor_alloc_ids;
+};
+
+// Time/size stats recorded for a single execution of a graph node.
+struct NodeExecStats {
+  // TODO(tucker): Use some more compact form of node identity than
+  // the full string name.  Either all processes should agree on a
+  // global id (cost_id?) for each node, or we should use a hash of
+  // the name.
+  string node_name;
+  int64 all_start_micros;
+  int64 op_start_rel_micros;
+  int64 op_end_rel_micros;
+  int64 all_end_rel_micros;
+  std::vector<AllocatorMemoryUsed> memory;
+  std::vector<NodeOutput> output;
+  string timeline_label;
+  int64 scheduled_micros;
+  uint32 thread_id;
+  std::vector<AllocationDescription> referenced_tensor;
+  MemoryStats memory_stats;
+};
+
+struct DeviceStepStats {
+  string device;
+  std::vector<NodeExecStats> node_stats;
+};
+
+struct StepStats {
+  std::vector<DeviceStepStats> dev_stats;
+};
+
 /// tensorflow/tensorflow/core/framework/summary.proto
+
+//option cc_enable_arenas = true;
+//option java_outer_classname = "SummaryProtos";
+//option java_multiple_files = true;
+//option java_package = "org.tensorflow.framework";
+
+// Metadata associated with a series of Summary data
+struct SummaryDescription {
+  // Hint on how plugins should process the data in this series.
+  // Supported values include "scalar", "histogram", "image", "audio"
+  string type_hint;
+};
 
 // Serialization format for histogram module in
 // core/lib/histogram/histogram.h
@@ -1142,6 +1229,303 @@ struct HistogramProto {
   //   i != 0:  bucket_limit(i-1) .. bucket_limit(i)
   std::vector<double> bucket_limit;
   std::vector<double> bucket;
+};
+
+// A SummaryMetadata encapsulates information on which plugins are able to make
+// use of a certain summary value.
+struct SummaryMetadata {
+  struct PluginData {
+    // The name of the plugin this data pertains to.
+    string plugin_name;
+
+    // The content to store for the plugin. The best practice is for this to be
+    // a binary serialized protocol buffer.
+    bytes content;
+  };
+
+  // Data that associates a summary with a certain plugin.
+  PluginData plugin_data;
+
+  // Display name for viewing in TensorBoard.
+  string display_name;
+
+  // Longform readable description of the summary sequence. Markdown supported.
+  string summary_description;
+};
+
+// A Summary is a set of named values to be displayed by the
+// visualizer.
+//
+// Summaries are produced regularly during training, as controlled by
+// the "summary_interval_secs" attribute of the training operation.
+// Summaries are also produced at the end of an evaluation.
+struct Summary {
+  struct Image {
+    // Dimensions of the image.
+    int32 height;
+    int32 width;
+    // Valid colorspace values are
+    //   1 - grayscale
+    //   2 - grayscale + alpha
+    //   3 - RGB
+    //   4 - RGBA
+    //   5 - DIGITAL_YUV
+    //   6 - BGRA
+    int32 colorspace;
+    // Image data in encoded format.  All image formats supported by
+    // image_codec::CoderUtil can be stored here.
+    bytes encoded_image_string;
+  };
+
+  struct Audio {
+    // Sample rate of the audio in Hz.
+    float sample_rate;
+    // Number of channels of audio.
+    int64 num_channels;
+    // Length of the audio in frames (samples per channel).
+    int64 length_frames;
+    // Encoded audio data and its associated RFC 2045 content type (e.g.
+    // "audio/wav").
+    bytes encoded_audio_string;
+    string content_type;
+  };
+
+  struct Value {
+    // This field is deprecated and will not be set.
+    string node_name;
+
+    // Tag name for the data. Used by TensorBoard plugins to organize data. Tags
+    // are often organized by scope (which contains slashes to convey
+    // hierarchy). For example: foo/bar/0
+    string tag;
+
+    // Contains metadata on the summary value such as which plugins may use it.
+    // Take note that many summary values may lack a metadata field. This is
+    // because the FileWriter only keeps a metadata object on the first summary
+    // value with a certain tag for each tag. TensorBoard then remembers which
+    // tags are associated with which plugins. This saves space.
+    SummaryMetadata metadata;
+
+    // Value associated with the tag.
+    union value {
+      float simple_value;
+      bytes obsolete_old_style_histogram;
+      Image image;
+      HistogramProto histo;
+      Audio audio;
+      TensorProto tensor;
+    };
+  };
+
+  // Set of values for the summary.
+  std::vector<Value> value;
+};
+
+/// tensorflow/tensorflow/core/framework/log_memory.proto
+
+//option cc_enable_arenas = true;
+//option java_outer_classname = "LogMemoryProtos";
+//option java_multiple_files = true;
+//option java_package = "org.tensorflow.framework";
+
+struct MemoryLogStep {
+  // Process-unique step id.
+  int64 step_id;
+
+  // Handle describing the feeds and fetches of the step.
+  string handle;
+};
+
+struct MemoryLogTensorAllocation {
+  // Process-unique step id.
+  int64 step_id;
+
+  // Name of the kernel making the allocation as set in GraphDef,
+  // e.g., "affine2/weights/Assign".
+  string kernel_name;
+
+  // Allocated tensor details.
+  TensorDescription tensor;
+};
+
+struct MemoryLogTensorDeallocation {
+  // Id of the tensor buffer being deallocated, used to match to a
+  // corresponding allocation.
+  int64 allocation_id;
+
+  // Name of the allocator used.
+  string allocator_name;
+};
+
+struct MemoryLogTensorOutput {
+  // Process-unique step id.
+  int64 step_id;
+
+  // Name of the kernel producing an output as set in GraphDef, e.g.,
+  // "affine2/weights/Assign".
+  string kernel_name;
+
+  // Index of the output being set.
+  int32 index;
+
+  // Output tensor details.
+  TensorDescription tensor;
+};
+
+struct MemoryLogRawAllocation {
+  // Process-unique step id.
+  int64 step_id;
+
+  // Name of the operation making the allocation.
+  string operation;
+
+  // Number of bytes in the allocation.
+  int64 num_bytes;
+
+  // Address of the allocation.
+  uint64 ptr;
+
+  // Id of the tensor buffer being allocated, used to match to a
+  // corresponding deallocation.
+  int64 allocation_id;
+
+  // Name of the allocator used.
+  string allocator_name;
+};
+
+struct MemoryLogRawDeallocation {
+  // Process-unique step id.
+  int64 step_id = 1;
+
+  // Name of the operation making the deallocation.
+  string operation = 2;
+
+  // Id of the tensor buffer being deallocated, used to match to a
+  // corresponding allocation.
+  int64 allocation_id = 3;
+
+  // Name of the allocator used.
+  string allocator_name = 4;
+
+  // True if the deallocation is queued and will be performed later,
+  // e.g. for GPU lazy freeing of buffers.
+  bool deferred = 5;
+};
+
+/// tensorflow/tensorflow/core/framework/api_def.proto
+
+//option cc_enable_arenas = true;
+//option java_outer_classname = "ApiDefProtos";
+//option java_multiple_files = true;
+//option java_package = "org.tensorflow.framework";
+
+// Used to specify and override the default API & behavior in the
+// generated code for client languages, from what you would get from
+// the OpDef alone. There will be a set of ApiDefs that are common
+// to all client languages, and another set per client language.
+// The per-client-language ApiDefs will inherit values from the
+// common ApiDefs which it can either replace or modify.
+//
+// We separate the API definition from the OpDef so we can evolve the
+// API while remaining backwards compatible when interpretting old
+// graphs.  Overrides go in an "api_def.pbtxt" file with a text-format
+// ApiDefs message.
+//
+// WARNING: Be *very* careful changing the API for any existing op --
+// you can change the semantics of existing code.  These changes may
+// need to wait until a major release of TensorFlow to avoid breaking
+// our compatibility promises.
+struct ApiDef {
+  // Name of the op (in the OpDef) to specify the API for.
+  string graph_op_name;
+
+  enum Visibility {
+    // Normally this is "VISIBLE" unless you are inheriting a
+    // different value from another ApiDef.
+    DEFAULT_VISIBILITY = 0,
+    // Publicly visible in the API.
+    VISIBLE = 1,
+    // Do not include this op in the generated API. If visibility is
+    // set to 'SKIP', other fields are ignored for this op.
+    SKIP = 2,
+    // Hide this op by putting it into an internal namespace (or whatever
+    // is appropriate in the target language).
+    HIDDEN = 3
+  };
+  Visibility visibility;
+
+  // If you specify any endpoint, this will replace all of the
+  // inherited endpoints.  The first endpoint should be the
+  // "canonical" endpoint, and should not be deprecated (unless all
+  // endpoints are deprecated).
+  struct Endpoint {
+    // Name should be either like "CamelCaseName" or
+    // "Package.CamelCaseName". Client-language-specific ApiDefs may
+    // use a snake_case convention instead of CamelCase.
+    string name;
+
+    // First GraphDef version at which the op is disallowed.
+    int32 deprecation_version;
+  };
+  std::vector<Endpoint> endpoint;
+
+  struct Arg {
+    string name;
+
+    // Change the name used to access this arg in the API from what
+    // is used in the GraphDef.  Note that these names in `backticks`
+    // will also be replaced in the summary & description fields.
+    string rename_to;
+
+    // Note: this will replace any inherited arg doc. There is no
+    // current way of modifying arg descriptions (other than replacing
+    // them entirely) as can be done with op descriptions.
+    string description;
+  };
+  std::vector<Arg> in_arg;
+  std::vector<Arg> out_arg;
+  // List of original in_arg names to specify new argument order.
+  // Length of arg_order should be either empty to keep current order
+  // or match size of in_arg.
+  std::vector<string> arg_order;
+
+  // Description of the graph-construction-time configuration of this
+  // Op.  That is to say, this describes the attr fields that will
+  // be specified in the NodeDef.
+  struct Attr {
+    string name;
+
+    // Change the name used to access this attr in the API from what
+    // is used in the GraphDef.  Note that these names in `backticks`
+    // will also be replaced in the summary & description fields.
+    string rename_to;
+
+    // Specify a new default value to use for this attr.  This default
+    // will be used when creating new graphs, as opposed to the
+    // default in the OpDef, which will be used when interpreting old
+    // GraphDefs.
+    AttrValue default_value;
+
+    // Note: this will replace any inherited attr doc, there is no current
+    // way of modifying attr descriptions as can be done with op descriptions.
+    string description;
+  };
+  std::vector<Attr> attr;
+
+  // One-line human-readable description of what the Op does.
+  string summary;
+
+  // Additional, longer human-readable description of what the Op does.
+  string description;
+
+  // Modify an existing/inherited description by adding text to the beginning
+  // or end.
+  string description_prefix;
+  string description_suffix;
+};
+
+struct ApiDefs {
+  std::vector<ApiDef> op;
 };
 
 } // namespace mytensorflow

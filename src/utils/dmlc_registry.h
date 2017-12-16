@@ -13,7 +13,9 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "platform/base_error.h"
 #include "platform/macros.h"
+#include "utils/dmlc_parameter.h"
 
 /*
 /// \brief A registry for file system implementations.
@@ -253,10 +255,7 @@ class Registry {
                        const std::string& alias) {
     EntryType* e = fmap_.at(key_name);
     if (fmap_.count(alias)) {
-      if (e != fmap_.at(alias)) {
-        std::cerr << "Trying to register alias " << alias << " for key " << key_name
-          << " but " << alias << " is already taken";
-      }
+      PANIC_ENFORCE_EQ(e, fmap_.at(alias)); // "Trying to register alias " << alias << " for key " << key_name << " but " << alias << " is already taken";
     } else {
       fmap_[alias] = e;
     }
@@ -267,11 +266,7 @@ class Registry {
    * \return ref to the registered entry, used to set properties
    */
   inline EntryType &__REGISTER__(const std::string& name) {
-    if (fmap_.count(name) != 0U) {
-      std::cerr
-          << name << " already registered" << std::endl;
-      abort();
-    }
+    PANIC_ENFORCE_EQ(fmap_.count(name), 0U); // name << " already registered";
     EntryType *e = new EntryType();
     e->name = name;
     fmap_[name] = e;
@@ -332,41 +327,11 @@ class Registry {
  *  DMLC_REGISTRY_REGISTER(TreeFactory, TreeFactory, BinaryTree)
  *      .describe("Constructor of BinaryTree")
  *      .set_body([]() { return new BinaryTree(); });
- * 
- * virtual void Init(const std::vector<std::pair<std::string, std::string> >& kwargs);
- * MXNET_REGISTER_IO_ITER(SFrameDataIter)
- * .describe("Naive SFrame data iterator prototype")
- * .add_arguments(SFrameParam::__FIELDS__())
- * .add_arguments(BatchParam::__FIELDS__())
- * .add_arguments(PrefetcherParam::__FIELDS__()
- * .set_body([]() {
- *      return new PrefetcherIter(
- *             new BatchLoader(
- *             new SFrameDataIter()));
- *             });
  * \endcode
  *
  * \tparam EntryType The type of subclass that inheritate the base.
  * \tparam FunctionType The function type this registry is registerd.
  */
-
-/*!
- * \brief Information about a parameter field in string representations.
- */
-struct ParamFieldInfo {
-  /*! \brief name of the field */
-  std::string name;
-  /*! \brief type of the field in string format */
-  std::string type;
-  /*!
-   * \brief detailed type information string
-   *  This include the default value, enum constran and typename.
-   */
-  std::string type_info_str;
-  /*! \brief detailed description of the type */
-  std::string description;
-};
-
 template<typename EntryType, typename FunctionType>
 class FunctionRegEntryBase {
  public:
@@ -451,7 +416,7 @@ class FunctionRegEntryBase {
  * This macro must be used under namespace dmlc, and only used once in cc file.
  * \param EntryType Type of registry entry
  */
-#define MYDMLC_REGISTRY_ENABLE(EntryType)                                 \
+#define DMLC_REGISTRY_ENABLE(EntryType)                                 \
   template<>                                                            \
   Registry<EntryType > *Registry<EntryType >::Get() {                   \
     static Registry<EntryType > inst;                                   \
@@ -467,7 +432,7 @@ class FunctionRegEntryBase {
  * \param Name The name to be registered.
  * \sa FactoryRegistryEntryBase
  */
-#define MYDMLC_REGISTRY_REGISTER(EntryType, EntryTypeName, Name)          \
+#define DMLC_REGISTRY_REGISTER(EntryType, EntryTypeName, Name)          \
   static ATTRIBUTE_UNUSED EntryType & __make_ ## EntryTypeName ## _ ## Name ## __ = \
       ::bubblefs::mydmlc::Registry<EntryType>::Get()->__REGISTER__(#Name)           \
 
@@ -480,8 +445,8 @@ class FunctionRegEntryBase {
  * \param UniqueTag The unique tag used to represent.
  * \sa DMLC_REGISTRY_LINK_TAG
  */
-#define MYDMLC_REGISTRY_FILE_TAG(UniqueTag)                                \
-  int __mydmlc_registry_file_tag_ ## UniqueTag ## __() { return 0; }
+#define DMLC_REGISTRY_FILE_TAG(UniqueTag)                                \
+  int __dmlc_registry_file_tag_ ## UniqueTag ## __() { return 0; }
 
 /*!
  * \brief (Optional) Force link to all the objects registered in file tag.
@@ -522,10 +487,10 @@ class FunctionRegEntryBase {
  * \param UniqueTag The unique tag used to represent.
  * \sa DMLC_REGISTRY_ENABLE, DMLC_REGISTRY_FILE_TAG
  */
-#define MYDMLC_REGISTRY_LINK_TAG(UniqueTag)                                \
-  int __mydmlc_registry_file_tag_ ## UniqueTag ## __();                   \
+#define DMLC_REGISTRY_LINK_TAG(UniqueTag)                                \
+  int __dmlc_registry_file_tag_ ## UniqueTag ## __();                   \
   static int ATTRIBUTE_UNUSED __reg_file_tag_ ## UniqueTag ## __ = \
-      __mydmlc_registry_file_tag_ ## UniqueTag ## __();
+      __dmlc_registry_file_tag_ ## UniqueTag ## __();
       
 } // namespace mydmlc   
 } // namesapce bubblefs  
