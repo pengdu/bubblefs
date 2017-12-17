@@ -1,6 +1,6 @@
 
-#ifndef BUBBLEFS_UTILS_TENSORFLOW_PROTO_H_
-#define BUBBLEFS_UTILS_TENSORFLOW_PROTO_H_
+#ifndef BUBBLEFS_UTILS_TENSORFLOW_FRAMEWORK_PROTO_H_
+#define BUBBLEFS_UTILS_TENSORFLOW_FRAMEWORK_PROTO_H_
 
 // syntax = "proto3";
 // package tensorflow;
@@ -1531,4 +1531,4 @@ struct ApiDefs {
 } // namespace mytensorflow
 } // namespace bubblefs
 
-#endif // BUBBLEFS_UTILS_TENSORFLOW_PROTO_H_
+#endif // BUBBLEFS_UTILS_TENSORFLOW_FRAMEWORK_PROTO_H_

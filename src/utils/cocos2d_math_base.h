@@ -4,6 +4,7 @@
 #ifndef BUBBLEFS_UTILS_COCOS2D_MATH_BASE_H_
 #define BUBBLEFS_UTILS_COCOS2D_MATH_BASE_H_
 
+#include <math.h>
 #include <memory>
 #include <string.h>
 #include "platform/cocos2d_macros.h"

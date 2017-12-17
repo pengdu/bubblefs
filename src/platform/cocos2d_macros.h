@@ -31,6 +31,7 @@ Copyright (c) 2013-2017 Chukong Technologies
 
 #include <assert.h>
 #include <float.h>
+#include "platform/macros.h"
 
 /**
  * Define some platform specific macros.

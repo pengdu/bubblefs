@@ -24,7 +24,7 @@ limitations under the License.
 #include "utils/array_slice.h"
 #include "utils/flatmap.h"
 #include "utils/hash.h"
-#include "utils/tensorflow_proto.h"
+#include "utils/tensorflow_framework_proto.h"
 
 namespace bubblefs {
 namespace mytensorflow {
