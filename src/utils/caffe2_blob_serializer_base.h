@@ -105,7 +105,7 @@ class StringSerializer : public BlobSerializerBase {
       const Blob& blob,
       const string& name,
       SerializationAcceptor acceptor) override {
-    PANIC_ENFORCE(blob.IsType<std::string>());
+    PANIC_ENFORCE(blob.IsType<std::string>(), "");
 
     BlobProto blob_proto;
     //blob_proto.set_name(name);
@@ -137,7 +137,7 @@ void Blob::Serialize(
 }
 
 // The blob serialization member function implementation.
-std::string Blob::Serialize(const string& name) const {
+std::string Blob::Serialize(const std::string& name) const {
   std::string data;
   BlobSerializerBase::SerializationAcceptor acceptor = [&data](
       const std::string&, const std::string& blob) {
@@ -147,7 +147,7 @@ std::string Blob::Serialize(const string& name) const {
   this->Serialize(name, acceptor, kNoChunking);
   return data;
 }
-void Blob::Deserialize(const string& content) {
+void Blob::Deserialize(const std::string& content) {
   BlobProto blob_proto;
   this->Deserialize(blob_proto);
 }
