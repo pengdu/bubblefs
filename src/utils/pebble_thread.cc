@@ -40,10 +40,13 @@ bool Thread::Start() {
     return true;
 }
 
+//注意！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+// 如果在pthread_join途中，其他线程进行pthread_detach, 会出现join函数不能退出的情况
+// bool isinthread;线程还没有起来的时就发送信号出现crash的问题
+
 bool Thread::Join() {
     return (::pthread_join(m_thread_id, NULL) == 0);
 }
-
 
 void Thread::Exit() {
     ::pthread_exit(NULL);

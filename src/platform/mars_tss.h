@@ -12,13 +12,13 @@
 
 // mars/mars/comm/unix/thread/tss.h
 
-#ifndef BUBBLEFS_PLATFORM_MARS_UNIX_TSS_H_
-#define BUBBLEFS_PLATFORM_MARS_UNIX_TSS_H_
+#ifndef BUBBLEFS_PLATFORM_MARS_TSS_H_
+#define BUBBLEFS_PLATFORM_MARS_TSS_H_
 
 #include <pthread.h>
 
 namespace bubblefs {
-namespace mars {
+namespace mymars {
 
 typedef void (*cleanup_route)(void*);
 
@@ -48,7 +48,7 @@ class Tss {
     pthread_key_t _key;
 };
 
-} // namespace mars
+} // namespace mymars
 } // namespace bubblefs
 
-#endif // BUBBLEFS_PLATFORM_MARS_UNIX_TSS_H_
+#endif // BUBBLEFS_PLATFORM_MARS_TSS_H_

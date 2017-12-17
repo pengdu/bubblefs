@@ -311,6 +311,7 @@ const IndexedGraph& Graph::indexed_graph() const {
 }
 
 // implement constructor from graph
+/*
 IndexedGraph::IndexedGraph(const Graph &g) {
   entry_rptr_.push_back(0);
   std::vector<size_t> inputs_rptr{0}, control_rptr{0};
@@ -373,6 +374,7 @@ IndexedGraph::IndexedGraph(const Graph &g) {
         cptr + control_rptr[nid], cptr + control_rptr[nid + 1]);
   }
 }
+*/
 
 }  // namespace mynnvm
 }  // namespace bubblefs
