@@ -214,6 +214,8 @@ namespace bubblefs {
 // polluted.
 /* using override */
 using ::std::dynamic_pointer_cast;
+using ::std::make_pair;
+using ::std::pair;
 using ::std::shared_ptr;
 using ::std::string;
 using ::std::weak_ptr;
