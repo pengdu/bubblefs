@@ -69,15 +69,6 @@ PLATFORM_UTILS_DIRS = $(PROJECT_DIR)/src/platform $(PROJECT_DIR)/src/utils
 PLATFORM_UTILS_SRCS = $(foreach d, $(PLATFORM_UTILS_DIRS), $(wildcard $(addprefix $(d)/*, $(SRCEXTS))))
 PLATFORM_UTILS_OBJS = $(addsuffix .o, $(basename $(PLATFORM_UTILS_SRCS)))
 
-CLIENT_SRCS = $(wildcard $(PROJECT_DIR)/src/client/*.cc)
-CLIENT_OBJS = $(addsuffix .o, $(basename $(CLIENT_SRCS)))
-
-DB_SRCS = $(wildcard $(PROJECT_DIR)/src/db/*.cc)
-DB_OBJS = $(addsuffix .o, $(basename $(DB_SRCS)))
-
-HTTP_SRCS = $(wildcard $(PROJECT_DIR)/src/http/*.cc)
-HTTP_OBJS = $(addsuffix .o, $(basename $(HTTP_SRCS)))
-
 PLATFORM_SRCS = \
     $(PROJECT_DIR)/src/platform/bdcommon_logging.cc \
     $(PROJECT_DIR)/src/platform/mutex.cc
@@ -100,11 +91,11 @@ UTILS_SRCS = \
     $(PROJECT_DIR)/src/utils/stringpiece.cc
 UTILS_OBJS = $(addsuffix .o, $(basename $(UTILS_SRCS))) 
 
-OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS) $(DB_OBJS) $(CLIENT_OBJS)
+OBJS = $(PLATFORM_OBJS) $(UTILS_OBJS) $(PROTO_OBJS) $(RPC_OBJS)
 
 LIBS =
  
-BINS = $(PLATFORM_UTILS_OBJS) $(HTTP_OBJS) #$(PROJECT_DIR)/src/db/redis_store.o
+BINS = $(PLATFORM_UTILS_OBJS)
 
 # Commands
 
