@@ -21,7 +21,7 @@ is_digit()
 {
     [ "$#" -eq 1 ] || return 1 # is blank
     
-    #��Ϊlet digit=0 ����ֵΪ 1
+    #
     [ "-$1" == '-0' ] && return 0 # is zero
     
     local -i digit
@@ -109,7 +109,7 @@ is_ip()
 	&& ( $2 >= 0 && $2 < 256 ) &&  ( $3 >= 0 && $3 < 256 ) && ( $4 >= 0 
 	&& $4 < 256 )  ) print "ok" }'`
 	
-	#�� ip ���� 0
+	#
 	if [ "-${ipflag}" = "-ok" ]
 	then
 	{
