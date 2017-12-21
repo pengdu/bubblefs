@@ -7,7 +7,7 @@
 
 // bitcoin/src/crypto/chacha20.cpp
 
-#include "utils/bitcoin_chacha.h"
+#include "utils/bitcoin_chacha20.h"
 #include <string.h>
 #include "platform/bitcoin_endian.h"
 
