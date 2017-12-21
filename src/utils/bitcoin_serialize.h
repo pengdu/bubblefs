@@ -3,8 +3,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BITCOIN_SERIALIZE_H
-#define BITCOIN_SERIALIZE_H
+// bitcoin/src/serialize.h
+
+#ifndef BUBBLEFS_UTILS_BITCOIN_SERIALIZE_H_
+#define BUBBLEFS_UTILS_BITCOIN_SERIALIZE_H_
 
 #include <assert.h>
 #include <stdint.h>
@@ -149,8 +151,8 @@ enum
     SER_GETHASH         = (1 << 2),
 };
 
-#define READWRITE(obj)      (bubblefs::bitcoin::SerReadWrite(s, (obj), ser_action))
-#define READWRITEMANY(...)      (bubblefs::bitcoin::SerReadWriteMany(s, ser_action, __VA_ARGS__))
+#define READWRITE(obj)      (bubblefs::mybitcoin::SerReadWrite(s, (obj), ser_action))
+#define READWRITEMANY(...)      (bubblefs::mybitcoin::SerReadWriteMany(s, ser_action, __VA_ARGS__))
 
 /** 
  * Implement three methods for serializable objects. These are actually wrappers over
