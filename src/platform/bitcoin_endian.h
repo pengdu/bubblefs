@@ -3,6 +3,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 // bitcoin/src/compat/endian.h
+// // bitcoin/src/crypto/common.h
 
 #ifndef BUBBLEFS_PLATFORM_BITCOIN_ENDIAN_H
 #define BUBBLEFS_PLATFORM_BITCOIN_ENDIAN_H

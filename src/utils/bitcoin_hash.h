@@ -114,6 +114,15 @@ inline uint160 Hash160(const prevector<N, unsigned char>& vch)
     return Hash160(vch.begin(), vch.end());
 }
 
+/** Compute the 256-bit hash of an object's serialization. */
+//template<typename T>
+//uint256 SerializeHash(const T& obj, int nType=SER_GETHASH, int nVersion=PROTOCOL_VERSION)
+//{
+//    CHashWriter ss(nType, nVersion);
+//    ss << obj;
+//    return ss.GetHash();
+//}
+
 unsigned int MurmurHash3(unsigned int nHashSeed, const std::vector<unsigned char>& vDataToHash);
 
 void BIP32Hash(const ChainCode &chainCode, unsigned int nChild, unsigned char header, const unsigned char data[32], unsigned char output[64]);

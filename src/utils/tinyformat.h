@@ -1,5 +1,4 @@
-// bitcoin/src/tinyformat.h
-
+// tinyformat.h
 // Copyright (C) 2011, Chris Foster [chris42f (at) gmail (d0t) com]
 //
 // Boost Software License - Version 1.0
@@ -112,9 +111,10 @@
 // User defined types: Uses operator<< for user defined types by default.
 // Overload formatValue() for more control.
 
+// bitcoin/src/tinyformat.h
 
-#ifndef TINYFORMAT_H_INCLUDED
-#define TINYFORMAT_H_INCLUDED
+#ifndef BUBBLEFS_UTILS_TINYFORMAT_H_
+#define BUBBLEFS_UTILS_TINYFORMAT_H_
 
 namespace tinyformat {}
 //------------------------------------------------------------------------------
@@ -1066,4 +1066,4 @@ std::string format(const std::string &fmt, const Args&... args)
 
 #define strprintf tfm::format
 
-#endif // TINYFORMAT_H_INCLUDED
+#endif // BUBBLEFS_UTILS_TINYFORMAT_H_
