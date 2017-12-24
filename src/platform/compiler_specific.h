@@ -113,11 +113,12 @@
 #define NORETURN_PTR
 #endif
 
-// Annotate a variable indicating it's ok if the variable is not used.
+// Annotate a variable or function indicating it's ok if the variable or function is not used.
 // (Typically used to silence a compiler warning when the assignment
 // is important for some other reason.)
 // Use like:
 //   int x ALLOW_UNUSED = ...;
+//   int fool() ALLOW_UNUSED;
 #if defined(COMPILER_GCC)
 #define ALLOW_UNUSED __attribute__((unused))
 #define ATTRIBUTE_UNUSED __attribute__((unused))

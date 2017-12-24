@@ -9,7 +9,6 @@
  */
 
 // slash/slash/include/env.h
-// pdlfs-common/include/pdlfs-common/env.h
 
 #ifndef BUBBLEFS_PLATFORM_SLASH_ENV_H_
 #define BUBBLEFS_PLATFORM_SLASH_ENV_H_
@@ -18,7 +17,6 @@
 #include <string>
 #include <vector>
 #include "platform/mutexlock.h"
-#include "utils/pdlfs_map.h"
 #include "utils/slash_random.h"
 #include "utils/slash_status.h"
 

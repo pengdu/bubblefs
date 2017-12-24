@@ -23,10 +23,11 @@
 
 namespace bubblefs {
 namespace myambry {
+namespace utils {  
   
 class BitUtilTest {
   //@Test
-public:
+ public:
   void testBitUtil() {
     PRINTF_CHECK_TRUE(BitUtil::isPowerOfTwo(32));
     PRINTF_CHECK_FALSE(BitUtil::isPowerOfTwo(37));
@@ -56,11 +57,12 @@ public:
   }
 };
 
+} // namespace utils
 } // namespace myambry
 } // namespace bubblefs
 
 int main(int argc, char* argv[]) {
-  bubblefs::myambry::BitUtilTest b;
-  b.testBitUtil();
+  bubblefs::myambry::utils::BitUtilTest t;
+  t.testBitUtil();
   return 0;
 }

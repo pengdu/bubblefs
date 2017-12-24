@@ -22,6 +22,7 @@
 
 namespace bubblefs {
 namespace myambry {
+namespace utils {  
   
 class BitUtil {
 public:
@@ -838,5 +839,6 @@ public:
   }
 };
 
+} // namespace utils
 } // namespace myambry
 } // namespace bubblefs
