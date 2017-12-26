@@ -16,12 +16,12 @@
 #include "utils/lucene_sync.h"
 
 #define LUCENE_INTERFACE(Name) \
-    static std::string _getClassName() { return L###Name; } \
-    virtual std::string getClassName() { return L###Name; }
+    static std::string _getClassName() { return #Name; } \
+    virtual std::string getClassName() { return #Name; }
 
 #define LUCENE_CLASS(Name) \
     LUCENE_INTERFACE(Name); \
-    std::shared_ptr<Name> shared_from_this() { return std::static_pointer_cast<Name>(LuceneObject::shared_from_this()); }
+    std::shared_ptr<Name> shared_from_this() { return std::static_pointer_cast<Name>(Object::shared_from_this()); }
 
 namespace bubblefs {
 namespace mylucene {

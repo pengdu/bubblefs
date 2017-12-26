@@ -20,9 +20,17 @@
 namespace bubblefs {
 namespace mylucene {
 
+DECLARE_SHARED_PTR(Future)
 DECLARE_SHARED_PTR(Object)
+DECLARE_SHARED_PTR(Reader)
 DECLARE_SHARED_PTR(Signal)
 DECLARE_SHARED_PTR(Synchronize)
+DECLARE_SHARED_PTR(Thread)
+DECLARE_SHARED_PTR(ThreadPool)
+DECLARE_SHARED_PTR(UTF8Decoder)
+DECLARE_SHARED_PTR(UTF8DecoderStream)
+DECLARE_SHARED_PTR(UTF8Encoder)
+DECLARE_SHARED_PTR(UTF8EncoderStream)
 
 } // namespace mylucene
 } // namespace bubblefs
