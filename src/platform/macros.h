@@ -299,33 +299,6 @@ inline void ignore_result(const T&) {
 } // namespace bubblefs
 } // namespace base
 
-// The following enum should be used only as a constructor argument to indicate
-// that the variable has static storage class, and that the constructor should
-// do nothing to its state.  It indicates to the reader that it is legal to
-// declare a static instance of the class, provided the constructor is given
-// the base::LINKER_INITIALIZED argument.  Normally, it is unsafe to declare a
-// static variable that has a constructor or a destructor because invocation
-// order is undefined.  However, IF the type can be initialized by filling with
-// zeroes (which the loader does for static variables), AND the destructor also
-// does nothing to the storage, AND there are no virtual methods, then a
-// constructor declared as
-//       explicit MyClass(base::LinkerInitialized x) {}
-// and invoked as
-//       static MyClass my_variable_name(base::LINKER_INITIALIZED);
-namespace bubblefs {
-namespace base {
-enum LinkerInitialized { LINKER_INITIALIZED };
-
-// Use these to declare and define a static local variable (static T;) so that
-// it is leaked so that its destructors are not called at exit. If you need
-// thread-safe initialization, use base/lazy_instance.h instead.
-#undef CR_DEFINE_STATIC_LOCAL
-#define CR_DEFINE_STATIC_LOCAL(type, name, arguments) \
-  static type& name = *new type arguments
-
-}  // namespace base
-}  // namespace bubblefs
-
 #if defined(__GXX_EXPERIMENTAL_CXX0X__) || __cplusplus >= 201103L
 // Define this to 1 if the code is compiled in C++11 mode; leave it
 // undefined otherwise.  Do NOT define it to 0 -- that causes

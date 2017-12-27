@@ -32,39 +32,13 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "platform/toft_system_atomic_pointer.h"
 #include "platform/toft_system_memory_barrier.h"
 #include "utils/toft_base_arena.h"
 #include "utils/toft_base_random.h"
 
 namespace bubblefs {
 namespace mytoft {
-
-class AtomicPointer {
-private:
-    void* rep_;
-
-public:
-    AtomicPointer() : rep_(NULL) {
-    }
-    explicit AtomicPointer(void* p) : rep_(p) {
-    }
-
-    inline void* NoBarrier_Load() const {
-        return rep_;
-    }
-    inline void NoBarrier_Store(void* v) {
-        rep_ = v;
-    }
-    inline void* Acquire_Load() const {
-        void* result = rep_;
-        MemoryBarrier();
-        return result;
-    }
-    inline void Release_Store(void* v) {
-        MemoryBarrier();
-        rep_ = v;
-    }
-};
 
 class Arena;
 
