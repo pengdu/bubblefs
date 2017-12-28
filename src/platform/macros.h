@@ -223,12 +223,6 @@ struct ArraySizeHelper
 #define ARRAYSIZE_UNSAFE(a) \
     ((sizeof(a) / sizeof(*(a))) / \
      static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
-     
-// Concatenate numbers in c/c++ macros.
-#ifndef BASE_CONCAT
-# define BASE_CONCAT(a, b) BASE_CONCAT_HELPER(a, b)
-# define BASE_CONCAT_HELPER(a, b) a##b
-#endif
   
 #if defined(BASE_CXX11_ENABLED)
 // C++11 supports compile-time assertion directly
@@ -338,6 +332,12 @@ inline void ignore_result(const T&) {
 
 #define PRId64_FORMAT "%" PRId64
 #define PRIu64_FORMAT "%" PRIu64
+
+// Concatenate numbers in c/c++ macros.
+#ifndef BASE_CONCAT
+# define BASE_CONCAT(a, b) BASE_CONCAT_HELPER(a, b)
+# define BASE_CONCAT_HELPER(a, b) a##b
+#endif
 
 // This is not very useful as it does not expand defined symbols if
 // called directly. Use its counterpart without the _NO_EXPANSION
