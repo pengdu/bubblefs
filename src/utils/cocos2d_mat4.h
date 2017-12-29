@@ -950,12 +950,6 @@ public:
     Mat4& operator/=(float s);
     float& index(int row, int col);
     const float& index(int row, int col) const;
-    float* begin();
-    const float* begin() const;
-    const float* cbegin() const;
-    float* end();
-    const float* end() const;
-    const float* cend() const;
     void row(int i, Vec4& v);
     Vec4 row(int i);
     void column(int i, Vec4& v);
@@ -1119,30 +1113,6 @@ float& Mat4::index(int row, int col) {
 
 const float& Mat4::index(int row, int col) const {
     return m[col * 4 + row];
-}
-
-float* Mat4::begin() {
-    return m;
-}
-
-const float* Mat4::begin() const {
-    return m;
-}
-
-const float* Mat4::cbegin() const {
-    return m;
-}
-
-float* Mat4::end() {
-    return m + elemnum;
-}
-
-const float* Mat4::end() const {
-    return m + elemnum;
-}
-
-const float* Mat4::cend() const {
-    return m + elemnum;
 }
 
 void Mat4::row(int i, Vec4& v) {
