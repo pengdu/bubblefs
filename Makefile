@@ -7,20 +7,15 @@ OPT ?= -g2 -Werror # (B) Debug mode, w/ full line-level debugging symbols
 #CXX=/opt/compiler/gcc-4.8.2/bin/g++
 
 PROJECT_DIR=.
+THIRD_PARTY_DIR=$(PROJECT_DIR)/third_party
 
 # Dependencies
 include $(PROJECT_DIR)/depends.mk
 
 INCLUDE_PATH = -I$(PROJECT_DIR)/src \
-               -I$(TBB_PATH)/include \
+               -I$(THIRD_PARTY_DIR)/include \
                -I$(BOOST_PATH) \
-               -I$(RAPIDJSON_PATH)/include \
-               -isystem $(GTEST_PATH)/include \
-               -I$(SNAPPY_PATH)/include \
-               -I$(LEVELDB_PATH)/include \
-               -I$(PROTOBUF_PATH)/include \
-               -I$(SOFA_PBRPC_PATH)/include \
-               -I$(GPERFTOOLS_PATH)/include
+               -isystem $(GTEST_PATH)/include
 
 LDFLAGS = -L$(TBB_PATH)/lib -ltbb -Wl,-rpath=$(TBB_PATH)/lib \
           -L$(GTEST_PATH)/lib -lgtest \
@@ -40,7 +35,7 @@ CXX = clang
 
 # Compiler opts
 GCC_OPTS = -fmax-errors=2
-CLANG_OPTS = -ferror-limit=2
+CLANG_OPTS = -ferror-limit=2 -fdelayed-template-parsing
 
 # Notes on the flags:
 # 1. Added -fno-omit-frame-pointer: perf/tcmalloc-profiler use frame pointers by default

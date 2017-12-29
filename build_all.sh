@@ -69,6 +69,32 @@ if [ ! -f "${FLAG_DIR}/boost_1_65_0" ] \
     touch "${FLAG_DIR}/boost_1_65_0"
 fi
 
+# rapidjson
+if [ ! -f "${FLAG_DIR}/rapidjson_1_1_0" ] \
+    || [ ! -d "${DEPS_PREFIX}/include/rapidjson" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/rapidjson" ]; then
+        rm -rf ${DEPS_SOURCE}/rapidjson
+    fi
+    unzip ${DEPS_PACKAGE}/rapidjson-1.1.0.zip -d .
+    mv rapidjson-1.1.0 rapidjson && cd rapidjson
+    cp -a include/rapidjson ${DEPS_PREFIX}/include
+    touch "${FLAG_DIR}/rapidjson_1_1_0"
+fi
+
+# rapidxml
+if [ ! -f "${FLAG_DIR}/rapidxml_1_13" ] \
+    || [ ! -d "${DEPS_PREFIX}/include/rapidxml" ]; then
+    cd ${DEPS_SOURCE}
+    if [ -d "${DEPS_SOURCE}/rapidxml" ]; then
+        rm -rf ${DEPS_SOURCE}/rapidxml
+    fi
+    unzip ${DEPS_PACKAGE}/rapidxml-1.13.zip -d .
+    mv rapidxml-1.13 rapidxml
+    cp -a rapidxml ${DEPS_PREFIX}/include
+    touch "${FLAG_DIR}/rapidxml_1_13"
+fi
+
 # jemalloc
 if [ ! -f "${FLAG_DIR}/jemalloc_5_0_1" ] \
     || [ ! -f "${DEPS_PREFIX}/lib/libjemalloc.a" ] \
@@ -88,19 +114,6 @@ if [ ! -f "${FLAG_DIR}/jemalloc_5_0_1" ] \
     cp -a lib/libjemalloc.a ${DEPS_PREFIX}/lib
     cp -a include/jemalloc ${DEPS_PREFIX}/include
     touch "${FLAG_DIR}/jemalloc_5_0_1"
-fi
-
-# rapidjson
-if [ ! -f "${FLAG_DIR}/rapidjson_1_1_0" ] \
-    || [ ! -d "${DEPS_PREFIX}/include/rapidjson" ]; then
-    cd ${DEPS_SOURCE}
-    if [ -d "${DEPS_SOURCE}/rapidjson" ]; then
-        rm -rf ${DEPS_SOURCE}/rapidjson
-    fi
-    unzip ${DEPS_PACKAGE}/rapidjson-1.1.0.zip -d .
-    mv rapidjson-1.1.0 rapidjson && cd rapidjson
-    cp -a include/rapidjson ${DEPS_PREFIX}/include
-    touch "${FLAG_DIR}/rapidjson_1_1_0"
 fi
 
 # gflags
@@ -141,7 +154,7 @@ fi
 # use cmake 3.x or above
 if [ ! -f "${FLAG_DIR}/snappy_1_1_7" ] \
     || [ ! -f "${DEPS_PREFIX}/lib/libsnappy.a" ] \
-    || [ ! -f "${DEPS_PREFIX}/include/snappy.h" ] ]; then
+    || [ ! -f "${DEPS_PREFIX}/include/snappy.h" ]; then
     cd ${DEPS_SOURCE}
     if [ -d "${DEPS_SOURCE}/snappy" ] ]; then
     	rm -rf ${DEPS_SOURCE}/snappy

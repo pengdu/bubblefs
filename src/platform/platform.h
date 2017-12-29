@@ -228,4 +228,5 @@ limitations under the License.
 #define PLATFORM_IS_X86
 #endif
 
+
 #endif // PLATFORM_PLATFORM_DEFINE_H_

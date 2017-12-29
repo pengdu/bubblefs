@@ -170,4 +170,17 @@
     PRINTF_ERROR("\n EXIT_FAILURE \n"); \
     exit(EXIT_FAILURE)
     
+/* 
+#include <array>
+#include <iostream>
+void LogInfo(char const *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  std::array<char, 1024> buffer;
+  vsprintf(&buffer[0], fmt, args);
+  std::clog << "(INFO) KlayGE: " << &buffer[0] << std::endl;
+  va_end(args);
+}
+*/
+    
 #endif // BUBBLEFS_PLATFORM_BASE_ERROR_H_
