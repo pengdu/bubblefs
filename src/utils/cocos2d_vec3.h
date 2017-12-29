@@ -41,7 +41,8 @@ class Quaternion;
 class Vec3
 {
 public:
-
+    static constexpr int elemnum = 3;
+    
     /**
      * The x-coordinate.
      */
@@ -483,6 +484,14 @@ public:
     static const Vec3 UNIT_Y;
     /** equals to Vec3(0,0,1) */
     static const Vec3 UNIT_Z;
+    
+    /// Note: TODO my added functions
+    Vec3& operator=(Vec3 const& rhs);
+    Vec3& operator*=(const Vec3& v);
+    Vec3& operator/=(const Vec3& v);
+    void swap(Vec3& v);
+    void mult(const Vec3 &v);
+    void div(const Vec3 &v);
 };
 
 /**
@@ -657,6 +666,45 @@ inline Vec3 operator*(float x, const Vec3& v)
     Vec3 result(v);
     result.scale(x);
     return result;
+}
+
+/// Note: TODO my added funcs
+
+Vec3& Vec3::operator=(Vec3 const& rhs) {
+  x = rhs.x;
+  y = rhs.y;
+  z = rhs.z;
+  return *this;
+}
+
+inline Vec3& Vec3::operator*=(const Vec3& v)
+{
+    mult(v);
+    return *this;
+}
+
+inline Vec3& Vec3::operator/=(const Vec3& v)
+{
+    div(v);
+    return *this;
+}
+
+void Vec3::swap(Vec3& v) {
+  std::swap(x, v.x);
+  std::swap(y, v.y);
+  std::swap(z, v.z);
+}
+
+void Vec3::mult(const Vec3& v) {
+  x = x * v.x;
+  y = y * v.y;
+  z = z * v.z;
+}
+
+void Vec3::div(const Vec3& v) {
+  x = x / v.x;
+  y = y / v.y;
+  z = z / v.z;
 }
 
 } // namespace mycocos2d

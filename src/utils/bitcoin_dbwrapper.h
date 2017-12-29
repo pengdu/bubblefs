@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <exception>
+#include "platform/macros.h"
 #include "utils/bitcoin_serialize.h"
 #include "utils/bitcoin_streams.h"
 #include "utils/bitcoin_utilstrencodings.h"
@@ -121,7 +122,7 @@ public:
 class CDBIterator
 {
 private:
-    const CDBWrapper &parent;
+    const CDBWrapper &parent ATTRIBUTE_UNUSED;
     leveldb::Iterator *piter;
 
 public:

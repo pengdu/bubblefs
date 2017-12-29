@@ -35,7 +35,7 @@ CXX = clang
 
 # Compiler opts
 GCC_OPTS = -fmax-errors=2
-CLANG_OPTS = -ferror-limit=2 -fdelayed-template-parsing
+CLANG_OPTS = -ferror-limit=2
 
 # Notes on the flags:
 # 1. Added -fno-omit-frame-pointer: perf/tcmalloc-profiler use frame pointers by default

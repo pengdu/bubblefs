@@ -47,7 +47,8 @@ class Mat4;
 class Vec2
 {
 public:
-
+    static constexpr int elemnum = 2;
+    
     /**
      * The x coordinate.
      */
@@ -446,6 +447,7 @@ public:
     inline bool operator!=(const Vec2& v) const;
 
     //code added compatible for Point
+    
 public:
       /**
      * @js NA
@@ -739,6 +741,14 @@ public:
     static const Vec2 ANCHOR_MIDDLE_TOP;
     /** equals to Vec2(0.5, 0) */
     static const Vec2 ANCHOR_MIDDLE_BOTTOM;
+    
+    /// Note: TODO my added functions
+    Vec2& operator=(Vec2 const& rhs);
+    Vec2& operator*=(const Vec2 &v);
+    Vec2& operator/=(const Vec2 &v);
+    void swap(Vec2& v);
+    void mult(const Vec2 &v);
+    void div(const Vec2 &v);
 };
 
 /**
@@ -959,6 +969,41 @@ void Vec2::setPoint(float xx, float yy)
 {
     this->x = xx;
     this->y = yy;
+}
+
+/// Note: TODO my added funcs
+
+Vec2& Vec2::operator=(Vec2 const& rhs) {
+  x = rhs.x;
+  y = rhs.y;
+  return *this;
+}
+
+inline Vec2& Vec2::operator*=(const Vec2& v)
+{
+    mult(v);
+    return *this;
+}
+
+inline Vec2& Vec2::operator/=(const Vec2& v)
+{
+    div(v);
+    return *this;
+}
+
+void Vec2::swap(Vec2& v) {
+  std::swap(x, v.x);
+  std::swap(y, v.y);
+}
+
+void Vec2::mult(const Vec2& v) {
+  x = x * v.x;
+  y = y * v.y;
+}
+
+void Vec2::div(const Vec2& v) {
+  x = x / v.x;
+  y = y / v.y;
 }
 
 } // namespace mycocos2d

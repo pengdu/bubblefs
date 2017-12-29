@@ -25,6 +25,7 @@
 #ifndef BUBBLEFS_UTILS_COCOS2D_VEC4_H_
 #define BUBBLEFS_UTILS_COCOS2D_VEC4_H_
 
+#include <algorithm>
 #include "platform/cocos2d_macros.h"
 
 #ifdef __SSE__
@@ -40,6 +41,8 @@ namespace mycocos2d {
 class Vec4
 {
 public:
+    static constexpr int elemnum = 4;
+  
 #ifdef __SSE__
     union {
         struct {
@@ -444,6 +447,14 @@ public:
     static const Vec4 UNIT_Z;
     /** equals to Vec4(0,0,0,1) */
     static const Vec4 UNIT_W;
+    
+    /// Note: TODO my added functions
+    Vec4& operator=(Vec4 const& rhs);
+    Vec4& operator*=(const Vec4& v);
+    Vec4& operator/=(const Vec4& v);
+    void swap(Vec4& v);
+    void mult(const Vec4 &v);
+    void div(const Vec4 &v);
 };
 
 /**
@@ -541,6 +552,49 @@ inline Vec4 operator*(float x, const Vec4& v)
     Vec4 result(v);
     result.scale(x);
     return result;
+}
+
+/// Note: TODO my added funcs
+
+Vec4& Vec4::operator=(Vec4 const& rhs) {
+  x = rhs.x;
+  y = rhs.y;
+  z = rhs.z;
+  w = rhs.z;
+  return *this;
+}
+
+inline Vec4& Vec4::operator*=(const Vec4& v)
+{
+    mult(v);
+    return *this;
+}
+
+inline Vec4& Vec4::operator/=(const Vec4& v)
+{
+    div(v);
+    return *this;
+}
+
+void Vec4::swap(Vec4& v) {
+  std::swap(x, v.x);
+  std::swap(y, v.y);
+  std::swap(z, v.z);
+  std::swap(w, v.w);
+}
+
+void Vec4::mult(const Vec4& v) {
+  x = x * v.x;
+  y = y * v.y;
+  z = y * v.z;
+  w = y * v.w;
+}
+
+void Vec4::div(const Vec4& v) {
+  x = x / v.x;
+  y = y / v.y;
+  z = z / v.z;
+  w = w / v.w;
 }
 
 } // namespace mycocos2d

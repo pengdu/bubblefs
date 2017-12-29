@@ -26,6 +26,7 @@
 
 #ifdef __SSE__
 #include <xmmintrin.h>
+#include <boost/concept_check.hpp>
 #endif
 
 namespace bubblefs {
@@ -82,6 +83,8 @@ public:
     /**
      * Stores the columns of this 4x4 matrix.
      * */
+    static constexpr int elemnum = 16;
+    
 #ifdef __SSE__
     union {
         __m128 col[4];
@@ -934,6 +937,29 @@ private:
     static void createBillboardHelper(const Vec3& objectPosition, const Vec3& cameraPosition,
                                       const Vec3& cameraUpVector, const Vec3* cameraForwardVector,
                                       Mat4* dst);
+    
+public:
+    /// Note: TODO my added funcs
+    // the matrix is column-based, row and column is based on logical order instead of memory order.
+    Mat4& operator=(Mat4 const &rhs);
+    float& operator[](int i);
+    const float& operator[](int i) const;
+    float& operator()(int row, int col);
+    const float& operator()(int row, int col) const;
+    Mat4& operator*=(float s);
+    Mat4& operator/=(float s);
+    float& index(int row, int col);
+    const float& index(int row, int col) const;
+    float* begin();
+    const float* begin() const;
+    const float* cbegin() const;
+    float* end();
+    const float* end() const;
+    const float* cend() const;
+    void row(int i, Vec4& v);
+    Vec4 row(int i);
+    void column(int i, Vec4& v);
+    Vec4 column(int i);
 };
 
 /**
@@ -1051,6 +1077,88 @@ inline Vec4 operator*(const Mat4& m, const Vec4& v)
     Vec4 x;
     m.transformVector(v, &x);
     return x;
+}
+
+/// Note: TODO my added funcs
+
+Mat4& Mat4::operator=(Mat4 const &rhs) {
+    memcpy(m, &rhs.m, sizeof(float) * elemnum);
+    return *this;
+}
+
+float& Mat4::operator[](int i) {
+    return *(m + i);
+}
+
+const float& Mat4::operator[](int i) const {
+    return *(m + i);
+}  
+
+float& Mat4::operator()(int row, int col) {
+    return index(row, col);
+}
+
+const float& Mat4::operator()(int row, int col) const {
+    return index(row, col);  
+}
+
+Mat4& Mat4::operator*=(float s) {
+  for (int i = 0; i < elemnum; ++i) {
+    m[i] *= s;
+  }
+  return *this;
+}
+
+Mat4& Mat4::operator/=(float s) {
+  return this->operator*=(1 / s);
+}
+
+float& Mat4::index(int row, int col) {
+    return m[col * 4 + row];
+}
+
+const float& Mat4::index(int row, int col) const {
+    return m[col * 4 + row];
+}
+
+float* Mat4::begin() {
+    return m;
+}
+
+const float* Mat4::begin() const {
+    return m;
+}
+
+const float* Mat4::cbegin() const {
+    return m;
+}
+
+float* Mat4::end() {
+    return m + elemnum;
+}
+
+const float* Mat4::end() const {
+    return m + elemnum;
+}
+
+const float* Mat4::cend() const {
+    return m + elemnum;
+}
+
+void Mat4::row(int i, Vec4& v) {
+  v.set(index(0, i), index(1, i), index(2, i), index(3, i));
+}
+
+Vec4 Mat4::row(int i) {
+  return Vec4(index(0, i), index(1, i), index(2, i), index(3, i));
+}
+
+void Mat4::column(int i, Vec4& v) {
+  v.set(index(i, 0), index(i, 1), index(i, 2), index(i, 3));
+}
+
+Vec4 Mat4::column(int i) {
+  return Vec4(index(i, 0), index(i, 1), index(i, 2), index(i, 3));
 }
 
 } // namespace mycocos2d

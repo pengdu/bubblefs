@@ -18,7 +18,7 @@
  This file was modified to fit the cocos2d-x project
  */
 
-// cocos2d-x/cocos/math/Vec2.cpp
+// cocos2d-x/cocos/math/Vec2.cpp 
 
 #include "utils/cocos2d_vec2.h"
 #include "platform/cocos2d_macros.h"

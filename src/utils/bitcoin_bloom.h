@@ -8,8 +8,8 @@
 #define BUBBLEFS_UTILS_BITCOIN_BLOOM_H_
 
 #include "utils/bitcoin_serialize.h"
-
 #include <vector>
+#include "platform/macros.h"
 
 namespace bubblefs {
 namespace mybitcoin {
@@ -54,7 +54,7 @@ private:
     bool isEmpty;
     unsigned int nHashFuncs;
     unsigned int nTweak;
-    unsigned char nFlags;
+    unsigned char nFlags ATTRIBUTE_UNUSED;
 
     unsigned int Hash(unsigned int nHashNum, const std::vector<unsigned char>& vDataToHash) const;
 

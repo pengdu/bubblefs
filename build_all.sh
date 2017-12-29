@@ -82,19 +82,6 @@ if [ ! -f "${FLAG_DIR}/rapidjson_1_1_0" ] \
     touch "${FLAG_DIR}/rapidjson_1_1_0"
 fi
 
-# rapidxml
-if [ ! -f "${FLAG_DIR}/rapidxml_1_13" ] \
-    || [ ! -d "${DEPS_PREFIX}/include/rapidxml" ]; then
-    cd ${DEPS_SOURCE}
-    if [ -d "${DEPS_SOURCE}/rapidxml" ]; then
-        rm -rf ${DEPS_SOURCE}/rapidxml
-    fi
-    unzip ${DEPS_PACKAGE}/rapidxml-1.13.zip -d .
-    mv rapidxml-1.13 rapidxml
-    cp -a rapidxml ${DEPS_PREFIX}/include
-    touch "${FLAG_DIR}/rapidxml_1_13"
-fi
-
 # jemalloc
 if [ ! -f "${FLAG_DIR}/jemalloc_5_0_1" ] \
     || [ ! -f "${DEPS_PREFIX}/lib/libjemalloc.a" ] \
