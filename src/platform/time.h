@@ -553,11 +553,13 @@ inline int fast_realtime(timespec* ts) {
     return clock_gettime(CLOCK_REALTIME, ts);
 }
 
-/*!
- * \brief return time in seconds
+/**
+ * Return the current time in milliseconds since the Unix epoch.
+ *
+ * @return The number of milliseconds since the Unix epoch.
  */
 // dmlc-core/include/dmlc/timer.h
-inline double ChronoGetTime(void) {
+inline double current_time_ms(void) {
   return std::chrono::duration<double>(
       std::chrono::high_resolution_clock::now().time_since_epoch()).count();
 }

@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <execinfo.h> // linux
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,6 +62,12 @@
     fprintf(stderr, "ERROR [%s:%d](%s) errno: %d %s, " fmt, \
             __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__); \
     fflush(stderr)
+    
+#define PRINTF_FATAL(fmt, ...) \
+    fprintf(stderr, "FATAL [%s:%d](%s) errno: %d %s, " fmt, \
+            __FILE__, __LINE__, __FUNCTION__, errno, STR_ERRORNO(), ##__VA_ARGS__); \
+    fflush(stderr) \
+    abort()
     
 #define PRINTF_ASSERT(fmt, ...) \
     fprintf(stderr, "ASSERT [%s:%d](%s) errno: %d %s, " fmt, \
@@ -169,6 +176,15 @@
     PRINTF_ERROR(fmt, ##__VA_ARGS__); \
     PRINTF_ERROR("\n EXIT_FAILURE \n"); \
     exit(EXIT_FAILURE)
+    
+#define PRINT_STACK_TRACE(fmt, ...) \
+  do {                                                                        \
+    fprintf(stderr, "FATAL (%s:%d: errno: %s) " fmt "\n", __FILE__, __LINE__, \
+            errno == 0 ? "None" : strerror(errno), ##__VA_ARGS__);            \
+    void *buffer[255];                                                        \
+    const int calls = backtrace(buffer, sizeof(buffer) / sizeof(void *));     \
+    backtrace_symbols_fd(buffer, calls, 1);                                   \                                                               \
+  } while (0)
     
 /* 
 #include <array>
