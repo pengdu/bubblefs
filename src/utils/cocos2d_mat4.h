@@ -83,7 +83,7 @@ public:
     /**
      * Stores the columns of this 4x4 matrix.
      * */
-    static constexpr int elemnum = 16;
+    static constexpr int nelems = 16;
     
 #ifdef __SSE__
     union {
@@ -1076,7 +1076,7 @@ inline Vec4 operator*(const Mat4& m, const Vec4& v)
 /// Note: TODO my added funcs
 
 Mat4& Mat4::operator=(Mat4 const &rhs) {
-    memcpy(m, &rhs.m, sizeof(float) * elemnum);
+    memcpy(m, &rhs.m, sizeof(float) * nelems);
     return *this;
 }
 
@@ -1097,7 +1097,7 @@ const float& Mat4::operator()(int row, int col) const {
 }
 
 Mat4& Mat4::operator*=(float s) {
-  for (int i = 0; i < elemnum; ++i) {
+  for (int i = 0; i < nelems; ++i) {
     m[i] *= s;
   }
   return *this;

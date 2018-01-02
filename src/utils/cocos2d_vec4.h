@@ -41,7 +41,7 @@ namespace mycocos2d {
 class Vec4
 {
 public:
-    static constexpr int elemnum = 4;
+    static constexpr int nelems = 4;
   
 #ifdef __SSE__
     union {

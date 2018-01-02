@@ -41,7 +41,7 @@ class Quaternion;
 class Vec3
 {
 public:
-    static constexpr int elemnum = 3;
+    static constexpr int nelems = 3;
     
     /**
      * The x-coordinate.

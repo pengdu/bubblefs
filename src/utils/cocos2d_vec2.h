@@ -47,7 +47,7 @@ class Mat4;
 class Vec2
 {
 public:
-    static constexpr int elemnum = 2;
+    static constexpr int nelems = 2;
     
     /**
      * The x coordinate.
