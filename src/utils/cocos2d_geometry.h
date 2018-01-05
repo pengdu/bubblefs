@@ -207,6 +207,9 @@ public:
     void merge(const Rect& rect);
     /**An empty Rect.*/
     static const Rect ZERO;
+    
+    /// Note: TODO my added code
+    static Rect intersectedRect(const Rect &rectA, const Rect &rectB);
 };
 
 } // namespace mycocos2d

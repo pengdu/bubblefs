@@ -12,6 +12,9 @@
 namespace bubblefs {
 namespace mysimple {
 
+/*
+ * CountDownLatch is used for a main thread waiting for a group of threads to be completed
+ */  
 class CountDownLatch {
  public:
   explicit CountDownLatch(int count)
@@ -21,6 +24,13 @@ class CountDownLatch {
     MutexLock lock(&mutex_);
     while (count_ > 0) {
       cond_.Wait();
+    }
+  }
+  
+  void TimedWait(uint64 timeout) {
+    MutexLock lock(&mutex_);
+    while (count_ > 0) {
+      cond_.TimedWait(timeout);
     }
   }
 

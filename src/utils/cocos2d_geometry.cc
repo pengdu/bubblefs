@@ -280,5 +280,26 @@ Rect Rect::unionWithRect(const Rect & rect) const
 
 const Rect Rect::ZERO = Rect(0, 0, 0, 0);
 
+/// Note: TODO my added code
+
+Rect Rect::intersectedRect(const Rect& rectA, const Rect& rectB)
+{
+  Vec2 leftBottom, rigthTop;
+  float width = 0.0f, height = 0.0f;
+  if (rectA.intersectsRect(rectB)) {
+    leftBottom.x = std::max(rectA.getMinX(), rectB.getMinX());
+    leftBottom.y = std::max(rectA.getMinY(), rectB.getMinY());
+    
+    rigthTop.x = std::min(rectA.getMaxX(), rectB.getMaxX());
+    rigthTop.y = std::min(rectA.getMaxY(), rectB.getMaxY());
+    
+    width = rigthTop.x - leftBottom.x;
+    height = rigthTop.y - leftBottom.y;
+    
+    return Rect(leftBottom.x, leftBottom.y, width, height);
+  }
+  return Rect();
+}
+
 } // namespace mycocos2d
 } // namespace bubblefs
