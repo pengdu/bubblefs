@@ -17,8 +17,6 @@ limitations under the License. */
 #include <memory>
 #include <unordered_map>
 #include <iostream>
-#include "paddle/platform/enforce.h"
-#include "paddle/platform/variant.h"
 
 namespace bubblefs {
 namespace mypaddle {
