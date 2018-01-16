@@ -19,6 +19,8 @@
 namespace bubblefs {
 namespace mypslite {
 
+class Van;  
+  
 /**
  * \brief resend a messsage if no ack is received within a given time
  */

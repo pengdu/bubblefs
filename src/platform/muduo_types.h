@@ -4,17 +4,18 @@
 #ifndef BUBBLEFS_PLATFORM_MUDUO_TYPES_H_
 #define BUBBLEFS_PLATFORM_MUDUO_TYPES_H_
 
+#include <assert.h>
 #include <stdint.h>
 #include <string>
-#include <assert.h>
 
 ///
 /// The most common stuffs.
 ///
 namespace bubblefs {
-namespace mymuduo
-{
+namespace mymuduo {
 
+using std::string;  
+  
 // Taken from google-protobuf stubs/common.h
 //
 // Protocol Buffers - Google's data interchange format
