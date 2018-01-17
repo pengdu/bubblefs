@@ -22,6 +22,7 @@ limitations under the License. */
 
 // Paddle/paddle/utils/Util.h
 // tensorflow/tensorflow/core/lib/core/bits.h
+// mesos/3rdparty/stout/include/stout/bits.hpp
 
 #ifndef BUBBLEFS_UTILS_BITS_H_
 #define BUBBLEFS_UTILS_BITS_H_
@@ -140,6 +141,20 @@ inline unsigned GetBitsOf(int v) {
     v >>= 1;
   }
   return n;
+}
+
+// Provides efficient bit operations.
+// More details can be found at:
+// http://graphics.stanford.edu/~seander/bithacks.html
+// Counts set bits from a 32 bit unsigned integer using Hamming weight.
+inline int countSetBits(uint32_t value)
+{
+  int count = 0;
+  value = value - ((value >> 1) & 0x55555555);
+  value = (value & 0x33333333) + ((value >> 2) & 0x33333333);
+  count = (((value + (value >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+
+  return count;
 }
 
 }  // namespace bubblefs
