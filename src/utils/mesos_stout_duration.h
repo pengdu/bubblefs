@@ -11,11 +11,14 @@
 // limitations under the License.
 
 // mesos/3rdparty/stout/include/stout/duration.hpp
+// mesos/3rdparty/stout/include/stout/stopwatch.hpp
 
 #ifndef BUBBLEFS_UTILS_MESOS_STOUT_DURATION_H_
 #define BUBBLEFS_UTILS_MESOS_STOUT_DURATION_H_
 
 #include <ctype.h> // For 'isdigit'.
+#include <stdint.h>
+#include <time.h>
 
 // For 'timeval'.
 #ifndef __WINDOWS__
@@ -434,6 +437,85 @@ inline constexpr Duration Duration::min()
 {
   return Nanoseconds(std::numeric_limits<int64_t>::min());
 }
+
+class Stopwatch
+{
+public:
+  Stopwatch()
+    : running(false)
+  {
+    started.tv_sec = 0;
+    started.tv_nsec = 0;
+    stopped.tv_sec = 0;
+    stopped.tv_nsec = 0;
+  }
+
+  void start()
+  {
+    started = now();
+    running = true;
+  }
+
+  void stop()
+  {
+    stopped = now();
+    running = false;
+  }
+
+  Nanoseconds elapsed() const
+  {
+    if (!running) {
+      return Nanoseconds(diff(stopped, started));
+    }
+
+    return Nanoseconds(diff(now(), started));
+  }
+
+private:
+  static timespec now()
+  {
+    timespec ts;
+#ifdef __MACH__
+    // OS X does not have clock_gettime, use clock_get_time.
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    ts.tv_sec = mts.tv_sec;
+    ts.tv_nsec = mts.tv_nsec;
+#elif __WINDOWS__
+    const static __int64 ticks_in_second = 10000000i64;
+    const static __int64 ns_in_tick = 100;
+
+    // Interpret the filetime as a 64-bit unsigned integer to simplify the math
+    // of converting to `timespec`.
+    static_assert(
+        sizeof(FILETIME) == sizeof(__int64),
+        "stopwatch: We currently require `FILETIME` to be 64 bits in size");
+    __int64 filetime_in_ticks;
+
+    GetSystemTimeAsFileTime(reinterpret_cast<FILETIME*>(&filetime_in_ticks));
+
+    // Conversions. `tv_sec` is elapsed seconds, and `tv_nsec` is the remainder
+    // of the elapsed time, in nanoseconds.
+    ts.tv_sec  = filetime_in_ticks / ticks_in_second;
+    ts.tv_nsec = filetime_in_ticks % ticks_in_second * ns_in_tick;
+#else
+    clock_gettime(CLOCK_REALTIME, &ts);
+#endif // __MACH__
+    return ts;
+  }
+
+  static uint64_t diff(const timespec& from, const timespec& to)
+  {
+    return ((from.tv_sec - to.tv_sec) * 1000000000LL)
+      + (from.tv_nsec - to.tv_nsec);
+  }
+
+  bool running;
+  timespec started, stopped;
+};
 
 } // namespace mymesos
 } // namespace bubblefs

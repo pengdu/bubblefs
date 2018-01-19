@@ -11,6 +11,7 @@
 // limitations under the License
 
 // mesos/3rdparty/libprocess/include/process/future.hpp
+// mesos/3rdparty/libprocess/include/process/state_machine.hpp
 
 #ifndef BUBBLEFS_UTILS_MESOS_PROCESS_FUTURE_H_
 #define BUBBLEFS_UTILS_MESOS_PROCESS_FUTURE_H_
@@ -48,6 +49,11 @@
 #include <stout/try.hpp>
 
 #include <stout/os/strerror.hpp>
+
+// The Future and Promise primitives are used to enable programmers 
+// to write asynchronous, non-blocking, and highly concurrent software.
+// A Future acts as the read-side of a result which might be computed asynchronously. 
+// A Promise, on the other hand, acts as the write-side "container".
 
 namespace bubblefs {
 namespace mymesos {
@@ -127,6 +133,10 @@ public:
   bool operator!=(const Future<T>& that) const;
   bool operator<(const Future<T>& that) const;
 
+  // A promise starts in the PENDING state and can then transition 
+  // to any of the READY, FAILED, or DISCARDED states. You can check the state 
+  // using Future::isPending(), Future::isReady(), Future::isFailed(), and Future::isDiscarded().
+  // We typically refer to transitioning to READY as completing the promise/future. 
   // Helpers to get the current state of this future.
   bool isPending() const;
   bool isReady() const;
@@ -170,6 +180,23 @@ public:
   typedef lambda::CallableOnce<void()> DiscardedCallback;
   typedef lambda::CallableOnce<void(const Future<T>&)> AnyCallback;
 
+  // You can also add a callback to be invoked when (or if) a transition occurs (or has occcured) 
+  // by using the Future::onReady(), Future::onFailed(), and Future::onDiscarded(). 
+  // As a catch all you can use Future::onAny() which will invoke 
+  // it's callbacks on a transition to all of READY, FAILED, and DISCARDED.
+  // Code Style: prefer composition using Future::then() and Future::recover() over Future::onReady(), 
+  // Future::onFailed(), Future::onDiscarded(), and Future::onAny(). 
+  // You can "cancel" the result of some asynchronous operation by discarding a future. 
+  // Unlike doing a discard on a promise, discarding a future is a request that may or may not be be satisfiable. 
+  // You discard a future using Future::discard(). You can determine if a future has a discard request 
+  // by using Future::hasDiscard() or set up a callback using Future::onDiscard(). 
+  // The provider of the future will often use Future::onDiscard() 
+  // to watch for discard requests and try and act accordingly.
+  // An instance of Promise that is deleted before it has transitioned out of PENDING is considered abandoned. 
+  // The concept of abandonment was added late to the library so for backwards compatibility reasons 
+  // we could not add a new state but instead needed to have it be a sub-state of PENDING.
+  // A good rule of thumb is if you find yourself creating your own instance of a Promise 
+  // to compose an asynchronous operation you should use composition instead! 
   // Installs callbacks for the specified events and returns a const
   // reference to 'this' in order to easily support chaining.
   const Future<T>& onAbandoned(AbandonedCallback&& callback) const;
@@ -225,6 +252,25 @@ public:
   }
 
 private:
+  // There are two possible ways in which the callbacks to the Future::onReady() family of functions 
+  // as well as the composition functions like Future::then() get invoked:
+  // 1. By the caller of Future::onReady(), Future::then(), etc.
+  // 2. By the caller of Promise::set(), Promise::fail(), etc.
+  // The first case occurs if the future is already transitioned to that state 
+  // when adding the callback, i.e., if the state is already READY 
+  // for either Future::onReady() or Future::then(), or FAILED for Future::onFailed() or Future::recover(), etc, 
+  // then the callback will be executed immediately.
+  // The second case occurs if the future has not yet transitioned to that state. 
+  // In that case the callback is stored and it is executed by the caller of Promise::set(), Promise::fail(), 
+  // whoever is deleting the promise (for abandonment), etc.
+  // This means that it is critical to consider the synchronization 
+  // that might be necessary for your code given that multiple possible callers could execute the callback!
+  // We call these callback semantics synchronous, as opposed to asynchronous. 
+  // You can use defer() in order to asynchronously invoke your callbacks.
+  // Note that after the callbacks are invoked they are deleted, 
+  // so any resources that you might be holding on to inside the callback 
+  // will properly be released after the future transitions and it's callbacks are invoked. 
+  // 
   // We use the 'Prefer' and 'LessPrefer' structs as a way to prefer
   // one function over the other when doing SFINAE for the 'onReady',
   // 'onFailed', 'onAny', and 'then' functions. In each of these cases
@@ -385,6 +431,19 @@ public:
     return onAny(std::forward<F>(f), Prefer());
   }
 
+  // You can compose together asynchronous function calls
+  // using Future::then(), Future::repair(), and Future::recover(). 
+  // Each of Future::then(), Future::repair(), and Future::recover() 
+  // takes a callback that will be invoked after certain transitions.
+  // Future::then() allows you to transform the type of the Future into a new type 
+  // but both Future::repair() and Future::recover() must return the same type as Future 
+  // because they may not get executed! Here's an example using Future::recover() to handle a failure
+  // Be careful what you capture in your callbacks! Depending on the state of the future 
+  // the callback may be executed from a different scope and 
+  // what ever you captured may no longer be valid.
+  // The future returned by Future::then() will not execute the callback if a discard has been requested. 
+  // That is, even if the future transitions to READY, 
+  // Future::then() will still enforce the request to discard and transition the future to DISCARDED
   // Installs callbacks that get executed when this future is ready
   // and associates the result of the callback with the future that is
   // returned to the caller (which may be of a different type).
@@ -697,7 +756,17 @@ template <typename U>
 void discarded(Future<U> future);
 } // namespace internal {
 
-
+// A Promise is templated by the type that it will "contain". 
+// A Promise is not copyable or assignable in order 
+// to encourage strict ownership rules between processes 
+// (i.e., it's hard to reason about multiple actors concurrently trying to complete a Promise,
+// even if it's safe to do so concurrently).
+// You can get a Future from a Promise using Promise::future(). 
+// Unlike Promise, a Future can be both copied and assigned.
+// Use like:
+// Promise<int> promise;
+// Future<int> future = promise.future();
+// 
 // TODO(benh): Make Promise a subclass of Future?
 template <typename T>
 class Promise
@@ -2014,6 +2083,185 @@ UndiscardableDecorator<typename std::decay<F>::type> undiscardable(F&& f)
   return UndiscardableDecorator<
     typename std::decay<F>::type>(std::forward<F>(f));
 }
+
+// An asbtraction to help build state machines within an actor.
+//
+// Actors are natural state machines but there is still quite a bit of
+// boilerplate that one needs to end up writing. For example, let's
+// say you have the following actor:
+//
+//   class CoinOperatedTurnstile : public Process<CoinOperatedTurnstile>
+//   {
+//   public:
+//     // Returns nothing if you've been able to deposit a coin.
+//     Future<Nothing> deposit()
+//     {
+//       if (state != State::LOCKED) {
+//         return Failure("Coin already deposited in turnstile");
+//       }
+//
+//       state = State::UNLOCKED;
+//
+//       ... perform any side effects related to depositing a coin ...;
+//
+//       return Nothing();
+//     }
+//
+//     // Returns nothing if you've been able to push through the turnstile.
+//     Future<Nothing> push()
+//     {
+//       if (state != State::UNLOCKED) {
+//         return Failure("Turnstile is locked");
+//       }
+//
+//       state = State::LOCKED;
+//
+//       ... perform any side effects from opening the turnstile ...;
+//
+//       return Nothing();
+//     }
+//
+//   private:
+//     enum class State {
+//       UNLOCKED,
+//       LOCKED,
+//     } state = State::LOCKED;
+//   };
+//
+// With the `StateMachine` abstraction below this becomes:
+//
+//   class CoinOperatedTurnstile : public Process<CoinOperatedTurnstile>
+//   {
+//   public:
+//     // Returns nothing if you've been able to deposit a coin.
+//     Future<Nothing> deposit()
+//     {
+//       return state.transition<State::LOCKED, State::UNLOCKED>(
+//         []() -> Future<Nothing> {
+//           ... perform any side effects related to depositing a coin ...;
+//         },
+//         "Coin already deposited in turnstile");
+//     }
+//
+//     // Returns nothing if you've been able to push through the turnstile.
+//     Future<Nothing> push()
+//     {
+//       return state.transition<State::UNLOCKED, State::LOCKED>(
+//         []() -> Future<Nothing> {
+//           ... perform any side effects from opening the turnstile ...;
+//         },
+//         "Turnstile is locked");
+//     }
+//
+//   private:
+//     enum class State {
+//       UNLOCKED,
+//       LOCKED,
+//     };
+//
+//     StateMachine<State> state = State::LOCKED;
+//   };
+//
+//
+//  *** Transition Semantics ***
+//
+// The semantics of `StateMachine::transition()` are:
+//
+//   (1) Transition the state if the state is currently in the
+//   specified "from" state. If not, return an `Error()`.
+//
+//   (2) Notify anyone waiting on that state transition (i.e., anyone
+//   that called `StateMachine::when()`).
+//
+//   (3) Invoke the side effect function (if provided).
+//
+//
+//  *** Asynchronous Transitions ***
+//
+// In many circumstances you'll need to perform some work, often
+// asynchronously, in order to transition to a particular state. For
+// example, consider some actor that needs to perform some asynchronous
+// action in order to transition from a "running" state to a
+// "stopped" state. To do that you'll need to introduce an
+// intermediate state and _only_ complete the transition after the
+// asynchronous action has completed. For example:
+//
+//   // Returns nothing once we have stopped.
+//   Future<Nothing> stop()
+//   {
+//     return state.transition<State::RUNNING, State::STOPPING>(
+//         []() {
+//           return asynchronously_stop()
+//             .then([]() -> Future<Nothing> {
+//               return state.transition<State::STOPPING, State::STOPPED>();
+//             });
+//         });
+//   }
+//
+// It can be tempting to skip this pattern even when you're not
+// calling any asynchronous function, but be careful because you
+// shouldn't be peforming ANY action to perform a transition without
+// first changing the state to reflect the fact that you're doing the
+// transition.
+//
+// The rule of thumb is this: if you need to perform _ANY_ action
+// (synchronous or asynchronous) to transition to a state you _MUST_
+// introduce an intermediate state to represent that you're performing
+// that transition.
+template <typename State>
+class StateMachine
+{
+public:
+  StateMachine(State initial) : state(initial) {}
+
+  template <State from, State to, typename F>
+  Try<typename result_of<F()>::type> transition(
+      F&& f,
+      Option<std::string>&& message = None())
+  {
+    if (state != from) {
+      return Error(message.getOrElse("Invalid current state"));
+    }
+
+    state = to;
+
+    foreach (Promise<Nothing>& promise, promises[state]) {
+      promise.set(Nothing());
+    }
+
+    promises[state].clear();
+
+    return f();
+  }
+
+  template <State from, State to>
+  Try<Nothing> transition(Option<std::string>&& message = None())
+  {
+    return transition<from, to>([]() { return Nothing(); }, std::move(message));
+  }
+
+  template <State s>
+  bool is() const
+  {
+    return state == s;
+  }
+
+  template <State s>
+  Future<Nothing> when()
+  {
+    if (state != s) {
+      promises[s].emplace_back();
+      return promises[s].back().future();
+    }
+
+    return Nothing();
+  }
+
+private:
+  State state;
+
+  hashmap<State, std::vector<Promise<Nothing>>> promises;
+};
 
 }  // namespace process
 }  // namespace mymesos

@@ -31,6 +31,21 @@
 #include <stout/stringify.hpp>
 #include <stout/synchronized.hpp>
 
+// Process Event Queue (aka Mailbox)
+// Each process has a queue of incoming Event's that it processes one at a time. 
+// Other actor implementations often call this queue the "mailbox".
+// There are 5 different kinds of events that can be enqueued for a process:
+// 1. MessageEvent: a Message has been received.
+// 2. DispatchEvent: a method on the process has been "dispatched".
+// 3. HttpEvent: an http::Request has been received.
+// 4. ExitedEvent: another process which has been linked has terminated.
+// 5. TerminateEvent: the process has been requested to terminate.
+// An event is serviced one at a time by invoking the process' serve() method 
+// which by default invokes the process' visit() method corresponding to the underlying event type. 
+// Most actors don't need to override the implementation of serve() or visit() 
+// but can rely on higher-level abstractions that simplify serving the event 
+// (e.g., route(), which make it easy to set up handlers for an HttpEvent, discussed below in HTTP).
+
 namespace bubblefs {
 namespace mymesos {
 namespace process {
@@ -108,6 +123,15 @@ struct Event
   operator JSON::Object() const;
 };
 
+// A MessageEvent gets enqueued for a process when it gets sent a Message, 
+// either locally or remotely. You use send() to send a message from within a process 
+// and post() to send a message from outside a process. 
+// A post() sends a message without a return address 
+// because there is no process to reply to. 
+// PID<ServerProcess> server = spawn(new ServerProcess(), true);
+// PID<ClientProcess> client = spawn(new ClientProcess(server), true);
+// wait(server);
+// wait(client);
 
 struct MessageEvent : Event
 {
