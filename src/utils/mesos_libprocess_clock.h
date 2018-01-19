@@ -13,6 +13,7 @@
 // mesos/3rdparty/libprocess/include/process/clock.hpp
 // mesos/3rdparty/libprocess/src/clock.cpp
 // mesos/3rdparty/libprocess/include/process/delay.hpp
+// mesos/3rdparty/libprocess/include/process/after.hpp
 
 #ifndef BUBBLEFS_UTILS_MESOS_PROCESS_CLOCK_H_
 #define BUBBLEFS_UTILS_MESOS_PROCESS_CLOCK_H_
@@ -159,7 +160,7 @@ public:
 // We store the timers in a map of lists indexed by the timeout of the
 // timer so that we can have two timers that have the same timeout. We
 // exploit that the map is SORTED!
-static map<Time, list<Timer>>* timers = new map<Time, list<Timer>>();
+static std::map<Time, std::list<Timer>>* timers = new std::map<Time, list<Timer>>();
 static recursive_mutex* timers_mutex = new recursive_mutex();
 
 
@@ -169,7 +170,7 @@ static recursive_mutex* timers_mutex = new recursive_mutex();
 // likely change.
 namespace clock {
 
-map<ProcessBase*, Time>* currents = new map<ProcessBase*, Time>();
+std::map<ProcessBase*, Time>* currents = new map<ProcessBase*, Time>();
 
 Time* initial = new Time(Time::epoch());
 Time* current = new Time(Time::epoch());
@@ -258,7 +259,7 @@ void scheduleTick(const map<Time, list<Timer>>& timers, set<Time>* ticks)
 // which can be empty or have timers that trigger later than the current time.
 void tick(const Time& time)
 {
-  list<Timer> timedout;
+  std::list<Timer> timedout;
 
   synchronized (timers_mutex) {
     // We pass nullptr to be explicit about the fact that we want the
@@ -266,14 +267,14 @@ void tick(const Time& time)
     // called from the event loop, not a Process context).
     Time now = Clock::now(nullptr);
 
-    VLOG(3) << "Handling timers up to " << now;
+    //VLOG(3) << "Handling timers up to " << now;
 
     foreachkey (const Time& timeout, *timers) {
       if (timeout > now) {
         break;
       }
 
-      VLOG(3) << "Have timeout(s) at " << timeout;
+      //VLOG(3) << "Have timeout(s) at " << timeout;
 
       // Need to toggle 'settling' so that we don't prematurely say
       // we're settled until after the timers are executed below,
@@ -289,7 +290,7 @@ void tick(const Time& time)
     timers->erase(timers->begin(), timers->upper_bound(now));
 
     // Okay, so the timeout for the next timer should not have fired.
-    CHECK(timers->empty() || (timers->begin()->first > now));
+    //CHECK(timers->empty() || (timers->begin()->first > now));
 
     // Remove this tick from the scheduled 'ticks', it may have
     // been removed already if the clock was paused / manipulated
@@ -329,7 +330,7 @@ void Clock::finalize()
 {
   // We keep track of state differently when the clock is paused.
   // Finalization only handles cleanup of a running clock.
-  CHECK(!clock::paused) << "Clock must not be paused when finalizing";
+  //CHECK(!clock::paused) << "Clock must not be paused when finalizing";
 
   synchronized (timers_mutex) {
     // NOTE: `currents` is only non-empty when the clock is paused.
@@ -675,6 +676,51 @@ Timer delay(const Duration& duration,
 
   REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
 #undef TEMPLATE
+  
+// Provides an abstraction over `Timer` and `Clock::timer` that
+// completes a future after some duration and lets you attempt to
+// discard that future.
+//
+// This can be used along with `loop` to create "waiting loops", for
+// example:
+//
+//   // Wait until a file exists, check for it ever every second.
+//   loop(None(),
+//        []() {
+//          return after(Seconds(1));
+//        },
+//        [=]() {
+//          if (os::exists(file)) -> ControlFlow<Nothing> {
+//            return Break();
+//          }
+//          return Continue();
+//        });
+inline Future<Nothing> after(const Duration& duration)
+{
+  std::shared_ptr<Promise<Nothing>> promise(new Promise<Nothing>());
+
+  Timer timer = Clock::timer(duration, [=]() {
+    promise->set(Nothing());
+  });
+
+  // Attempt to discard the promise if the future is discarded.
+  //
+  // NOTE: while the future holds a reference to the promise there is
+  // no cicular reference here because even if there are no references
+  // to the Future the timer will eventually fire and we'll set the
+  // promise which will clear the `onDiscard` callback and delete the
+  // reference to Promise.
+  promise->future()
+    .onDiscard([=]() {
+      if (Clock::cancel(timer)) {
+        promise->discard();
+      }
+    });
+
+  return promise->future();
+}
+
+
 
 } // namespace process
 } // namespace mymesos

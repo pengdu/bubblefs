@@ -12,6 +12,12 @@
 
 // mesos/3rdparty/libprocess/include/process/process.hpp
 // mesos/3rdparty/libprocess/include/process/dispatch.hpp
+// mesos/3rdparty/libprocess/include/process/async.hpp
+// mesos/3rdparty/libprocess/include/process/deferred.hpp
+// mesos/3rdparty/libprocess/include/process/executor.hpp
+// mesos/3rdparty/libprocess/include/process/defer.hpp
+// mesos/3rdparty/libprocess/include/process/run.hpp
+// mesos/3rdparty/libprocess/include/process/loop.hpp
 
 #ifndef BUBBLEFS_UTILS_MESOS_PROCESS_PROCESS_H_
 #define BUBBLEFS_UTILS_MESOS_PROCESS_PROCESS_H_
@@ -1200,6 +1206,1468 @@ auto dispatch(const UPID& pid, F&& f)
   -> decltype(internal::Dispatch<R>()(pid, std::forward<F>(f)))
 {
   return internal::Dispatch<R>()(pid, std::forward<F>(f));
+}
+
+// Provides an abstraction for asynchronously executing a function
+// (note the declarations are here and definitions below since
+// defining and declaring below will require defining the default
+// argument when declaring these as friends in AsyncExecutor which is
+// brittle).
+
+template <typename F>
+Future<typename result_of<F()>::type> async(
+    const F& f,
+    typename std::enable_if<!std::is_void<typename result_of<F()>::type>::value>::type* = nullptr); // NOLINT(whitespace/line_length)
+
+
+template <typename F>
+Future<Nothing> async(
+    const F& f,
+    typename std::enable_if<std::is_void<typename result_of<F()>::type>::value>::type* = nullptr); // NOLINT(whitespace/line_length)
+
+
+#define TEMPLATE(Z, N, DATA)                                            \
+  template <typename F, ENUM_PARAMS(N, typename A)>                     \
+  Future<typename result_of<F(ENUM_PARAMS(N, A))>::type> async( \
+      const F& f,                                                       \
+      ENUM_BINARY_PARAMS(N, A, a),                                      \
+      typename std::enable_if<!std::is_void<typename result_of<F(ENUM_PARAMS(N, A))>::type>::value>::type* = nullptr); /* NOLINT(whitespace/line_length) */ \
+                                                                        \
+                                                                        \
+  template <typename F, ENUM_PARAMS(N, typename A)>                     \
+  Future<Nothing> async(                                                \
+      const F& f,                                                       \
+      ENUM_BINARY_PARAMS(N, A, a),                                      \
+      typename std::enable_if<std::is_void<typename result_of<F(ENUM_PARAMS(N, A))>::type>::value>::type* = nullptr); // NOLINT(whitespace/line_length)
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+
+
+// TODO(vinod): Merge this into ExecutorProcess.
+class AsyncExecutorProcess : public Process<AsyncExecutorProcess>
+{
+private:
+  friend class AsyncExecutor;
+
+  AsyncExecutorProcess() : ProcessBase(ID::generate("__async_executor__")) {}
+  virtual ~AsyncExecutorProcess() {}
+
+  // Not copyable, not assignable.
+  AsyncExecutorProcess(const AsyncExecutorProcess&);
+  AsyncExecutorProcess& operator=(const AsyncExecutorProcess&);
+
+  template <
+      typename F,
+      typename std::enable_if<
+          !std::is_void<typename result_of<F()>::type>::value, int>::type = 0>
+  typename result_of<F()>::type execute(const F& f)
+  {
+    terminate(self()); // Terminate process after function returns.
+    return f();
+  }
+
+  template <
+      typename F,
+      typename std::enable_if<
+          std::is_void<typename result_of<F()>::type>::value, int>::type = 0>
+  Nothing execute(const F& f)
+  {
+    terminate(self()); // Terminate process after function returns.
+    f();
+    return Nothing();
+  }
+
+#define TEMPLATE(Z, N, DATA)                                            \
+  template <                                                            \
+      typename F,                                                       \
+      ENUM_PARAMS(N, typename A),                                       \
+      typename std::enable_if<                                          \
+          !std::is_void<                                                \
+              typename result_of<F(ENUM_PARAMS(N, A))>::type>::value,   \
+          int>::type = 0>                                               \
+  typename result_of<F(ENUM_PARAMS(N, A))>::type execute(       \
+      const F& f, ENUM_BINARY_PARAMS(N, A, a))                          \
+  {                                                                     \
+    terminate(self()); /* Terminate process after function returns. */  \
+    return f(ENUM_PARAMS(N, a));                                        \
+  }                                                                     \
+                                                                        \
+  template <                                                            \
+      typename F,                                                       \
+      ENUM_PARAMS(N, typename A),                                       \
+      typename std::enable_if<                                          \
+          std::is_void<                                                 \
+              typename result_of<F(ENUM_PARAMS(N, A))>::type>::value,   \
+          int>::type = 0>                                               \
+  Nothing execute(                                                      \
+      const F& f, ENUM_BINARY_PARAMS(N, A, a))                          \
+  {                                                                     \
+    terminate(self()); /* Terminate process after function returns. */  \
+    f(ENUM_PARAMS(N, a));                                               \
+    return Nothing();                                                   \
+  }
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+};
+
+
+// Acts like a function call but runs within an asynchronous execution
+// context such as an Executor or a ProcessBase (enforced because only
+// an executor or the 'defer' routines are allowed to create them).
+template <typename F>
+struct Deferred : std::function<F>
+{
+private:
+  friend class Executor;
+
+  template <typename G> friend struct _Deferred;
+
+  // TODO(benh): Consider removing these in favor of having these
+  // functions return _Deferred.
+  template <typename T>
+  friend Deferred<void()>
+  defer(const PID<T>& pid, void (T::*method)());
+
+  template <typename R, typename T>
+  friend Deferred<Future<R>()>
+  defer(const PID<T>& pid, Future<R> (T::*method)());
+
+  template <typename R, typename T>
+  friend Deferred<Future<R>()>
+  defer(const PID<T>& pid, R (T::*method)());
+
+  /*implicit*/ Deferred(const std::function<F>& f) : std::function<F>(f) {}
+};
+
+
+// We need an intermediate "deferred" type because when constructing a
+// Deferred we won't always know the underlying function type (for
+// example, if we're being passed a std::bind or a lambda). A lambda
+// won't always implicitly convert to a std::function so instead we
+// hold onto the functor type F and let the compiler invoke the
+// necessary cast operator (below) when it actually has determined
+// what type is needed. This is similar in nature to how std::bind
+// works with its intermediate _Bind type (which the pre-C++11
+// implementation relied on).
+template <typename F>
+struct _Deferred
+{
+  // We expect that conversion operators are invoked on rvalues only,
+  // as _Deferred is supposed to be used directly as a result of defer call.
+  operator Deferred<void()>() &&
+  {
+    // The 'pid' differentiates an already dispatched functor versus
+    // one which still needs to be dispatched (which is done
+    // below). We have to delay wrapping the dispatch (for example, in
+    // defer.hpp) as long as possible because we don't always know
+    // what type the functor is or is going to be cast to (i.e., a
+    // std::bind might can be cast to functions that do or do not take
+    // arguments which will just be dropped when invoking the
+    // underlying bound function).
+    if (pid.isNone()) {
+      return std::function<void()>(std::forward<F>(f));
+    }
+
+    // We need to explicitly copy the members otherwise we'll
+    // implicitly copy 'this' which might not exist at invocation.
+    Option<UPID> pid_ = pid;
+    F&& f_ = std::forward<F>(f);
+
+    return std::function<void()>(
+        [=]() {
+          dispatch(pid_.get(), f_);
+        });
+  }
+
+  operator std::function<void()>() &&
+  {
+    if (pid.isNone()) {
+      return std::function<void()>(std::forward<F>(f));
+    }
+
+    Option<UPID> pid_ = pid;
+    F&& f_ = std::forward<F>(f);
+
+    return std::function<void()>(
+        [=]() {
+          dispatch(pid_.get(), f_);
+        });
+  }
+
+  operator lambda::CallableOnce<void()>() &&
+  {
+    if (pid.isNone()) {
+      return lambda::CallableOnce<void()>(std::forward<F>(f));
+    }
+
+    Option<UPID> pid_ = pid;
+
+    return lambda::CallableOnce<void()>(
+        lambda::partial(
+            [pid_](typename std::decay<F>::type&& f_) {
+              dispatch(pid_.get(), std::move(f_));
+            },
+            std::forward<F>(f)));
+  }
+
+  template <typename R>
+  operator Deferred<R()>() &&
+  {
+    if (pid.isNone()) {
+      return std::function<R()>(std::forward<F>(f));
+    }
+
+    Option<UPID> pid_ = pid;
+    F&& f_ = std::forward<F>(f);
+
+    return std::function<R()>(
+        [=]() {
+          return dispatch(pid_.get(), f_);
+        });
+  }
+
+  template <typename R>
+  operator std::function<R()>() &&
+  {
+    if (pid.isNone()) {
+      return std::function<R()>(std::forward<F>(f));
+    }
+
+    Option<UPID> pid_ = pid;
+    F&& f_ = std::forward<F>(f);
+
+    return std::function<R()>(
+        [=]() {
+          return dispatch(pid_.get(), f_);
+        });
+  }
+
+  template <typename R>
+  operator lambda::CallableOnce<R()>() &&
+  {
+    if (pid.isNone()) {
+      return lambda::CallableOnce<R()>(std::forward<F>(f));
+    }
+
+    Option<UPID> pid_ = pid;
+
+    return lambda::CallableOnce<R()>(
+        lambda::partial(
+          [pid_](typename std::decay<F>::type&& f_) {
+            return dispatch(pid_.get(), std::move(f_));
+          },
+          std::forward<F>(f)));
+  }
+
+// Expands to lambda::_$(N+1). N is zero-based, and placeholders are one-based.
+#define PLACEHOLDER(Z, N, DATA) CAT(lambda::_, INC(N))
+
+// This assumes type and variable base names are `P` and `p` respectively.
+#define FORWARD(Z, N, DATA) std::forward<P ## N>(p ## N)
+
+  // Due to a bug (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=41933)
+  // with variadic templates and lambdas, we still need to do
+  // preprocessor expansions. In addition, due to a bug with clang (or
+  // libc++) we can't use std::bind with a std::function so we have to
+  // explicitly use the std::function<R(P...)>::operator() (see
+  // http://stackoverflow.com/questions/20097616/stdbind-to-a-stdfunction-crashes-with-clang).
+#define TEMPLATE(Z, N, DATA)                                             \
+  template <ENUM_PARAMS(N, typename P)>                                  \
+  operator Deferred<void(ENUM_PARAMS(N, P))>() &&                        \
+  {                                                                      \
+    if (pid.isNone()) {                                                  \
+      return std::function<void(ENUM_PARAMS(N, P))>(std::forward<F>(f)); \
+    }                                                                    \
+                                                                         \
+    Option<UPID> pid_ = pid;                                             \
+    F&& f_ = std::forward<F>(f);                                         \
+                                                                         \
+    return std::function<void(ENUM_PARAMS(N, P))>(                       \
+        [=](ENUM_BINARY_PARAMS(N, P, p)) {                               \
+          std::function<void()> f__([=]() {                              \
+            f_(ENUM_PARAMS(N, p));                                       \
+          });                                                            \
+          dispatch(pid_.get(), f__);                                     \
+        });                                                              \
+  }                                                                      \
+                                                                         \
+  template <ENUM_PARAMS(N, typename P)>                                  \
+  operator std::function<void(ENUM_PARAMS(N, P))>() &&                   \
+  {                                                                      \
+    if (pid.isNone()) {                                                  \
+      return std::function<void(ENUM_PARAMS(N, P))>(std::forward<F>(f)); \
+    }                                                                    \
+                                                                         \
+    Option<UPID> pid_ = pid;                                             \
+    F&& f_ = std::forward<F>(f);                                         \
+                                                                         \
+    return std::function<void(ENUM_PARAMS(N, P))>(                       \
+        [=](ENUM_BINARY_PARAMS(N, P, p)) {                               \
+          std::function<void()> f__([=]() {                              \
+            f_(ENUM_PARAMS(N, p));                                       \
+          });                                                            \
+          dispatch(pid_.get(), f__);                                     \
+        });                                                              \
+  }                                                                      \
+                                                                         \
+  template <ENUM_PARAMS(N, typename P)>                                  \
+  operator lambda::CallableOnce<void(ENUM_PARAMS(N, P))>() &&            \
+  {                                                                      \
+    if (pid.isNone()) {                                                  \
+      return lambda::CallableOnce<void(ENUM_PARAMS(N, P))>(              \
+          std::forward<F>(f));                                           \
+    }                                                                    \
+                                                                         \
+    Option<UPID> pid_ = pid;                                             \
+                                                                         \
+    return lambda::CallableOnce<void(ENUM_PARAMS(N, P))>(                \
+        lambda::partial(                                                 \
+            [pid_](typename std::decay<F>::type&& f_,                    \
+                   ENUM_BINARY_PARAMS(N, P, &&p)) {                      \
+              lambda::CallableOnce<void()> f__(                          \
+                  lambda::partial(std::move(f_), ENUM(N, FORWARD, _)));  \
+              dispatch(pid_.get(), std::move(f__));                      \
+            },                                                           \
+            std::forward<F>(f),                                          \
+            ENUM(N, PLACEHOLDER, _)));                                   \
+  }
+
+  REPEAT_FROM_TO(1, 3, TEMPLATE, _) // Args A0 -> A1.
+#undef TEMPLATE
+
+#define TEMPLATE(Z, N, DATA)                                            \
+  template <typename R, ENUM_PARAMS(N, typename P)>                     \
+  operator Deferred<R(ENUM_PARAMS(N, P))>() &&                          \
+  {                                                                     \
+    if (pid.isNone()) {                                                 \
+      return std::function<R(ENUM_PARAMS(N, P))>(std::forward<F>(f));   \
+    }                                                                   \
+                                                                        \
+    Option<UPID> pid_ = pid;                                            \
+    F&& f_ = std::forward<F>(f);                                        \
+                                                                        \
+    return std::function<R(ENUM_PARAMS(N, P))>(                         \
+        [=](ENUM_BINARY_PARAMS(N, P, p)) {                              \
+          std::function<R()> f__([=]() {                                \
+            return f_(ENUM_PARAMS(N, p));                               \
+          });                                                           \
+          return dispatch(pid_.get(), f__);                             \
+        });                                                             \
+  }                                                                     \
+                                                                        \
+  template <typename R, ENUM_PARAMS(N, typename P)>                     \
+  operator std::function<R(ENUM_PARAMS(N, P))>() &&                     \
+  {                                                                     \
+    if (pid.isNone()) {                                                 \
+      return std::function<R(ENUM_PARAMS(N, P))>(std::forward<F>(f));   \
+    }                                                                   \
+                                                                        \
+    Option<UPID> pid_ = pid;                                            \
+    F&& f_ = std::forward<F>(f);                                        \
+                                                                        \
+    return std::function<R(ENUM_PARAMS(N, P))>(                         \
+        [=](ENUM_BINARY_PARAMS(N, P, p)) {                              \
+          std::function<R()> f__([=]() {                                \
+            return f_(ENUM_PARAMS(N, p));                               \
+          });                                                           \
+          return dispatch(pid_.get(), f__);                             \
+        });                                                             \
+  }                                                                     \
+                                                                        \
+  template <typename R, ENUM_PARAMS(N, typename P)>                     \
+  operator lambda::CallableOnce<R(ENUM_PARAMS(N, P))>() &&              \
+  {                                                                     \
+    if (pid.isNone()) {                                                 \
+      return lambda::CallableOnce<R(ENUM_PARAMS(N, P))>(                \
+          std::forward<F>(f));                                          \
+    }                                                                   \
+                                                                        \
+    Option<UPID> pid_ = pid;                                            \
+                                                                        \
+    return lambda::CallableOnce<R(ENUM_PARAMS(N, P))>(                  \
+        lambda::partial(                                                \
+            [pid_](typename std::decay<F>::type&& f_,                   \
+                   ENUM_BINARY_PARAMS(N, P, &&p)) {                     \
+              lambda::CallableOnce<R()> f__(                            \
+                  lambda::partial(std::move(f_), ENUM(N, FORWARD, _))); \
+              return dispatch(pid_.get(), std::move(f__));              \
+        },                                                              \
+        std::forward<F>(f),                                             \
+        ENUM(N, PLACEHOLDER, _)));                                      \
+  }
+
+  REPEAT_FROM_TO(1, 3, TEMPLATE, _) // Args A0 -> A1.
+#undef TEMPLATE
+
+#undef FORWARD
+#undef PLACEHOLDER
+
+private:
+  friend class Executor;
+
+  template <typename G>
+  friend _Deferred<G> defer(const UPID& pid, G&& g);
+
+// This assumes type and variable base names are `A` and `a` respectively.
+#define FORWARD(Z, N, DATA) std::forward<A ## N>(a ## N)
+
+#define TEMPLATE(Z, N, DATA)                                             \
+  template <typename T,                                                  \
+            ENUM_PARAMS(N, typename P),                                  \
+            ENUM_PARAMS(N, typename A)>                                  \
+  friend auto defer(const PID<T>& pid,                                   \
+                    void (T::*method)(ENUM_PARAMS(N, P)),                \
+                    ENUM_BINARY_PARAMS(N, A, &&a))                       \
+    -> _Deferred<decltype(                                               \
+           lambda::partial(                                              \
+               &std::function<void(ENUM_PARAMS(N, P))>::operator(),      \
+               std::function<void(ENUM_PARAMS(N, P))>(),                 \
+               ENUM(N, FORWARD, _)))>;
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+
+#define TEMPLATE(Z, N, DATA)                                             \
+  template <typename R,                                                  \
+            typename T,                                                  \
+            ENUM_PARAMS(N, typename P),                                  \
+            ENUM_PARAMS(N, typename A)>                                  \
+  friend auto defer(const PID<T>& pid,                                   \
+                    Future<R> (T::*method)(ENUM_PARAMS(N, P)),           \
+                    ENUM_BINARY_PARAMS(N, A, &&a))                       \
+    -> _Deferred<decltype(                                               \
+           lambda::partial(                                              \
+               &std::function<Future<R>(ENUM_PARAMS(N, P))>::operator(), \
+               std::function<Future<R>(ENUM_PARAMS(N, P))>(),            \
+               ENUM(N, FORWARD, _)))>;
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+
+#define TEMPLATE(Z, N, DATA)                                             \
+  template <typename R,                                                  \
+            typename T,                                                  \
+            ENUM_PARAMS(N, typename P),                                  \
+            ENUM_PARAMS(N, typename A)>                                  \
+  friend auto defer(const PID<T>& pid,                                   \
+                    R (T::*method)(ENUM_PARAMS(N, P)),                   \
+                    ENUM_BINARY_PARAMS(N, A, &&a))                       \
+    -> _Deferred<decltype(                                               \
+         lambda::partial(                                                \
+           &std::function<Future<R>(ENUM_PARAMS(N, P))>::operator(),     \
+           std::function<Future<R>(ENUM_PARAMS(N, P))>(),                \
+           ENUM(N, FORWARD, _)))>;
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+#undef FORWARD
+
+  _Deferred(const UPID& pid, F&& f) : pid(pid), f(std::forward<F>(f)) {}
+
+  /*implicit*/ _Deferred(F&& f) : f(std::forward<F>(f)) {}
+
+  Option<UPID> pid;
+  F f;
+};
+
+// This is a wrapper around AsyncExecutorProcess.
+class AsyncExecutor
+{
+private:
+  // Declare async functions as friends.
+  template <typename F>
+  friend Future<typename result_of<F()>::type> async(
+      const F& f,
+      typename std::enable_if<!std::is_void<typename result_of<F()>::type>::value>::type*); // NOLINT(whitespace/line_length)
+
+  template <typename F>
+  friend Future<Nothing> async(
+      const F& f,
+      typename std::enable_if<std::is_void<typename result_of<F()>::type>::value>::type*); // NOLINT(whitespace/line_length)
+
+#define TEMPLATE(Z, N, DATA)                                            \
+  template <typename F, ENUM_PARAMS(N, typename A)>                     \
+  friend Future<typename result_of<F(ENUM_PARAMS(N, A))>::type> async( \
+      const F& f,                                                       \
+      ENUM_BINARY_PARAMS(N, A, a),                                      \
+      typename std::enable_if<!std::is_void<typename result_of<F(ENUM_PARAMS(N, A))>::type>::value>::type*); /* NOLINT(whitespace/line_length) */ \
+                                                                        \
+  template <typename F, ENUM_PARAMS(N, typename A)>                     \
+  friend Future<Nothing> async(                                         \
+      const F& f,                                                       \
+      ENUM_BINARY_PARAMS(N, A, a),                                      \
+      typename std::enable_if<std::is_void<typename result_of<F(ENUM_PARAMS(N, A))>::type>::value>::type*); // NOLINT(whitespace/line_length)
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+
+  AsyncExecutor()
+  {
+    process = spawn(new AsyncExecutorProcess(), true); // Automatically GC.
+  }
+
+  virtual ~AsyncExecutor() {}
+
+  // Not copyable, not assignable.
+  AsyncExecutor(const AsyncExecutor&);
+  AsyncExecutor& operator=(const AsyncExecutor&);
+
+  template <typename F>
+  Future<typename result_of<F()>::type> execute(
+      const F& f,
+      typename std::enable_if<!std::is_void<typename result_of<F()>::type>::value>::type* = nullptr) // NOLINT(whitespace/line_length)
+  {
+    // Need to disambiguate overloaded method.
+    typename result_of<F()>::type(AsyncExecutorProcess::*method)(const F&) =
+      &AsyncExecutorProcess::execute<F>;
+
+    return dispatch(process, method, f);
+  }
+
+  template <typename F>
+  Future<Nothing> execute(
+      const F& f,
+      typename std::enable_if<std::is_void<typename result_of<F()>::type>::value>::type* = nullptr) // NOLINT(whitespace/line_length)
+  {
+    // Need to disambiguate overloaded method.
+    Nothing(AsyncExecutorProcess::*method)(const F&) =
+      &AsyncExecutorProcess::execute<F>;
+
+    return dispatch(process, method, f);
+  }
+
+#define TEMPLATE(Z, N, DATA)                                            \
+  template <typename F, ENUM_PARAMS(N, typename A)>                     \
+  Future<typename result_of<F(ENUM_PARAMS(N, A))>::type> execute( \
+      const F& f,                                                       \
+      ENUM_BINARY_PARAMS(N, A, a),                                      \
+      typename std::enable_if<!std::is_void<typename result_of<F(ENUM_PARAMS(N, A))>::type>::value>::type* = nullptr) /* NOLINT(whitespace/line_length) */ \
+  {                                                                     \
+    /* Need to disambiguate overloaded method. */                       \
+    typename result_of<F(ENUM_PARAMS(N, A))>::type(AsyncExecutorProcess::*method)(const F&, ENUM_PARAMS(N, A)) = /* NOLINT(whitespace/line_length) */ \
+      &AsyncExecutorProcess::execute<F, ENUM_PARAMS(N, A)>;             \
+                                                                        \
+    return dispatch(process, method, f, ENUM_PARAMS(N, a));             \
+  }                                                                     \
+                                                                        \
+  template <typename F, ENUM_PARAMS(N, typename A)>                     \
+  Future<Nothing> execute(                                              \
+      const F& f,                                                       \
+      ENUM_BINARY_PARAMS(N, A, a),                                      \
+      typename std::enable_if<std::is_void<typename result_of<F(ENUM_PARAMS(N, A))>::type>::value>::type* = nullptr) /* NOLINT(whitespace/line_length) */ \
+  {                                                                     \
+    /* Need to disambiguate overloaded method. */                       \
+    Nothing(AsyncExecutorProcess::*method)(const F&, ENUM_PARAMS(N, A)) = \
+      &AsyncExecutorProcess::execute<F, ENUM_PARAMS(N, A)>;             \
+                                                                        \
+    return dispatch(process, method, f, ENUM_PARAMS(N, a));             \
+  }
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+
+  PID<AsyncExecutorProcess> process;
+};
+
+
+// Provides an abstraction for asynchronously executing a function.
+template <typename F>
+Future<typename result_of<F()>::type> async(
+    const F& f,
+    typename std::enable_if<!std::is_void<typename result_of<F()>::type>::value>::type*) // NOLINT(whitespace/line_length)
+{
+  return AsyncExecutor().execute(f);
+}
+
+
+template <typename F>
+Future<Nothing> async(
+    const F& f,
+    typename std::enable_if<std::is_void<typename result_of<F()>::type>::value>::type*) // NOLINT(whitespace/line_length)
+{
+  return AsyncExecutor().execute(f);
+}
+
+
+#define TEMPLATE(Z, N, DATA)                                            \
+  template <typename F, ENUM_PARAMS(N, typename A)>                     \
+  Future<typename result_of<F(ENUM_PARAMS(N, A))>::type> async( \
+      const F& f,                                                       \
+      ENUM_BINARY_PARAMS(N, A, a),                                      \
+      typename std::enable_if<!std::is_void<typename result_of<F(ENUM_PARAMS(N, A))>::type>::value>::type*) /* NOLINT(whitespace/line_length) */ \
+  {                                                                     \
+    return AsyncExecutor().execute(f, ENUM_PARAMS(N, a));               \
+  }                                                                     \
+                                                                        \
+  template <typename F, ENUM_PARAMS(N, typename A)>                     \
+  Future<Nothing> async(                                                \
+      const F& f,                                                       \
+      ENUM_BINARY_PARAMS(N, A, a),                                      \
+      typename std::enable_if<std::is_void<typename result_of<F(ENUM_PARAMS(N, A))>::type>::value>::type*) /* NOLINT(whitespace/line_length) */ \
+  {                                                                     \
+    return AsyncExecutor().execute(f, ENUM_PARAMS(N, a));               \
+  }
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+  
+
+// Provides an abstraction that can take a standard function object
+// and defer or asynchronously execute it without needing a process.
+// Each converted function object will get execute serially with respect
+// to one another when invoked.
+class Executor
+{
+public:
+  Executor() : process(ID::generate("__executor__"))
+  {
+    spawn(process);
+  }
+
+  ~Executor()
+  {
+    terminate(process);
+    wait(process);
+  }
+
+  void stop()
+  {
+    terminate(process);
+
+    // TODO(benh): Note that this doesn't wait because that could
+    // cause a deadlock ... thus, the semantics here are that no more
+    // dispatches will occur after this function returns but one may
+    // be occurring concurrently.
+  }
+
+  template <typename F>
+  _Deferred<F> defer(F&& f)
+  {
+    return _Deferred<F>(process.self(), std::forward<F>(f));
+  }
+
+
+private:
+  // Not copyable, not assignable.
+  Executor(const Executor&);
+  Executor& operator=(const Executor&);
+
+  ProcessBase process;
+
+
+public:
+  template <
+      typename F,
+      typename R = typename result_of<F()>::type,
+      typename std::enable_if<!std::is_void<R>::value, int>::type = 0>
+  auto execute(F&& f)
+    -> decltype(dispatch(process, std::function<R()>(std::forward<F>(f))))
+  {
+    // NOTE: Currently we cannot pass a mutable lambda into `dispatch()`
+    // because it would be captured by copy, so we convert `f` into a
+    // `std::function` to bypass this restriction.
+    return dispatch(process, std::function<R()>(std::forward<F>(f)));
+  }
+
+  // NOTE: This overload for `void` returns `Future<Nothing>` so we can
+  // chain. This follows the same behavior as `async()`.
+  template <
+      typename F,
+      typename R = typename result_of<F()>::type,
+      typename std::enable_if<std::is_void<R>::value, int>::type = 0>
+  Future<Nothing> execute(F&& f)
+  {
+    // NOTE: Currently we cannot pass a mutable lambda into `dispatch()`
+    // because it would be captured by copy, so we convert `f` into a
+    // `std::function` to bypass this restriction. This wrapper also
+    // avoids `f` being evaluated when it is a nested bind.
+    // TODO(chhsiao): Capture `f` by forwarding once we switch to C++14.
+    return dispatch(
+        process,
+        std::bind(
+            [](const std::function<R()>& f_) { f_(); return Nothing(); },
+            std::function<R()>(std::forward<F>(f))));
+  }
+};
+
+
+// Per thread executor pointer. We use a pointer to lazily construct the
+// actual executor.
+extern thread_local Executor* _executor_;
+
+#define __executor__                                                    \
+  (_executor_ == nullptr ? _executor_ = new Executor() : _executor_)
+
+
+// The defer mechanism is very similar to the dispatch mechanism (see
+// dispatch.hpp), however, rather than scheduling the method to get
+// invoked, the defer mechanism returns a 'Deferred' object that when
+// invoked does the underlying dispatch.
+
+// First, definitions of defer for methods returning void:
+
+template <typename T>
+Deferred<void()> defer(const PID<T>& pid, void (T::*method)())
+{
+  return Deferred<void()>([=]() { dispatch(pid, method); });
+}
+
+
+template <typename T>
+Deferred<void()> defer(const Process<T>& process, void (T::*method)())
+{
+  return defer(process.self(), method);
+}
+
+
+template <typename T>
+Deferred<void()> defer(const Process<T>* process, void (T::*method)())
+{
+  return defer(process->self(), method);
+}
+
+
+// Due to a bug (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=41933)
+// with variadic templates and lambdas, we still need to do
+// preprocessor expansions. In addition, due to a bug with clang (or
+// libc++) we can't use std::bind with a std::function so we have to
+// explicitly use the std::function<R(P...)>::operator() (see
+// http://stackoverflow.com/questions/20097616/stdbind-to-a-stdfunction-crashes-with-clang).
+
+// This assumes that type and variable base names are `A` and `a` respectively.
+#define FORWARD_A(Z, N, DATA) std::forward<A ## N>(a ## N)
+
+// This assumes that type and variable base names are `P` and `p` respectively.
+#define FORWARD_P(Z, N, DATA) std::forward<P ## N>(p ## N)
+
+#define TEMPLATE(Z, N, DATA)                                            \
+  template <typename T,                                                 \
+            ENUM_PARAMS(N, typename P),                                 \
+            ENUM_PARAMS(N, typename A)>                                 \
+  auto defer(const PID<T>& pid,                                         \
+             void (T::*method)(ENUM_PARAMS(N, P)),                      \
+             ENUM_BINARY_PARAMS(N, A, &&a))                             \
+    -> _Deferred<decltype(                                              \
+         lambda::partial(                                               \
+           &std::function<void(ENUM_PARAMS(N, P))>::operator(),         \
+           std::function<void(ENUM_PARAMS(N, P))>(),                    \
+           ENUM(N, FORWARD_A, _)))>                                     \
+  {                                                                     \
+    std::function<void(ENUM_PARAMS(N, P))> f(                           \
+        [=](ENUM_BINARY_PARAMS(N, P, &&p)) {                            \
+          dispatch(pid, method, ENUM(N, FORWARD_P, _));                 \
+        });                                                             \
+    return lambda::partial(                                             \
+        &std::function<void(ENUM_PARAMS(N, P))>::operator(),            \
+        std::move(f),                                                   \
+        ENUM(N, FORWARD_A, _));                                         \
+  }                                                                     \
+                                                                        \
+  template <typename T,                                                 \
+            ENUM_PARAMS(N, typename P),                                 \
+            ENUM_PARAMS(N, typename A)>                                 \
+  auto defer(const Process<T>& process,                                 \
+             void (T::*method)(ENUM_PARAMS(N, P)),                      \
+             ENUM_BINARY_PARAMS(N, A, &&a))                             \
+    -> decltype(defer(process.self(), method, ENUM(N, FORWARD_A, _)))   \
+  {                                                                     \
+    return defer(process.self(), method, ENUM(N, FORWARD_A, _));        \
+  }                                                                     \
+                                                                        \
+  template <typename T,                                                 \
+            ENUM_PARAMS(N, typename P),                                 \
+            ENUM_PARAMS(N, typename A)>                                 \
+  auto defer(const Process<T>* process,                                 \
+             void (T::*method)(ENUM_PARAMS(N, P)),                      \
+             ENUM_BINARY_PARAMS(N, A, &&a))                             \
+    -> decltype(defer(process->self(), method, ENUM(N, FORWARD_A, _)))  \
+  {                                                                     \
+    return defer(process->self(), method, ENUM(N, FORWARD_A, _));       \
+  }
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+
+
+// Next, definitions of defer for methods returning future:
+
+template <typename R, typename T>
+Deferred<Future<R>()> defer(const PID<T>& pid, Future<R> (T::*method)())
+{
+  return Deferred<Future<R>()>([=]() { return dispatch(pid, method); });
+}
+
+template <typename R, typename T>
+Deferred<Future<R>()> defer(const Process<T>& process, Future<R> (T::*method)())
+{
+  return defer(process.self(), method);
+}
+
+template <typename R, typename T>
+Deferred<Future<R>()> defer(const Process<T>* process, Future<R> (T::*method)())
+{
+  return defer(process->self(), method);
+}
+
+#define TEMPLATE(Z, N, DATA)                                            \
+  template <typename R,                                                 \
+            typename T,                                                 \
+            ENUM_PARAMS(N, typename P),                                 \
+            ENUM_PARAMS(N, typename A)>                                 \
+  auto defer(const PID<T>& pid,                                         \
+             Future<R> (T::*method)(ENUM_PARAMS(N, P)),                 \
+             ENUM_BINARY_PARAMS(N, A, &&a))                             \
+    -> _Deferred<decltype(                                              \
+         lambda::partial(                                               \
+           &std::function<Future<R>(ENUM_PARAMS(N, P))>::operator(),    \
+           std::function<Future<R>(ENUM_PARAMS(N, P))>(),               \
+           ENUM(N, FORWARD_A, _)))>                                     \
+  {                                                                     \
+    std::function<Future<R>(ENUM_PARAMS(N, P))> f(                      \
+        [=](ENUM_BINARY_PARAMS(N, P, &&p)) {                            \
+          return dispatch(pid, method, ENUM(N, FORWARD_P, _));          \
+        });                                                             \
+    return lambda::partial(                                             \
+        &std::function<Future<R>(ENUM_PARAMS(N, P))>::operator(),       \
+        std::move(f),                                                   \
+        ENUM(N, FORWARD_A, _));                                         \
+  }                                                                     \
+                                                                        \
+  template <typename R,                                                 \
+            typename T,                                                 \
+            ENUM_PARAMS(N, typename P),                                 \
+            ENUM_PARAMS(N, typename A)>                                 \
+  auto defer(const Process<T>& process,                                 \
+             Future<R> (T::*method)(ENUM_PARAMS(N, P)),                 \
+             ENUM_BINARY_PARAMS(N, A, &&a))                             \
+    -> decltype(defer(process.self(), method, ENUM(N, FORWARD_A, _)))   \
+  {                                                                     \
+    return defer(process.self(), method, ENUM(N, FORWARD_A, _));        \
+  }                                                                     \
+                                                                        \
+  template <typename R,                                                 \
+            typename T,                                                 \
+            ENUM_PARAMS(N, typename P),                                 \
+            ENUM_PARAMS(N, typename A)>                                 \
+  auto defer(const Process<T>* process,                                 \
+             Future<R> (T::*method)(ENUM_PARAMS(N, P)),                 \
+             ENUM_BINARY_PARAMS(N, A, &&a))                             \
+    -> decltype(defer(process->self(), method, ENUM(N, FORWARD_A, _)))  \
+  {                                                                     \
+    return defer(process->self(), method, ENUM(N, FORWARD_A, _));       \
+  }
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+
+
+// Finally, definitions of defer for methods returning a value:
+
+template <typename R, typename T>
+Deferred<Future<R>()> defer(const PID<T>& pid, R (T::*method)())
+{
+  return Deferred<Future<R>()>([=]() { return dispatch(pid, method); });
+}
+
+template <typename R, typename T>
+Deferred<Future<R>()> defer(const Process<T>& process, R (T::*method)())
+{
+  return defer(process.self(), method);
+}
+
+template <typename R, typename T>
+Deferred<Future<R>()> defer(const Process<T>* process, R (T::*method)())
+{
+  return defer(process->self(), method);
+}
+
+#define TEMPLATE(Z, N, DATA)                                            \
+  template <typename R,                                                 \
+            typename T,                                                 \
+            ENUM_PARAMS(N, typename P),                                 \
+            ENUM_PARAMS(N, typename A)>                                 \
+  auto defer(const PID<T>& pid,                                         \
+             R (T::*method)(ENUM_PARAMS(N, P)),                         \
+             ENUM_BINARY_PARAMS(N, A, &&a))                             \
+    -> _Deferred<decltype(                                              \
+         lambda::partial(                                               \
+           &std::function<Future<R>(ENUM_PARAMS(N, P))>::operator(),    \
+           std::function<Future<R>(ENUM_PARAMS(N, P))>(),               \
+           ENUM(N, FORWARD_A, _)))>                                     \
+  {                                                                     \
+    std::function<Future<R>(ENUM_PARAMS(N, P))> f(                      \
+        [=](ENUM_BINARY_PARAMS(N, P, &&p)) {                            \
+          return dispatch(pid, method, ENUM(N, FORWARD_P, _));          \
+        });                                                             \
+    return lambda::partial(                                             \
+        &std::function<Future<R>(ENUM_PARAMS(N, P))>::operator(),       \
+        std::move(f),                                                   \
+        ENUM(N, FORWARD_A, _));                                         \
+  }                                                                     \
+                                                                        \
+  template <typename R,                                                 \
+            typename T,                                                 \
+            ENUM_PARAMS(N, typename P),                                 \
+            ENUM_PARAMS(N, typename A)>                                 \
+  auto                                                                  \
+  defer(const Process<T>& process,                                      \
+        R (T::*method)(ENUM_PARAMS(N, P)),                              \
+        ENUM_BINARY_PARAMS(N, A, &&a))                                  \
+    -> decltype(defer(process.self(), method, ENUM(N, FORWARD_A, _)))   \
+  {                                                                     \
+    return defer(process.self(), method, ENUM(N, FORWARD_A, _));        \
+  }                                                                     \
+                                                                        \
+  template <typename R,                                                 \
+            typename T,                                                 \
+            ENUM_PARAMS(N, typename P),                                 \
+            ENUM_PARAMS(N, typename A)>                                 \
+  auto                                                                  \
+  defer(const Process<T>* process,                                      \
+        R (T::*method)(ENUM_PARAMS(N, P)),                              \
+        ENUM_BINARY_PARAMS(N, A, &&a))                                  \
+    -> decltype(defer(process->self(), method, ENUM(N, FORWARD_A, _)))  \
+  {                                                                     \
+    return defer(process->self(), method, ENUM(N, FORWARD_A, _));       \
+  }
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+
+#undef FORWARD_A
+#undef FORWARD_P
+
+
+// Now we define defer calls for functors (with and without a PID):
+
+template <typename F>
+_Deferred<F> defer(const UPID& pid, F&& f)
+{
+  return _Deferred<F>(pid, std::forward<F>(f));
+}
+
+
+template <typename F>
+_Deferred<F> defer(F&& f)
+{
+  if (__process__ != nullptr) {
+    return defer(__process__->self(), std::forward<F>(f));
+  }
+
+  return __executor__->defer(std::forward<F>(f));
+}
+
+template <typename R>
+class ThunkProcess : public Process<ThunkProcess<R>>
+{
+public:
+  ThunkProcess(std::shared_ptr<lambda::function<R()>> _thunk,
+               std::shared_ptr<Promise<R>> _promise)
+    : ProcessBase(ID::generate("__thunk__")),
+      thunk(_thunk),
+      promise(_promise) {}
+
+  virtual ~ThunkProcess() {}
+
+protected:
+  void serve(Event&& event) override
+  {
+    promise->set((*thunk)());
+  }
+
+private:
+  std::shared_ptr<lambda::function<R()>> thunk;
+  std::shared_ptr<Promise<R>> promise;
+};
+
+} // namespace internal {
+
+
+template <typename R>
+Future<R> run(R (*method)())
+{
+  std::shared_ptr<lambda::function<R()>> thunk(
+      new lambda::function<R()>(
+          lambda::bind(method)));
+
+  std::shared_ptr<Promise<R>> promise(new Promise<R>());
+  Future<R> future = promise->future();
+
+  terminate(spawn(new internal::ThunkProcess<R>(thunk, promise), true));
+
+  return future;
+}
+
+
+#define TEMPLATE(Z, N, DATA)                                            \
+  template <typename R,                                                 \
+            ENUM_PARAMS(N, typename P),                                 \
+            ENUM_PARAMS(N, typename A)>                                 \
+  Future<R> run(                                                        \
+      R (*method)(ENUM_PARAMS(N, P)),                                   \
+      ENUM_BINARY_PARAMS(N, A, a))                                      \
+  {                                                                     \
+    std::shared_ptr<lambda::function<R()>> thunk(                       \
+        new lambda::function<R()>(                                      \
+            lambda::bind(method, ENUM_PARAMS(N, a))));                  \
+                                                                        \
+    std::shared_ptr<Promise<R>> promise(new Promise<R>());              \
+    Future<R> future = promise->future();                               \
+                                                                        \
+    terminate(spawn(new internal::ThunkProcess<R>(thunk, promise), true)); \
+                                                                        \
+    return future;                                                      \
+  }
+
+  REPEAT_FROM_TO(1, 13, TEMPLATE, _) // Args A0 -> A11.
+#undef TEMPLATE
+  
+
+// Provides an asynchronous "loop" abstraction. This abstraction is
+// helpful for code that would have synchronously been written as a
+// loop but asynchronously ends up being a recursive set of functions
+// which depending on the compiler may result in a stack overflow
+// (i.e., a compiler that can't do sufficient tail call optimization
+// may add stack frames for each recursive call).
+//
+// The loop abstraction takes an optional PID `pid` and uses it as the
+// execution context to run the loop. The implementation does a
+// `defer` on this `pid` to "pop" the stack when it needs to
+// asynchronously recurse. This also lets callers synchronize
+// execution with other code dispatching and deferring using `pid`. If
+// `None` is passed for `pid` then no `defer` is done and the stack
+// will still "pop" but be restarted from the execution context
+// wherever the blocked future is completed. This is usually very safe
+// when that blocked future will be completed by the IO thread, but
+// should not be used if it's completed by another process (because
+// you'll block that process until the next time the loop blocks).
+//
+// The two functions passed to the loop represent the loop "iterate"
+// step and the loop "body" step respectively. Each invocation of
+// "iterate" returns the next value and the "body" returns whether or
+// not to continue looping (as well as any other processing necessary
+// of course). You can think of this synchronously as:
+//
+//     bool condition = true;
+//     do {
+//       condition = body(iterate());
+//     } while (condition);
+//
+// Asynchronously using recursion this might look like:
+//
+//     Future<Nothing> loop()
+//     {
+//       return iterate()
+//         .then([](T t) {
+//            return body(t)
+//             .then([](bool condition) {
+//               if (condition) {
+//                 return loop();
+//               } else {
+//                 return Nothing();
+//               }
+//             });
+//         });
+//     }
+//
+// And asynchronously using `pid` as the execution context:
+//
+//     Future<Nothing> loop()
+//     {
+//       return iterate()
+//         .then(defer(pid, [](T t) {
+//            return body(t)
+//             .then(defer(pid, [](bool condition) {
+//               if (condition) {
+//                 return loop();
+//               } else {
+//                 return Nothing();
+//               }
+//             }));
+//         }));
+//     }
+//
+// And now what this looks like using `loop`:
+//
+//     loop(pid,
+//          []() {
+//            return iterate();
+//          },
+//          [](T t) {
+//            return body(t);
+//          });
+//
+// One difference between the `loop` version of the "body" versus the
+// other non-loop examples above is the return value is not `bool` or
+// `Future<bool>` but rather `ControlFlow<V>` or
+// `Future<ControlFlow<V>>`. This enables you to return values out of
+// the loop via a `Break(...)`, for example:
+//
+//     loop(pid,
+//          []() {
+//            return iterate();
+//          },
+//          [](T t) {
+//            if (finished(t)) {
+//              return Break(SomeValue());
+//            }
+//            return Continue();
+//          });
+template <typename Iterate,
+          typename Body,
+          typename T = typename internal::unwrap<typename result_of<Iterate()>::type>::type, // NOLINT(whitespace/line_length)
+          typename CF = typename internal::unwrap<typename result_of<Body(T)>::type>::type, // NOLINT(whitespace/line_length)
+          typename V = typename CF::ValueType>
+Future<V> loop(const Option<UPID>& pid, Iterate&& iterate, Body&& body);
+
+
+// A helper for `loop` which creates a Process for us to provide an
+// execution context for running the loop.
+template <typename Iterate,
+          typename Body,
+          typename T = typename internal::unwrap<typename result_of<Iterate()>::type>::type, // NOLINT(whitespace/line_length)
+          typename CF = typename internal::unwrap<typename result_of<Body(T)>::type>::type, // NOLINT(whitespace/line_length)
+          typename V = typename CF::ValueType>
+Future<V> loop(Iterate&& iterate, Body&& body)
+{
+  // Have libprocess own and free the new `ProcessBase`.
+  UPID process = spawn(new ProcessBase(), true);
+
+  return loop<Iterate, Body, T, CF, V>(
+      process,
+      std::forward<Iterate>(iterate),
+      std::forward<Body>(body))
+    .onAny([=]() {
+      terminate(process);
+      // NOTE: no need to `wait` or `delete` since the `spawn` above
+      // put libprocess in control of garbage collection.
+    });
+}
+
+
+// Generic "control flow" construct that is leveraged by
+// implementations such as `loop`. At a high-level a `ControlFlow`
+// represents some control flow statement such as `continue` or
+// `break`, however, these statements can both have values or be
+// value-less (i.e., these are meant to be composed "functionally" so
+// the representation of `break` captures a value that "exits the
+// current function" but the representation of `continue` does not).
+//
+// The pattern here is to define the type/representation of control
+// flow statements within the `ControlFlow` class (e.g.,
+// `ControlFlow::Continue` and `ControlFlow::Break`) but also provide
+// "syntactic sugar" to make it easier to use at the call site (e.g.,
+// the functions `Continue()` and `Break(...)`).
+template <typename T>
+class ControlFlow
+{
+public:
+  using ValueType = T;
+
+  enum class Statement
+  {
+    CONTINUE,
+    BREAK
+  };
+
+  class Continue
+  {
+  public:
+    Continue() = default;
+
+    template <typename U>
+    operator ControlFlow<U>() const
+    {
+      return ControlFlow<U>(ControlFlow<U>::Statement::CONTINUE, None());
+    }
+  };
+
+  class Break
+  {
+  public:
+    Break(T t) : t(std::move(t)) {}
+
+    template <typename U>
+    operator ControlFlow<U>() const &
+    {
+      return ControlFlow<U>(ControlFlow<U>::Statement::BREAK, t);
+    }
+
+    template <typename U>
+    operator ControlFlow<U>() &&
+    {
+      return ControlFlow<U>(ControlFlow<U>::Statement::BREAK, std::move(t));
+    }
+
+  private:
+    T t;
+  };
+
+  ControlFlow(Statement s, Option<T> t) : s(s), t(std::move(t)) {}
+
+  Statement statement() const { return s; }
+
+  T& value() & { return t.get(); }
+  const T& value() const & { return t.get(); }
+  T&& value() && { return t.get(); }
+  const T&& value() const && { return t.get(); }
+
+private:
+  Statement s;
+  Option<T> t;
+};
+
+
+// Provides "syntactic sugar" for creating a `ControlFlow::Continue`.
+struct Continue
+{
+  Continue() = default;
+
+  template <typename T>
+  operator ControlFlow<T>() const
+  {
+    return typename ControlFlow<T>::Continue();
+  }
+};
+
+
+// Provides "syntactic sugar" for creating a `ControlFlow::Break`.
+template <typename T>
+typename ControlFlow<typename std::decay<T>::type>::Break Break(T&& t)
+{
+  return typename ControlFlow<typename std::decay<T>::type>::Break(
+      std::forward<T>(t));
+}
+
+
+inline ControlFlow<Nothing>::Break Break()
+{
+  return ControlFlow<Nothing>::Break(Nothing());
+}
+
+
+namespace internal {
+
+template <typename Iterate, typename Body, typename T, typename R>
+class Loop : public std::enable_shared_from_this<Loop<Iterate, Body, T, R>>
+{
+public:
+  template <typename Iterate_, typename Body_>
+  static std::shared_ptr<Loop> create(
+      const Option<UPID>& pid,
+      Iterate_&& iterate,
+      Body_&& body)
+  {
+    return std::shared_ptr<Loop>(
+        new Loop(
+            pid,
+            std::forward<Iterate_>(iterate),
+            std::forward<Body_>(body)));
+  }
+
+  std::shared_ptr<Loop> shared()
+  {
+    // Must fully specify `shared_from_this` because we're templated.
+    return std::enable_shared_from_this<Loop>::shared_from_this();
+  }
+
+  std::weak_ptr<Loop> weak()
+  {
+    return std::weak_ptr<Loop>(shared());
+  }
+
+  Future<R> start()
+  {
+    auto self = shared();
+    auto weak_self = weak();
+
+    // Propagating discards:
+    //
+    // When the caller does a discard we need to propagate it to
+    // either the future returned from `iterate` or the future
+    // returned from `body`. One easy way to do this would be to add
+    // an `onAny` callback for every future returned from `iterate`
+    // and `body`, but that would be a slow memory leak that would
+    // grow over time, especially if the loop was actually
+    // infinite. Instead, we capture the current future that needs to
+    // be discarded within a `discard` function that we'll invoke when
+    // we get a discard. Because there is a race setting the `discard`
+    // function and reading it out to invoke we have to synchronize
+    // access using a mutex. An alternative strategy would be to use
+    // something like `atomic_load` and `atomic_store` with
+    // `shared_ptr` so that we can swap the current future(s)
+    // atomically.
+    promise.future().onDiscard([weak_self]() {
+      auto self = weak_self.lock();
+      if (self) {
+        // We need to make a copy of the current `discard` function so
+        // that we can invoke it outside of the `synchronized` block
+        // in the event that discarding invokes causes the `onAny`
+        // callbacks that we have added in `run` to execute which may
+        // deadlock attempting to re-acquire `mutex`!
+        std::function<void()> f = []() {};
+        synchronized (self->mutex) {
+          f = self->discard;
+        }
+        f();
+      }
+    });
+
+    if (pid.isSome()) {
+      // Start the loop using `pid` as the execution context.
+      dispatch(pid.get(), [self]() {
+        self->run(self->iterate());
+      });
+
+      // TODO(benh): Link with `pid` so that we can discard or abandon
+      // the promise in the event `pid` terminates and didn't discard
+      // us so that we can avoid any leaks (memory or otherwise).
+    } else {
+      run(iterate());
+    }
+
+    return promise.future();
+  }
+
+  void run(Future<T> next)
+  {
+    auto self = shared();
+
+    // Reset `discard` so that we're not delaying cleanup of any
+    // captured futures longer than necessary.
+    //
+    // TODO(benh): Use `WeakFuture` in `discard` functions instead.
+    synchronized (mutex) {
+      discard = []() {};
+    }
+
+    while (next.isReady()) {
+      Future<ControlFlow<R>> flow = body(next.get());
+      if (flow.isReady()) {
+        switch (flow->statement()) {
+          case ControlFlow<R>::Statement::CONTINUE: {
+            next = iterate();
+            continue;
+          }
+          case ControlFlow<R>::Statement::BREAK: {
+            promise.set(flow->value());
+            return;
+          }
+        }
+      } else {
+        auto continuation = [self](const Future<ControlFlow<R>>& flow) {
+          if (flow.isReady()) {
+            switch (flow->statement()) {
+              case ControlFlow<R>::Statement::CONTINUE: {
+                self->run(self->iterate());
+                break;
+              }
+              case ControlFlow<R>::Statement::BREAK: {
+                self->promise.set(flow->value());
+                break;
+              }
+            }
+          } else if (flow.isFailed()) {
+            self->promise.fail(flow.failure());
+          } else if (flow.isDiscarded()) {
+            self->promise.discard();
+          }
+        };
+
+        if (pid.isSome()) {
+          flow.onAny(defer(pid.get(), continuation));
+        } else {
+          flow.onAny(continuation);
+        }
+
+        if (!promise.future().hasDiscard()) {
+          synchronized (mutex) {
+            self->discard = [=]() mutable { flow.discard(); };
+          }
+        }
+
+        // There's a race between when a discard occurs and the
+        // `discard` function gets invoked and therefore we must
+        // explicitly always do a discard. In addition, after a
+        // discard occurs we'll need to explicitly do discards for
+        // each new future that blocks.
+        if (promise.future().hasDiscard()) {
+          flow.discard();
+        }
+
+        return;
+      }
+    }
+
+    auto continuation = [self](const Future<T>& next) {
+      if (next.isReady()) {
+        self->run(next);
+      } else if (next.isFailed()) {
+        self->promise.fail(next.failure());
+      } else if (next.isDiscarded()) {
+        self->promise.discard();
+      }
+    };
+
+    if (pid.isSome()) {
+      next.onAny(defer(pid.get(), continuation));
+    } else {
+      next.onAny(continuation);
+    }
+
+    if (!promise.future().hasDiscard()) {
+      synchronized (mutex) {
+        discard = [=]() mutable { next.discard(); };
+      }
+    }
+
+    // See comment above as to why we need to explicitly discard
+    // regardless of the path the if statement took above.
+    if (promise.future().hasDiscard()) {
+      next.discard();
+    }
+  }
+
+protected:
+  Loop(const Option<UPID>& pid, const Iterate& iterate, const Body& body)
+    : pid(pid), iterate(iterate), body(body) {}
+
+  Loop(const Option<UPID>& pid, Iterate&& iterate, Body&& body)
+    : pid(pid), iterate(std::move(iterate)), body(std::move(body)) {}
+
+private:
+  const Option<UPID> pid;
+  Iterate iterate;
+  Body body;
+  Promise<R> promise;
+
+  // In order to discard the loop safely we capture the future that
+  // needs to be discarded within the `discard` function and reading
+  // and writing that function with a mutex.
+  std::mutex mutex;
+  std::function<void()> discard = []() {};
+};
+
+} // namespace internal {
+
+
+template <typename Iterate, typename Body, typename T, typename CF, typename V>
+Future<V> loop(const Option<UPID>& pid, Iterate&& iterate, Body&& body)
+{
+  using Loop = internal::Loop<
+    typename std::decay<Iterate>::type,
+    typename std::decay<Body>::type,
+    T,
+    V>;
+
+  std::shared_ptr<Loop> loop = Loop::create(
+      pid,
+      std::forward<Iterate>(iterate),
+      std::forward<Body>(body));
+
+  return loop->start();
 }
 
 } // namespace process
