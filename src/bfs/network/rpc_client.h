@@ -19,7 +19,7 @@ class RpcClient {
  public:
   RpcClient() { }
   
-  init() {
+  startup() {
     sofa::pbrpc::RpcClientOptions client_options;
     client_options.max_pending_buffer_size = 128; // 128MB
     rpc_client_.reset(new sofa::pbrpc::RpcClient(client_options));
@@ -27,18 +27,18 @@ class RpcClient {
   
   // stub -> RpcChannel -> RpcClient(RpcClientStream)
   template <class T>
-  bool getStub(const std::string server, T** stub) {
+  bool getStub(const std::string server_address, T** stub) {
     MutexLock lock(&host_map_lock_);
     sofa::pbrpc::RpcChannel* channel = nullptr;
-    auto it = host_map_.find(server);
+    auto it = host_map_.find(server_address);
     if (it != host_map_.end()) {
       channel = it->second;
     } else {
       sofa::pbrpc::RpcChannelOptions channel_options;
-      channel = new sofa::pbrpc::RpcChannel(rpc_client_, server, channel_options);
-      host_map_[server] = channel;
+      channel = new sofa::pbrpc::RpcChannel(rpc_client_, server_address, channel_options);
+      host_map_[server_address] = channel;
     }
-    *stub = new T(channel); // stub needs channel to init
+    *stub = new T(channel); // stub needs channel to ctor
     return true;
   }
   
@@ -70,7 +70,7 @@ class RpcClient {
   }
   
   template <class Stub, class Request, class Response, class Callback>
-  void asyncRequest(Stub* stub, void(Stub::*func)(
+  void asyncSendRequest(Stub* stub, void(Stub::*func)(
                     google::protobuf::RpcController*,
                     const Request*, Response*, Callback*),
                     const Request* request, Response* response,
