@@ -103,7 +103,7 @@ public:
         if (stop_) return 0;
         int64_t now_time = get_micros();
         int64_t exe_time = now_time + delay * 1000;
-        BGItem bg_item(++last_task_id_, exe_time, task);
+        BGItem bg_item(++last_task_id_, exe_time, task); // id > 1
         time_queue_.push(bg_item);
         latest_[bg_item.id] = bg_item;
         work_cv_.Signal();
@@ -112,7 +112,7 @@ public:
     /// Cancel a delayed task
     /// if running, wait if non_block==false; return immediately if non_block==true
     bool CancelTask(int64_t task_id, bool non_block = false, bool* is_running = nullptr) {
-        if (task_id == 0) {
+        if (task_id == 0) { // not delay task
             if (is_running != nullptr) {
                 *is_running = false;
             }
@@ -129,14 +129,15 @@ public:
                         }
                         return false;
                     }
-                    latest_.erase(it);
+                    latest_.erase(it);  // cancel task
                     return true;
-                } else if (non_block) {
+                } else if (non_block) { // already running
                     if (is_running != nullptr) {
                         *is_running = true;
                     }
                     return false;
                 }
+                // else block
             }
             struct timespec ts = {0, 100000};
             nanosleep(&ts, &ts);
@@ -211,7 +212,7 @@ private:
                         latest_.erase(it);
                         running_task_id_ = bg_item.id;
                         mutex_.Unlock();
-                        task();
+                        task(); // not use mutex in task, may call threadpool funcs
                         task_cost_sum_ += get_micros() - now_time;
                         task_count_++;
                         mutex_.Lock("ThreadProcRelock");
@@ -247,7 +248,7 @@ private:
         int64_t id;
         int64_t exe_time;
         Task task;
-        bool operator<(const BGItem& item) const {
+        bool operator<(const BGItem& item) const { // top is min-heap
             if (exe_time != item.exe_time) {
                 return exe_time > item.exe_time;
             } else {

@@ -9,6 +9,7 @@
 #include "utils/muduo_exception.h"
 #include <assert.h>
 #include <stdio.h>
+#include <algorithm>
 
 using namespace bubblefs::mymuduo;
 
@@ -39,7 +40,7 @@ void ThreadPool::start(int numThreads)
   {
     char id[32];
     snprintf(id, sizeof id, "%d", i+1);
-    threads_.push_back(new mymuduo::Thread(
+    threads_.push_back(new Thread(
           std::bind(&ThreadPool::runInThread, this), name_+id));
     threads_[i].start();
   }
@@ -58,7 +59,7 @@ void ThreadPool::stop()
   }
   std::for_each(threads_.begin(),
                 threads_.end(),
-                std::bind(&mymuduo::Thread::join, std::placeholders::_1));
+                std::bind(&Thread::join, std::placeholders::_1));
 }
 
 size_t ThreadPool::queueSize() const

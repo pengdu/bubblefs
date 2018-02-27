@@ -53,9 +53,9 @@ public:
     void Notify() {
         mu_.AssertHeld();
         notifying_ = true;
-        while (bitmap_[ready_] == 1) {
+        while (bitmap_[ready_] == 1) { // callback all the ready items
             mu_.Unlock();
-            callback_(base_offset_, items_[ready_]);
+            callback_(base_offset_, items_[ready_]); // not use mutex in callback avoiding for blocking
             mu_.Lock("SlidingWindow::Notify relock");
             bitmap_[ready_] = 0;
             ++ready_;
@@ -81,7 +81,7 @@ public:
     ///     Pay attention to a deadlock.
     int Add(int32_t offset, Item item) {
         MutexLock lock(&mu_, "Slinding Add", 50000);
-        int32_t pos = offset - base_offset_;
+        int32_t pos = offset - base_offset_; // use int to wrap index
         if (pos >= size_) {
             return -1;
         } else if (pos < 0) {
