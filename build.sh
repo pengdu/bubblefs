@@ -34,7 +34,7 @@ cd ${DEPS_SOURCE}
 # or use -rpath/-R for runtime shared-lib searching, prio > LD_LIBRARY_PATH
 
 #Pre-installed
-#sudo apt-get install autoconf automake libtool zlib1g-dev
+#sudo apt-get install autoconf automake libtool zlib1g zlib1g-dev
 
 # boost
 if [ ! -f "${FLAG_DIR}/boost_1_65_0" ] \
