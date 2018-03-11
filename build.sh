@@ -33,7 +33,7 @@ cd ${DEPS_SOURCE}
 # in .bashrc or /etc/profile or shell, export LD_LIBRARY_PATH=/PATH/TO/LIB:$LD_LIBRARY_PATH for searching lib*.so* in other dirs
 # or use -rpath/-R for runtime shared-lib searching, prio > LD_LIBRARY_PATH
 
-#pre-installed
+#Pre-installed
 #sudo apt-get install autoconf automake libtool zlib1g-dev
 
 # boost
